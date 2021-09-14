@@ -1,0 +1,22 @@
+{
+	"folders": [
+		{
+			"path": "kernel"
+		},
+		{
+			"path": "memoria"
+		},
+		{
+			"path": "shared"
+		},
+		{
+			"path": "swap"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"kernel.h": "c",
+			"memoria.h": "c"
+		}
+	}
+}
