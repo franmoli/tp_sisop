@@ -48,6 +48,6 @@ typedef struct {
 t_config *leer_config_file(char *);
 t_config_kernel *generarConfigKernel(t_config *config);
 t_config_memoria *generarConfigMemoria(t_config *config);
-t_config_swap *generarConfigSwap(t_config *config);
+t_config_swap *generar_config_swap(t_config *config);
 
 #endif

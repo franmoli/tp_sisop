@@ -34,7 +34,7 @@ t_config_memoria *generarConfigMemoria(t_config *config){
     return config_memoria;
 }
 
-t_config_swap *generarConfigSwap(t_config *config){
+t_config_swap *generar_config_swap(t_config *config){
     //Formateo los array recibidos por configuración
     char *file_paths_unformatted = config_get_string_value(config, "ARCHIVOS_SWAP");
     char **file_paths_formatted = string_split(string_substring(file_paths_unformatted, 1, strlen(file_paths_unformatted)-2), ", ");
