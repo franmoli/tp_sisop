@@ -1,0 +1,117 @@
+[INFO] 17:29:45:390 KERNEL/(6750:6750): Programa inicializado correctamente
+[INFO] 17:29:45:390 KERNEL/(6750:6750): Iniciando carga del archivo de configuración
+[INFO] 17:39:52:690 KERNEL/(7051:7051): Programa inicializado correctamente
+[INFO] 17:39:52:690 KERNEL/(7051:7051): Iniciando carga del archivo de configuración
+[INFO] 17:39:52:690 KERNEL/(7051:7051): Configuración cargada correctamente
+[INFO] 17:44:28:327 KERNEL/(7183:7183): Programa inicializado correctamente
+[INFO] 17:44:28:328 KERNEL/(7183:7183): Iniciando carga del archivo de configuración
+[INFO] 17:44:28:328 KERNEL/(7183:7183): Configuración cargada correctamente
+[INFO] 17:48:20:743 KERNEL/(7340:7340): Programa inicializado correctamente
+[INFO] 17:48:20:743 KERNEL/(7340:7340): Iniciando carga del archivo de configuración
+[INFO] 17:48:20:744 KERNEL/(7340:7340): Configuración cargada correctamente
+[INFO] 17:50:31:721 KERNEL/(7434:7434): Programa inicializado correctamente
+[INFO] 17:50:31:722 KERNEL/(7434:7434): Iniciando carga del archivo de configuración
+[INFO] 17:50:31:722 KERNEL/(7434:7434): Configuración cargada correctamente
+[INFO] 17:59:06:125 KERNEL/(7571:7571): Programa inicializado correctamente
+[INFO] 17:59:06:125 KERNEL/(7571:7571): Iniciando carga del archivo de configuración
+[INFO] 17:59:06:125 KERNEL/(7571:7571): Configuración cargada correctamente
+[INFO] 18:02:21:658 KERNEL/(7670:7670): Programa inicializado correctamente
+[INFO] 18:02:21:659 KERNEL/(7670:7670): Iniciando carga del archivo de configuración
+[INFO] 18:02:21:659 KERNEL/(7670:7670): Configuración cargada correctamente
+[INFO] 18:03:22:554 KERNEL/(7706:7706): Programa inicializado correctamente
+[INFO] 18:03:22:555 KERNEL/(7706:7706): Iniciando carga del archivo de configuración
+[INFO] 18:03:22:555 KERNEL/(7706:7706): Configuración cargada correctamente
+[INFO] 18:04:30:223 KERNEL/(7746:7746): Programa inicializado correctamente
+[INFO] 18:04:30:224 KERNEL/(7746:7746): Iniciando carga del archivo de configuración
+[INFO] 18:04:30:224 KERNEL/(7746:7746): Configuración cargada correctamente
+[INFO] 18:05:32:883 KERNEL/(7779:7779): Programa inicializado correctamente
+[INFO] 18:05:32:884 KERNEL/(7779:7779): Iniciando carga del archivo de configuración
+[INFO] 18:05:32:884 KERNEL/(7779:7779): Configuración cargada correctamente
+[INFO] 18:06:21:736 KERNEL/(7825:7825): Programa inicializado correctamente
+[INFO] 18:06:21:736 KERNEL/(7825:7825): Iniciando carga del archivo de configuración
+[INFO] 18:06:21:737 KERNEL/(7825:7825): Configuración cargada correctamente
+[INFO] 18:06:21:737 KERNEL/(7825:7825): 25000
+[INFO] 18:06:21:737 KERNEL/(7825:7825): 1000
+[INFO] 18:17:24:487 KERNEL/(8102:8102): Programa inicializado correctamente
+[INFO] 18:17:24:488 KERNEL/(8102:8102): Iniciando carga del archivo de configuración
+[INFO] 18:17:24:488 KERNEL/(8102:8102): Configuración cargada correctamente
+[INFO] 18:17:24:489 KERNEL/(8102:8102): 1
+[INFO] 18:17:24:489 KERNEL/(8102:8102): 1
+[INFO] 19:16:28:736 KERNEL/(8851:8851): Programa inicializado correctamente
+[INFO] 19:16:28:736 KERNEL/(8851:8851): Iniciando carga del archivo de configuración
+[INFO] 19:16:28:736 KERNEL/(8851:8851): Configuración cargada correctamente
+[INFO] 19:16:28:737 KERNEL/(8851:8851): 42
+[INFO] 19:16:28:737 KERNEL/(8851:8851): 1
+[INFO] 19:16:28:737 KERNEL/(8851:8851): 1
+[INFO] 19:18:29:674 KERNEL/(8905:8905): Programa inicializado correctamente
+[INFO] 19:18:29:674 KERNEL/(8905:8905): Iniciando carga del archivo de configuración
+[INFO] 19:18:29:675 KERNEL/(8905:8905): Configuración cargada correctamente
+[INFO] 19:18:29:675 KERNEL/(8905:8905): 42
+[INFO] 19:18:29:675 KERNEL/(8905:8905): 1
+[INFO] 19:18:29:676 KERNEL/(8905:8905): 1
+[INFO] 19:19:36:885 KERNEL/(8934:8934): Programa inicializado correctamente
+[INFO] 19:19:36:885 KERNEL/(8934:8934): Iniciando carga del archivo de configuración
+[INFO] 19:19:36:886 KERNEL/(8934:8934): Configuración cargada correctamente
+[INFO] 19:19:36:886 KERNEL/(8934:8934): 42
+[INFO] 19:19:36:886 KERNEL/(8934:8934): 1
+[INFO] 19:19:36:886 KERNEL/(8934:8934): 1
+[INFO] 19:20:22:516 KERNEL/(8992:8992): Programa inicializado correctamente
+[INFO] 19:20:22:517 KERNEL/(8992:8992): Iniciando carga del archivo de configuración
+[INFO] 19:20:22:517 KERNEL/(8992:8992): Configuración cargada correctamente
+[INFO] 19:20:22:518 KERNEL/(8992:8992): 42
+[INFO] 19:20:22:518 KERNEL/(8992:8992): 1
+[INFO] 19:20:22:518 KERNEL/(8992:8992): 1
+[INFO] 19:23:55:911 KERNEL/(9062:9062): Programa inicializado correctamente
+[INFO] 19:23:55:912 KERNEL/(9062:9062): Iniciando carga del archivo de configuración
+[INFO] 19:23:55:912 KERNEL/(9062:9062): Configuración cargada correctamente
+[INFO] 19:23:55:913 KERNEL/(9062:9062): 42
+[INFO] 19:23:55:913 KERNEL/(9062:9062): 1
+[INFO] 19:23:55:913 KERNEL/(9062:9062): 1
+[INFO] 19:25:12:977 KERNEL/(9103:9103): Programa inicializado correctamente
+[INFO] 19:25:12:978 KERNEL/(9103:9103): Iniciando carga del archivo de configuración
+[INFO] 19:26:09:627 KERNEL/(9135:9135): Programa inicializado correctamente
+[INFO] 19:26:09:628 KERNEL/(9135:9135): Iniciando carga del archivo de configuración
+[INFO] 19:26:12:765 KERNEL/(9139:9139): Programa inicializado correctamente
+[INFO] 19:26:12:765 KERNEL/(9139:9139): Iniciando carga del archivo de configuración
+[INFO] 19:37:10:808 KERNEL/(9631:9631): Programa inicializado correctamente
+[INFO] 19:37:10:808 KERNEL/(9631:9631): Iniciando carga del archivo de configuración
+[INFO] 19:37:10:808 KERNEL/(9631:9631): Configuración cargada correctamente
+[INFO] 19:37:10:809 KERNEL/(9631:9631): 0
+[INFO] 19:37:10:809 KERNEL/(9631:9631): Configuración cargada correctamente
+[INFO] 19:37:10:809 KERNEL/(9631:9631): Programa finalizado con éxito
+[INFO] 19:39:38:902 KERNEL/(9679:9679): Programa inicializado correctamente
+[INFO] 19:39:38:902 KERNEL/(9679:9679): Iniciando carga del archivo de configuración
+[INFO] 19:39:38:903 KERNEL/(9679:9679): Configuración cargada correctamente
+[INFO] 19:39:38:903 KERNEL/(9679:9679): 0
+[INFO] 19:39:38:903 KERNEL/(9679:9679): Configuración cargada correctamente
+[INFO] 19:39:38:903 KERNEL/(9679:9679): Programa finalizado con éxito
+[INFO] 19:42:41:381 KERNEL/(9721:9721): Programa inicializado correctamente
+[INFO] 19:42:41:381 KERNEL/(9721:9721): Iniciando carga del archivo de configuración
+[INFO] 19:43:03:380 KERNEL/(9756:9756): Programa inicializado correctamente
+[INFO] 19:43:03:380 KERNEL/(9756:9756): Iniciando carga del archivo de configuración
+[INFO] 19:43:03:381 KERNEL/(9756:9756): Configuración cargada correctamente
+[INFO] 19:43:03:381 KERNEL/(9756:9756): 0
+[INFO] 19:43:03:381 KERNEL/(9756:9756): Configuración cargada correctamente
+[INFO] 19:43:03:381 KERNEL/(9756:9756): Programa finalizado con éxito
+[INFO] 19:43:59:304 KERNEL/(9788:9788): Programa inicializado correctamente
+[INFO] 19:43:59:305 KERNEL/(9788:9788): Iniciando carga del archivo de configuración
+[INFO] 19:43:59:306 KERNEL/(9788:9788): Configuración cargada correctamente
+[INFO] 19:43:59:306 KERNEL/(9788:9788): 0
+[INFO] 19:43:59:306 KERNEL/(9788:9788): Configuración cargada correctamente
+[INFO] 19:43:59:306 KERNEL/(9788:9788): Programa finalizado con éxito
+[INFO] 20:08:00:837 KERNEL/(10038:10038): Programa inicializado correctamente
+[INFO] 20:08:00:838 KERNEL/(10038:10038): Iniciando carga del archivo de configuración
+[INFO] 20:08:00:838 KERNEL/(10038:10038): Configuración cargada correctamente
+[INFO] 20:08:00:839 KERNEL/(10038:10038): 0
+[INFO] 20:08:00:839 KERNEL/(10038:10038): Configuración cargada correctamente
+[INFO] 20:08:00:839 KERNEL/(10038:10038): Programa finalizado con éxito
+[INFO] 20:14:43:424 KERNEL/(10092:10092): Programa inicializado correctamente
+[INFO] 20:14:43:425 KERNEL/(10092:10092): Iniciando carga del archivo de configuración
+[INFO] 20:17:07:123 KERNEL/(10142:10142): Programa inicializado correctamente
+[INFO] 20:17:07:123 KERNEL/(10142:10142): Iniciando carga del archivo de configuración
+[INFO] 20:17:39:927 KERNEL/(10177:10177): Programa inicializado correctamente
+[INFO] 20:17:39:927 KERNEL/(10177:10177): Iniciando carga del archivo de configuración
+[INFO] 20:18:25:410 KERNEL/(10209:10209): Programa inicializado correctamente
+[INFO] 20:18:25:411 KERNEL/(10209:10209): Iniciando carga del archivo de configuración
+[INFO] 20:24:17:584 KERNEL/(10275:10275): Programa inicializado correctamente
+[INFO] 20:24:17:585 KERNEL/(10275:10275): Iniciando carga del archivo de configuración
