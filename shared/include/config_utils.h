@@ -5,10 +5,11 @@
 #include <stdlib.h>
 #include <commons/config.h>
 #include <commons/collections/list.h>
+#include <string.h>
+#include <commons/string.h>
 #include "TAD.h"
 
-typedef struct
-{
+typedef struct {
     char *IP_MEMORIA;
     int PUERTO_MEMORIA;
     char *ALGORITMO_PLANIFICACION;
@@ -21,8 +22,7 @@ typedef struct
     int ALFA;
 } t_config_kernel;
 
-typedef struct
-{
+typedef struct {
     char *IP;
     int TAMANIO;
     int PUERTO;
@@ -33,24 +33,21 @@ typedef struct
     char *ALGORITMO_REEMPLAZO_TLB;
     int RETARDO_ACIERTO_TLB;
     int RETARDO_FALLO_TLB;
-
 } t_config_memoria;
 
-typedef struct
-{
+typedef struct {
     char *IP;
     int PUERTO;
     int TAMANIO_SWAP;
     int TAMANIO_PAGINA;
     t_list *ARCHIVOS_SWAP;
-   int MARCOS_MAXIMOS;
-   int RETARDO_SWAP;
-
+    int MARCOS_MAXIMOS;
+    int RETARDO_SWAP;
 } t_config_swap;
-
 
 t_config *leer_config_file(char *);
 t_config_kernel *generarConfigKernel(t_config *config);
 t_config_memoria *generarConfigMemoria(t_config *config);
 t_config_swap *generarConfigSwap(t_config *config);
+
 #endif

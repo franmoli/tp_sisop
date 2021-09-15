@@ -3,4 +3,6 @@
 
 #include "swap-global.h"
 
+t_config *config_file;
+
 #endif

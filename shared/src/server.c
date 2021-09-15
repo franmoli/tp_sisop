@@ -1,7 +1,6 @@
 #include "../include/server.h"
 
-int iniciar_servidor(char* IP, char* PUERTO, t_log* logger)
-{
+int iniciar_servidor(char* IP, char* PUERTO, t_log* logger) {
 	int socket_servidor;
 
     struct addrinfo hints, *servinfo, *p;
@@ -13,8 +12,7 @@ int iniciar_servidor(char* IP, char* PUERTO, t_log* logger)
 
     getaddrinfo(IP, PUERTO, &hints, &servinfo);
 
-    for (p=servinfo; p != NULL; p = p->ai_next)
-    {
+    for (p=servinfo; p != NULL; p = p->ai_next) {
         if ((socket_servidor = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1)
             continue;
 
@@ -34,20 +32,18 @@ int iniciar_servidor(char* IP, char* PUERTO, t_log* logger)
     return socket_servidor;
 }
 
-int esperar_cliente(int socket_servidor, t_log* logger)
-{
+int esperar_cliente(int socket_servidor, t_log* logger) {
 	struct sockaddr_in dir_cliente;
 	socklen_t tam_direccion = sizeof(struct sockaddr_in);
 	
 	int socket_cliente = accept(socket_servidor, (void*) &dir_cliente, &tam_direccion);
-	if(socket_cliente!=-1){
+	if(socket_cliente!=-1) {
 		log_info(logger, "Se conecto un cliente! %d",socket_cliente);
 	}
 	return socket_cliente;
 }
 
-int recibir_operacion(int socket_cliente, t_log* logger)
-{
+int recibir_operacion(int socket_cliente, t_log* logger) {
 	int cod_op;
 	if(recv(socket_cliente, &cod_op, sizeof(int), MSG_WAITALL) != 0)
 		return cod_op;
@@ -58,8 +54,7 @@ int recibir_operacion(int socket_cliente, t_log* logger)
 	}
 }
 
-void* recibir_buffer(int* size, int socket_cliente, t_log* logger)
-{
+void* recibir_buffer(int* size, int socket_cliente, t_log* logger) {
 	void * buffer;
 
 	recv(socket_cliente, size, sizeof(int), MSG_WAITALL);
@@ -69,12 +64,11 @@ void* recibir_buffer(int* size, int socket_cliente, t_log* logger)
 	return buffer;
 }
 
-t_paquete* recibir_mensaje(int socket_cliente)
-{
+t_paquete* recibir_mensaje(int socket_cliente) {
 	t_paquete* paquete = malloc(sizeof(t_paquete));
 	paquete->buffer = malloc(sizeof(t_buffer));
 
-	int a = recv(socket_cliente, &(paquete->codigo_operacion), sizeof(uint32_t), MSG_WAITALL);
+	//int a = recv(socket_cliente, &(paquete->codigo_operacion), sizeof(uint32_t), MSG_WAITALL);
 	recv(socket_cliente, &(paquete->buffer->size), sizeof(uint32_t), 0);
 	paquete->buffer->stream = malloc(paquete->buffer->size);
 	recv(socket_cliente, paquete->buffer->stream, paquete->buffer->size, 0);
@@ -93,15 +87,14 @@ t_paquete* recibir_mensaje(int socket_cliente)
 }
 
 //podemos usar la lista de valores para poder hablar del for y de como recorrer la lista
-t_list* recibir_paquete(int socket_cliente, t_log* logger)
-{
+t_list* recibir_paquete(int socket_cliente, t_log* logger) {
 	int size;
 	int desplazamiento = 0;
 	void * buffer;
 	t_list* valores = list_create();
 	int tamanio;
 
-	buffer = recibir_buffer(&size, socket_cliente,logger);
+	buffer = recibir_buffer(&size, socket_cliente, logger);
 	while(desplazamiento < size)
 	{
 		memcpy(&tamanio, buffer + desplazamiento, sizeof(int));
@@ -116,18 +109,15 @@ t_list* recibir_paquete(int socket_cliente, t_log* logger)
 	return NULL;
 }
 
-
-void enviarMensaje(t_paquete* paquete, int socket_cliente){
+void enviar_mensaje(t_paquete* paquete, int socket_cliente) {
 	int bytes = paquete->buffer->size + 2*sizeof(int);
-	void* a_enviar = serializar_paquete(paquete, bytes);
+	void* a_enviar = serializar_paquete(paquete, &bytes);
 	send(socket_cliente, a_enviar, bytes, 0);
 	free(a_enviar);
 }
 
-
-void* serializar_paquete(t_paquete* paquete, int *bytes)
-{
-	void * magic = malloc(bytes);
+void* serializar_paquete(t_paquete* paquete, int *bytes) {
+	void * magic = malloc(*bytes);
 	int desplazamiento = 0;
 
 	memcpy(magic + desplazamiento, &(paquete->codigo_operacion), sizeof(op_code));
