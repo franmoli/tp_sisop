@@ -3,7 +3,7 @@
 int main(int argc, char **argv) {
     //Inicio del programa
     system("clear");
-    logger_swap = log_create("cfg/swap.log", "SWAP", true, LOG_LEVEL_INFO);
+    logger_swap = log_create("./cfg/swap.log", "SWAP", true, LOG_LEVEL_INFO);
     log_info(logger_swap, "Programa inicializado correctamente");
 
     //Se carga la configuración
@@ -22,8 +22,14 @@ int main(int argc, char **argv) {
     while(list_iterator_has_next(paths_iterator)) {
         printf("- %s\n", list_iterator_next(paths_iterator));
     }
+    list_iterator_destroy(paths_iterator);
     log_info(logger_swap, "Configuración cargada correctamente");
 
     //Fin del programa
+    log_info(logger_swap, "Programa finalizado con éxito");
+    log_destroy(logger_swap);
+    config_destroy(config_file);
+    free(config_swap->ARCHIVOS_SWAP);
+    free(config_swap);
     return 1;
 }
