@@ -11,6 +11,8 @@ int main(int argc, char **argv) {
     config_file = leer_config_file("./cfg/kernel.cfg");
     config_kernel = generar_config_kernel(config_file);
     log_info(logger_kernel, "Configuración cargada correctamente");
+
+    // se printea la informacion cargada
     printf("IP MEMORIA: %s\n", config_kernel->IP_MEMORIA);
     printf("PUERTO_MEMORIA: %d\n", config_kernel->PUERTO_MEMORIA);
     printf("ALGORITMO_PLANIFICACION: %s\n", config_kernel->ALGORITMO_PLANIFICACION);
@@ -22,14 +24,14 @@ int main(int argc, char **argv) {
     printf("DISPOSITIVOS IO:\n");
     t_list_iterator *io_devices_iterator = list_iterator_create(config_kernel->DISPOSITIVOS_IO);
     while(list_iterator_has_next(io_devices_iterator)) {
-        printf("- %s\n", list_iterator_next(io_devices_iterator));
+        printf("- %s\n", (char*)list_iterator_next(io_devices_iterator));
     }
     list_iterator_destroy(io_devices_iterator);
     printf("DURACIONES IO:\n");
     log_info(logger_kernel, string_itoa(list_size(config_kernel->DURACIONES_IO)));
     t_list_iterator *io_durations_iterator = list_iterator_create(config_kernel->DURACIONES_IO);
     while(list_iterator_has_next(io_durations_iterator)) {
-        printf("- %s\n", list_iterator_next(io_durations_iterator));
+        printf("- %s\n", (char*) list_iterator_next(io_durations_iterator));
     }
     list_iterator_destroy(io_durations_iterator);
     log_info(logger_kernel, "Configuración cargada correctamente");

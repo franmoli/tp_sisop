@@ -5,26 +5,30 @@ t_config *leer_config_file(char *configName) {
 }
 
 t_config_kernel *generar_config_kernel(t_config *config) {
+
     //Formateo los array recibidos por configuración
     char *io_devices_unformatted = config_get_string_value(config, "DISPOSITIVOS_IO");
-    char **io_devices_formatted = string_split(string_substring(io_devices_unformatted, 1, strlen(io_devices_unformatted)-2), ", ");
+    char **io_devices_formatted = string_split(string_substring(io_devices_unformatted, 1, strlen(io_devices_unformatted)-2), ","); 
     char *io_durations_unformatted = config_get_string_value(config, "DURACIONES_IO");
-    char **io_durations_formatted = string_split(string_substring(io_durations_unformatted, 1, strlen(io_durations_unformatted)-2), ", ");
+    char **io_durations_formatted = string_split(string_substring(io_durations_unformatted, 1, strlen(io_durations_unformatted)-2), ",");
 
     //Agrego los elementos de los array a una lista
     t_list *io_devices = list_create();
     int contador_devices = 0;
     while(io_devices_formatted[contador_devices]) {
+        string_trim_left(&io_devices_formatted[contador_devices]);
+        string_trim_right(&io_devices_formatted[contador_devices]);
         list_add(io_devices, io_devices_formatted[contador_devices]);
-        contador_devices += 2;
+        contador_devices++;
     }
 
     t_list *io_durations = list_create();
     int contador_durations = 0;
     while(io_durations_formatted[contador_durations]) {
-        printf("\n%s\n", io_durations_formatted[contador_durations]);
-        contador_durations +=2;
-        printf("\n%d", contador_durations);
+        string_trim_left(&io_durations_formatted[contador_durations]);
+        string_trim_right(&io_durations_formatted[contador_durations]);
+        list_add(io_durations, io_durations_formatted[contador_durations]);
+        contador_durations++;
     }
 
     //Cargo la configuración
