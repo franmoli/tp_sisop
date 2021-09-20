@@ -1,12 +1,10 @@
 #include "config_utils.h"
 
-t_config *leer_config_file(char *configName)
-{
+t_config *leer_config_file(char *configName) {
     return config_create(configName);
 }
 
-t_config_kernel *generarConfigKernel(t_config *config)
-{
+t_config_kernel *generarConfigKernel(t_config *config) {
     t_config_kernel *config_kernel = malloc(sizeof(t_config_kernel));
     config_kernel->IP_MEMORIA = config_get_string_value(config, "IP_MEMORIA");
     config_kernel->PUERTO_MEMORIA = config_get_int_value(config, "PUERTO_MEMORIA");
@@ -37,15 +35,28 @@ t_config_memoria *generarConfigMemoria(t_config *config){
 }
 
 t_config_swap *generarConfigSwap(t_config *config){
-    t_config_swap *config_swap = malloc(sizeof(t_config_swap));
-     config_swap->IP = config_get_string_value(config, "IP");
-     config_swap->PUERTO = config_get_int_value(config, "PUERTO");
-     config_swap->TAMANIO_SWAP = config_get_int_value(config, "TAMANIO_SWAP");
-     config_swap->TAMANIO_PAGINA = config_get_int_value(config, "TAMANIO_PAGINA");
-     config_swap->MARCOS_MAXIMOS = config_get_int_value(config, "MARCOS_MAXIMOS");
-     config_swap->RETARDO_SWAP = config_get_int_value(config, "RETARDO_SWAP");
+    //Formateo los array recibidos por configuración
+    char *file_paths_unformatted = config_get_string_value(config, "ARCHIVOS_SWAP");
+    char **file_paths_formatted = string_split(string_substring(file_paths_unformatted, 1, strlen(file_paths_unformatted)-2), ", ");
+    
+    //Agrego los elementos del array a una lista
+    t_list *file_paths = list_create();
+    int contador = 0;
+    while(file_paths_formatted[contador] != NULL) {
+        list_add(file_paths, file_paths_formatted[contador]);
+        contador += 2;
+    }
 
-     //FALTA LA LISTA
+    //Cargo la configuración
+    t_config_swap *config_swap = malloc(sizeof(t_config_swap));
+    config_swap->IP = config_get_string_value(config, "IP");
+    config_swap->PUERTO = config_get_int_value(config, "PUERTO");
+    config_swap->TAMANIO_SWAP = config_get_int_value(config, "TAMANIO_SWAP");
+    config_swap->TAMANIO_PAGINA = config_get_int_value(config, "TAMANIO_PAGINA");
+    config_swap->MARCOS_MAXIMOS = config_get_int_value(config, "MARCOS_MAXIMOS");
+    config_swap->RETARDO_SWAP = config_get_int_value(config, "RETARDO_SWAP");
+    config_swap->ARCHIVOS_SWAP = file_paths;
+
     return config_swap;
 }
 void liberar_config(t_config* config){    
