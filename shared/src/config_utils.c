@@ -30,7 +30,7 @@ t_config_memoria *generarConfigMemoria(t_config *config){
     config_memoria->RETARDO_ACIERTO_TLB = config_get_int_value(config, "RETARDO_ACIERTO_TLB");
     config_memoria->RETARDO_FALLO_TLB = config_get_int_value(config, "RETARDO_FALLO_TLB");
     config_memoria->MARCOS_MAXIMOS = config_get_int_value(config, "MARCOS_MAXIMOS");
-
+    config_memoria->TAMANIO_PAGINA = config_get_int_value(config, "TAMANIO_PAGINA");
     return config_memoria;
 }
 
@@ -58,4 +58,7 @@ t_config_swap *generar_config_swap(t_config *config){
     config_swap->ARCHIVOS_SWAP = file_paths;
 
     return config_swap;
+}
+void liberar_config(t_config* config){    
+    config_destroy(config);
 }
