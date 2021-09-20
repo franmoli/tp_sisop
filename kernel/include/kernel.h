@@ -3,4 +3,6 @@
 
 #include "kernel-global.h"
 
+t_config *config_file;
+
 #endif

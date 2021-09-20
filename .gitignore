@@ -27,6 +27,7 @@
 *.so
 *.so.*
 *.dylib
+*.vscode
 
 # Executables
 *.exe
@@ -35,12 +36,16 @@
 *.i*86
 *.x86_64
 *.hex
+*/swap
+*/memoria
+*/kernel
 
 # Debug files
 *.dSYM/
 *.su
 *.idb
 *.pdb
+*.log
 
 # Kernel Module Compile Results
 *.mod*
