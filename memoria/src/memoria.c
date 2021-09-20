@@ -2,11 +2,13 @@
 
 int main(int argc, char **argv)
 {
+    logger_memoria = log_create("./cfg/memoria.log", "MEMORIA", true, LOG_LEVEL_INFO);
+    log_info(logger_memoria, "Programa inicializado correctamente");
     pthread_t hilo_client;
 	t_config* config = leer_config_file("./cfg/memoria.cfg");
     config_memoria = generarConfigMemoria(config);
+    log_info(logger_memoria, "Configuración cargada correctamente");
     tamanio_memoria = malloc(sizeof(config_memoria->TAMANIO));
-    logger_memoria = log_create("./cfg/memoria.log", "MEMORIA", true, LOG_LEVEL_INFO);
 	
 	tabla_paginas = malloc(sizeof(t_tabla_paginas));
     tabla_paginas->paginas = list_create();
@@ -23,6 +25,7 @@ int main(int argc, char **argv)
 			pthread_create(&hilo_client, NULL, (void *)ejecutar_operacion, (void *)socket_client);
 		}
     }
+	log_info(logger_memoria, "Programa finalizado con éxito");
     log_destroy(logger_memoria);
 	liberar_config(config);
 }
@@ -33,9 +36,11 @@ static void *ejecutar_operacion(int client)
 	{
 		t_paquete *paquete;
 		paquete = recibir_mensaje(client);
-        analizar_paquete(paquete);
+        //analizar_paquete(paquete);
+		//TODO: implementar funcion
 		free(paquete);
 	}
 	close(client);
 	log_info(logger_memoria, "Se desconecto el cliente [%d]", client);
+	return NULL;
 }

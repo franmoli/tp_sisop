@@ -20,7 +20,7 @@ int main(int argc, char **argv) {
     printf("ARCHIVOS:\n");
     t_list_iterator *paths_iterator = list_iterator_create(config_swap->ARCHIVOS_SWAP);
     while(list_iterator_has_next(paths_iterator)) {
-        printf("- %s\n", list_iterator_next(paths_iterator));
+        printf("- %s\n", (char*) list_iterator_next(paths_iterator));
     }
     list_iterator_destroy(paths_iterator);
     log_info(logger_swap, "Configuración cargada correctamente");

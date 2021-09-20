@@ -40,6 +40,8 @@ int main(int argc, char **argv) {
     log_info(logger_kernel, "Programa finalizado con éxito");
     log_destroy(logger_kernel);
     config_destroy(config_file);
+    //TODO: liberar memoria de las listas de configuracion con sus elementos
     free(config_kernel);
     return 1;
+
 }
