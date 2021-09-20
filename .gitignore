@@ -38,6 +38,7 @@
 *.hex
 */swap
 */memoria
+*/kernel
 
 # Debug files
 *.dSYM/
