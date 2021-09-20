@@ -33,6 +33,8 @@ typedef struct {
     char *ALGORITMO_REEMPLAZO_TLB;
     int RETARDO_ACIERTO_TLB;
     int RETARDO_FALLO_TLB;
+    int TAMANIO_PAGINA;
+
 } t_config_memoria;
 
 typedef struct {
@@ -49,5 +51,5 @@ t_config *leer_config_file(char *);
 t_config_kernel *generarConfigKernel(t_config *config);
 t_config_memoria *generarConfigMemoria(t_config *config);
 t_config_swap *generarConfigSwap(t_config *config);
-
+void liberar_config(t_config* config);
 #endif

@@ -37,6 +37,7 @@
 *.x86_64
 *.hex
 */swap
+*/memoria
 
 # Debug files
 *.dSYM/
