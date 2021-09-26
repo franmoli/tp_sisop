@@ -9,7 +9,12 @@
 #include <commons/log.h>
 #include <commons/collections/list.h>
 #include <string.h>
-#include "TAD.h"
+
+//Estructuras
+typedef enum {
+	CLIENTE_DESCONECTADO = 1,
+	CLIENTE_TEST = 2
+} op_code;
 
 typedef struct {
     uint32_t size;
@@ -21,13 +26,12 @@ typedef struct {
     t_buffer *buffer;
 } t_paquete;
 
-void *recibir_buffer(int *, int, t_log *);
-int iniciar_servidor(char *, char *, t_log *);
-int esperar_cliente(int, t_log *);
-t_list *recibir_paquete(int, t_log *);
-t_paquete *recibir_mensaje(int socket_cliente);
-int recibir_operacion(int, t_log *);
-void enviar_mensaje(t_paquete* paquete, int socket_cliente);
+//Funciones
+int iniciar_servidor(char *ip, char *puerto, t_log *logger);
+int crear_conexion(char *ip, char* puerto);
+int esperar_cliente(int socket_servidor, t_log *logger);
 void* serializar_paquete(t_paquete* paquete, int *bytes);
+void enviar_paquete(t_paquete* paquete, int socket_cliente);
+t_paquete *recibir_paquete(int socket_cliente);
 
 #endif
