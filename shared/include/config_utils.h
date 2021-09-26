@@ -10,7 +10,9 @@
 
 typedef struct {
     char *IP_MEMORIA;
-    int PUERTO_MEMORIA;
+    char *PUERTO_MEMORIA;
+    char *IP_KERNEL;
+    char *PUERTO_KERNEL;
     char *ALGORITMO_PLANIFICACION;
     t_list *DISPOSITIVOS_IO;
     t_list *DURACIONES_IO;
