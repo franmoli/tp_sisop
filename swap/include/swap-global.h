@@ -2,8 +2,14 @@
 #define SWAP_GLOBAL_H
 
 #include "config_utils.h"
+#include "server.h"
 
+//Configuración
 t_config_swap *config_swap;
+//Logs
 t_log *logger_swap;
+//Conexiones
+int socket_server;
+int socket_client;
 
 #endif

@@ -8,9 +8,11 @@ t_config_kernel *generar_config_kernel(t_config *config) {
 
     //Formateo los array recibidos por configuración
     char *io_devices_unformatted = config_get_string_value(config, "DISPOSITIVOS_IO");
-    char **io_devices_formatted = string_split(string_substring(io_devices_unformatted, 1, strlen(io_devices_unformatted)-2), ","); 
+    char *io_devices_substring = string_substring(io_devices_unformatted, 1, strlen(io_devices_unformatted)-2);
+    char **io_devices_formatted = string_split(io_devices_substring, ","); 
     char *io_durations_unformatted = config_get_string_value(config, "DURACIONES_IO");
-    char **io_durations_formatted = string_split(string_substring(io_durations_unformatted, 1, strlen(io_durations_unformatted)-2), ",");
+    char *io_durations_substring = string_substring(io_durations_unformatted, 1, strlen(io_durations_unformatted)-2);
+    char **io_durations_formatted = string_split(io_durations_substring, ",");
 
     //Agrego los elementos de los array a una lista
     t_list *io_devices = list_create();
@@ -19,8 +21,10 @@ t_config_kernel *generar_config_kernel(t_config *config) {
         string_trim_left(&io_devices_formatted[contador_devices]);
         string_trim_right(&io_devices_formatted[contador_devices]);
         list_add(io_devices, io_devices_formatted[contador_devices]);
+        printf("Address of io_device %d: %p\n", contador_devices, &io_devices_formatted[contador_devices]);
         contador_devices++;
     }
+    printf("Address of io_device %d: %p\n", contador_devices, &io_devices_formatted[contador_devices]);
 
     t_list *io_durations = list_create();
     int contador_durations = 0;
@@ -34,7 +38,9 @@ t_config_kernel *generar_config_kernel(t_config *config) {
     //Cargo la configuración
     t_config_kernel *config_kernel = malloc(sizeof(t_config_kernel));
     config_kernel->IP_MEMORIA = config_get_string_value(config, "IP_MEMORIA");
-    config_kernel->PUERTO_MEMORIA = config_get_int_value(config, "PUERTO_MEMORIA");
+    config_kernel->PUERTO_MEMORIA = config_get_string_value(config, "PUERTO_MEMORIA");
+    config_kernel->IP_KERNEL = config_get_string_value(config, "IP_KERNEL");
+    config_kernel->PUERTO_KERNEL = config_get_string_value(config, "PUERTO_KERNEL");
     config_kernel->ALGORITMO_PLANIFICACION = config_get_string_value(config, "ALGORITMO_PLANIFICACION");
     config_kernel->RETARDO_CPU = config_get_int_value(config, "RETARDO_CPU");
     config_kernel->GRADO_MULTIPROCESAMIENTO = config_get_int_value(config, "GRADO_MULTIPROCESAMIENTO");
@@ -43,6 +49,15 @@ t_config_kernel *generar_config_kernel(t_config *config) {
     config_kernel->ALFA = config_get_int_value(config, "ALFA");
     config_kernel->DISPOSITIVOS_IO = io_devices;
     config_kernel->DURACIONES_IO = io_durations;
+
+    // libero memoria utilizada en el formateo
+    free(io_devices_unformatted);
+    free(io_devices_substring);
+    free(io_devices_formatted);
+
+    free(io_durations_unformatted);
+    free(io_durations_formatted);
+    free(io_durations_substring);
 
     return config_kernel;
 }
@@ -66,8 +81,8 @@ t_config_memoria *generarConfigMemoria(t_config *config){
 t_config_swap *generar_config_swap(t_config *config) {
     //Formateo los array recibidos por configuración
     char *file_paths_unformatted = config_get_string_value(config, "ARCHIVOS_SWAP");
-    char **file_paths_formatted = string_split(string_substring(file_paths_unformatted, 1, strlen(file_paths_unformatted)-2), ", ");
-
+    char *file_paths_substring = string_substring(file_paths_unformatted, 1, strlen(file_paths_unformatted)-2);
+    char **file_paths_formatted = string_split(file_paths_substring, ", ");
     //Agrego los elementos del array a una lista
     t_list *file_paths = list_create();
     int contador = 0;
@@ -86,6 +101,8 @@ t_config_swap *generar_config_swap(t_config *config) {
     config_swap->RETARDO_SWAP = config_get_int_value(config, "RETARDO_SWAP");
     config_swap->ARCHIVOS_SWAP = file_paths;
 
+    // liberar memoria del formateo
+    free(file_paths_substring);
     return config_swap;
 }
 
