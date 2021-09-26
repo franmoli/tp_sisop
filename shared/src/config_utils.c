@@ -106,6 +106,17 @@ t_config_swap *generar_config_swap(t_config *config) {
     return config_swap;
 }
 
+t_config_matelib *generar_config_matelib(t_config *config){
+
+    t_config_matelib *config_matelib =  malloc(sizeof(t_config_matelib));
+    config_matelib->IP = config_get_string_value(config,"IP");
+    config_matelib->PUERTO_MATELIB = config_get_int_value(config,"PUERTO_MATELIB");
+    config_matelib->PUERTO_MEMORIA = config_get_int_value(config,"PUERTO_MEMORIA");
+    config_matelib->PUERTO_KERNEL = config_get_int_value(config,"PUERTO_KERNEL");
+
+    return config_matelib;
+}
+
 void liberar_config(t_config* config){    
     config_destroy(config);
 }

@@ -1,19 +1,36 @@
-
+PROCESS_NAME=matelib
+IDIR =./include
+SHARED_IDIR = ../shared/include
 CC=gcc
+CFLAGS=-I$(IDIR) -I$(SHARED_IDIR) -g -Wall
 
-build-example-lib:
-	cd examples/lib_implementation && \
-	$(CC) -c -Wall -Werror -I"../../" -fpic matelib.c && \
-	$(CC) -shared matelib.o -o libmate.so && \
-	rm matelib.o
+ODIR=./obj
+SRCDIR =./src
+LIBS=-lcommons -lpthread -lreadline -lcunit -lrt
 
-build-example: build-example-lib
-	cd examples/lib_usage && \
-	$(CC) -g3 -Wall -L"../lib_implementation" -I"../../" main.c -lmate -lpthread -lrt -o example
+SHARED_SRCDIR = ../shared/src
+SHARED_ODIR = ../shared/obj
 
-run: build-example
-	cd examples/lib_usage && \
-	LD_LIBRARY_PATH="../lib_implementation/" ./example
+DEPS = $(wildcard $(IDIR)/*.h)
+
+SRC = $(wildcard $(SRCDIR)/*.c)
+OBJ = $(patsubst $(SRCDIR)/%.c,$(ODIR)/%.o,$(SRC))
+
+$(ODIR)/%.o: $(SRCDIR)/%.c $(DEPS) $(SHARED_DEPS)
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+$(SHARED_ODIR)/%.o: $(SHARED_SRCDIR)/%.c $(SHARED_DEPS)
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+SHARED_DEPS = $(wildcard $(SHARED_IDIR)/*.h)
+
+SHARED_SRC = $(wildcard $(SHARED_SRCDIR)/*.c)
+SHARED_OBJ = $(patsubst $(SHARED_SRCDIR)/%.c,$(SHARED_ODIR)/%.o,$(SHARED_SRC))
+
+$(PROCESS_NAME): $(OBJ) $(SHARED_OBJ)
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+
+.PHONY: clean
 
 clean:
-	rm examples/lib_implementation/libmate.so examples/lib_usage/example
+	rm -f $(ODIR)/*.o *~ core $(INCDIR)/*~ $(PROCESS_NAME) $(SHARED_ODIR)/*.o 

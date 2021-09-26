@@ -1,0 +1,7 @@
+#!/bin/bash
+FILE=matelib
+make $FILE
+if test -f "./$FILE"; then
+    make
+    ./$FILE
+fi
