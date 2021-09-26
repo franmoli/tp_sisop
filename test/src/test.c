@@ -6,12 +6,9 @@
 #include "../../swap/include/swap.h"
 #include <stdio.h>
 
-/* Antes de arrancar escribir este comando en la terminal sobre la carpeta memoria */
-
-
 
 ///////////////////////////////////////////////////////////////////////////
-/* gcc -Wall -L/usr/local/lib -o memoria_test src/memoria_test.c -lcunit */
+/* gcc -Wall -L/usr/local/lib -o test src/test.c -lcunit */
 ///////////////////////////////////////////////////////////////////////////
 
 /* Para ejecutar los tests en la terminal escribir ./swap_test */
