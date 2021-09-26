@@ -31,7 +31,7 @@ static void *ejecutar_operacion(int client)
 	while (rec)
 	{
 		t_paquete *paquete;
-		paquete = recibir_mensaje(client);
+		paquete = recibir_paquete(client);
         //analizar_paquete(paquete);
 		//TODO: implementar funcion
 		free(paquete);
