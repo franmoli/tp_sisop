@@ -1,7 +1,7 @@
 #ifndef SWAPL_GLOBAL_H
 #define SWAP_GLOBAL_H
 
-#include "config_utils.h"
+#include "../../shared/include/config_utils.h"
 
 
 t_config_swap *config_swap;
