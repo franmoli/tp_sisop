@@ -54,7 +54,7 @@ void max_test_3(void) {
 
 
 
-int main ( int argc, char **argv )
+int main ( void )
 {
    CU_pSuite pSuite = NULL;
 
