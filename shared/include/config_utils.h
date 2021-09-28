@@ -7,7 +7,6 @@
 #include <commons/collections/list.h>
 #include <string.h>
 #include <commons/string.h>
-#include "TAD.h"
 
 typedef struct {
     char *IP_MEMORIA;
@@ -49,9 +48,9 @@ typedef struct {
 
 typedef struct {
     char *IP;
-    int PUERTO_MATELIB;
-    int PUERTO_MEMORIA;
-    int PUERTO_KERNEL;
+    char *PUERTO_MATELIB;
+    char *PUERTO_MEMORIA;
+    char *PUERTO_KERNEL;
 } t_config_matelib;
 
 t_config *leer_config_file(char *);
