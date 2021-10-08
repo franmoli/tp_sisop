@@ -31,7 +31,6 @@ typedef struct{
 
 typedef struct{
     uint32_t numero_marco;
-
 }t_marco;
 
 t_tabla_paginas* tabla_paginas;
