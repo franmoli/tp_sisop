@@ -24,15 +24,14 @@ typedef struct{
 }t_tabla_paginas;
 
 typedef struct{
+    uint32_t numero_marco;
+}t_marco;
+
+typedef struct{
     uint32_t numero_pagina;
     t_marco* marco;
     bool esta_vacia;
 }t_pagina;
-
-typedef struct{
-    uint32_t numero_marco;
-
-}t_marco;
 
 t_tabla_paginas* tabla_paginas;
 void* tamanio_memoria;
