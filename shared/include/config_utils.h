@@ -3,14 +3,16 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <commons/config.h>
-#include <commons/collections/list.h>
 #include <string.h>
+#include <commons/config.h>
 #include <commons/string.h>
+#include <commons/collections/list.h>
 
 typedef struct {
     char *IP_MEMORIA;
-    int PUERTO_MEMORIA;
+    char *PUERTO_MEMORIA;
+    char *IP_KERNEL;
+    char *PUERTO_KERNEL;
     char *ALGORITMO_PLANIFICACION;
     t_list *DISPOSITIVOS_IO;
     t_list *DURACIONES_IO;
@@ -33,7 +35,6 @@ typedef struct {
     int RETARDO_ACIERTO_TLB;
     int RETARDO_FALLO_TLB;
     int TAMANIO_PAGINA;
-
 } t_config_memoria;
 
 typedef struct {
@@ -59,4 +60,5 @@ t_config_memoria *generarConfigMemoria(t_config *config);
 t_config_swap *generar_config_swap(t_config *config);
 t_config_matelib *generar_config_matelib(t_config *config);
 void liberar_config(t_config* config);
+
 #endif

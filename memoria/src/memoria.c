@@ -15,13 +15,9 @@ int main(int argc, char **argv)
 	tabla_paginas->paginas_totales_maximas =config_memoria->TAMANIO / config_memoria->TAMANIO_PAGINA;
     
     socket_server = iniciar_servidor("127.0.0.1", string_itoa(config_memoria->PUERTO), logger_memoria);
-	log_info(logger_memoria, "Modulo Memoria iniciado socket:[%d] esperando clientes...", socket_server);
     while(1){
-
         socket_client = esperar_cliente(socket_server, logger_memoria);
-		if (socket_client != -1)
-		{
-			log_info(logger_memoria, "Se conecto el cliente [%d]", socket_client);
+		if (socket_client != -1) {
 			pthread_create(&hilo_client, NULL, (void *)ejecutar_operacion, (void *)socket_client);
 		}
     }
@@ -35,7 +31,7 @@ static void *ejecutar_operacion(int client)
 	while (rec)
 	{
 		t_paquete *paquete;
-		paquete = recibir_mensaje(client);
+		paquete = recibir_paquete(client);
         //analizar_paquete(paquete);
 		//TODO: implementar funcion
 		free(paquete);
