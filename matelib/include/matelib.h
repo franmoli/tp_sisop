@@ -21,6 +21,9 @@ typedef int32_t mate_pointer;
 
 // TODO: Docstrings
 
+
+static void *realizar_operacion(t_paquete *paquete);
+
 //------------------General Functions---------------------/
 int mate_init(mate_instance *lib_ref, char *config);
 

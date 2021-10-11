@@ -14,23 +14,42 @@ int main(int argc, char **argv){
     log_info(logger_matelib, "Configuración cargada correctamente");
 
 //Iniciar servidor
-    socket_servidor = iniciar_servidor(config_matelib->IP,string_itoa(config_matelib->PUERTO_MATELIB),logger_matelib);
+    socket_servidor = iniciar_servidor(config_matelib->IP,config_matelib->PUERTO_MATELIB,logger_matelib);
+
+//Crear conexion con kernel
+    socket_kernel = crear_conexion(config_matelib->IP,config_matelib->PUERTO_KERNEL);
 
 //Esperar Conexiones de procesos(carpinchos)
     pthread_t hilo_cliente;
+    t_paquete *paquete;
     log_info(logger_matelib,"Esperando conexiones...");
     while(1){
 
         socket_cliente = esperar_cliente(socket_servidor,logger_matelib);
+        log_info(logger_matelib,"Se conecto un carpincho");
+        paquete = recibir_paquete(socket_cliente);
+        log_info(logger_matelib,"Recibi un paquete a procesar");
+
         if(socket_cliente != -1){
-        //    pthread_create(&hilo_cliente, NULL, (void*)funcionx, (void*)parametrosx);
+            pthread_create(&hilo_cliente, NULL, (void*)realizar_operacion, (void*) paquete);
         }
     //Terminar ejecucion del cliente cuando se desconecta
     }
 
+//Libero conexion con kernel
+    close(socket_kernel);
+
 //Terminar ejecucion    
     liberar_memoria();
     return 1;
+}
+
+static void *realizar_operacion(t_paquete* paquete){
+    t_paquete* paquete_a_enviar;
+	/*  Armar switch para analizar dependiendo del codigo_operacion  */
+    enviar_paquete(paquete_a_enviar,socket_kernel);
+    log_info(logger_matelib,"Se envio el paquete a kernel");
+    return NULL;
 }
 
 
@@ -102,7 +121,7 @@ int mate_memwrite(mate_instance *lib_ref, void *origin, mate_pointer dest, int s
 
 void liberar_memoria(){
 
-    config_destroy(arch_config);
+    liberar_config(arch_config);
     free(config_matelib);
     log_info(logger_matelib, "Finalizacion Matelib exitosa!");
     log_destroy(logger_matelib);    
