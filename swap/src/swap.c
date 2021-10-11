@@ -16,6 +16,35 @@ int main(int argc, char **argv) {
     socket_server = iniciar_servidor(config_swap->IP, string_itoa(config_swap->PUERTO), logger_swap);
 
     //Se inicializan los archivos
+    
+    //Prueba de serialización
+    t_marco *marco_prueba = malloc(sizeof(t_marco));
+    marco_prueba->numero_marco = 340;
+
+    t_pagina *pagina_prueba = malloc(sizeof(t_pagina));
+    pagina_prueba->numero_pagina = 200;
+    pagina_prueba->marco = marco_prueba;
+    pagina_prueba->esta_vacia = false;
+
+    void *stream_prueba = malloc(bytes_pagina(*pagina_prueba));
+    serializar_pagina(*pagina_prueba, &stream_prueba, 0);
+    t_pagina pagina_deserializada = deserializar_pagina(stream_prueba, 0);
+
+    printf("\n\n\n");
+
+    printf("Pagina %d\n", pagina_prueba->numero_pagina);
+    printf("\tMarco: %d\n", pagina_prueba->marco->numero_marco);
+    printf("\tVacia: %d\n", pagina_prueba->esta_vacia);
+    printf("---------------------------\n");
+    printf("Pagina %d\n", pagina_deserializada.numero_pagina);
+    printf("\tMarco: %d\n", pagina_deserializada.marco->numero_marco);
+    printf("\tVacia: %d\n", pagina_deserializada.esta_vacia);
+
+    printf("\n\n\n");
+
+    free(marco_prueba);
+    free(pagina_prueba);
+    free(stream_prueba);
 
     //Se esperan conexiones
     pthread_t hilo_client;
