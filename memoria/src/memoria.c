@@ -14,6 +14,12 @@ int main(int argc, char **argv)
     tabla_paginas->paginas = list_create();
 	tabla_paginas->paginas_totales_maximas =config_memoria->TAMANIO / config_memoria->TAMANIO_PAGINA;
     
+    //Conectar a swap
+    int socket_cliente_swap = crear_conexion("127.0.0.1", "5001");
+    if(socket_cliente_swap == -1){
+        log_info(logger_memoria, "Fallo en la conexion a swap");
+    }
+
     socket_server = iniciar_servidor("127.0.0.1", string_itoa(config_memoria->PUERTO), logger_memoria);
     while(1){
         socket_client = esperar_cliente(socket_server, logger_memoria);
