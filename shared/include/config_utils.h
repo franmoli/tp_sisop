@@ -10,7 +10,9 @@
 
 typedef struct {
     char *IP_MEMORIA;
-    int PUERTO_MEMORIA;
+    char *PUERTO_MEMORIA;
+    char *IP_KERNEL;
+    char *PUERTO_KERNEL;
     char *ALGORITMO_PLANIFICACION;
     t_list *DISPOSITIVOS_IO;
     t_list *DURACIONES_IO;
@@ -45,10 +47,18 @@ typedef struct {
     int RETARDO_SWAP;
 } t_config_swap;
 
+typedef struct {
+    char *IP;
+    char *PUERTO_MATELIB;
+    char *PUERTO_MEMORIA;
+    char *PUERTO_KERNEL;
+} t_config_matelib;
+
 t_config *leer_config_file(char *);
 t_config_kernel *generar_config_kernel(t_config *config);
 t_config_memoria *generarConfigMemoria(t_config *config);
 t_config_swap *generar_config_swap(t_config *config);
+t_config_matelib *generar_config_matelib(t_config *config);
 void liberar_config(t_config* config);
 
 #endif

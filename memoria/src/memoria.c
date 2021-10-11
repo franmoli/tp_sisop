@@ -14,6 +14,12 @@ int main(int argc, char **argv)
     tabla_paginas->paginas = list_create();
 	tabla_paginas->paginas_totales_maximas =config_memoria->TAMANIO / config_memoria->TAMANIO_PAGINA;
     
+    //Conectar a swap
+    int socket_cliente_swap = crear_conexion("127.0.0.1", "5001");
+    if(socket_cliente_swap == -1){
+        log_info(logger_memoria, "Fallo en la conexion a swap");
+    }
+
     socket_server = iniciar_servidor("127.0.0.1", string_itoa(config_memoria->PUERTO), logger_memoria);
     while(1){
         socket_client = esperar_cliente(socket_server, logger_memoria);
@@ -27,14 +33,26 @@ int main(int argc, char **argv)
 }
 static void *ejecutar_operacion(int client)
 {
-	bool rec = true;
-	while (rec)
-	{
-		t_paquete *paquete;
-		paquete = recibir_mensaje(client);
-        //analizar_paquete(paquete);
-		//TODO: implementar funcion
-		free(paquete);
+	while(1) {
+		t_paquete *paquete = recibir_paquete(client);
+
+        //Analizo el código de operación recibido y ejecuto acciones según corresponda
+        switch(paquete->codigo_operacion) {
+            case CLIENTE_TEST:
+                log_info(logger_memoria, "Mensaje de prueba recibido correctamente por el cliente %d", client);
+                break;
+            default:
+                log_error(logger_memoria, "Codigo de operacion desconocido");
+                break;
+        }
+
+        //Libero la memoria ocupada por el paquete
+		free(paquete->buffer->stream);
+        free(paquete->buffer);
+        free(paquete);
+
+        //Salgo del ciclo
+        break; 
 	}
 	close(client);
 	log_info(logger_memoria, "Se desconecto el cliente [%d]", client);
