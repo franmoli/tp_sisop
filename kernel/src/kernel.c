@@ -6,12 +6,22 @@ int main(int argc, char **argv) {
     logger_kernel = log_create("./cfg/kernel.log", "KERNEL", true, LOG_LEVEL_INFO);
     log_info(logger_kernel, "Programa inicializado correctamente");
 
+
     //Se carga la configuración
     log_info(logger_kernel, "Iniciando carga del archivo de configuración");
     config_file = leer_config_file("./cfg/kernel.cfg");
     config_kernel = generar_config_kernel(config_file);
     log_info(logger_kernel, "Configuración cargada correctamente");
-    print_inicializacion(config_kernel);
+
+    //Iniciar listas de procesos
+    iniciar_listas();
+    
+    //Iniciar planificador de largo plazo
+    iniciar_planificador_largo();
+    //Iniciar planificador de corto plazo
+    iniciar_planificador_corto();
+    //Iniciar planificador de mediano plazo
+    iniciar_planificador_mediano();
     
     //Conectar a memoria (datos temporales hardcodeados)
     int socket_cliente_memoria = crear_conexion(config_kernel->IP_MEMORIA, config_kernel->PUERTO_MEMORIA);
@@ -21,12 +31,10 @@ int main(int argc, char **argv) {
 
 
     //Iniciar servidor y empiezo a escuchar procesos
-    iniciar_servidor_kernel(config_kernel, logger_kernel);
-    
+    pthread_t hilo_servidor;
+    pthread_create(&hilo_servidor, NULL, iniciar_servidor_kernel, (void *)NULL);
+    pthread_join(hilo_servidor, NULL);
 
-    //Iniciar planificador de corto plazo
-    //Iniciar planificador de mediano plazo
-    //Iniciar planificador de largo plazo
 
     //Fin del programa
     liberar_memoria_y_finalizar(config_kernel, logger_kernel, config_file);
@@ -76,24 +84,12 @@ void element_destroyer(void* elemento){
     free(elemento);
 }
 
-void atender_proceso (void* parametro ){
-
-}
-
-void *iniciar_servidor_kernel(t_config_kernel *config_kernel, t_log *logger_kernel){
-    int socket_servidor = iniciar_servidor(config_kernel->IP_KERNEL,config_kernel->PUERTO_KERNEL, logger_kernel);
-    if(socket_servidor == -1){
-        log_info(logger_kernel, "Fallo en la creacion del servidor");
-    }else{
-        //Espero por un proceso cliente y creo hilo para atenderlo
-        while(1){
-            int *socket_proceso_cliente = malloc(sizeof(int));
-            *socket_proceso_cliente = esperar_cliente(socket_servidor, logger_kernel);
-            if (*socket_proceso_cliente != -1) {
-                pthread_t hilo_proceso_cliente;
-                pthread_create(&hilo_proceso_cliente, NULL, (void *)atender_proceso, (void *)socket_proceso_cliente);
-            }
-        }
-    }
-    return NULL;
+void iniciar_listas(){
+    lista_new = list_create();
+    lista_ready = list_create();
+    lista_exec = list_create();
+    lista_blocked = list_create();
+    lista_s_blocked = list_create();
+    lista_s_ready = list_create();
+    log_info(logger_kernel, "Listas inicializadas correctamente");
 }
