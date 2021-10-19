@@ -79,6 +79,27 @@ void nuevo_carpincho(int socket_cliente){
 }
 
 void *planificador_largo_plazo(void *_){
+
     int multiprogramacion_disponible = config_kernel->GRADO_MULTIPROGRAMACION;
+
+    while(1){
+        if(multiprogramacion_disponible){
+
+            t_proceso *aux;
+
+            //Se saca de new y se pasa a ready
+            sem_wait(&mutex_listas);
+            aux = list_remove(lista_new, 0);
+            list_add(lista_ready, aux);
+            sem_post(&mutex_listas);
+
+            multiprogramacion_disponible--;
+        }else{
+
+            sem_wait(&proceso_finalizo);
+
+            multiprogramacion_disponible++;
+        }
+    }
     return NULL;
 }

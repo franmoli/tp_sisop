@@ -8,6 +8,7 @@ void element_destroyer(void* elemento);
 void liberar_memoria_y_finalizar(t_config_kernel *config_kernel, t_log *logger_kernel, t_config *config_file);
 void print_inicializacion (t_config_kernel *config_kernel);
 void iniciar_listas();
+void iniciar_semaforos_generales();
 
 t_config *config_file;
 

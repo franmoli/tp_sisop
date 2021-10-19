@@ -13,6 +13,9 @@ int main(int argc, char **argv) {
     config_kernel = generar_config_kernel(config_file);
     log_info(logger_kernel, "Configuración cargada correctamente");
 
+    //Iniciar semaforos de uso general
+    iniciar_semaforos_generales();
+
     //Iniciar listas de procesos
     iniciar_listas();
     
@@ -89,4 +92,12 @@ void iniciar_listas(){
     sem_init(&mutex_listas, 0, 1);
     
     log_info(logger_kernel, "Listas inicializadas correctamente");
+    
+    return;
+}
+
+void iniciar_semaforos_generales(){
+    sem_init(&proceso_finalizo, 0, 0);
+    
+    return;
 }

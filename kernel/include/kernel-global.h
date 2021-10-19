@@ -40,5 +40,6 @@ t_list *lista_s_blocked;
 t_list *lista_s_ready;
 //Semaforos
 sem_t mutex_listas;
+sem_t proceso_finalizo;
 
 #endif
