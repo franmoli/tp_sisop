@@ -9,6 +9,7 @@
 #include "planificador_largo.h"
 #include "planificador_mediano.h"
 #include <pthread.h>
+#include <semaphore.h>
 
 //tipos propios para listas
 typedef enum {
@@ -37,5 +38,7 @@ t_list *lista_exec;
 t_list *lista_blocked;
 t_list *lista_s_blocked;
 t_list *lista_s_ready;
+//Semaforos
+sem_t mutex_listas;
 
 #endif

@@ -78,11 +78,15 @@ void element_destroyer(void* elemento){
 }
 
 void iniciar_listas(){
+    
     lista_new = list_create();
     lista_ready = list_create();
     lista_exec = list_create();
     lista_blocked = list_create();
     lista_s_blocked = list_create();
     lista_s_ready = list_create();
+
+    sem_init(&mutex_listas, 0, 1);
+    
     log_info(logger_kernel, "Listas inicializadas correctamente");
 }
