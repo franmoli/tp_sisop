@@ -29,13 +29,6 @@ int main(int argc, char **argv) {
         log_info(logger_kernel, "Fallo en la conexion a memoria");
     }
 
-
-    //Iniciar servidor y empiezo a escuchar procesos
-    pthread_t hilo_servidor;
-    pthread_create(&hilo_servidor, NULL, iniciar_servidor_kernel, (void *)NULL);
-    pthread_join(hilo_servidor, NULL);
-
-
     //Fin del programa
     liberar_memoria_y_finalizar(config_kernel, logger_kernel, config_file);
     return 0;
