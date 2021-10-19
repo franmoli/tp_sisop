@@ -10,7 +10,7 @@ void atender_proceso (void* parametro ){
     //int size = 0;
     //t_paquete *raw;
     printf("Atiendo proceso socket: %d", socket_cliente);
-    
+     
     return;
 }
 
