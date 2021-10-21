@@ -48,10 +48,9 @@ typedef struct {
 } t_config_swap;
 
 typedef struct {
-    char *IP;
-    char *PUERTO_MATELIB;
-    char *PUERTO_MEMORIA;
+    char *IP_KERNEL;
     char *PUERTO_KERNEL;
+    char *LOG_LEVEL;
 } t_config_matelib;
 
 t_config *leer_config_file(char *);
