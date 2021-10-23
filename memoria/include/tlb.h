@@ -1,8 +1,8 @@
-#ifndef PAGINACION_H
-#define PAGINACION_H
+#ifndef TLB_H
+#define TLB_H
 
 #include "memoria-global.h"
 #include <commons/collections/list.h>
-#include "tlb.h"
 
+int getTLBPaginaByMarco(int marco);
 #endif
