@@ -38,6 +38,8 @@ t_log *logger_memoria;
 t_tabla_tlb* tabla_tlb;
 t_tabla_paginas* tabla_paginas;
 
+t_list *allocs;
+
 void* tamanio_memoria;
 int socket_server, socket_cliente_swap, socket_client;
 #endif
