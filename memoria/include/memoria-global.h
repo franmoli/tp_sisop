@@ -4,9 +4,6 @@
 #include "config_utils.h"
 #include "server.h"
 
-t_config_memoria *config_memoria;
-t_log *logger_memoria;
-
 typedef struct {
     uint32_t prevAlloc;
     uint32_t nextAlloc;
@@ -30,11 +27,17 @@ typedef struct{
 typedef struct{
     uint32_t numero_pagina;
     t_marco* marco;
-    bool esta_vacia;
+    t_heap_metadata metadata;
 }t_pagina;
+typedef struct{
+    t_list *tlb;
+}t_tabla_tlb;
 
+t_config_memoria *config_memoria;
+t_log *logger_memoria;
+t_tabla_tlb* tabla_tlb;
 t_tabla_paginas* tabla_paginas;
+
 void* tamanio_memoria;
-int socket_server;
-int socket_client;
+int socket_server, socket_cliente_swap, socket_client;
 #endif

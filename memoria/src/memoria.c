@@ -15,7 +15,7 @@ int main(int argc, char **argv)
 	tabla_paginas->paginas_totales_maximas =config_memoria->TAMANIO / config_memoria->TAMANIO_PAGINA;
     
     //Conectar a swap
-    int socket_cliente_swap = crear_conexion("127.0.0.1", "5001");
+    socket_cliente_swap = crear_conexion("127.0.0.1", "5001");
     if(socket_cliente_swap == -1){
         log_info(logger_memoria, "Fallo en la conexion a swap");
     }
