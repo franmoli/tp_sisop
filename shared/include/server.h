@@ -14,7 +14,8 @@
 typedef enum {
 	CLIENTE_DESCONECTADO = 1,
 	CLIENTE_TEST = 2,
-    MEMALLOC = 3
+    MEMALLOC = 3,
+    MEMWRITE = 4,
 } op_code;
 
 typedef struct {

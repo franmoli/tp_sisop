@@ -46,6 +46,10 @@ static void *ejecutar_operacion(int client)
                 log_info(logger_memoria, "recibi orden de almacenar memoria del cliente %d", client);
                 guardarMemoria(paquete);
                 break;
+            case MEMWRITE:
+                log_info(logger_memoria, "recibi orden de guardar en memoria del cliente %d", client);
+                guardarMemoria(paquete);
+                break;
             default:
                 log_error(logger_memoria, "Codigo de operacion desconocido");
                 break;

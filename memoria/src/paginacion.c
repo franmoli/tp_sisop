@@ -10,10 +10,8 @@ void guardarMemoria(t_paquete* paquete){
     }
 
     if(paginaAGuardar == 0){ // No encontro memoria para meter el contenido
-
+        //Swap Time
     }
-    //Deserializo
-    //Me fijo si lo tengo 
 }
 
 int getPaginaAGuardar(){
