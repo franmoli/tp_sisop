@@ -7,4 +7,6 @@
 
 
 void guardarMemoria(t_paquete* paquete);
+int getPaginaAGuardar();
+void findAndSaveEnPagina(int pagina);
 #endif

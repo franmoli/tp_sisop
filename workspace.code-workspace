@@ -17,7 +17,8 @@
 		"files.associations": {
 			"kernel.h": "c",
 			"memoria.h": "c",
-			"paginacion.h": "c"
+			"paginacion.h": "c",
+			"tlb.h": "c"
 		}
 	}
 }
