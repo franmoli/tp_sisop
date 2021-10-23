@@ -12,6 +12,7 @@ int main(int argc, char **argv)
 	
 	tabla_paginas = malloc(sizeof(t_tabla_paginas));
     tabla_paginas->paginas = list_create();
+    tabla_tlb->tlb = list_create();
 	tabla_paginas->paginas_totales_maximas =config_memoria->TAMANIO / config_memoria->TAMANIO_PAGINA;
     
     //Conectar a swap
@@ -40,6 +41,10 @@ static void *ejecutar_operacion(int client)
         switch(paquete->codigo_operacion) {
             case CLIENTE_TEST:
                 log_info(logger_memoria, "Mensaje de prueba recibido correctamente por el cliente %d", client);
+                break;
+            case MEMALLOC:
+                log_info(logger_memoria, "recibi orden de almacenar memoria del cliente %d", client);
+                guardarMemoria(paquete);
                 break;
             default:
                 log_error(logger_memoria, "Codigo de operacion desconocido");

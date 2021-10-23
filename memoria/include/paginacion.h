@@ -5,4 +5,6 @@
 #include <commons/collections/list.h>
 #include "tlb.h"
 
+
+void guardarMemoria(t_paquete* paquete);
 #endif

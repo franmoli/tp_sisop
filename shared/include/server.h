@@ -13,7 +13,8 @@
 //Estructuras
 typedef enum {
 	CLIENTE_DESCONECTADO = 1,
-	CLIENTE_TEST = 2
+	CLIENTE_TEST = 2,
+    MEMALLOC = 3
 } op_code;
 
 typedef struct {
