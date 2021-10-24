@@ -34,11 +34,11 @@ int mate_init(mate_instance *lib_ref, char *config){
     lib_ref->config         = config_matelib;
     lib_ref->group_info = malloc(sizeof(mate_inner_structure));
 
-    sprintf(string,"%d",lib_ref->id);
-    strcpy(string,strcat(string,".cfg"));
+    sprintf(string,"./cfg/%d",lib_ref->id);
+    strcat(string,".cfg");
     
     //TODO Fijarse como usar el log_level_debug para instanciarlo desde config (string to enum)
-    lib_ref->logger = log_create(strcat("./cfg/",string),"MATELIB",0,LOG_LEVEL_DEBUG);
+    lib_ref->logger = log_create(string,"MATELIB",0,LOG_LEVEL_DEBUG);
     log_info(lib_ref->logger,"Acabo de instanciarme");
 
     //Conexion con kernel y en caso que no exista, conexion con memoria
@@ -46,12 +46,15 @@ int mate_init(mate_instance *lib_ref, char *config){
     if(socket == -1){
         crear_conexion(config_matelib->IP_KERNEL, "5002");
     }
-    
+
     t_paquete paquete = {
         NUEVO_CARPINCHO,
         NULL
     };    
-
+    if(socket == -1){
+        log_error(lib_ref->logger,"No se pudo conectar a kernel ni a memoria");
+        return 1;
+    }
     enviar_paquete(&paquete, socket);
 
     free(string);

@@ -19,7 +19,7 @@ void iniciar_planificador_largo(){
 void *iniciar_servidor_kernel(void *_){
     int socket_servidor = iniciar_servidor(config_kernel->IP_KERNEL,config_kernel->PUERTO_KERNEL, logger_kernel);
     if(socket_servidor == -1){
-        log_info(logger_kernel, "Fallo en la creacion del servidor");
+        log_error(logger_kernel, "Fallo en la creacion del servidor");
     }else{
         //Espero por un proceso cliente y creo hilo para atenderlo
         while(1){
@@ -52,6 +52,7 @@ void atender_proceso (void* parametro ){
             //TODO: case OPERACION_SARASA
             // agregar a lista de operaciones del proceso     
             default:
+                printf("--- %d ---------%d\n", paquete->codigo_operacion, NUEVO_CARPINCHO);
                 log_error(logger_kernel, "Codigo de operacion desconocido");
                 break;
         }
@@ -86,14 +87,16 @@ void *planificador_largo_plazo(void *_){
         if(multiprogramacion_disponible){
 
             t_proceso *aux;
+            if(list_size(lista_new)){
+                //Se saca de new y se pasa a ready
+                sem_wait(&mutex_listas);
+                aux = list_remove(lista_new, 0);
+                list_add(lista_ready, aux);
+                sem_post(&mutex_listas);
 
-            //Se saca de new y se pasa a ready
-            sem_wait(&mutex_listas);
-            aux = list_remove(lista_new, 0);
-            list_add(lista_ready, aux);
-            sem_post(&mutex_listas);
-
-            multiprogramacion_disponible--;
+                multiprogramacion_disponible--;
+                printf("agrego proceso %d", aux->id);
+            }
         }else{
 
             sem_wait(&proceso_finalizo);

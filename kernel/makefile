@@ -7,7 +7,7 @@ LD_LIBRARY_PATH="../matelib"
 
 ODIR=./obj
 SRCDIR =./src
-LIBS=-lcommons -lpthread -lreadline -lcunit -lrt -lmate
+LIBS=-lcommons -lpthread -lreadline -lcunit -lrt
 
 SHARED_SRCDIR = ../shared/src
 SHARED_ODIR = ../shared/obj
