@@ -93,7 +93,7 @@ int mate_call_io(mate_instance *lib_ref, mate_io_resource io, void *msg){
     return 1;
 }
 
-//-----------------------------------Funciones Modulo Memoria-----------------------------------
+//-----------------------------------Funciones Modulo Memoria -----------------------------------
 /*
 mate_pointer mate_memalloc(mate_instance *lib_ref, int size){
 
@@ -115,4 +115,8 @@ int mate_memread(mate_instance *lib_ref, mate_pointer origin, void *dest, int si
 int mate_memwrite(mate_instance *lib_ref, void *origin, mate_pointer dest, int size){
 
     return 1;
+}
+
+int test(int num){
+    return num + 1;
 }
