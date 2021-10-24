@@ -2,77 +2,93 @@
 
 
 void alloc_mem(int size){
-        if(list_size(allocs) == 0){
+    if(list_size(allocs) == 0){
 
-            //me fijo si hay memoria disponible
-            bool memoria_disponible = memoria_disponible(size);
-            // reservo directamente el primer lugar
-            if (memoria_disponible) {
-                //genero alloc y reservo primer lugar
+        //me fijo si hay memoria disponible
+        bool memoria_disponible = memoria_disponible(size);
+        // reservo directamente el primer lugar
+        if (memoria_disponible) {
+            //genero alloc y reservo primer lugar
+            t_heap_metadata* nuevo_alloc;
+             nuevo_alloc = nuevo_alloc(size);
 
-            }
         }
-        
+    } else {
 
-    //buscar en la lista si hay un espacio disponible
-        //si hay reservarlo y si sobra hacer otro alloc
-        //si no hay cuando llego al final de la lista veo de agregarlo
-            //si tengo memoria disponible lo agrego
-            //si no tengo memoria hago un return -1
+        t_heap_metadata* nuevo_alloc;
+        nuevo_alloc = buscar_alloc_libre(size);
+
+    }
 
 }
 
-bool memoria_disponible(int size){
+//Crea un nuevo alloc y lo agrega a la lista
+t_heap_metadata* nuevo_alloc(int size){
 
-    //return total memoria - total reservado >= size
-    //total memoria = archivo config
-    //total reservado = ultimo alloc - primer alloc creo
+    t_heap_metadata* nuevo_alloc = malloc(sizeof(t_heap_metadata));
+
+    nuevo_alloc->isFree = false;
+    //nuevo_alloc->prevAlloc = if list no tiene elementos, seria primera posicion de memoria, sino que sea el nextAlloc del ultimo alloc
+    nuevo_alloc->nextAlloc = nuevo_alloc->prevAlloc + size;
+
+    list_add(nuevo_alloc,allocs);
+    return nuevo_alloc;
+}
+
+//Dado el tamaño total de la memoria y el total reservado, me fijo si queda espacio disponible para reservar size
+bool memoria_disponible(int size){
 
     int total_reservado = memoria_reservada();
 
-    //ver que valor tiene tamanio_memoria y si puedo restarlo
     return config_memoria->TAMANIO - total_reservado >= size;
 }
 
 
+//Guardo primer y ultimo alloc y comparo para obtener el size total reservado
 int memoria_reservada(){
+
+    int cont = 0;
 
     t_list_iterator* list_iterator = list_iterator_create(allocs);
     while(list_iterator_has_next(list_iterator)) {
-        //aca tendria que saltar o ir guardando en un contador para llegar al ultimo elemento y encontrar el alloc
+        if (cont == 0) {
+            t_heap_metadata* first_alloc = allocs
+        }
         t_heap_metadata* alloc = list_iterator_next(list_iterator);
+        cont ++;
     }
+
+    int memoria_reservada = alloc->nextAlloc - allocs->prevAlloc
 
     list_iterator_destroy(list_iterator);
 
-    //comparo alloc (ultimo) con el primero y calculo la memoria reservada
-
-    //return alloc->prevAlloc - primer_alloc->prevAlloc
-
+    return memoria_reservada
 
 }
 
-    /*t_list_iterator* list_iterator = list_iterator_create(tabla_tlb->tlb);
-    while(list_iterator_has_next(list_iterator)) {
-        t_tlb* tlb = list_iterator_next(list_iterator);
-        if(tlb->numero_marco == marco)
-            return tlb->numero_pagina;
-    }
-    
-    list_iterator_destroy(list_iterator);
-    return 0;
-*/
-
-
-
+//Busco el primer alloc libre en la lista (first fit)
 t_heap_metadata* buscar_alloc_libre(int size) {
 
-    //itero la lista de allocs
-        //por cada elemento me fijo primero si isFree == true
-            //si es true me fijo si el tamaño es suficiente
-            //return ese alloc, sino aca mismo puedo seguir con todo
+    t_list_iterator* list_iterator = list_iterator_create(allocs);
+    while(list_iterator_has_next(list_iterator)) {
+        t_heap_metadata* alloc = list_iterator_next(list_iterator);
+        if (alloc->isFree && (alloc->nextAlloc - alloc->prevAlloc >= size)) {
+            list_iterator_destroy(list_iterator);
+            return alloc;
+        }
+    }
 
-        //si no se cumple sigo con la iteracion hasta el final
+    list_iterator_destroy(list_iterator);
 
+    bool memoria_disponible = memoria_disponible(size);
+    // reservo directamente el primer lugar
+        if (memoria_disponible) {
+            //genero alloc y reservo primer lugar
+            t_heap_metadata* nuevo_alloc;
+            nuevo_alloc = nuevo_alloc(size);
+            return nuevo_alloc;
+        }
+
+    //Si no puede encontrar alloc libre ni hay memoria disponible mando a swap
 
 }
