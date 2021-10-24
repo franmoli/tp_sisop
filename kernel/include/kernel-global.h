@@ -11,6 +11,7 @@
 #include <pthread.h>
 #include <semaphore.h>
 
+
 //tipos propios para listas
 typedef enum {
     NEW = 1,

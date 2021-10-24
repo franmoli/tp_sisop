@@ -4,7 +4,7 @@ int main(int argc, char **argv) {
     //Inicio del programa
     system("clear");
     logger_kernel = log_create("./cfg/kernel.log", "KERNEL", true, LOG_LEVEL_INFO);
-    log_info(logger_kernel, "Programa inicializado correctamente");
+    log_info(logger_kernel, "Programa inicializado correctamente ");
 
 
     //Se carga la configuración

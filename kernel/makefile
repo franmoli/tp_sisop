@@ -3,10 +3,11 @@ IDIR =./include
 SHARED_IDIR = ../shared/include
 CC=gcc
 CFLAGS=-I$(IDIR) -I$(SHARED_IDIR) -g -Wall
+LD_LIBRARY_PATH="../matelib"
 
 ODIR=./obj
 SRCDIR =./src
-LIBS=-lcommons -lpthread -lreadline -lcunit -lrt
+LIBS=-lcommons -lpthread -lreadline -lcunit -lrt -lmate
 
 SHARED_SRCDIR = ../shared/src
 SHARED_ODIR = ../shared/obj
@@ -17,7 +18,7 @@ SRC = $(wildcard $(SRCDIR)/*.c)
 OBJ = $(patsubst $(SRCDIR)/%.c,$(ODIR)/%.o,$(SRC))
 
 $(ODIR)/%.o: $(SRCDIR)/%.c $(DEPS) $(SHARED_DEPS)
-	$(CC) -c -o $@ $< $(CFLAGS)
+	$(CC) -c -o $@ $< $(CFLAGS) -L$(LD_LIBRARY_PATH)
 
 $(SHARED_ODIR)/%.o: $(SHARED_SRCDIR)/%.c $(SHARED_DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
@@ -29,7 +30,7 @@ SHARED_OBJ = $(patsubst $(SHARED_SRCDIR)/%.c,$(SHARED_ODIR)/%.o,$(SHARED_SRC))
 
 
 $(PROCESS_NAME): $(OBJ) $(SHARED_OBJ)
-	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS) -L$(LD_LIBRARY_PATH)
 
 .PHONY: clean
 
