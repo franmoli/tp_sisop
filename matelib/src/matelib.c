@@ -47,16 +47,19 @@ int mate_init(mate_instance *lib_ref, char *config){
         crear_conexion(config_matelib->IP_KERNEL, "5002");
     }
 
-    t_paquete paquete = {
-        NUEVO_CARPINCHO,
-        NULL
-    };    
+    // creo un paquete vacío para testear
+    t_paquete *paquete = malloc(sizeof(t_paquete));
+    t_buffer *buffer = malloc(sizeof(t_buffer));
+    paquete->codigo_operacion = NUEVO_CARPINCHO;
+    paquete->buffer = buffer;
+    buffer->size = 0;
+
     if(socket == -1){
         log_error(lib_ref->logger,"No se pudo conectar a kernel ni a memoria");
         return 1;
     }
-    enviar_paquete(&paquete, socket);
-
+    
+    enviar_paquete(paquete, socket);
     free(string);
     return 0;
 }

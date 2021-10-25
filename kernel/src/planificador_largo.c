@@ -6,12 +6,12 @@ void iniciar_planificador_largo(){
 
     pthread_t hilo_servidor;
     pthread_create(&hilo_servidor, NULL, iniciar_servidor_kernel, (void *)NULL);
-    pthread_join(hilo_servidor, NULL);
 
     //TODO: crear hilo planificador que elementos de new a ready segun tengan disponible por multiprogramacion
     pthread_t hilo_planificador;
     pthread_create(&hilo_planificador, NULL, planificador_largo_plazo, (void *)NULL);
-    pthread_join(hilo_planificador, NULL);
+    
+    while(1);
 }
 
 
@@ -37,7 +37,6 @@ void *iniciar_servidor_kernel(void *_){
 void atender_proceso (void* parametro ){
 
     int socket_cliente = *(int*)parametro;
-    printf("Atiendo proceso socket: %d", socket_cliente);
     while(1) {
 		t_paquete *paquete = recibir_paquete(socket_cliente);
 
@@ -52,7 +51,6 @@ void atender_proceso (void* parametro ){
             //TODO: case OPERACION_SARASA
             // agregar a lista de operaciones del proceso     
             default:
-                printf("--- %d ---------%d\n", paquete->codigo_operacion, NUEVO_CARPINCHO);
                 log_error(logger_kernel, "Codigo de operacion desconocido");
                 break;
         }
@@ -69,14 +67,13 @@ void atender_proceso (void* parametro ){
 }
 
 void nuevo_carpincho(int socket_cliente){
-    
     t_proceso *nuevo_proceso = malloc(sizeof(t_proceso));
     nuevo_proceso->id = socket_cliente;
     nuevo_proceso->status = NEW;
-
     sem_wait(&mutex_listas);
     list_add(lista_new, nuevo_proceso);
     sem_post(&mutex_listas);
+
 }
 
 void *planificador_largo_plazo(void *_){
@@ -85,9 +82,10 @@ void *planificador_largo_plazo(void *_){
 
     while(1){
         if(multiprogramacion_disponible){
-
             t_proceso *aux;
+            
             if(list_size(lista_new)){
+
                 //Se saca de new y se pasa a ready
                 sem_wait(&mutex_listas);
                 aux = list_remove(lista_new, 0);
@@ -95,12 +93,17 @@ void *planificador_largo_plazo(void *_){
                 sem_post(&mutex_listas);
 
                 multiprogramacion_disponible--;
-                printf("agrego proceso %d", aux->id);
+                printf("agrego proceso %d\n", aux->id);
             }
         }else{
 
+            printf("me trabé listas:\n");
+            printf("Ready: %d\n", list_size(lista_ready));
+            printf("Block: %d\n", list_size(lista_blocked));
+            printf("Exec: %d\n", list_size(lista_exec));
+            printf(".");
             sem_wait(&proceso_finalizo);
-
+            printf("me destrabé\n");
             multiprogramacion_disponible++;
         }
     }
