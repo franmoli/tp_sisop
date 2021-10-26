@@ -4,6 +4,10 @@
 #include "memoria-global.h"
 #include <commons/collections/list.h>
 
-void alloc_mem(int size);
-bool memoria_disponible(int size);
+void allocMem(int size);
+bool memoriaDisponible(int size);
+t_heap_metadata* nuevoAlloc(int size);
+bool memoriaDisponible(int size);
+int memoriaReservada();
+t_heap_metadata* buscarAllocLibre(int size);
 #endif

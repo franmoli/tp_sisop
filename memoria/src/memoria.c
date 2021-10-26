@@ -13,9 +13,15 @@ int main(int argc, char **argv)
 	tabla_paginas = malloc(sizeof(t_tabla_paginas));
     tabla_paginas->paginas = list_create();
     tabla_tlb->tlb = list_create();
-    allocs = list_create();
 	tabla_paginas->paginas_totales_maximas =config_memoria->TAMANIO / config_memoria->TAMANIO_PAGINA;
-    
+    int i = 0;
+    while( i< tabla_paginas->paginas_totales_maximas){
+        t_pagina *pagina = malloc(sizeof(t_pagina));
+        pagina->tamanio_ocupado = 0;
+        pagina->numero_pagina = i;
+        list_add(tabla_paginas->paginas, pagina);
+        i++;
+    }
     //Conectar a swap
     socket_cliente_swap = crear_conexion("127.0.0.1", "5001");
     if(socket_cliente_swap == -1){

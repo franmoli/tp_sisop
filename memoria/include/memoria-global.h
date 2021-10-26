@@ -26,8 +26,9 @@ typedef struct{
 
 typedef struct{
     uint32_t numero_pagina;
-    t_marco* marco;
-    t_heap_metadata metadata;
+    uint32_t tamanio_ocupado;
+    uint32_t cantidad_contenidos;
+    t_list* metadatas; //t_heap_metadata metadata;
 }t_pagina;
 typedef struct{
     t_list *tlb;
