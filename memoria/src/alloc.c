@@ -10,7 +10,7 @@ void alloc_mem(int size){
         if (memoria_disponible) {
             //genero alloc y reservo primer lugar
             t_heap_metadata* nuevo_alloc;
-             nuevo_alloc = nuevo_alloc(size);
+            nuevo_alloc = nuevo_alloc(size);
 
         }
     } else {
@@ -40,29 +40,32 @@ bool memoria_disponible(int size){
 
     int total_reservado = memoria_reservada();
 
-    return config_memoria->TAMANIO - total_reservado >= size;
+    return config_memoria->TAMANIO - (total_reservado + 9) >= size;
 }
 
 
 //Guardo primer y ultimo alloc y comparo para obtener el size total reservado
 int memoria_reservada(){
 
-    int cont = 0;
+    t_heap_metadata* anterior = malloc(sizeof(t_heap_metadata));
+    t_heap_metadata* alloc = malloc(sizeof(t_heap_metadata));
+    alloc = list_get(allocs,0);
 
     t_list_iterator* list_iterator = list_iterator_create(allocs);
-    while(list_iterator_has_next(list_iterator)) {
-        if (cont == 0) {
-            t_heap_metadata* first_alloc = allocs
-        }
-        t_heap_metadata* alloc = list_iterator_next(list_iterator);
-        cont ++;
+
+    while(alloc->nextAlloc != null) {
+        anterior = alloc;
+        alloc = list_iterator_next(list_iterator);
     }
 
-    int memoria_reservada = alloc->nextAlloc - allocs->prevAlloc
+    int memoria_reservada = malloc(sizeof(int));
+    memoria_reservada = anterior->nextAlloc;
 
     list_iterator_destroy(list_iterator);
+    free(anterior);
+    free(alloc);
 
-    return memoria_reservada
+    return memoria_reservada;
 
 }
 
