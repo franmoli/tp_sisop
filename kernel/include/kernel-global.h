@@ -25,6 +25,9 @@ typedef enum {
 typedef struct {
     int id;
     t_status status;
+    int estimacion;
+    int ejecucion_anterior;
+    bool estimar;
     // t_task_list *task_list; ????? cuales son las tareas que ejecuta el proceso
 } t_proceso;
 
@@ -41,6 +44,7 @@ t_list *lista_s_blocked;
 t_list *lista_s_ready;
 //Semaforos
 sem_t mutex_listas;
-sem_t proceso_finalizo;
+sem_t proceso_finalizo_o_suspended;
+sem_t salida_exec;
 
 #endif

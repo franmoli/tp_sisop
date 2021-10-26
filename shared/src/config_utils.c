@@ -21,7 +21,6 @@ t_config_kernel *generar_config_kernel(t_config *config) {
         string_trim_left(&io_devices_formatted[contador_devices]);
         string_trim_right(&io_devices_formatted[contador_devices]);
         list_add(io_devices, io_devices_formatted[contador_devices]);
-        printf("Address of io_device %d: %p\n", contador_devices, &io_devices_formatted[contador_devices]);
         contador_devices++;
     }
 

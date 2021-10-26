@@ -7,11 +7,9 @@ void iniciar_planificador_largo(){
     pthread_t hilo_servidor;
     pthread_create(&hilo_servidor, NULL, iniciar_servidor_kernel, (void *)NULL);
 
-    //TODO: crear hilo planificador que elementos de new a ready segun tengan disponible por multiprogramacion
     pthread_t hilo_planificador;
     pthread_create(&hilo_planificador, NULL, planificador_largo_plazo, (void *)NULL);
     
-    while(1);
 }
 
 
@@ -70,6 +68,9 @@ void nuevo_carpincho(int socket_cliente){
     t_proceso *nuevo_proceso = malloc(sizeof(t_proceso));
     nuevo_proceso->id = socket_cliente;
     nuevo_proceso->status = NEW;
+    nuevo_proceso->estimacion = config_kernel->ESTIMACION_INICIAL;
+    nuevo_proceso->ejecucion_anterior = 0;
+    nuevo_proceso->estimar = false;
     sem_wait(&mutex_listas);
     list_add(lista_new, nuevo_proceso);
     sem_post(&mutex_listas);
@@ -88,8 +89,9 @@ void *planificador_largo_plazo(void *_){
 
                 //Se saca de new y se pasa a ready
                 sem_wait(&mutex_listas);
-                aux = list_remove(lista_new, 0);
-                list_add(lista_ready, aux);
+                    aux = list_remove(lista_new, 0);
+                    aux->status =  READY;
+                    list_add(lista_ready, aux);
                 sem_post(&mutex_listas);
 
                 multiprogramacion_disponible--;
@@ -102,7 +104,7 @@ void *planificador_largo_plazo(void *_){
             printf("Block: %d\n", list_size(lista_blocked));
             printf("Exec: %d\n", list_size(lista_exec));
             printf(".");
-            sem_wait(&proceso_finalizo);
+            sem_wait(&proceso_finalizo_o_suspended);
             printf("me destrabé\n");
             multiprogramacion_disponible++;
         }

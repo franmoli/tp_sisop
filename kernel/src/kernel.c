@@ -26,12 +26,13 @@ int main(int argc, char **argv) {
     //Iniciar planificador de mediano plazo
     iniciar_planificador_mediano();
     
+    
     //Conectar a memoria (datos temporales hardcodeados)
     int socket_cliente_memoria = crear_conexion(config_kernel->IP_MEMORIA, config_kernel->PUERTO_MEMORIA);
     if(socket_cliente_memoria == -1){
-        log_info(logger_kernel, "Fallo en la conexion a memoria");
+        log_error(logger_kernel, "Fallo en la conexion a memoria");
     }
-
+    while(1);
     //Fin del programa
     liberar_memoria_y_finalizar(config_kernel, logger_kernel, config_file);
     return 0;
@@ -97,7 +98,7 @@ void iniciar_listas(){
 }
 
 void iniciar_semaforos_generales(){
-    sem_init(&proceso_finalizo, 0, 0);
-    
+    sem_init(&proceso_finalizo_o_suspended, 0, 0);
+    sem_init(&salida_exec, 0, 0);
     return;
 }
