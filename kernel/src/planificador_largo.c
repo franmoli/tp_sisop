@@ -24,6 +24,7 @@ void *iniciar_servidor_kernel(void *_){
             int *socket_proceso_cliente = malloc(sizeof(int));
             *socket_proceso_cliente = esperar_cliente(socket_servidor, logger_kernel);
             if (*socket_proceso_cliente != -1) {
+                sem_wait(&libre_para_inicializar_proceso);
                 pthread_t hilo_proceso_cliente;
                 pthread_create(&hilo_proceso_cliente, NULL, (void *)atender_proceso, (void *)socket_proceso_cliente);
             }
@@ -33,18 +34,21 @@ void *iniciar_servidor_kernel(void *_){
 }
 
 void atender_proceso (void* parametro ){
-
+    bool inicializado = false;
     int socket_cliente = *(int*)parametro;
     while(1) {
 		t_paquete *paquete = recibir_paquete(socket_cliente);
-
+        
         //Analizo el código de operación recibido y ejecuto acciones según corresponda
         switch(paquete->codigo_operacion) {
             case CLIENTE_TEST:
                 log_info(logger_kernel, "Mensaje de prueba recibido correctamente por el cliente %d", socket_cliente);
                 break;
             case NUEVO_CARPINCHO:
-                nuevo_carpincho(socket_cliente);
+                if(!inicializado){
+                    nuevo_carpincho(socket_cliente);
+                    inicializado = true;
+                }
                 break;
             //TODO: case OPERACION_SARASA
             // agregar a lista de operaciones del proceso     
@@ -81,9 +85,9 @@ void nuevo_carpincho(int socket_cliente){
     sem_post(&mutex_listas);
 
     cantidad_de_procesos++;
+    sem_post(&proceso_inicializado);
     avisar_cambio();
-
-
+    sem_post(&libre_para_inicializar_proceso);
 
 }
 

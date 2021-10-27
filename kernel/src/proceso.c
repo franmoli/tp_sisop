@@ -3,22 +3,23 @@
 void *proceso(void *self){
     
     t_proceso *proceso_struct = self;
+    sem_wait(&proceso_inicializado);
 
     while(1){
         sem_wait(&actualizacion_de_listas_1);
-        sem_post(&actualizacion_de_listas_1_recibido);
+        
         switch (proceso_struct->status){
             case NEW:
-                new();
                 printf("Paso a new p: %d\n", proceso_struct->id);
+                new();
                 break;
             case READY:
-                ready();
                 printf("Paso a ready p: %d\n", proceso_struct->id);                
+                ready();
                 break;
             case EXEC:
-                exec();
                 printf("Paso a exec p: %d\n", proceso_struct->id);
+                exec();
                 break;
             case BLOCKED:
                 blocked();
@@ -31,6 +32,7 @@ void *proceso(void *self){
                 blocked();
                 break;
         }
+        sem_post(&actualizacion_de_listas_1_recibido);
         sem_wait(&actualizacion_de_listas_2);
     }
 

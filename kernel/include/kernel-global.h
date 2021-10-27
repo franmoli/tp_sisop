@@ -47,6 +47,8 @@ sem_t salida_exec;
 sem_t actualizacion_de_listas_1;
 sem_t actualizacion_de_listas_2;
 sem_t actualizacion_de_listas_1_recibido;
+sem_t proceso_inicializado;
+sem_t libre_para_inicializar_proceso;
 //Auxiliares
 int cantidad_de_procesos;
 
