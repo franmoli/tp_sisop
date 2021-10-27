@@ -3,6 +3,10 @@
 // Acá se están todas las declaraciones de funciones y librerias necesitadas Exclusivamente por kernel.c
 
 #include "kernel-global.h"
+#include "server.h"
+#include "planificador_corto.h"
+#include "planificador_mediano.h"
+#include "planificador_largo.h"
 
 void element_destroyer(void* elemento);
 void liberar_memoria_y_finalizar(t_config_kernel *config_kernel, t_log *logger_kernel, t_config *config_file);

@@ -1,17 +1,24 @@
 
-#include "planificador_corto.h"
+#include "../include/planificador_corto.h"
 
 void estimar(t_proceso *proceso);
 
 void iniciar_planificador_corto(){
+
     printf("Inicio planificador CORTO \n");
     void *(*planificador)(void*);
     pthread_t hilo_planificador;
+
     if(!strcmp(config_kernel->ALGORITMO_PLANIFICACION, "SJF")){
+
         planificador = planificador_corto_plazo_sjf;
+
     }else if(!strcmp(config_kernel->ALGORITMO_PLANIFICACION, "HRRN")){
+
         planificador = planificador_corto_plazo_hrrn;
+
     }else{
+
         log_error(logger_kernel, "Planificador no soportado/no reconocido");
         return;
     }
@@ -20,17 +27,23 @@ void iniciar_planificador_corto(){
 }
 
 void *planificador_corto_plazo_sjf (void *_){
+
     int multiprocesamiento = config_kernel->GRADO_MULTIPROCESAMIENTO;
     t_proceso *aux;
+
     while(1){
+
         //calcular estimaciones
         for(int i = 0; i < list_size(lista_ready); i++){
+
             aux = list_get(lista_ready, i);
             if(aux->estimar)
                 estimar(aux);
+
         }
         
         if(multiprocesamiento && list_size(lista_ready)){
+
             int index = -1;
             int estimacion_aux;
 
@@ -44,12 +57,7 @@ void *planificador_corto_plazo_sjf (void *_){
             }
 
             //Se saca de ready y se pasa a exec
-            sem_wait(&mutex_listas);
-                aux = list_remove(lista_ready, index);
-                aux->status =  EXEC;
-                list_add(lista_exec, aux);
-            sem_post(&mutex_listas);
-
+            mover_proceso_de_lista(lista_ready, lista_exec, index, EXEC);
 
             multiprocesamiento--;
 
@@ -67,6 +75,7 @@ void *planificador_corto_plazo_sjf (void *_){
 
     return NULL;
 }
+
 void *planificador_corto_plazo_hrrn (void *_){
     
     return NULL;

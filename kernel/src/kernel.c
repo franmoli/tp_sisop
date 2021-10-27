@@ -92,6 +92,7 @@ void iniciar_listas(){
 
     sem_init(&mutex_listas, 0, 1);
     
+    cantidad_de_procesos = 0;
     log_info(logger_kernel, "Listas inicializadas correctamente");
     
     return;
@@ -100,5 +101,38 @@ void iniciar_listas(){
 void iniciar_semaforos_generales(){
     sem_init(&proceso_finalizo_o_suspended, 0, 0);
     sem_init(&salida_exec, 0, 0);
+    sem_init(&actualizacion_de_listas_1, 0, 0);
+    sem_init(&actualizacion_de_listas_2, 0, 0);
+    sem_init(&actualizacion_de_listas_1_recibido, 0, 0);
     return;
+}
+
+void mover_proceso_de_lista(t_list *origen, t_list *destino, int index, int status){
+    t_proceso *aux;
+
+    sem_wait(&mutex_listas);
+        aux = list_remove(origen, index);
+        aux->status =  status;
+        list_add(destino, aux);
+    sem_post(&mutex_listas);
+
+    avisar_cambio();
+    return;
+}
+
+void avisar_cambio(){
+    //Aviso que hubo un cambio de listas
+    for(int i = 0; i < cantidad_de_procesos; i++){
+        sem_post(&actualizacion_de_listas_1);
+    }
+
+    //Espero que todos los procesos hayan recibido el aviso 
+    for(int i = 0; i < cantidad_de_procesos; i++){
+        sem_wait(&actualizacion_de_listas_1_recibido);
+    }
+
+    //Habilito que vuelvan a esperar una vez ya resuelto todo lo que tengan que hacer con su nuevo estado
+    for(int i = 0; i < cantidad_de_procesos; i++){
+        sem_post(&actualizacion_de_listas_2);
+    }
 }

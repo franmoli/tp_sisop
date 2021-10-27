@@ -2,6 +2,8 @@
 #define P_LARGO
 
 #include "kernel-global.h"
+#include "server.h"
+#include "proceso.h"
 
 void iniciar_planificador_largo();
 void atender_proceso (void* parametro);

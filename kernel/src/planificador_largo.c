@@ -66,14 +66,24 @@ void atender_proceso (void* parametro ){
 
 void nuevo_carpincho(int socket_cliente){
     t_proceso *nuevo_proceso = malloc(sizeof(t_proceso));
+
     nuevo_proceso->id = socket_cliente;
     nuevo_proceso->status = NEW;
     nuevo_proceso->estimacion = config_kernel->ESTIMACION_INICIAL;
     nuevo_proceso->ejecucion_anterior = 0;
     nuevo_proceso->estimar = false;
+
+    pthread_t hilo_proceso;
+    pthread_create(&hilo_proceso, NULL, proceso, (void*)nuevo_proceso);
+
     sem_wait(&mutex_listas);
     list_add(lista_new, nuevo_proceso);
     sem_post(&mutex_listas);
+
+    cantidad_de_procesos++;
+    avisar_cambio();
+
+
 
 }
 
@@ -83,19 +93,12 @@ void *planificador_largo_plazo(void *_){
 
     while(1){
         if(multiprogramacion_disponible){
-            t_proceso *aux;
-            
             if(list_size(lista_new)){
 
                 //Se saca de new y se pasa a ready
-                sem_wait(&mutex_listas);
-                    aux = list_remove(lista_new, 0);
-                    aux->status =  READY;
-                    list_add(lista_ready, aux);
-                sem_post(&mutex_listas);
+                mover_proceso_de_lista(lista_new, lista_ready, 0, READY);
 
                 multiprogramacion_disponible--;
-                printf("agrego proceso %d\n", aux->id);
             }
         }else{
 

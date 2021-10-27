@@ -2,14 +2,12 @@
 #define KERNEL_GLOBAL_H
 
 // Acá estan todas las declaraciones y librerias usadas por todos los archivos .c
-
-#include "config_utils.h"
-#include "server.h"
-#include "planificador_corto.h"
-#include "planificador_largo.h"
-#include "planificador_mediano.h"
 #include <pthread.h>
 #include <semaphore.h>
+#include <commons/log.h>
+
+#include "config_utils.h"
+
 
 
 //tipos propios para listas
@@ -46,5 +44,14 @@ t_list *lista_s_ready;
 sem_t mutex_listas;
 sem_t proceso_finalizo_o_suspended;
 sem_t salida_exec;
+sem_t actualizacion_de_listas_1;
+sem_t actualizacion_de_listas_2;
+sem_t actualizacion_de_listas_1_recibido;
+//Auxiliares
+int cantidad_de_procesos;
+
+//funciones
+void mover_proceso_de_lista(t_list *origen, t_list *destino, int index, int status);
+void avisar_cambio();
 
 #endif
