@@ -12,6 +12,8 @@ int main(int argc, char **argv)
 	
 	tabla_paginas = malloc(sizeof(t_tabla_paginas));
     tabla_paginas->paginas = list_create();
+
+    tabla_tlb = malloc(sizeof(tabla_tlb));
     tabla_tlb->tlb = list_create();
 	tabla_paginas->paginas_totales_maximas =config_memoria->TAMANIO / config_memoria->TAMANIO_PAGINA;
     int i = 0;
@@ -19,6 +21,8 @@ int main(int argc, char **argv)
         t_pagina *pagina = malloc(sizeof(t_pagina));
         pagina->tamanio_ocupado = 0;
         pagina->numero_pagina = i;
+        pagina->cantidad_contenidos= 0;
+        pagina->contenidos_pagina = list_create();
         list_add(tabla_paginas->paginas, pagina);
         i++;
     }
@@ -27,7 +31,8 @@ int main(int argc, char **argv)
     if(socket_cliente_swap == -1){
         log_info(logger_memoria, "Fallo en la conexion a swap");
     }
-
+    t_paquete *paquete2;
+    guardarMemoria(paquete2);
     socket_server = iniciar_servidor("127.0.0.1", string_itoa(config_memoria->PUERTO), logger_memoria);
     while(1){
         socket_client = esperar_cliente(socket_server, logger_memoria);
