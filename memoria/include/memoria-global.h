@@ -4,6 +4,11 @@
 #include "config_utils.h"
 #include "server.h"
 
+typedef enum
+{
+	PATOTA = 0,
+} t_contenido;
+
 typedef struct {
     uint32_t prevAlloc;
     uint32_t nextAlloc;
@@ -21,15 +26,18 @@ typedef struct{
 }t_tabla_paginas;
 
 typedef struct{
-    uint32_t numero_marco;
-}t_marco;
-
-typedef struct{
     uint32_t numero_pagina;
     uint32_t tamanio_ocupado;
     uint32_t cantidad_contenidos;
-    t_list* metadatas; //t_heap_metadata metadata;
+    t_list* contenidos_pagina;
 }t_pagina;
+
+typedef struct{
+		uint32_t dir_comienzo; // NO DEBE SER UN PUNTERO
+		uint32_t tamanio; 
+		t_contenido contenido_pagina; //antes era un puntero
+	} t_contenidos_pagina;
+
 typedef struct{
     t_list *tlb;
 }t_tabla_tlb;
