@@ -8,6 +8,9 @@ void iniciar_planificador_corto(){
     printf("Inicio planificador CORTO \n");
     void *(*planificador)(void*);
     pthread_t hilo_planificador;
+    pthread_t hilo_terminar_rafaga;
+    int *multiprocesamiento = malloc(sizeof(int));
+    *multiprocesamiento = config_kernel->GRADO_MULTIPROCESAMIENTO;
 
     if(!strcmp(config_kernel->ALGORITMO_PLANIFICACION, "SJF")){
 
@@ -23,14 +26,15 @@ void iniciar_planificador_corto(){
         return;
     }
      
-    pthread_create(&hilo_planificador, NULL, planificador, (void *)NULL);
+    pthread_create(&hilo_planificador, NULL, planificador, (void *)multiprocesamiento);
+    pthread_create(&hilo_terminar_rafaga, NULL, esperar_salida_exec, (void *)multiprocesamiento);
 }
 
-void *planificador_corto_plazo_sjf (void *_){
+void *planificador_corto_plazo_sjf (void *multiprocesamiento_p){
 
-    int multiprocesamiento = config_kernel->GRADO_MULTIPROCESAMIENTO;
+    
     t_proceso *aux;
-
+    int *multiprocesamiento = multiprocesamiento_p;
     while(1){
 
         //calcular estimaciones
@@ -39,11 +43,9 @@ void *planificador_corto_plazo_sjf (void *_){
             aux = list_get(lista_ready, i);
             if(aux->estimar)
                 estimar(aux);
-
         }
         
-        if(multiprocesamiento && list_size(lista_ready)){
-
+        if(*multiprocesamiento && list_size(lista_ready)){
             int index = -1;
             int estimacion_aux;
 
@@ -59,16 +61,9 @@ void *planificador_corto_plazo_sjf (void *_){
             //Se saca de ready y se pasa a exec
             mover_proceso_de_lista(lista_ready, lista_exec, index, EXEC);
 
-            multiprocesamiento--;
-
-        }else if(!multiprocesamiento){
-            printf("Procesos en EXEC:\n");
-            for(int i = 0; i< list_size(lista_exec); i++){
-                t_proceso *aux = list_get(lista_exec, i);
-                printf("P: %d | estimacion: %d\n", aux->id, aux->estimacion);
-            }
-            sem_wait(&salida_exec);
-            multiprocesamiento++;
+            sem_wait(&mutex_multiprocesamiento);
+            *multiprocesamiento = *multiprocesamiento - 1;
+            sem_post(&mutex_multiprocesamiento);
         }
     }
 
@@ -76,7 +71,7 @@ void *planificador_corto_plazo_sjf (void *_){
     return NULL;
 }
 
-void *planificador_corto_plazo_hrrn (void *_){
+void *planificador_corto_plazo_hrrn (void *multiprocesamiento_p){
     
     return NULL;
 }
@@ -86,4 +81,34 @@ void estimar(t_proceso *proceso){
     proceso->estimacion = (alfa * proceso->ejecucion_anterior) + (( 1 - alfa) * proceso->estimacion);
     proceso->estimar = false;
     return;
+}
+
+void *esperar_salida_exec(void *multiprocesamiento_p){
+
+    int *multiprocesamiento = multiprocesamiento_p;
+
+    while(1){
+
+        sem_wait(&salida_exec);
+
+        bool encontrado = false;
+        int tamanio_lista_exec = list_size(lista_exec);
+        int index = 0;
+
+        while(!encontrado && (index < tamanio_lista_exec)){
+            t_proceso *aux = list_get(lista_exec, index);
+            if(aux->termino_rafaga){
+                if(aux->block){
+                    mover_proceso_de_lista(lista_exec, lista_blocked, index, BLOCKED);
+                }else{
+                    mover_proceso_de_lista(lista_exec, lista_ready, index, READY);
+                }
+                encontrado = true;
+            }
+            index ++;
+        }
+        sem_wait(&mutex_multiprocesamiento);
+        *multiprocesamiento = *multiprocesamiento + 1;
+        sem_post(&mutex_multiprocesamiento);
+    }
 }

@@ -26,6 +26,8 @@ typedef struct {
     int estimacion;
     int ejecucion_anterior;
     bool estimar;
+    bool termino_rafaga;
+    bool block;
     // t_task_list *task_list; ????? cuales son las tareas que ejecuta el proceso
 } t_proceso;
 
@@ -49,8 +51,11 @@ sem_t actualizacion_de_listas_2;
 sem_t actualizacion_de_listas_1_recibido;
 sem_t proceso_inicializado;
 sem_t libre_para_inicializar_proceso;
+sem_t mutex_multiprocesamiento;
+sem_t mutex_cant_procesos;
 //Auxiliares
 int cantidad_de_procesos;
+bool salida_de_exec;
 
 //funciones
 void mover_proceso_de_lista(t_list *origen, t_list *destino, int index, int status);

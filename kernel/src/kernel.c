@@ -106,6 +106,8 @@ void iniciar_semaforos_generales(){
     sem_init(&actualizacion_de_listas_1_recibido, 0, 0);
     sem_init(&proceso_inicializado, 0, 0);
     sem_init(&libre_para_inicializar_proceso, 0, 1);
+    sem_init(&mutex_multiprocesamiento, 0, 1);
+    sem_init(&mutex_cant_procesos, 0, 1);
     return;
 }
 
@@ -115,29 +117,28 @@ void mover_proceso_de_lista(t_list *origen, t_list *destino, int index, int stat
     sem_wait(&mutex_listas);
         aux = list_remove(origen, index);
         aux->status =  status;
+        aux->termino_rafaga = false;
         list_add(destino, aux);
     sem_post(&mutex_listas);
 
-    printf("Cambio de lista p: %d ----\n", aux->id);
-    printf(".");
     avisar_cambio();
     return;
 }
 
 void avisar_cambio(){
-    
+    sem_wait(&mutex_cant_procesos);
     //Aviso que hubo un cambio de listas
     for(int i = 0; i < cantidad_de_procesos; i++){
         sem_post(&actualizacion_de_listas_1);
     }
-
+    
     //Espero que todos los procesos hayan recibido el aviso y ejecutado
     for(int i = 0; i < cantidad_de_procesos; i++){
         sem_wait(&actualizacion_de_listas_1_recibido);
     }
-    
     //Habilito que vuelvan a esperar una vez ya resuelto todo lo que tengan que hacer con su nuevo estado
     for(int i = 0; i < cantidad_de_procesos; i++){
         sem_post(&actualizacion_de_listas_2);
     }
+    sem_post(&mutex_cant_procesos);
 }

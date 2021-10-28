@@ -1,16 +1,18 @@
 #include "proceso.h"
 
 void *proceso(void *self){
-    
     t_proceso *proceso_struct = self;
     sem_wait(&proceso_inicializado);
 
+
     while(1){
-        sem_wait(&actualizacion_de_listas_1);
         
+        sem_wait(&actualizacion_de_listas_1);
+
         switch (proceso_struct->status){
             case NEW:
                 printf("Paso a new p: %d\n", proceso_struct->id);
+                printf(".");
                 new();
                 break;
             case READY:
@@ -18,12 +20,16 @@ void *proceso(void *self){
                 ready();
                 break;
             case EXEC:
-                printf("Paso a exec p: %d\n", proceso_struct->id);
+                //TODO :proceso timestamp
+                printf("Ejecutando p: %d\n", proceso_struct->id);
                 exec();
+                proceso_struct->termino_rafaga = true;
+                //TODO: proceso calcular ejecucion real Y y setear para estimar
+                sem_post(&salida_exec);
                 break;
             case BLOCKED:
                 blocked();
-                printf("Paso a block p: %d\n", proceso_struct->id);
+                //printf("Paso a block p: %d\n", proceso_struct->id);
                 break;
             case S_BLOCKED:
                 blocked();
@@ -32,6 +38,7 @@ void *proceso(void *self){
                 blocked();
                 break;
         }
+
         sem_post(&actualizacion_de_listas_1_recibido);
         sem_wait(&actualizacion_de_listas_2);
     }
@@ -47,6 +54,9 @@ void ready(){
 
 }
 void exec(){
+    //Tarea mock
+    printf("Haciendo la tarea\n");
+    sleep(2);
 
 }
 void blocked(){

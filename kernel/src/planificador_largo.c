@@ -76,6 +76,8 @@ void nuevo_carpincho(int socket_cliente){
     nuevo_proceso->estimacion = config_kernel->ESTIMACION_INICIAL;
     nuevo_proceso->ejecucion_anterior = 0;
     nuevo_proceso->estimar = false;
+    nuevo_proceso->termino_rafaga = false;
+    nuevo_proceso->block = false;
 
     pthread_t hilo_proceso;
     pthread_create(&hilo_proceso, NULL, proceso, (void*)nuevo_proceso);
@@ -83,8 +85,11 @@ void nuevo_carpincho(int socket_cliente){
     sem_wait(&mutex_listas);
     list_add(lista_new, nuevo_proceso);
     sem_post(&mutex_listas);
-
+    
+    sem_wait(&mutex_cant_procesos);
     cantidad_de_procesos++;
+    sem_post(&mutex_cant_procesos);
+
     sem_post(&proceso_inicializado);
     avisar_cambio();
     sem_post(&libre_para_inicializar_proceso);
@@ -106,7 +111,7 @@ void *planificador_largo_plazo(void *_){
             }
         }else{
 
-            printf("me trabé listas:\n");
+            printf("me trabé planif largo listas:\n");
             printf("Ready: %d\n", list_size(lista_ready));
             printf("Block: %d\n", list_size(lista_blocked));
             printf("Exec: %d\n", list_size(lista_exec));
