@@ -8,5 +8,6 @@ void iniciar_planificador_corto();
 void *planificador_corto_plazo_sjf(void *_);
 void *planificador_corto_plazo_hrrn(void *_);
 void *esperar_salida_exec(void *_);
+void *esperar_salida_block(void *multiprocesamiento_p);
 
 #endif

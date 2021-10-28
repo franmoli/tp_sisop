@@ -101,6 +101,7 @@ void iniciar_listas(){
 void iniciar_semaforos_generales(){
     sem_init(&proceso_finalizo_o_suspended, 0, 0);
     sem_init(&salida_exec, 0, 0);
+    sem_init(&salida_block, 0, 0);
     sem_init(&actualizacion_de_listas_1, 0, 0);
     sem_init(&actualizacion_de_listas_2, 0, 0);
     sem_init(&actualizacion_de_listas_1_recibido, 0, 0);

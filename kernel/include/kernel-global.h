@@ -46,6 +46,7 @@ t_list *lista_s_ready;
 sem_t mutex_listas;
 sem_t proceso_finalizo_o_suspended;
 sem_t salida_exec;
+sem_t salida_block;
 sem_t actualizacion_de_listas_1;
 sem_t actualizacion_de_listas_2;
 sem_t actualizacion_de_listas_1_recibido;

@@ -112,3 +112,26 @@ void *esperar_salida_exec(void *multiprocesamiento_p){
         sem_post(&mutex_multiprocesamiento);
     }
 }
+
+void *esperar_salida_block(void *multiprocesamiento_p){
+
+    
+
+    while(1){
+
+        sem_wait(&salida_block);
+
+        bool encontrado = false;
+        int tamanio_lista_blocked = list_size(lista_blocked);
+        int index = 0;
+
+        while(!encontrado && (index < tamanio_lista_blocked)){
+            t_proceso *aux = list_get(lista_blocked, index);
+            if(aux->termino_rafaga){
+                    mover_proceso_de_lista(lista_blocked, lista_ready, index, READY);
+                encontrado = true;
+            }
+            index ++;
+        }
+    }
+}
