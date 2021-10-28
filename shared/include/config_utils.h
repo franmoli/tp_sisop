@@ -50,6 +50,8 @@ typedef struct {
 typedef struct {
     char *IP_KERNEL;
     char *PUERTO_KERNEL;
+    char *IP_MEMORIA;
+    char *PUERTO_MEMORIA;
     char *LOG_LEVEL;
 } t_config_matelib;
 

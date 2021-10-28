@@ -42,9 +42,9 @@ int mate_init(mate_instance *lib_ref, char *config){
     log_info(lib_ref->logger,"Acabo de instanciarme");
 
     //Conexion con kernel y en caso que no exista, conexion con memoria
-    socket = crear_conexion(config_matelib->IP_KERNEL, "5002");
+    socket = crear_conexion(config_matelib->IP_KERNEL, config_matelib->PUERTO_KERNEL);
     if(socket == -1){
-        crear_conexion(config_matelib->IP_KERNEL, "5002");
+        crear_conexion(config_matelib->IP_MEMORIA, config_matelib->PUERTO_MEMORIA);
     }
 
     // creo un paquete vacío para testear
@@ -73,6 +73,8 @@ int mate_close(mate_instance *lib_ref){
 //-----------------------------------Semaforos-----------------------------------
 
 int mate_sem_init(mate_instance *lib_ref, mate_sem_name sem, unsigned int value){
+
+    
 
     return 1;
 }
