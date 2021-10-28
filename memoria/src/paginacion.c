@@ -2,7 +2,7 @@
 
 void guardarMemoria(t_paquete* paquete){
 
-    int espacioAguardar = 2;
+    int espacioAguardar = 9;
 
     int paginaAGuardar = getPaginaAGuardar(espacioAguardar); //le paso el tamaño de lo que voy a guardar  
     int posicionEnPagina = 0;
@@ -12,6 +12,7 @@ void guardarMemoria(t_paquete* paquete){
     else{// No encontro memoria para meter el contenido
         //Swap Time
     }
+
     memcpy(tamanio_memoria + posicionEnPagina + (config_memoria->TAMANIO_PAGINA) * paginaAGuardar, &espacioAguardar, espacioAguardar);
 
     t_pagina *pagina = list_get(tabla_paginas->paginas, paginaAGuardar);
