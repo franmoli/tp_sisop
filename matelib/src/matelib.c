@@ -1,12 +1,4 @@
 #include "matelib.h"
-/*
-static void *realizar_operacion(t_paquete* paquete){
-    t_paquete* paquete_a_enviar;
-	//Armar switch para analizar dependiendo del codigo_operacion
-    enviar_paquete(paquete_a_enviar,socket_kernel);
-    log_info(logger_matelib,"Se envio el paquete a kernel");
-    return NULL;
-}*/
 
 int32_t obtenerIDRandom(){
     srand(0);
@@ -21,6 +13,22 @@ t_config_matelib* obtenerConfig(char* config){
     return config_mate;
 }
 
+int encontrar_lugar_libre(mate_instance *lib_ref){
+
+    for(int i = 0;i < CANT_MAX_SEM;i++){
+
+        if(!(lib_ref->info_carpincho->lista_sem[i].ocupado)){
+            return i;
+        }
+    }
+    return -1;
+}
+
+void inicializar_lista_sem(mate_instance *lib_ref){
+
+
+}
+
 //-----------------------------------Instanciacion -----------------------------------
 
 int mate_init(mate_instance *lib_ref, char *config){
@@ -32,7 +40,10 @@ int mate_init(mate_instance *lib_ref, char *config){
     
     lib_ref->id             = obtenerIDRandom();
     lib_ref->config         = config_matelib;
+    //Quizas se saca el group_info
     lib_ref->group_info = malloc(sizeof(mate_inner_structure));
+    lib_ref->info_carpincho = malloc(sizeof(mate_inner_structure));
+    //hacer malloc en la estructura del semaforo minimamente, sino Seg Fault.
 
     sprintf(string,"./cfg/%d",lib_ref->id);
     strcat(string,".cfg");
@@ -74,9 +85,19 @@ int mate_close(mate_instance *lib_ref){
 
 int mate_sem_init(mate_instance *lib_ref, mate_sem_name sem, unsigned int value){
 
-    
+    int posicion = encontrar_lugar_libre(lib_ref);
+    if(posicion == -1){
+        log_info(lib_ref->logger,"No hay lugar disponible para inicializar el semaforo");
+        return -1;
+    }
+    lib_ref->info_carpincho->lista_sem[posicion].nombre = malloc(sizeof(char)*20);
+    lib_ref->info_carpincho->lista_sem[posicion].semaforo = malloc(sizeof(sem_t));
+    strcpy(lib_ref->info_carpincho->lista_sem[posicion].nombre,sem);
+    sem_init(lib_ref->info_carpincho->lista_sem[posicion].semaforo,0,value);
+    lib_ref->info_carpincho->lista_sem[posicion].ocupado = true;
+    log_info(lib_ref->logger,"Semaforo instanciado correctamente");
 
-    return 1;
+    return 0;
 }
 
 int mate_sem_wait(mate_instance *lib_ref, mate_sem_name sem){
