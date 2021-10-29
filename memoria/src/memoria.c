@@ -31,8 +31,13 @@ int main(int argc, char **argv)
     if(socket_cliente_swap == -1){
         log_info(logger_memoria, "Fallo en la conexion a swap");
     }
+
+    //CASO DE PRUEBA DE METODOS SIN KERNEL/MATELIB
     t_paquete *paquete2;
     guardarMemoria(paquete2);
+
+
+    //PROGRAMA NORMAL
     socket_server = iniciar_servidor("127.0.0.1", string_itoa(config_memoria->PUERTO), logger_memoria);
     while(1){
         socket_client = esperar_cliente(socket_server, logger_memoria);

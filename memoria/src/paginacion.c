@@ -4,14 +4,29 @@ void guardarMemoria(t_paquete* paquete){
 
     int espacioAguardar = 9;
 
-    int paginaAGuardar = getPaginaAGuardar(espacioAguardar); //le paso el tamaño de lo que voy a guardar  
-    int posicionEnPagina = 0;
-    if(paginaAGuardar >= 0){
-        posicionEnPagina = getPosicionPagina(paginaAGuardar);
+    //Agarro primera pagina disponible para los 9bits del heap_metadata
+    int paginaHeapHeader = getPrimeraPaginaDisponible(sizeof(t_heap_metadata));
+    if(paginaHeapHeader >=0){
+        t_pagina *paginaHeader =list_get(tabla_paginas->paginas,paginaHeapHeader);
+        if(config_memoria->TAMANIO_PAGINA -paginaHeader->tamanio_ocupado - sizeof(t_heap_metadata)>= espacioAguardar){
+            //en la misma pagina me entra el 100% del contenido.
+        }else{
+            if(config_memoria->TAMANIO_PAGINA -paginaHeader->tamanio_ocupado - sizeof(t_heap_metadata)== 0){
+                //La pagina esta llena tengo que buscar otra.
+                int paginaAGuardar = 0;
+                int posicionEnPagina = 0;
+                if(paginaAGuardar >= 0){
+                    posicionEnPagina = getPosicionPagina(paginaAGuardar);
+                }
+                else{// No encontro memoria para meter el contenido
+                    //Swap Time
+                }
+            }else{
+                //Completo esta pagina y tengo que pedir otra mas.
+            }
+        }
     }
-    else{// No encontro memoria para meter el contenido
-        //Swap Time
-    }
+    /*
 
     memcpy(tamanio_memoria + posicionEnPagina + (config_memoria->TAMANIO_PAGINA) * paginaAGuardar, &espacioAguardar, espacioAguardar);
 
@@ -23,7 +38,7 @@ void guardarMemoria(t_paquete* paquete){
     contenidoPagina->dir_comienzo=posicionEnPagina;
     contenidoPagina->tamanio = espacioAguardar;
     
-    list_add(pagina->contenidos_pagina, contenidoPagina);
+    list_add(pagina->contenidos_pagina, contenidoPagina);*/
 }
 
 int getPosicionPagina(int pagina){
