@@ -6,6 +6,9 @@
 #include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/mman.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 //Archivos
 int tamanio_archivo;
@@ -16,6 +19,7 @@ t_config *config_file;
 static void *ejecutar_operacion(int client);
 void crear_archivo_swap(int numero_particion);
 void insertar_pagina_en_archivo(t_pagina *pagina);
+void leer_pagina_de_archivo();
 void borrar_archivos_swap();
 void liberar_memoria_y_finalizar();
 void destruir_elementos_lista(void *elemento);
