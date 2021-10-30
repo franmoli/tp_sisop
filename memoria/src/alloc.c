@@ -227,3 +227,76 @@ t_heap_metadata* newAllocs(int size, t_alloc* alloc) {
 }
 
 */
+
+
+
+//Tampoco funciona la estructura administrativa, hay que traer pagina por pagina desde la primera y acceder a memoria para buscar los allocs
+
+// Itero por la lista de paginas dentro de la tabla de pagina, veo como puedo ir a buscar los elementos de la pagina dentro de memoria, me traigo pagina por pagina y veo los allocs en orden
+// onda se que los primeros 9 bytes de la pagina 0 son el primer heap metadata, me traigo eso y veo que onda, con tener el primer alloc ya se el nextalloc y puedo ir al siguiente
+
+//Si el heap disponible tiene un size mayor al size que quiero meter, ese espacio sobrante tiene que ser mayor a 9 para poder armar otro heap, sino no sirve ese heap, se sigue buscando
+
+
+iterarPaginas(int size) {
+
+    t_list_iterator* list_iterator = list_iterator_create(tabla_paginas->paginas);
+    while(list_iterator_has_next(list_iterator)) {
+        t_pagina* paginaLeida = list_iterator_next(list_iterator);
+
+    }
+
+}
+
+
+t_heap_metadata* traerAllocDeMemoria(uint32_t) {
+
+    t_heap_metadata* data = malloc(sizeof(t_heap_metadata));
+    int offset = posicion;
+
+    memcpy(&data->prevAlloc,tamanio_memoria + offset,sizeof(uint32_t));
+    offset += sizeof(uint32_t);
+    memcpy(&data->nextAlloc,tamanio_memoria + offset,sizeof(uint32_t));
+    offset += sizeof(uint32_t);
+    memcpy(&data->isFree,tamanio_memoria + offset,sizeof(uint8_t));
+    offset += sizeof(uint8_t);
+
+    return data;
+
+}
+
+t_heap_metadata* obtenerPrimerAlloc() {
+
+    t_pagina* primeraPagina = list_get(tabla_paginas->paginas,0);
+    t_contenidos_pagina* primerContenido = list_get(primeraPagina->contenidos_pagina,0);
+    if(primerContenido->tamanio != 9) {
+        // Pense que era alloc
+        return -1;
+    }
+
+    return traerAllocDeMemoria(primerContenido->direccion_comienzo);
+
+}
+
+t_heap_metadata* crearPrimerAlloc(int size) {
+
+    t_heap_metadata* newAlloc = malloc(sizeof(t_heap_metadata));
+    newAlloc->isFree = 0;
+    newAlloc->prevAlloc = NULL;
+    newAlloc->nextAlloc = size + 9;
+
+    return newAlloc;
+
+}
+
+t_heap_metadata* crearUltimoAlloc(uint32_t dirUltimoAlloc, int sizeUltimoAlloc) {
+
+    // Cuando creo un alloc al final, tengo que cambiar el ultimo que tiene nextalloc en null,
+
+    return 0;
+}
+
+
+// El ultimo alloc que tiene nextalloc Null, es un alloc que nunca se reserva, debido a que tiene el tamaño de lo que falta para terminar la ultima pagina
+// Cuando creo un alloc, tengo que achicar este para que existan los 2, y cuando el alloc que creo es mas grande que este, tengo que arrancar una nueva pagina
+// y crear este alloc con lo que me sobre de la pagina.

@@ -12,6 +12,7 @@ typedef enum
 typedef struct {
     uint32_t prevAlloc;
     uint32_t nextAlloc;
+    //True -1, False 0
     uint8_t isFree;
 }t_heap_metadata;
 
