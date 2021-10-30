@@ -14,7 +14,6 @@ void iniciar_planificador_largo(){
 
     pthread_t hilo_exit;
     pthread_create(&hilo_exit, NULL, hilo_salida_a_exit, (void *)multiprogramacion_disponible);
-    
 }
 
 
