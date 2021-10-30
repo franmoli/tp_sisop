@@ -3,12 +3,17 @@
 void iniciar_planificador_largo(){
     //Iniciar servidor y empiezo a escuchar procesos
     printf("Inicio planificador LARGO \n");
+    int *multiprogramacion_disponible = malloc(sizeof(int));
+    *multiprogramacion_disponible = config_kernel->GRADO_MULTIPROGRAMACION;
 
     pthread_t hilo_servidor;
     pthread_create(&hilo_servidor, NULL, iniciar_servidor_kernel, (void *)NULL);
 
     pthread_t hilo_planificador;
     pthread_create(&hilo_planificador, NULL, planificador_largo_plazo, (void *)NULL);
+
+    pthread_t hilo_exit;
+    pthread_create(&hilo_exit, NULL, hilo_salida_a_exit, (void *)multiprogramacion_disponible);
     
 }
 
@@ -98,16 +103,17 @@ void nuevo_carpincho(int socket_cliente){
 
 void *planificador_largo_plazo(void *_){
 
-    int multiprogramacion_disponible = config_kernel->GRADO_MULTIPROGRAMACION;
+    int *multiprogramacion_disponible = malloc(sizeof(int));
+    *multiprogramacion_disponible = config_kernel->GRADO_MULTIPROGRAMACION;
 
     while(1){
-        if(multiprogramacion_disponible){
+        if(*multiprogramacion_disponible){
             if(list_size(lista_new)){
 
                 //Se saca de new y se pasa a ready
                 mover_proceso_de_lista(lista_new, lista_ready, 0, READY);
 
-                multiprogramacion_disponible--;
+                *multiprogramacion_disponible = *multiprogramacion_disponible - 1;
             }
         }else{
 
@@ -117,9 +123,93 @@ void *planificador_largo_plazo(void *_){
             printf("Exec: %d\n", list_size(lista_exec));
             printf(".");
             sem_wait(&proceso_finalizo_o_suspended);
-            printf("me destrabé\n");
-            multiprogramacion_disponible++;
+            *multiprogramacion_disponible = *multiprogramacion_disponible + 1;
         }
+    }
+    return NULL;
+}
+
+void *hilo_salida_a_exit(void *multiprogramacion_disponible_p){
+
+    int *multiprogramacion_disponible = multiprogramacion_disponible_p;
+
+    while(1){
+        printf(".\n");
+        sem_wait(&salida_a_exit);
+        
+        //printf("Ready: %d\n", list_size(lista_ready));
+        //printf("Block: %d\n", list_size(lista_blocked));
+        //printf("Exec: %d\n", list_size(lista_exec));
+        bool encontrado = false;
+        //int tamanio_lista_exec = list_size(lista_exec);
+        int tamanio_lista_blocked = list_size(lista_blocked);
+        int tamanio_lista_ready = list_size(lista_ready);
+        int index = 0;
+
+
+        //Busco en exec
+        printf("Exec: %d \n", list_size(lista_exec));        
+        while(!encontrado && (index < list_size(lista_exec))){
+            printf("Exec: %d \n", list_size(lista_exec));
+            t_proceso *aux = list_get(lista_exec, index);
+            if(aux->salida_exit){
+                    sem_wait(&mutex_cant_procesos);
+                    sem_wait(&mutex_listas);
+                        aux = list_remove(lista_exec, index );
+                    sem_post(&mutex_listas);
+                    cantidad_de_procesos--;
+                    sem_post(&mutex_cant_procesos);
+                
+                 printf("Saco proceso %d\n", aux->id);
+                encontrado = true;
+            }
+            index ++;
+        }
+
+        index = 0;
+
+        //Busco en ready
+        while(!encontrado && (index < tamanio_lista_ready)){
+            t_proceso *aux = list_get(lista_ready, index);
+            if(aux->salida_exit){
+                
+                    sem_wait(&mutex_cant_procesos);
+                    sem_wait(&mutex_listas);
+                        aux = list_remove(lista_ready, index );
+                    sem_post(&mutex_listas);
+                    cantidad_de_procesos--;
+                    sem_post(&mutex_cant_procesos);
+                
+
+                printf("Saco proceso %d\n", aux->id);
+                encontrado = true;
+            }
+            index ++;
+        }
+
+        while(!encontrado && (index < tamanio_lista_blocked)){
+            t_proceso *aux = list_get(lista_blocked, index);
+            if(aux->salida_exit){
+               
+                sem_wait(&mutex_listas);
+                aux = list_remove(lista_blocked, index);
+                sem_post(&mutex_listas);
+                
+                printf("Saco proceso %d\n", aux->id);
+                encontrado = true;
+            }
+            index ++;
+        }
+
+        if(encontrado){
+            sem_wait(&mutex_multiprogramacion);
+            *multiprogramacion_disponible = *multiprogramacion_disponible + 1;
+            sem_post(&mutex_multiprogramacion);
+            sem_post(&proceso_finalizo_o_suspended);
+            sem_post(&liberar_multiprocesamiento);
+            sem_post(&salida_a_exit_recibida);
+        }
+        
     }
     return NULL;
 }

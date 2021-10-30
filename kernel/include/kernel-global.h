@@ -28,6 +28,7 @@ typedef struct {
     bool estimar;
     bool termino_rafaga;
     bool block;
+    bool salida_exit;
     // t_task_list *task_list; ????? cuales son las tareas que ejecuta el proceso
 } t_proceso;
 
@@ -53,7 +54,13 @@ sem_t actualizacion_de_listas_1_recibido;
 sem_t proceso_inicializado;
 sem_t libre_para_inicializar_proceso;
 sem_t mutex_multiprocesamiento;
+sem_t mutex_multiprogramacion;
 sem_t mutex_cant_procesos;
+sem_t salida_a_exit;
+sem_t liberar_multiprocesamiento;
+sem_t salida_a_exit_recibida;
+sem_t salida_de_exec_recibida;
+
 //Auxiliares
 int cantidad_de_procesos;
 bool salida_de_exec;
