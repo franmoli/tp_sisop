@@ -4,9 +4,10 @@ SHARED_IDIR = ../shared/include
 CC=gcc
 CFLAGS=-I$(IDIR) -I$(SHARED_IDIR) -g -Wall
 
+
 ODIR=./obj
 SRCDIR =./src
-LIBS=-lcommons -lpthread -lreadline -lcunit -lrt
+LIBS=-lcommons -lpthread -lreadline -lcunit -lrt -fpic
 
 SHARED_SRCDIR = ../shared/src
 SHARED_ODIR = ../shared/obj
@@ -34,3 +35,8 @@ $(PROCESS_NAME): $(OBJ) $(SHARED_OBJ)
 
 clean:
 	rm -f $(ODIR)/*.o *~ core $(INCDIR)/*~ $(PROCESS_NAME) $(SHARED_ODIR)/*.o 
+
+.PHONY: carpincho
+
+carpincho: $(OBJ) $(SHARED_OBJ)
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)

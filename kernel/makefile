@@ -3,6 +3,7 @@ IDIR =./include
 SHARED_IDIR = ../shared/include
 CC=gcc
 CFLAGS=-I$(IDIR) -I$(SHARED_IDIR) -g -Wall
+LD_LIBRARY_PATH="../matelib"
 
 ODIR=./obj
 SRCDIR =./src

@@ -21,10 +21,8 @@ t_config_kernel *generar_config_kernel(t_config *config) {
         string_trim_left(&io_devices_formatted[contador_devices]);
         string_trim_right(&io_devices_formatted[contador_devices]);
         list_add(io_devices, io_devices_formatted[contador_devices]);
-        printf("Address of io_device %d: %p\n", contador_devices, &io_devices_formatted[contador_devices]);
         contador_devices++;
     }
-    printf("Address of io_device %d: %p\n", contador_devices, &io_devices_formatted[contador_devices]);
 
     t_list *io_durations = list_create();
     int contador_durations = 0;
@@ -81,14 +79,19 @@ t_config_memoria *generarConfigMemoria(t_config *config){
 t_config_swap *generar_config_swap(t_config *config) {
     //Formateo los array recibidos por configuración
     char *file_paths_unformatted = config_get_string_value(config, "ARCHIVOS_SWAP");
-    char *file_paths_substring = string_substring(file_paths_unformatted, 1, strlen(file_paths_unformatted)-2);
-    char **file_paths_formatted = string_split(file_paths_substring, ", ");
     //Agrego los elementos del array a una lista
     t_list *file_paths = list_create();
-    int contador = 0;
-    while(file_paths_formatted[contador] != NULL) {
-        list_add(file_paths, file_paths_formatted[contador]);
-        contador += 2;
+    if(strlen(file_paths_unformatted) > 2) {
+        char *file_paths_substring = string_substring(file_paths_unformatted, 1, strlen(file_paths_unformatted)-2);
+        char **file_paths_formatted = string_split(file_paths_substring, ", ");
+
+        int contador = 0;
+        while(file_paths_formatted[contador] != NULL) {
+            list_add(file_paths, file_paths_formatted[contador]);
+            contador += 2;
+        }
+
+        free(file_paths_substring);
     }
 
     //Cargo la configuración
@@ -100,19 +103,18 @@ t_config_swap *generar_config_swap(t_config *config) {
     config_swap->MARCOS_MAXIMOS = config_get_int_value(config, "MARCOS_MAXIMOS");
     config_swap->RETARDO_SWAP = config_get_int_value(config, "RETARDO_SWAP");
     config_swap->ARCHIVOS_SWAP = file_paths;
-
-    // liberar memoria del formateo
-    free(file_paths_substring);
+    
     return config_swap;
 }
 
 t_config_matelib *generar_config_matelib(t_config *config){
 
     t_config_matelib *config_matelib =  malloc(sizeof(t_config_matelib));
-    config_matelib->IP = config_get_string_value(config,"IP");
-    config_matelib->PUERTO_MATELIB = config_get_string_value(config,"PUERTO_MATELIB");
-    config_matelib->PUERTO_MEMORIA = config_get_string_value(config,"PUERTO_MEMORIA");
+    config_matelib->IP_KERNEL = config_get_string_value(config,"IP_KERNEL");
     config_matelib->PUERTO_KERNEL = config_get_string_value(config,"PUERTO_KERNEL");
+    config_matelib->IP_MEMORIA = config_get_string_value(config,"IP_MEMORIA");
+    config_matelib->PUERTO_MEMORIA = config_get_string_value(config,"PUERTO_MEMORIA");
+    config_matelib->LOG_LEVEL = config_get_string_value(config,"LOG_LEVEL");
 
     return config_matelib;
 }
