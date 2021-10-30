@@ -4,30 +4,35 @@ int main(int argc, char **argv) {
     //Inicio del programa
     system("clear");
     logger_kernel = log_create("./cfg/kernel.log", "KERNEL", true, LOG_LEVEL_INFO);
-    log_info(logger_kernel, "Programa inicializado correctamente");
+    log_info(logger_kernel, "Programa inicializado correctamente ");
+
 
     //Se carga la configuración
     log_info(logger_kernel, "Iniciando carga del archivo de configuración");
     config_file = leer_config_file("./cfg/kernel.cfg");
     config_kernel = generar_config_kernel(config_file);
     log_info(logger_kernel, "Configuración cargada correctamente");
-    print_inicializacion(config_kernel);
+
+    //Iniciar semaforos de uso general
+    iniciar_semaforos_generales();
+
+    //Iniciar listas de procesos
+    iniciar_listas();
+    
+    //Iniciar planificador de largo plazo
+    iniciar_planificador_largo();
+    //Iniciar planificador de corto plazo
+    iniciar_planificador_corto();
+    //Iniciar planificador de mediano plazo
+    iniciar_planificador_mediano();
+    
     
     //Conectar a memoria (datos temporales hardcodeados)
     int socket_cliente_memoria = crear_conexion(config_kernel->IP_MEMORIA, config_kernel->PUERTO_MEMORIA);
     if(socket_cliente_memoria == -1){
-        log_info(logger_kernel, "Fallo en la conexion a memoria");
+        log_error(logger_kernel, "Fallo en la conexion a memoria");
     }
-
-
-    //Iniciar servidor y empiezo a escuchar procesos
-    iniciar_servidor_kernel(config_kernel, logger_kernel);
-    
-
-    //Iniciar planificador de corto plazo
-    //Iniciar planificador de mediano plazo
-    //Iniciar planificador de largo plazo
-
+    while(1);
     //Fin del programa
     liberar_memoria_y_finalizar(config_kernel, logger_kernel, config_file);
     return 0;
@@ -76,24 +81,72 @@ void element_destroyer(void* elemento){
     free(elemento);
 }
 
-void atender_proceso (void* parametro ){
+void iniciar_listas(){
+    
+    lista_new = list_create();
+    lista_ready = list_create();
+    lista_exec = list_create();
+    lista_blocked = list_create();
+    lista_s_blocked = list_create();
+    lista_s_ready = list_create();
 
+    sem_init(&mutex_listas, 0, 1);
+    
+    cantidad_de_procesos = 0;
+    log_info(logger_kernel, "Listas inicializadas correctamente");
+    
+    return;
 }
 
-void *iniciar_servidor_kernel(t_config_kernel *config_kernel, t_log *logger_kernel){
-    int socket_servidor = iniciar_servidor(config_kernel->IP_KERNEL,config_kernel->PUERTO_KERNEL, logger_kernel);
-    if(socket_servidor == -1){
-        log_info(logger_kernel, "Fallo en la creacion del servidor");
-    }else{
-        //Espero por un proceso cliente y creo hilo para atenderlo
-        while(1){
-            int *socket_proceso_cliente = malloc(sizeof(int));
-            *socket_proceso_cliente = esperar_cliente(socket_servidor, logger_kernel);
-            if (*socket_proceso_cliente != -1) {
-                pthread_t hilo_proceso_cliente;
-                pthread_create(&hilo_proceso_cliente, NULL, (void *)atender_proceso, (void *)socket_proceso_cliente);
-            }
-        }
+void iniciar_semaforos_generales(){
+    sem_init(&proceso_finalizo_o_suspended, 0, 0);
+    sem_init(&salida_exec, 0, 0);
+    sem_init(&salida_block, 0, 0);
+    sem_init(&actualizacion_de_listas_1, 0, 0);
+    sem_init(&actualizacion_de_listas_2, 0, 0);
+    sem_init(&actualizacion_de_listas_1_recibido, 0, 0);
+    sem_init(&proceso_inicializado, 0, 0);
+    sem_init(&libre_para_inicializar_proceso, 0, 1);
+    sem_init(&mutex_multiprocesamiento, 0, 1);
+    sem_init(&mutex_cant_procesos, 0, 1);
+    sem_init(&mutex_multiprogramacion, 0, 1);
+    sem_init(&salida_a_exit, 0, 0);
+    sem_init(&liberar_multiprocesamiento, 0, 0);
+    sem_init(&salida_de_exec_recibida, 0, 0);
+    sem_init(&salida_a_exit_recibida, 0, 0);
+    return;
+}
+
+void mover_proceso_de_lista(t_list *origen, t_list *destino, int index, int status){
+    t_proceso *aux;
+    
+    sem_wait(&mutex_listas);
+        //printf("%p", origen);
+        aux = list_remove(origen, index);
+        aux->status =  status;
+        aux->termino_rafaga = false;
+        list_add(destino, aux);
+    sem_post(&mutex_listas);
+    
+    avisar_cambio();
+    return;
+}
+
+void avisar_cambio(){
+    printf("Espero acá2\n");
+    sem_wait(&mutex_cant_procesos);
+    //Aviso que hubo un cambio de listas
+    for(int i = 0; i < cantidad_de_procesos; i++){
+        sem_post(&actualizacion_de_listas_1);
     }
-    return NULL;
+    printf("Espero acá\n");
+    //Espero que todos los procesos hayan recibido el aviso y ejecutado
+    for(int i = 0; i < cantidad_de_procesos; i++){
+        sem_wait(&actualizacion_de_listas_1_recibido);
+    }
+    //Habilito que vuelvan a esperar una vez ya resuelto todo lo que tengan que hacer con su nuevo estado
+    for(int i = 0; i < cantidad_de_procesos; i++){
+        sem_post(&actualizacion_de_listas_2);
+    }
+    sem_post(&mutex_cant_procesos);
 }
