@@ -11,13 +11,12 @@
 #include <unistd.h>
 
 //Archivos
-int tamanio_archivo;
 int archivo_seleccionado;
 t_config *config_file;
 
 //Funciones
 static void *ejecutar_operacion(int client);
-void crear_archivo_swap(int numero_particion);
+void crear_archivos_swap();
 void insertar_pagina_en_archivo(t_pagina *pagina);
 void leer_pagina_de_archivo();
 void borrar_archivos_swap();
