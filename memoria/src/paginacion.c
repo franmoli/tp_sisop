@@ -64,3 +64,61 @@ void findAndSaveEnPagina(int pagina){
     //Busca en la tabla de paginas dicha pagina si esta mete ahi el contenido
     //Sino esta crea la pagina y guarda
 }
+
+
+
+// Mem Read: Dada una direccion de memoria busco el contenido que se encuentra alli
+
+void memRead(uint32_t direccion) {
+
+    t_pagina* pagina = buscarPagina(direccion);
+
+
+    t_list_iterator *list_iterator = list_iterator_create(pagina->contenidos_pagina);
+
+    while(list_iterator_has_next(list_iterator)) {
+        t_contenidos_pagina* contenido = list_iterator_next(list_iterator);
+
+        if(contenido->dir_comienzo <= direccion && (contenido->dir_comienzo + tamanio) >= direccion) {
+
+            free(pagina);
+            list_iterator_destroy(list_iterator);
+
+            leerContenidoEnMemoria(contenido->dir_comienzo, contenido->contenido_pagina);
+        }
+
+    }
+
+}
+
+// Dada la direccion del contenido y su tipo, lo busco en memoria
+void leerContenidoEnMemoria(uint32_t direccion, t_contenido tipoContenido) {
+
+    if(tipoContenido == tipoContenido.ALLOC) {
+        t_heap_metadata* alloc = traerAllocDeMemoria(direccion);
+        //Hasta aca llegue, fijate que queres hacer con esto
+    }
+
+    // To be continued... cuando sepamos que otros contenidos guardamos
+
+}
+
+//Dada una direccion logica devuelvo la pagina que la contiene
+t_pagina* buscarPagina(uint32_t direccion) {
+
+    t_list_iterator *list_iterator = list_iterator_create(tabla_paginas->paginas);
+
+    while(list_iterator_has_next(list_iterator)) {
+        t_pagina *paginaLeida = list_iterator_next(list_iterator);
+        t_contenidos_pagina* primerContenido = list_get(paginaLeida->contenidos_pagina,0);
+        if(primerContenido->dir_comienzo <= direccion && (primerContenido->dir_comienzo + config_memoria->TAMANIO_PAGINA) >= direccion) {
+            free(primerContenido);
+            list_iterator_destroy(list_iterator);
+            return paginaLeida;
+        }
+    }
+
+    //Si no encontro la pagina es porque no existe nada en la direccion que busca
+    return -1;
+
+}

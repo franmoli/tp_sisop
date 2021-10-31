@@ -7,6 +7,7 @@
 typedef enum
 {
 	PATOTA = 0,
+    ALLOC = 1,
 } t_contenido;
 
 typedef struct {
