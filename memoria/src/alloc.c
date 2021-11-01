@@ -197,7 +197,7 @@ t_heap_metadata* crearUltimoAlloc(uint32_t dirUltimoAlloc, int sizeUltimoAlloc) 
 
     return 0;
 }
-t_heap_metadata *generarHeaderMetadata(){
+t_heap_metadata *generarHeaderMetadataAlFinal(t_pagina *pagina){
     t_heap_metadata *heapHeader = malloc(sizeof(t_heap_metadata));
     heapHeader->isFree = true;
     heapHeader->nextAlloc = NULL;
