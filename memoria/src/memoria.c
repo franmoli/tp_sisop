@@ -33,7 +33,7 @@ int main(int argc, char **argv)
     }
 
     //CASO DE PRUEBA DE METODOS SIN KERNEL/MATELIB
-    t_paquete *paquete1 = serializar_alloc(9);
+    t_paquete *paquete1 = serializar_alloc(5);
     
     guardarMemoria(paquete1);
     free(paquete1);

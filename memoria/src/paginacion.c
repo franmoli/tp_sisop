@@ -11,21 +11,24 @@ void guardarMemoria(t_paquete *paquete)
     if (numeropaginaHeapHeader >= 0)
     {
         t_pagina *paginaHeader = list_get(tabla_paginas->paginas, numeropaginaHeapHeader);
-        if (config_memoria->TAMANIO_PAGINA - paginaHeader->tamanio_ocupado - (sizeof(t_heap_metadata) * 2) >= espacioAguardar)
+
+        int entraTotal = config_memoria->TAMANIO_PAGINA - paginaHeader->tamanio_ocupado - (sizeof(t_heap_metadata) * 2) - espacioAguardar;
+        if (entraTotal >= 0)
         {
             //en la misma pagina me entra el 100% del contenido.
             t_heap_metadata *heapHeader = guardarHeader(paginaHeader, numeropaginaHeapHeader);
             heapHeader->nextAlloc = tamanio_memoria + numeropaginaHeapHeader + (config_memoria->TAMANIO_PAGINA) * numeropaginaHeapHeader + espacioAguardar;
-            paginaHeader->contenidos_pagina = + 1;
+            paginaHeader->cantidad_contenidos = paginaHeader->cantidad_contenidos + 1;
             t_heap_metadata *heapFooter = generarFooter(paginaHeader, numeropaginaHeapHeader);
             memcpy(heapHeader->nextAlloc , &heapFooter, sizeof(t_heap_metadata));
-            paginaHeader->contenidos_pagina = + 2;
+            paginaHeader->cantidad_contenidos = paginaHeader->cantidad_contenidos + 2;
             paginaHeader->tamanio_ocupado = paginaHeader->tamanio_ocupado +  sizeof(t_heap_metadata)*2 + espacioAguardar;
             return;
         }
         else
         {
-            if (config_memoria->TAMANIO_PAGINA - paginaHeader->tamanio_ocupado - sizeof(t_heap_metadata) == 0)
+             int entraTotal = config_memoria->TAMANIO_PAGINA - paginaHeader->tamanio_ocupado - sizeof(t_heap_metadata);
+            if ( entraTotal == 0)
             {
                 //La pagina esta llena tengo que buscar otra.
                 guardarHeader(paginaHeader, numeropaginaHeapHeader);
