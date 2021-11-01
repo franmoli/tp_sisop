@@ -30,8 +30,8 @@ void guardarMemoria(t_paquete *paquete)
              int entraTotal = config_memoria->TAMANIO_PAGINA - paginaHeader->tamanio_ocupado - sizeof(t_heap_metadata);
             if ( entraTotal == 0)
             {
-                //La pagina esta llena tengo que buscar otra.
-                guardarHeader(paginaHeader, numeropaginaHeapHeader);
+                //La pagina se llenacon el header nada mas. tengo que buscar otra.
+                t_heap_metadata *heapHeader = guardarHeader(paginaHeader, numeropaginaHeapHeader);
                 int paginaAGuardar = getPrimeraPaginaDisponible(sizeof(t_heap_metadata));
                 if (paginaAGuardar >= 0)
                 {
