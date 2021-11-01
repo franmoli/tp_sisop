@@ -15,6 +15,8 @@ int main(int argc, char **argv) {
 
     //Iniciar semaforos de uso general
     iniciar_semaforos_generales();
+    
+    multiprogramacion_disponible = config_kernel->GRADO_MULTIPROGRAMACION;
 
     //Iniciar listas de procesos
     iniciar_listas();
@@ -114,6 +116,8 @@ void iniciar_semaforos_generales(){
     sem_init(&liberar_multiprocesamiento, 0, 0);
     sem_init(&salida_de_exec_recibida, 0, 0);
     sem_init(&salida_a_exit_recibida, 0, 0);
+    sem_init(&cambio_de_listas, 0, 0);
+    sem_init(&pedir_salida_de_block, 0, 0);
     return;
 }
 
@@ -133,13 +137,13 @@ void mover_proceso_de_lista(t_list *origen, t_list *destino, int index, int stat
 }
 
 void avisar_cambio(){
-    printf("Espero acá2\n");
+    //printf("Espero acá - procesos - avisar\n");
     sem_wait(&mutex_cant_procesos);
     //Aviso que hubo un cambio de listas
     for(int i = 0; i < cantidad_de_procesos; i++){
         sem_post(&actualizacion_de_listas_1);
     }
-    printf("Espero acá\n");
+    //printf("Espero acá\n");
     //Espero que todos los procesos hayan recibido el aviso y ejecutado
     for(int i = 0; i < cantidad_de_procesos; i++){
         sem_wait(&actualizacion_de_listas_1_recibido);
@@ -149,4 +153,6 @@ void avisar_cambio(){
         sem_post(&actualizacion_de_listas_2);
     }
     sem_post(&mutex_cant_procesos);
+    //printf("Post - procesos- avisar\n");
+    sleep(0.5);
 }

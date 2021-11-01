@@ -91,7 +91,7 @@ void *esperar_salida_exec(void *multiprocesamiento_p){
     while(1){
 
         sem_wait(&salida_exec);
-        printf("#recibida ready\n");
+        //printf("#recibida ready\n");
         bool encontrado = false;
         int tamanio_lista_exec = list_size(lista_exec);
         int index = 0;
@@ -102,7 +102,7 @@ void *esperar_salida_exec(void *multiprocesamiento_p){
                 if(aux->block){
                     mover_proceso_de_lista(lista_exec, lista_blocked, index, BLOCKED);
                 }else{
-                    printf("Saco de exec %d\n", aux->id);
+                    //printf("Saco de exec %d\n", aux->id);
                     mover_proceso_de_lista(lista_exec, lista_ready, index, READY);
                 }
                 encontrado = true;

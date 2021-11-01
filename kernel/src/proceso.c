@@ -42,6 +42,7 @@ void *proceso(void *self){
                 //printf("Paso a block p: %d\n", proceso_struct->id);
                 break;
             case S_BLOCKED:
+                //cambiar struct con flag de suspendido
                 blocked();
                 break;
             case S_READY:

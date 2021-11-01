@@ -29,6 +29,7 @@ typedef struct {
     bool termino_rafaga;
     bool block;
     bool salida_exit;
+    bool salida_block;
     // t_task_list *task_list; ????? cuales son las tareas que ejecuta el proceso
 } t_proceso;
 
@@ -60,10 +61,13 @@ sem_t salida_a_exit;
 sem_t liberar_multiprocesamiento;
 sem_t salida_a_exit_recibida;
 sem_t salida_de_exec_recibida;
+sem_t cambio_de_listas;
+sem_t pedir_salida_de_block;
 
 //Auxiliares
 int cantidad_de_procesos;
 bool salida_de_exec;
+int multiprogramacion_disponible;
 
 //funciones
 void mover_proceso_de_lista(t_list *origen, t_list *destino, int index, int status);

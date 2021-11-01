@@ -3,8 +3,6 @@
 void iniciar_planificador_largo(){
     //Iniciar servidor y empiezo a escuchar procesos
     printf("Inicio planificador LARGO \n");
-    int *multiprogramacion_disponible = malloc(sizeof(int));
-    *multiprogramacion_disponible = config_kernel->GRADO_MULTIPROGRAMACION;
 
     pthread_t hilo_servidor;
     pthread_create(&hilo_servidor, NULL, iniciar_servidor_kernel, (void *)NULL);
@@ -13,7 +11,7 @@ void iniciar_planificador_largo(){
     pthread_create(&hilo_planificador, NULL, planificador_largo_plazo, (void *)NULL);
 
     pthread_t hilo_exit;
-    pthread_create(&hilo_exit, NULL, hilo_salida_a_exit, (void *)multiprogramacion_disponible);
+    pthread_create(&hilo_exit, NULL, hilo_salida_a_exit, (void *)NULL);
 }
 
 
@@ -73,6 +71,7 @@ void atender_proceso (void* parametro ){
 }
 
 void nuevo_carpincho(int socket_cliente){
+
     t_proceso *nuevo_proceso = malloc(sizeof(t_proceso));
 
     nuevo_proceso->id = socket_cliente;
@@ -102,17 +101,16 @@ void nuevo_carpincho(int socket_cliente){
 
 void *planificador_largo_plazo(void *_){
 
-    int *multiprogramacion_disponible = malloc(sizeof(int));
-    *multiprogramacion_disponible = config_kernel->GRADO_MULTIPROGRAMACION;
 
     while(1){
-        if(*multiprogramacion_disponible){
+        if(multiprogramacion_disponible){
+            //TODO: primero se checkea que no haya nadie en ready-suspended
             if(list_size(lista_new)){
 
                 //Se saca de new y se pasa a ready
                 mover_proceso_de_lista(lista_new, lista_ready, 0, READY);
 
-                *multiprogramacion_disponible = *multiprogramacion_disponible - 1;
+                multiprogramacion_disponible = multiprogramacion_disponible - 1;
             }
         }else{
 
@@ -122,7 +120,7 @@ void *planificador_largo_plazo(void *_){
             printf("Exec: %d\n", list_size(lista_exec));
             printf(".");
             sem_wait(&proceso_finalizo_o_suspended);
-            *multiprogramacion_disponible = *multiprogramacion_disponible + 1;
+            multiprogramacion_disponible = multiprogramacion_disponible + 1;
         }
     }
     return NULL;
@@ -130,7 +128,6 @@ void *planificador_largo_plazo(void *_){
 
 void *hilo_salida_a_exit(void *multiprogramacion_disponible_p){
 
-    int *multiprogramacion_disponible = multiprogramacion_disponible_p;
 
     while(1){
         printf(".\n");
@@ -147,19 +144,23 @@ void *hilo_salida_a_exit(void *multiprogramacion_disponible_p){
 
 
         //Busco en exec
-        printf("Exec: %d \n", list_size(lista_exec));        
+        //printf("Exec: %d \n", list_size(lista_exec));        
         while(!encontrado && (index < list_size(lista_exec))){
-            printf("Exec: %d \n", list_size(lista_exec));
+            //printf("Exec: %d \n", list_size(lista_exec));
             t_proceso *aux = list_get(lista_exec, index);
             if(aux->salida_exit){
+                   // printf("Espera en exit - procesos\n");
                     sem_wait(&mutex_cant_procesos);
+                    //printf("Pasó en exit\n");  
+                    //printf(".");                  
                     sem_wait(&mutex_listas);
                         aux = list_remove(lista_exec, index );
                     sem_post(&mutex_listas);
                     cantidad_de_procesos--;
                     sem_post(&mutex_cant_procesos);
-                
-                 printf("Saco proceso %d\n", aux->id);
+                    //printf("Post-procesos-planif-exit\n");
+                 //printf("Saco proceso %d\n", aux->id);
+                 //printf(".");
                 encontrado = true;
             }
             index ++;
@@ -180,7 +181,7 @@ void *hilo_salida_a_exit(void *multiprogramacion_disponible_p){
                     sem_post(&mutex_cant_procesos);
                 
 
-                printf("Saco proceso %d\n", aux->id);
+                //printf("Saco proceso %d\n", aux->id);
                 encontrado = true;
             }
             index ++;
@@ -194,7 +195,7 @@ void *hilo_salida_a_exit(void *multiprogramacion_disponible_p){
                 aux = list_remove(lista_blocked, index);
                 sem_post(&mutex_listas);
                 
-                printf("Saco proceso %d\n", aux->id);
+                //printf("Saco proceso %d\n", aux->id);
                 encontrado = true;
             }
             index ++;
@@ -202,7 +203,7 @@ void *hilo_salida_a_exit(void *multiprogramacion_disponible_p){
 
         if(encontrado){
             sem_wait(&mutex_multiprogramacion);
-            *multiprogramacion_disponible = *multiprogramacion_disponible + 1;
+            multiprogramacion_disponible = multiprogramacion_disponible + 1;
             sem_post(&mutex_multiprogramacion);
             sem_post(&proceso_finalizo_o_suspended);
             sem_post(&liberar_multiprocesamiento);
