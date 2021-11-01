@@ -2,7 +2,7 @@
 
 /**************************** Memoria <---> Swap ****************************/
 //Cálculos de bytes
-int bytes_marco(t_marco marco) {
+/*int bytes_marco(t_marco marco) {
     int bytes_marco = 0;
 
     bytes_marco += sizeof(marco.numero_marco);
@@ -62,4 +62,4 @@ t_pagina deserializar_pagina(void *stream, int offset) {
     pagina.marco->numero_marco = marco_pagina.numero_marco;
 
     return pagina;
-}
+}*/

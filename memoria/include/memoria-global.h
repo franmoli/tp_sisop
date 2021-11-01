@@ -13,9 +13,9 @@ typedef enum
 typedef struct {
     uint32_t prevAlloc;
     uint32_t nextAlloc;
-    //True -1, False 0
     uint8_t isFree;
-}t_heap_metadata;
+} __attribute__((packed))
+t_heap_metadata;
 
 typedef struct{
     uint32_t numero_marco;
