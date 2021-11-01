@@ -33,11 +33,18 @@ int main(int argc, char **argv)
     }
 
     //CASO DE PRUEBA DE METODOS SIN KERNEL/MATELIB
-    t_paquete *paquete2;
-    guardarMemoria(paquete2);
-    guardarMemoria(paquete2);
-    guardarMemoria(paquete2);
+    t_paquete *paquete1 = serializar_alloc(9);
     
+    guardarMemoria(paquete1);
+    free(paquete1);
+    
+    t_paquete *paquete2 = serializar_alloc(10);
+    guardarMemoria(paquete2);
+    free(paquete2);
+
+    t_paquete *paquete3 = serializar_alloc(2);
+    guardarMemoria(paquete3);
+    free(paquete3);
     //PROGRAMA NORMAL
     socket_server = iniciar_servidor("127.0.0.1", string_itoa(config_memoria->PUERTO), logger_memoria);
     while(1){

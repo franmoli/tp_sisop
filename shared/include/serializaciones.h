@@ -20,5 +20,5 @@ typedef struct
 } t_malloc_serializado;
 
 t_paquete *serializar_alloc(uint32_t size);
-t_malloc_serializado *deserializar_alloc(t_paquete *paquete);
+uint32_t deserializar_alloc(t_paquete *paquete);
 #endif

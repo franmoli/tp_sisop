@@ -2,10 +2,7 @@
 
 void guardarMemoria(t_paquete *paquete)
 {
-
-    int espacioAguardar = 9;
-    t_paquete* p = serializar_alloc(9);
-    int *e = deserializar_alloc(p);
+    int espacioAguardar = deserializar_alloc(paquete);
     //Reservo Header
     //Reservo Contenido
     //Reservo Footer
@@ -19,9 +16,11 @@ void guardarMemoria(t_paquete *paquete)
             //en la misma pagina me entra el 100% del contenido.
             t_heap_metadata *heapHeader = guardarHeader(paginaHeader, numeropaginaHeapHeader);
             heapHeader->nextAlloc = tamanio_memoria + numeropaginaHeapHeader + (config_memoria->TAMANIO_PAGINA) * numeropaginaHeapHeader + espacioAguardar;
+            paginaHeader->contenidos_pagina = + 1;
             t_heap_metadata *heapFooter = generarFooter(paginaHeader, numeropaginaHeapHeader);
             memcpy(heapHeader->nextAlloc , &heapFooter, sizeof(t_heap_metadata));
-
+            paginaHeader->contenidos_pagina = + 2;
+            paginaHeader->tamanio_ocupado = paginaHeader->tamanio_ocupado +  sizeof(t_heap_metadata)*2 + espacioAguardar;
             return;
         }
         else
