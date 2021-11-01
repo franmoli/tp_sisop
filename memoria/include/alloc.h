@@ -6,12 +6,12 @@
 
 void allocMem(int size);
 bool memoriaDisponible(int size);
-t_heap_metadata* nuevoAlloc(int size);
+t_heap_metadata *nuevoAlloc(int size);
 bool memoriaDisponible(int size);
 int memoriaReservada();
-t_heap_metadata* buscarAllocLibre(int size);
+t_heap_metadata *buscarAllocLibre(int size);
 
-t_heap_metadata *generarHeaderMetadataAlFinal(t_pagina *pagina)
-t_heap_metadata *generarFooter(t_heap_metadata* heapHeader);
+t_heap_metadata *generarHeaderMetadataAlFinal(t_pagina *pagina);
+t_heap_metadata *generarFooter(t_pagina *heapHeader, int numeropaginaHeapHeader);
 int getPosicionEnLaPagina(int pagina);
 #endif

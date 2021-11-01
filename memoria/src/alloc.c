@@ -13,8 +13,6 @@
 // Si no tengo disponible, mando a swap
 // Si tengo disponible creo el nuevo heap metadata, y lo mando a paginacion para que mati lo guarde
 
-
-
 // Si quiero hacer memwrite
 
 /**
@@ -130,8 +128,6 @@ t_heap_metadata* newAllocs(int size, t_alloc* alloc) {
 
 */
 
-
-
 //Tampoco funciona la estructura administrativa, hay que traer pagina por pagina desde la primera y acceder a memoria para buscar los allocs
 
 // Itero por la lista de paginas dentro de la tabla de pagina, veo como puedo ir a buscar los elementos de la pagina dentro de memoria, me traigo pagina por pagina y veo los allocs en orden
@@ -139,7 +135,7 @@ t_heap_metadata* newAllocs(int size, t_alloc* alloc) {
 
 //Si el heap disponible tiene un size mayor al size que quiero meter, ese espacio sobrante tiene que ser mayor a 9 para poder armar otro heap, sino no sirve ese heap, se sigue buscando
 
-
+/*
 iterarPaginas(int size) {
 
     t_list_iterator* list_iterator = list_iterator_create(tabla_paginas->paginas);
@@ -196,22 +192,25 @@ t_heap_metadata* crearUltimoAlloc(uint32_t dirUltimoAlloc, int sizeUltimoAlloc) 
     // Cuando creo un alloc al final, tengo que cambiar el ultimo que tiene nextalloc en null,
 
     return 0;
-}
-t_heap_metadata *generarHeaderMetadataAlFinal(t_pagina *pagina){
+}*/
+t_heap_metadata *generarHeaderMetadataAlFinal(t_pagina *pagina)
+{
     t_heap_metadata *heapHeader = malloc(sizeof(t_heap_metadata));
     heapHeader->isFree = true;
     heapHeader->nextAlloc = NULL;
     heapHeader->prevAlloc = NULL;
     return heapHeader;
 }
-t_heap_metadata *generarFooter(t_heap_metadata* heapHeader){
+t_heap_metadata *generarFooter(t_pagina *paginaHeader, int numeropaginaHeapHeader)
+{
     t_heap_metadata *heapFooter = malloc(sizeof(t_heap_metadata));
     heapFooter->isFree = true;
     heapFooter->nextAlloc = NULL;
-    heapFooter->prevAlloc = &heapHeader;
-    return heapHeader;
+    heapFooter->prevAlloc = tamanio_memoria + paginaHeader->cantidad_contenidos + (config_memoria->TAMANIO_PAGINA) * numeropaginaHeapHeader;
+    return heapFooter;
 }
-int getPosicionEnLaPagina(int pagina){
+int getPosicionEnLaPagina(int pagina)
+{
     return 0;
 }
 // El ultimo alloc que tiene nextalloc Null, es un alloc que nunca se reserva, debido a que tiene el tamaño de lo que falta para terminar la ultima pagina
