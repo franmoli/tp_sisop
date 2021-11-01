@@ -176,7 +176,7 @@ t_heap_metadata* obtenerPrimerAlloc() {
         return -1;
     }
 
-    return traerAllocDeMemoria(primerContenido->direccion_comienzo);
+    return traerAllocDeMemoria(primerContenido->dir_comienzo);
 
 }
 
@@ -197,8 +197,23 @@ t_heap_metadata* crearUltimoAlloc(uint32_t dirUltimoAlloc, int sizeUltimoAlloc) 
 
     return 0;
 }
-
-
+t_heap_metadata *generarHeaderMetadata(){
+    t_heap_metadata *heapHeader = malloc(sizeof(t_heap_metadata));
+    heapHeader->isFree = true;
+    heapHeader->nextAlloc = NULL;
+    heapHeader->prevAlloc = NULL;
+    return heapHeader;
+}
+t_heap_metadata *generarFooter(t_heap_metadata* heapHeader){
+    t_heap_metadata *heapFooter = malloc(sizeof(t_heap_metadata));
+    heapFooter->isFree = true;
+    heapFooter->nextAlloc = NULL;
+    heapFooter->prevAlloc = &heapHeader;
+    return heapHeader;
+}
+int getPosicionEnLaPagina(int pagina){
+    return 0;
+}
 // El ultimo alloc que tiene nextalloc Null, es un alloc que nunca se reserva, debido a que tiene el tamaño de lo que falta para terminar la ultima pagina
 // Cuando creo un alloc, tengo que achicar este para que existan los 2, y cuando el alloc que creo es mas grande que este, tengo que arrancar una nueva pagina
 // y crear este alloc con lo que me sobre de la pagina.

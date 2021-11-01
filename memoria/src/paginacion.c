@@ -4,17 +4,28 @@ void guardarMemoria(t_paquete* paquete){
 
     int espacioAguardar = 9;
 
+    //Reservo Header
+    //Reservo Contenido
+    //Reservo Footer
     //Agarro primera pagina disponible para los 9bits del heap_metadata
+    int paginaAGuardar = 0;
+    int posicionEnPagina = 0;
+    
+    t_heap_metadata* heapHeader = generarHeaderMetadata();
     int paginaHeapHeader = getPrimeraPaginaDisponible(sizeof(t_heap_metadata));
     if(paginaHeapHeader >=0){
         t_pagina *paginaHeader =list_get(tabla_paginas->paginas,paginaHeapHeader);
-        if(config_memoria->TAMANIO_PAGINA -paginaHeader->tamanio_ocupado - sizeof(t_heap_metadata)>= espacioAguardar){
+        if(config_memoria->TAMANIO_PAGINA -paginaHeader->tamanio_ocupado - (sizeof(t_heap_metadata)*2)>= espacioAguardar){
             //en la misma pagina me entra el 100% del contenido.
+            posicionEnPagina = getPosicionPagina(paginaHeader);
+            memcpy(tamanio_memoria + posicionEnPagina + (config_memoria->TAMANIO_PAGINA) * paginaAGuardar, &heapHeader, sizeof(t_heap_metadata));
+            t_heap_metadata* heapFooter = generarFooter(heapHeader);
+            memcpy(tamanio_memoria + posicionEnPagina + (config_memoria->TAMANIO_PAGINA) * paginaAGuardar, &heapFooter, sizeof(t_heap_metadata));
+            
         }else{
             if(config_memoria->TAMANIO_PAGINA -paginaHeader->tamanio_ocupado - sizeof(t_heap_metadata)== 0){
                 //La pagina esta llena tengo que buscar otra.
-                int paginaAGuardar = 0;
-                int posicionEnPagina = 0;
+                
                 if(paginaAGuardar >= 0){
                     posicionEnPagina = getPosicionPagina(paginaAGuardar);
                 }
@@ -26,6 +37,7 @@ void guardarMemoria(t_paquete* paquete){
             }
         }
     }
+    
     /*
 
     memcpy(tamanio_memoria + posicionEnPagina + (config_memoria->TAMANIO_PAGINA) * paginaAGuardar, &espacioAguardar, espacioAguardar);
@@ -42,7 +54,7 @@ void guardarMemoria(t_paquete* paquete){
 }
 
 int getPosicionPagina(int pagina){
-    return 0;
+    return getPosicionEnLaPagina(pagina);
 }
 int getPaginaAGuardar(int size){
     t_list_iterator *list_iterator = list_iterator_create(tabla_paginas->paginas);

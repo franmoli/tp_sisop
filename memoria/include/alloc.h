@@ -10,4 +10,8 @@ t_heap_metadata* nuevoAlloc(int size);
 bool memoriaDisponible(int size);
 int memoriaReservada();
 t_heap_metadata* buscarAllocLibre(int size);
+
+t_heap_metadata *generarHeaderMetadata();
+t_heap_metadata *generarFooter(t_heap_metadata* heapHeader);
+int getPosicionEnLaPagina(int pagina);
 #endif
