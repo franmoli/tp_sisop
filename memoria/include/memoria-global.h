@@ -3,7 +3,7 @@
 
 #include "config_utils.h"
 #include "server.h"
-
+#include "serializaciones.h"
 typedef enum
 {
 	PATOTA = 0,

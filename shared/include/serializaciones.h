@@ -9,8 +9,16 @@
 #include <string.h>
 #include "../../memoria/include/memoria-global.h"
 
-int bytes_pagina(t_pagina pagina);
+/*int bytes_pagina(t_pagina pagina);
 void *serializar_pagina(t_pagina pagina, void **stream_inicial, int offset);
 t_pagina deserializar_pagina(void *stream, int offset);
+*/
 
+typedef struct
+{
+	uint32_t size_reservar;
+} t_malloc_serializado;
+
+t_paquete *serializar_alloc(uint32_t size);
+t_malloc_serializado *deserializar_alloc(t_paquete *paquete);
 #endif

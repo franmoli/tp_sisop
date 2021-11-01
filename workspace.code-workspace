@@ -19,7 +19,8 @@
 			"memoria.h": "c",
 			"paginacion.h": "c",
 			"tlb.h": "c",
-			"memoria-global.h": "c"
+			"memoria-global.h": "c",
+			"list.h": "c"
 		}
 	}
 }

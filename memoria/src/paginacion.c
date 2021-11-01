@@ -4,7 +4,8 @@ void guardarMemoria(t_paquete *paquete)
 {
 
     int espacioAguardar = 9;
-
+    t_paquete* p = serializar_alloc(9);
+    int *e = deserializar_alloc(p);
     //Reservo Header
     //Reservo Contenido
     //Reservo Footer

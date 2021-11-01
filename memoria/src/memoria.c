@@ -35,8 +35,9 @@ int main(int argc, char **argv)
     //CASO DE PRUEBA DE METODOS SIN KERNEL/MATELIB
     t_paquete *paquete2;
     guardarMemoria(paquete2);
-
-
+    guardarMemoria(paquete2);
+    guardarMemoria(paquete2);
+    
     //PROGRAMA NORMAL
     socket_server = iniciar_servidor("127.0.0.1", string_itoa(config_memoria->PUERTO), logger_memoria);
     while(1){
