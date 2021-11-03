@@ -201,22 +201,17 @@ t_heap_metadata *getLastHeapByPagina(t_pagina *pagina, int numeroPagina){
     }
     //Traigo primera paginita
     memcpy(&heap,tamanio_memoria + (config_memoria->TAMANIO_PAGINA) * numeroPagina, sizeof(t_heap_metadata));
-    t_contenidos_pagina *contenidos = list_get(pagina->contenidos_pagina,0);
-    int i = 0;
-    while(contenidos->recorrido < pagina->cantidad_contenidos){
-         if(getFromMemoriaHeap(heap,i, numeroPagina)){
-              memcpy(&heap,heap->nextAlloc, sizeof(t_heap_metadata));
+    for(int i = 0; i < pagina->cantidad_contenidos; i++){
+        heap = getFromMemoriaHeap(heap,numeroPagina);
+         if(heap->isFree == true){
+              //memcpy(&heap,heap->nextAlloc, sizeof(t_heap_metadata));
               return heap;
          }
-          i++;
     }
 }
-bool getFromMemoriaHeap(t_heap_metadata *heap,int i, int numeroPagina){
+t_heap_metadata *getFromMemoriaHeap(t_heap_metadata *heap, int numeroPagina){
     memcpy(&heap,heap->nextAlloc, sizeof(t_heap_metadata));
-    if(heap->isFree == true){
-        return true;
-    }  
-    return false;
+    return heap;
 }
 t_heap_metadata *generarHeapVacio(){
     t_heap_metadata *heapHeader = malloc(sizeof(t_heap_metadata));

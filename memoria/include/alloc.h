@@ -16,5 +16,5 @@ t_heap_metadata *getLastHeapByPagina(t_pagina *pagina, int numeroPagina);
 t_heap_metadata *generarHeaderMetadataAlFinal(t_pagina *pagina,int numeroPagina);
 t_heap_metadata *generarFooter(t_pagina *heapHeader, int numeropaginaHeapHeader);
 int getPosicionEnLaPagina(int pagina);
-bool getFromMemoriaHeap(t_heap_metadata *heap,int i, int numeroPagina);
+t_heap_metadata* getFromMemoriaHeap(t_heap_metadata *heap, int numeroPagina);
 #endif
