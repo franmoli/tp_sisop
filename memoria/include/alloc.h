@@ -11,7 +11,10 @@ bool memoriaDisponible(int size);
 int memoriaReservada();
 t_heap_metadata *buscarAllocLibre(int size);
 
-t_heap_metadata *generarHeaderMetadataAlFinal(t_pagina *pagina);
+t_heap_metadata *generarHeapVacio();
+t_heap_metadata *getLastHeapByPagina(t_pagina *pagina, int numeroPagina);
+t_heap_metadata *generarHeaderMetadataAlFinal(t_pagina *pagina,int numeroPagina);
 t_heap_metadata *generarFooter(t_pagina *heapHeader, int numeropaginaHeapHeader);
 int getPosicionEnLaPagina(int pagina);
+bool getFromMemoriaHeap(t_heap_metadata *heap,int i, int numeroPagina);
 #endif

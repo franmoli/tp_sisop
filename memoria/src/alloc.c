@@ -193,10 +193,43 @@ t_heap_metadata* crearUltimoAlloc(uint32_t dirUltimoAlloc, int sizeUltimoAlloc) 
 
     return 0;
 }*/
-t_heap_metadata *generarHeaderMetadataAlFinal(t_pagina *pagina)
-{
+t_heap_metadata *getLastHeapByPagina(t_pagina *pagina, int numeroPagina){
+    t_heap_metadata *heap = generarHeapVacio();
+    
+    if(pagina->cantidad_contenidos == 0){
+        return heap;
+    }
+    //Traigo primera paginita
+    memcpy(&heap,tamanio_memoria + (config_memoria->TAMANIO_PAGINA) * numeroPagina, sizeof(t_heap_metadata));
+    t_contenidos_pagina *contenidos = list_get(pagina->contenidos_pagina,0);
+    int i = 0;
+    while(contenidos->recorrido < pagina->cantidad_contenidos){
+         if(getFromMemoriaHeap(heap,i, numeroPagina)){
+              memcpy(&heap,heap->nextAlloc, sizeof(t_heap_metadata));
+              return heap;
+         }
+          i++;
+    }
+}
+bool getFromMemoriaHeap(t_heap_metadata *heap,int i, int numeroPagina){
+    memcpy(&heap,heap->nextAlloc, sizeof(t_heap_metadata));
+    if(heap->isFree == true){
+        return true;
+    }  
+    return false;
+}
+t_heap_metadata *generarHeapVacio(){
     t_heap_metadata *heapHeader = malloc(sizeof(t_heap_metadata));
     heapHeader->isFree = true;
+    heapHeader->nextAlloc = NULL;
+    heapHeader->prevAlloc = NULL;
+    return heapHeader;
+}
+t_heap_metadata *generarHeaderMetadataAlFinal(t_pagina *pagina,int numeroPagina)
+{
+    //FALTA RECORRER LA PAGINA Y QUEDARSE CON EL ULTIMO HEAP
+    t_heap_metadata *heapHeader = getLastHeapByPagina(pagina,numeroPagina);
+    heapHeader->isFree = false;
     heapHeader->nextAlloc = NULL;
     heapHeader->prevAlloc = NULL;
     return heapHeader;

@@ -23,6 +23,9 @@ int main(int argc, char **argv)
         pagina->numero_pagina = i;
         pagina->cantidad_contenidos= 0;
         pagina->contenidos_pagina = list_create();
+        t_contenidos_pagina *contenido =  malloc(sizeof(t_contenido));
+        contenido->recorrido = 0;
+        list_add(pagina->contenidos_pagina, contenido);
         list_add(tabla_paginas->paginas, pagina);
         i++;
     }

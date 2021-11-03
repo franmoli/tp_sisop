@@ -37,6 +37,7 @@ typedef struct{
 typedef struct{
 		uint32_t dir_comienzo; // NO DEBE SER UN PUNTERO
 		uint32_t tamanio; 
+        uint32_t recorrido;
 		t_contenido contenido_pagina; //antes era un puntero
 	} t_contenidos_pagina;
 

@@ -20,15 +20,15 @@ void guardarMemoria(t_paquete *paquete)
             heapHeader->nextAlloc = tamanio_memoria + numeropaginaHeapHeader + (config_memoria->TAMANIO_PAGINA) * numeropaginaHeapHeader + espacioAguardar;
             paginaHeader->cantidad_contenidos = paginaHeader->cantidad_contenidos + 1;
             t_heap_metadata *heapFooter = generarFooter(paginaHeader, numeropaginaHeapHeader);
-            memcpy(heapHeader->nextAlloc , &heapFooter, sizeof(t_heap_metadata));
+            memcpy(heapHeader->nextAlloc, &heapFooter, sizeof(t_heap_metadata));
             paginaHeader->cantidad_contenidos = paginaHeader->cantidad_contenidos + 2;
-            paginaHeader->tamanio_ocupado = paginaHeader->tamanio_ocupado +  sizeof(t_heap_metadata)*2 + espacioAguardar;
+            paginaHeader->tamanio_ocupado = paginaHeader->tamanio_ocupado + sizeof(t_heap_metadata) * 2 + espacioAguardar;
             return;
         }
         else
         {
-             int entraTotal = config_memoria->TAMANIO_PAGINA - paginaHeader->tamanio_ocupado - sizeof(t_heap_metadata);
-            if ( entraTotal == 0)
+            int entraTotal = config_memoria->TAMANIO_PAGINA - paginaHeader->tamanio_ocupado - sizeof(t_heap_metadata);
+            if (entraTotal == 0)
             {
                 //La pagina se llenacon el header nada mas. tengo que buscar otra.
                 t_heap_metadata *heapHeader = guardarHeader(paginaHeader, numeropaginaHeapHeader);
@@ -50,7 +50,7 @@ void guardarMemoria(t_paquete *paquete)
 }
 t_heap_metadata *guardarHeader(t_pagina *paginaHeader, int paginaHeapHeader)
 {
-    t_heap_metadata *heapHeader = generarHeaderMetadataAlFinal(paginaHeader);
+    t_heap_metadata *heapHeader = generarHeaderMetadataAlFinal(paginaHeader,paginaHeapHeader);
     memcpy(tamanio_memoria + paginaHeader->cantidad_contenidos + (config_memoria->TAMANIO_PAGINA) * paginaHeapHeader, &heapHeader, sizeof(t_heap_metadata));
     return heapHeader;
 }
