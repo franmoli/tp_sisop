@@ -11,6 +11,8 @@ int getPosicionPagina(t_pagina *pagina);
 void findAndSaveEnPagina(int pagina);
 t_heap_metadata *guardarHeader(t_pagina *paginaHeader, int paginaHeapHeader);
 
-void memRead(uint32_t direccion);
-void leerContenidoEnMemoria(uint32_t direccion, t_contenido tipoContenido);
+t_heap_metadata *memRead(uint32_t direccion);
+t_heap_metadata* leerContenidoEnMemoria(uint32_t direccion, t_contenido tipoContenido);
+t_pagina* buscarPagina(uint32_t direccion); 
+
 #endif

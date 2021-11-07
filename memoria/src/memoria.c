@@ -35,6 +35,39 @@ int main(int argc, char **argv)
         log_info(logger_memoria, "Fallo en la conexion a swap");
     }
 
+    uint32_t inicio = tamanio_memoria;
+
+    log_info(logger_memoria, "Inicio memoria: %d", inicio);
+
+    memAlloc(5);
+    t_heap_metadata* data = memRead(tamanio_memoria);
+
+    log_info(logger_memoria, "PrevAlloc: %d", data->prevAlloc);
+    log_info(logger_memoria, "NextAlloc: %d", data->nextAlloc);
+    log_info(logger_memoria, "isFree: %d", data->isFree);
+
+    log_info(logger_memoria, "---------------");
+
+    t_heap_metadata* data2 = memRead(data->nextAlloc);
+
+    log_info(logger_memoria, "PrevAlloc: %d", data2->prevAlloc);
+    log_info(logger_memoria, "NextAlloc: %d", data2->nextAlloc);
+    log_info(logger_memoria, "isFree: %d", data2->isFree);
+
+    log_info(logger_memoria, "---------------");
+
+    memAlloc(6);
+    t_heap_metadata* data3 = memRead(data->nextAlloc);
+    log_info(logger_memoria, "otro alloc: %d", data3->prevAlloc);
+    log_info(logger_memoria, "ultimo alloc empieza en: %d", data3->nextAlloc);
+
+    memAlloc(5);
+
+    memAlloc(10);
+
+    memAlloc(3);
+
+    /*
     //CASO DE PRUEBA DE METODOS SIN KERNEL/MATELIB
     t_paquete *paquete1 = serializar_alloc(5);
     
@@ -48,6 +81,9 @@ int main(int argc, char **argv)
     t_paquete *paquete3 = serializar_alloc(2);
     guardarMemoria(paquete3);
     free(paquete3);
+    */
+
+
     //PROGRAMA NORMAL
     socket_server = iniciar_servidor("127.0.0.1", string_itoa(config_memoria->PUERTO), logger_memoria);
     while(1){

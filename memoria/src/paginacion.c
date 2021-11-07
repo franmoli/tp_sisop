@@ -51,6 +51,8 @@ void guardarMemoria(t_paquete *paquete)
 t_heap_metadata *guardarHeader(t_pagina *paginaHeader, int paginaHeapHeader)
 {
     t_heap_metadata *heapHeader = generarHeaderMetadataAlFinal(paginaHeader,paginaHeapHeader);
+    log_info(logger_memoria, "primera direccion %d",tamanio_memoria);
+    log_info(logger_memoria, "Voy a guardar data en %d",tamanio_memoria + paginaHeader->cantidad_contenidos + (config_memoria->TAMANIO_PAGINA) * paginaHeapHeader, &heapHeader);
     memcpy(tamanio_memoria + paginaHeader->cantidad_contenidos + (config_memoria->TAMANIO_PAGINA) * paginaHeapHeader, &heapHeader, sizeof(t_heap_metadata));
     return heapHeader;
 }
@@ -83,39 +85,15 @@ void findAndSaveEnPagina(int pagina){
     //Sino esta crea la pagina y guarda
 }
 
-
-
-// Mem Read: Dada una direccion de memoria busco el contenido que se encuentra alli
-
-void memRead(uint32_t direccion) {
-
-    t_pagina* pagina = buscarPagina(direccion);
-
-
-    t_list_iterator *list_iterator = list_iterator_create(pagina->contenidos_pagina);
-
-    while(list_iterator_has_next(list_iterator)) {
-        t_contenidos_pagina* contenido = list_iterator_next(list_iterator);
-
-        if(contenido->dir_comienzo <= direccion && (contenido->dir_comienzo + tamanio) >= direccion) {
-
-            free(pagina);
-            list_iterator_destroy(list_iterator);
-
-            leerContenidoEnMemoria(contenido->dir_comienzo, contenido->contenido_pagina);
-        }
-
-    }
-
-}
+*/
 
 // Dada la direccion del contenido y su tipo, lo busco en memoria
-void leerContenidoEnMemoria(uint32_t direccion, t_contenido tipoContenido) {
+t_heap_metadata* leerContenidoEnMemoria(uint32_t direccion, t_contenido tipoContenido) {
 
-    if(tipoContenido == ALLOC) {
         t_heap_metadata* alloc = traerAllocDeMemoria(direccion);
+            log_info(logger_memoria, "Traje alloc de memoria");
         //Hasta aca llegue, fijate que queres hacer con esto
-    }
+        return alloc;
 
     // To be continued... cuando sepamos que otros contenidos guardamos
 
@@ -128,7 +106,10 @@ t_pagina* buscarPagina(uint32_t direccion) {
 
     while(list_iterator_has_next(list_iterator)) {
         t_pagina *paginaLeida = list_iterator_next(list_iterator);
+        log_info(logger_memoria, "Encontre la pagina: %d",paginaLeida->numero_pagina);
         t_contenidos_pagina* primerContenido = list_get(paginaLeida->contenidos_pagina,0);
+        log_info(logger_memoria, "Su primer contenido esta en: %d",primerContenido->dir_comienzo);
+        
         if(primerContenido->dir_comienzo <= direccion && (primerContenido->dir_comienzo + config_memoria->TAMANIO_PAGINA) >= direccion) {
             free(primerContenido);
             list_iterator_destroy(list_iterator);
@@ -139,4 +120,20 @@ t_pagina* buscarPagina(uint32_t direccion) {
     //Si no encontro la pagina es porque no existe nada en la direccion que busca
     return -1;
 
-}*/
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////////
+
+// Mem Read: Dada una direccion de memoria busco el contenido que se encuentra alli
+t_heap_metadata* memRead(uint32_t direccion) {
+
+    //TODO: Tener en cuenta que la direccion pertenezca a una pagina de la tabla de este proceso
+
+    t_heap_metadata* alloc = traerAllocDeMemoria(direccion);
+
+    log_info(logger_memoria, "Traje alloc de memoria");
+    return alloc;
+
+}
