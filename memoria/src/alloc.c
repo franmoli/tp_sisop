@@ -1,5 +1,52 @@
 #include "alloc.h"
 
+
+// Memfree -> Libero alloc (flag isFree en true), me fijo el anterior y posterior y los unifico
+// TODO -> Meter paginacion (Mati gatooo)
+void freeAlloc(uint32_t direccion) {
+
+    //Traigo de memoria el alloc
+    t_heap_metadata* alloc = traerAllocDeMemoria(direccion);
+
+    alloc->isFree = true;
+
+    t_heap_metadata* anterior = traerAllocDeMemoria(alloc->prevAlloc);
+    t_heap_metadata* posterior = malloc(sizeof(t_heap_metadata));
+    posterior->isFree = false;
+    if(alloc->nextAlloc != NULL) {
+        posterior = traerAllocDeMemoria(alloc->nextAlloc);
+    }
+
+    if(anterior->isFree) {
+        //Juntar los 2 allocs
+        anterior->nextAlloc = alloc->nextAlloc;
+        guardarAlloc(anterior,alloc->prevAlloc);
+        if(alloc->nextAlloc != NULL) {
+            posterior->prevAlloc = alloc->prevAlloc;
+            guardarAlloc(posterior,alloc->nextAlloc);
+        }
+
+    }
+
+    if(alloc->nextAlloc != NULL) {
+
+        if(posterior->isFree){
+            //Juntar los 2 allocs
+            alloc->nextAlloc = posterior->nextAlloc;
+            t_heap_metadata* posteriorDelPosterior = traerAllocDeMemoria(posterior->nextAlloc);
+
+            posteriorDelPosterior->prevAlloc = posterior->prevAlloc;
+
+            guardarAlloc(alloc, direccion);
+            guardarAlloc(posteriorDelPosterior,posterior->nextAlloc);
+
+        }
+
+    }
+
+}
+
+
 t_heap_metadata* traerAllocDeMemoria(uint32_t direccion) {
 
     t_heap_metadata* data = malloc(sizeof(t_heap_metadata));

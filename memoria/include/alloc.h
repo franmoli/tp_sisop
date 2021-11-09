@@ -15,6 +15,7 @@ t_heap_metadata* traerAllocDeMemoria(uint32_t);
 void crearPrimerAlloc(int size);
 void guardarAlloc(t_heap_metadata* data, uint32_t direccion);
 void memAlloc(int size);
+void freeAlloc(uint32_t direccion);
 
 
 #endif
