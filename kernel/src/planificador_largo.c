@@ -38,6 +38,7 @@ void *iniciar_servidor_kernel(void *_){
 void atender_proceso (void* parametro ){
     bool inicializado = false;
     int socket_cliente = *(int*)parametro;
+    t_proceso *carpincho = malloc(sizeof(t_proceso)); 
     while(1) {
 		t_paquete *paquete = recibir_paquete(socket_cliente);
         
@@ -46,17 +47,18 @@ void atender_proceso (void* parametro ){
             case CLIENTE_TEST:
                 log_info(logger_kernel, "Mensaje de prueba recibido correctamente por el cliente %d", socket_cliente);
                 break;
+
             case NUEVO_CARPINCHO:
                 if(!inicializado){
-                    nuevo_carpincho(socket_cliente);
+                    carpincho = nuevo_carpincho(socket_cliente);
                     inicializado = true;
                 }
                 break;
-            //TODO: case OPERACION_SARASA
-            // agregar a lista de operaciones del proceso     
+                
             default:
                 log_error(logger_kernel, "Codigo de operacion desconocido");
                 break;
+            
         }
 
         //Libero la memoria ocupada por el paquete
@@ -66,11 +68,12 @@ void atender_proceso (void* parametro ){
 
         //Salgo del ciclo
         break; 
+
 	}
     return;
 }
 
-void nuevo_carpincho(int socket_cliente){
+t_proceso *nuevo_carpincho(int socket_cliente){
 
     t_proceso *nuevo_proceso = malloc(sizeof(t_proceso));
 
@@ -97,30 +100,28 @@ void nuevo_carpincho(int socket_cliente){
     avisar_cambio();
     sem_post(&libre_para_inicializar_proceso);
 
+    return nuevo_proceso;
 }
 
 void *planificador_largo_plazo(void *_){
 
-
     while(1){
+
+        sem_wait(&cambio_de_listas);
         if(multiprogramacion_disponible){
-            //TODO: primero se checkea que no haya nadie en ready-suspended
-            if(list_size(lista_new)){
+            if(list_size(lista_s_ready)){
+                //Se saca de suspended y se pasa a ready
+                mover_proceso_de_lista(lista_s_ready, lista_ready, 0, READY);
+
+                multiprogramacion_disponible = multiprogramacion_disponible - 1;
+
+            }else if(list_size(lista_new)){
 
                 //Se saca de new y se pasa a ready
                 mover_proceso_de_lista(lista_new, lista_ready, 0, READY);
-
+                printf("A ready\n");
                 multiprogramacion_disponible = multiprogramacion_disponible - 1;
             }
-        }else{
-
-            printf("me trabé planif largo listas:\n");
-            printf("Ready: %d\n", list_size(lista_ready));
-            printf("Block: %d\n", list_size(lista_blocked));
-            printf("Exec: %d\n", list_size(lista_exec));
-            printf(".");
-            sem_wait(&proceso_finalizo_o_suspended);
-            multiprogramacion_disponible = multiprogramacion_disponible + 1;
         }
     }
     return NULL;

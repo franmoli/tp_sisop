@@ -17,7 +17,8 @@ typedef enum {
     EXEC = 3,
     BLOCKED = 4,
     S_BLOCKED = 5,
-    S_READY = 6
+    S_READY = 6,
+    EXIT = 7
 } t_status;
 
 typedef struct {
@@ -30,7 +31,6 @@ typedef struct {
     bool block;
     bool salida_exit;
     bool salida_block;
-    // t_task_list *task_list; ????? cuales son las tareas que ejecuta el proceso
 } t_proceso;
 
 //Configuración
@@ -63,6 +63,7 @@ sem_t salida_a_exit_recibida;
 sem_t salida_de_exec_recibida;
 sem_t cambio_de_listas;
 sem_t pedir_salida_de_block;
+sem_t solicitar_block;
 
 //Auxiliares
 int cantidad_de_procesos;

@@ -3,10 +3,8 @@
 void *proceso(void *self){
     t_proceso *proceso_struct = self;
     sem_wait(&proceso_inicializado);
-    int aux;
-    aux = 0;
     while(1){
-        printf("\n");
+        printf("esperando actual ed listax\n");
         sem_wait(&actualizacion_de_listas_1);
 
         switch (proceso_struct->status){
@@ -15,15 +13,11 @@ void *proceso(void *self){
                 new();
                 sleep(1);
                 break;
-            case READY:
-                printf("R - p: %d ", proceso_struct->id);                
-                ready();
-                break;
             case EXEC:
                 //TODO :proceso timestamp
                 printf("E - p: %d ", proceso_struct->id);
-                aux++;
-                if(exec(aux)){
+                exec(proceso_struct);
+                /*if(exec(aux)){
                     proceso_struct->salida_exit = true;
                     printf("salida a exit \n");
                     sem_post(&salida_a_exit);
@@ -35,27 +29,14 @@ void *proceso(void *self){
                     printf("Salida a ready\n");
                     sem_post(&salida_exec);
                     //sem_wait(&salida_de_exec_recibida);
-                }
+                }*/
                 break;
-            case BLOCKED:
-                blocked();
-                //printf("Paso a block p: %d\n", proceso_struct->id);
-                break;
-            case S_BLOCKED:
-                //cambiar struct con flag de suspendido
-                blocked();
-                break;
-            case S_READY:
-                blocked();
-                break;
+            default:
+                printf("Estoy bloqueado y no hago nada %d\n", proceso_struct->id);
         }
         sem_post(&actualizacion_de_listas_1_recibido);
         sem_wait(&actualizacion_de_listas_2);
-        if(aux > 1){
-            printf("retorna %d---\n", proceso_struct->id);
-            printf(".");
-            return NULL;
-        }
+        
     }
 
 
@@ -66,20 +47,28 @@ void new(){
     printf("iniciando el carpincho - new\n");
     sleep(1);
 }
-void ready(){
 
-}
-int exec(int aux){
+void exec(t_proceso *self){
+
+    bool bloquear_f = false;
     //Tarea mock
     printf("Haciendo la tarea - exec\n");
-    sleep(2);
 
-    if(aux > 1)
-        return true;
+    while(!bloquear_f){
 
-    return false;
+        sleep(2);
+        bloquear_f = true;
 
+    }
+
+    bloquear(self);
 }
-void blocked(){
 
+void bloquear(t_proceso *self){
+    printf("Bloqueando proceso: %d\n", self->id);
+    self->block = true;
+    self->status = BLOCKED;
+    sleep(1);
+    sem_post(&solicitar_block);
+    return;
 }

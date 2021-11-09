@@ -8,7 +8,7 @@
 void *proceso(void *_);
 void new();
 void ready();
-int exec(int mock);
+void exec(t_proceso *self);
 void blocked();
-
+void bloquear(t_proceso *self);
 #endif

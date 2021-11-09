@@ -37,6 +37,7 @@ void *planificador_corto_plazo_sjf (void *multiprocesamiento_p){
     
     t_proceso *aux;
     int *multiprocesamiento = multiprocesamiento_p;
+
     while(1){
 
         //calcular estimaciones
@@ -45,6 +46,7 @@ void *planificador_corto_plazo_sjf (void *multiprocesamiento_p){
             aux = list_get(lista_ready, i);
             if(aux->estimar)
                 estimar(aux);
+
         }
         
         if(*multiprocesamiento && list_size(lista_ready)){
@@ -65,6 +67,7 @@ void *planificador_corto_plazo_sjf (void *multiprocesamiento_p){
             sem_wait(&mutex_multiprocesamiento);
             *multiprocesamiento = *multiprocesamiento - 1;
             sem_post(&mutex_multiprocesamiento);
+
         }
     }
 
@@ -117,7 +120,7 @@ void *esperar_salida_exec(void *multiprocesamiento_p){
             sem_post(&salida_de_exec_recibida);
         }
         if(*multiprocesamiento == 0){
-            printf("ME quede sin multiproceeee\n");
+            printf("ME quede sin multiprocesamiento\n");
         }
     }
 }
@@ -157,4 +160,38 @@ void *hilo_liberar_multiprocesamiento(void *multiprocesamiento_p){
         
     }
     return NULL;
+}
+
+void *esperar_bloqueo(void *multiprocesamiento_p){
+    int *multiprocesamiento = multiprocesamiento_p;
+
+    while(1){
+
+        sem_wait(&solicitar_block);
+        bool encontrado = false;
+        int tamanio_lista_blocked = list_size(lista_blocked);
+        int index = 0;
+
+        while(!encontrado && (index < tamanio_lista_blocked)){
+            t_proceso *aux = list_get(lista_blocked, index);
+            
+                if(aux->block){
+                    printf("Bloqueando %d", aux->id);
+                    mover_proceso_de_lista(lista_exec, lista_blocked, index, BLOCKED);
+                    encontrado = true;
+                }
+            index ++;
+        }
+        if(encontrado){
+
+            sem_wait(&mutex_multiprocesamiento);
+            *multiprocesamiento = *multiprocesamiento + 1;
+            sem_post(&mutex_multiprocesamiento);
+            index = 0;
+
+        }
+        if(*multiprocesamiento == 0){
+            printf("ME quede sin multiprocesamiento\n");
+        }
+    }
 }

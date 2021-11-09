@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
     //Iniciar planificador de corto plazo
     iniciar_planificador_corto();
     //Iniciar planificador de mediano plazo
-    iniciar_planificador_mediano();
+    //iniciar_planificador_mediano();
     
     
     //Conectar a memoria (datos temporales hardcodeados)
@@ -118,12 +118,13 @@ void iniciar_semaforos_generales(){
     sem_init(&salida_a_exit_recibida, 0, 0);
     sem_init(&cambio_de_listas, 0, 0);
     sem_init(&pedir_salida_de_block, 0, 0);
+    sem_init(&solicitar_block, 0, 0);
     return;
 }
 
 void mover_proceso_de_lista(t_list *origen, t_list *destino, int index, int status){
     t_proceso *aux;
-    
+    printf("Cambio\n");
     sem_wait(&mutex_listas);
         //printf("%p", origen);
         aux = list_remove(origen, index);
@@ -137,13 +138,12 @@ void mover_proceso_de_lista(t_list *origen, t_list *destino, int index, int stat
 }
 
 void avisar_cambio(){
-    //printf("Espero acá - procesos - avisar\n");
+    printf("Avisando %d\n", cantidad_de_procesos);
     sem_wait(&mutex_cant_procesos);
     //Aviso que hubo un cambio de listas
     for(int i = 0; i < cantidad_de_procesos; i++){
         sem_post(&actualizacion_de_listas_1);
     }
-    //printf("Espero acá\n");
     //Espero que todos los procesos hayan recibido el aviso y ejecutado
     for(int i = 0; i < cantidad_de_procesos; i++){
         sem_wait(&actualizacion_de_listas_1_recibido);
@@ -152,7 +152,8 @@ void avisar_cambio(){
     for(int i = 0; i < cantidad_de_procesos; i++){
         sem_post(&actualizacion_de_listas_2);
     }
+    //Habilito planificadores
+    sem_post(&cambio_de_listas);
     sem_post(&mutex_cant_procesos);
-    //printf("Post - procesos- avisar\n");
     sleep(0.5);
 }

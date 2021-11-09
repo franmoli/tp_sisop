@@ -3,8 +3,6 @@
 void iniciar_planificador_mediano(){
     printf("Inicio planificador MEDIANO \n");
 
-    int *multiprogramacion_disponible = malloc(sizeof(int));
-    *multiprogramacion_disponible = config_kernel->GRADO_MULTIPROGRAMACION;
 
     pthread_t hilo_planificador;
     pthread_create(&hilo_planificador, NULL, planificador_mediano_plazo, (void *)NULL);
