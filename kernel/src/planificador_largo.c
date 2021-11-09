@@ -35,6 +35,7 @@ void *iniciar_servidor_kernel(void *_){
     return NULL;
 }
 
+//Atencion de nuevas operaciones
 void atender_proceso (void* parametro ){
     bool inicializado = false;
     int socket_cliente = *(int*)parametro;

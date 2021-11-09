@@ -3,6 +3,7 @@
 void *proceso(void *self){
     t_proceso *proceso_struct = self;
     sem_wait(&proceso_inicializado);
+    int index = 0;
     while(1){
         printf("esperando actual ed listax\n");
         sem_wait(&actualizacion_de_listas_1);
@@ -31,6 +32,9 @@ void *proceso(void *self){
                     //sem_wait(&salida_de_exec_recibida);
                 }*/
                 break;
+            case BLOCKED:
+                printf("B - p: %d ", proceso_struct->id);
+                break;
             default:
                 printf("Estoy bloqueado y no hago nada %d\n", proceso_struct->id);
         }
@@ -48,27 +52,33 @@ void new(){
     sleep(1);
 }
 
-void exec(t_proceso *self){
+void *exec(t_proceso *self){
 
     bool bloquear_f = false;
     //Tarea mock
     printf("Haciendo la tarea - exec\n");
 
     while(!bloquear_f){
-
         sleep(2);
         bloquear_f = true;
-
     }
 
     bloquear(self);
+    return NULL;
 }
 
 void bloquear(t_proceso *self){
     printf("Bloqueando proceso: %d\n", self->id);
     self->block = true;
-    self->status = BLOCKED;
     sleep(1);
     sem_post(&solicitar_block);
+    return;
+}
+
+void desbloquear(t_proceso *self){
+    printf("Desbloquear proceso: %d", self->id);
+    self->salida_block = true;
+    sleep(1);
+    sem_post(&salida_block);
     return;
 }

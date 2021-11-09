@@ -11,4 +11,5 @@ void ready();
 void exec(t_proceso *self);
 void blocked();
 void bloquear(t_proceso *self);
+void desbloquear(t_proceso *self);
 #endif
