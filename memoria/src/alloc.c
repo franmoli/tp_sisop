@@ -66,6 +66,7 @@ t_heap_metadata* traerAllocDeMemoria(uint32_t direccion) {
 
 void crearPrimerAlloc(int size) {
 
+    //HEADER + DATA
     t_heap_metadata* newAlloc = malloc(sizeof(t_heap_metadata));
     uint32_t inicio = tamanio_memoria;
     newAlloc->isFree = false;
@@ -83,6 +84,7 @@ void crearPrimerAlloc(int size) {
 
     free(newAlloc);
 
+    //FOOTER
     t_heap_metadata* alloc = malloc(sizeof(t_heap_metadata));
 
     alloc->isFree = true;
@@ -91,14 +93,14 @@ void crearPrimerAlloc(int size) {
 
     offset = 0;
 
-    memcpy(inicio + size + sizeof(t_heap_metadata) + offset, &newAlloc->prevAlloc, sizeof(uint32_t));
+    memcpy(inicio + size + sizeof(t_heap_metadata) + offset, &alloc->prevAlloc, sizeof(uint32_t));
     offset += sizeof(uint32_t);
-    memcpy(inicio + size + sizeof(t_heap_metadata) + offset, &newAlloc->nextAlloc, sizeof(uint32_t));
+    memcpy(inicio + size + sizeof(t_heap_metadata) + offset, &alloc->nextAlloc, sizeof(uint32_t));
     offset += sizeof(uint32_t);
-    memcpy(inicio + size + sizeof(t_heap_metadata) + offset, &newAlloc->isFree, sizeof(uint8_t));
+    memcpy(inicio + size + sizeof(t_heap_metadata) + offset, &alloc->isFree, sizeof(uint8_t));
     offset += sizeof(uint8_t);
 
-    free(newAlloc);
+    free(alloc);
 
     log_info(logger_memoria, "Pude guardar primer alloc en memoria");
 }
@@ -138,7 +140,6 @@ void memAlloc(int size) {
         uint32_t primeraDir = tamanio_memoria;
 
         while(data->nextAlloc != NULL) { 
-
             if(data->isFree == true){
 
                 //Estoy en un alloc libre y no es el ultimo, hacer si entra totalmente, sino que siga
@@ -184,7 +185,7 @@ void memAlloc(int size) {
         }
 
         log_info(logger_memoria, "Voy a guardar un nuevo alloc");
-
+        uint32_t a4 = data;
         if(config_memoria->TAMANIO + tamanio_memoria < nextAnterior + sizeof(t_heap_metadata) * 2 + size) {
             log_info(logger_memoria, "Memoria insuficiente");
             //Nose si tendria que mandar a swap aca
@@ -199,7 +200,7 @@ void memAlloc(int size) {
         guardarAlloc(data, nextAnterior);
 
         data->isFree = true;
-        data->prevAlloc = data->nextAlloc;
+        data->prevAlloc = nextAnterior;
         data->nextAlloc = NULL;
 
         guardarAlloc(data,nextAnterior + size + sizeof(t_heap_metadata));
@@ -209,58 +210,4 @@ void memAlloc(int size) {
         return;
 
     }
-
-
 }
-
-///////////////////////////////////////////////////////////////////////////////////
-
-t_heap_metadata *getLastHeapByPagina(t_pagina *pagina, int numeroPagina){
-    t_heap_metadata *heap = generarHeapVacio();
-    
-    if(pagina->cantidad_contenidos == 0){
-        return heap;
-    }
-    //Traigo primera paginita
-    memcpy(&heap,tamanio_memoria + (config_memoria->TAMANIO_PAGINA) * numeroPagina, sizeof(t_heap_metadata));
-    for(int i = 0; i < pagina->cantidad_contenidos; i++){
-        heap = getFromMemoriaHeap(heap,numeroPagina);
-         if(heap->isFree == true){
-              //memcpy(&heap,heap->nextAlloc, sizeof(t_heap_metadata));
-              return heap;
-         }
-    }
-}
-t_heap_metadata *getFromMemoriaHeap(t_heap_metadata *heap, int numeroPagina){
-    memcpy(&heap,heap->nextAlloc, sizeof(t_heap_metadata));
-    return heap;
-}
-t_heap_metadata *generarHeapVacio(){
-    t_heap_metadata *heapHeader = malloc(sizeof(t_heap_metadata));
-    heapHeader->isFree = true;
-    heapHeader->nextAlloc = NULL;
-    heapHeader->prevAlloc = NULL;
-    return heapHeader;
-}
-t_heap_metadata *generarHeaderMetadataAlFinal(t_pagina *pagina,int numeroPagina)
-{
-    //FALTA RECORRER LA PAGINA Y QUEDARSE CON EL ULTIMO HEAP
-    t_heap_metadata *heapHeader = getLastHeapByPagina(pagina,numeroPagina);
-    heapHeader->isFree = false;
-    heapHeader->nextAlloc = NULL;
-    heapHeader->prevAlloc = NULL;
-    return heapHeader;
-}
-t_heap_metadata *generarFooter(t_pagina *paginaHeader, int numeropaginaHeapHeader)
-{
-    t_heap_metadata *heapFooter = malloc(sizeof(t_heap_metadata));
-    heapFooter->isFree = true;
-    heapFooter->nextAlloc = NULL;
-    heapFooter->prevAlloc = tamanio_memoria + paginaHeader->cantidad_contenidos + (config_memoria->TAMANIO_PAGINA) * numeropaginaHeapHeader;
-    return heapFooter;
-}
-int getPosicionEnLaPagina(int pagina)
-{
-    return 0;
-}
-

@@ -35,7 +35,7 @@ int main(int argc, char **argv)
         log_info(logger_memoria, "Fallo en la conexion a swap");
     }
 
-    uint32_t inicio = tamanio_memoria;
+   /* uint32_t inicio = tamanio_memoria;
 
     log_info(logger_memoria, "Inicio memoria: %d", inicio);
 
@@ -59,29 +59,22 @@ int main(int argc, char **argv)
     memAlloc(6);
     t_heap_metadata* data3 = memRead(data->nextAlloc);
     log_info(logger_memoria, "otro alloc: %d", data3->prevAlloc);
-    log_info(logger_memoria, "ultimo alloc empieza en: %d", data3->nextAlloc);
+    log_info(logger_memoria, "ultimo alloc empieza en: %d", data3->nextAlloc);*/
 
-    memAlloc(5);
 
-    memAlloc(10);
-
-    memAlloc(3);
-
-    /*
-    //CASO DE PRUEBA DE METODOS SIN KERNEL/MATELIB
+    //CASO PRUEBA DE MEMALLOC
     t_paquete *paquete1 = serializar_alloc(5);
-    
     guardarMemoria(paquete1);
     free(paquete1);
-    
-    t_paquete *paquete2 = serializar_alloc(10);
-    guardarMemoria(paquete2);
-    free(paquete2);
 
-    t_paquete *paquete3 = serializar_alloc(2);
-    guardarMemoria(paquete3);
-    free(paquete3);
-    */
+    paquete1 = serializar_alloc(10);
+    guardarMemoria(paquete1);
+    free(paquete1);
+
+    paquete1 = serializar_alloc(3);
+    guardarMemoria(paquete1);
+    free(paquete1);
+
 
 
     //PROGRAMA NORMAL
