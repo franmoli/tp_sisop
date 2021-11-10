@@ -6,8 +6,10 @@
 #include "serializaciones.h"
 typedef enum
 {
-	PATOTA = 0,
+	CONTENIDO = 0,
     ALLOC = 1,
+    HEADER = 2,
+    FOOTER = 3,
 } t_contenido;
 
 typedef struct {
@@ -31,12 +33,14 @@ typedef struct{
     uint32_t numero_pagina;
     uint32_t tamanio_ocupado;
     uint32_t cantidad_contenidos;
-    t_list* contenidos_pagina;
+    t_list*  listado_de_contenido;
 }t_pagina;
 
 typedef struct{
 		uint32_t dir_comienzo; // NO DEBE SER UN PUNTERO
-		uint32_t tamanio; 
+		uint32_t dir_fin;
+        uint32_t tamanio; 
+        uint32_t carpincho_id;
         uint32_t recorrido;
 		t_contenido contenido_pagina; //antes era un puntero
 	} t_contenidos_pagina;

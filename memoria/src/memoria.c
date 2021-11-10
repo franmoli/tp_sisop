@@ -22,10 +22,10 @@ int main(int argc, char **argv)
         pagina->tamanio_ocupado = 0;
         pagina->numero_pagina = i;
         pagina->cantidad_contenidos= 0;
-        pagina->contenidos_pagina = list_create();
+        pagina->listado_de_contenido = list_create();
         t_contenidos_pagina *contenido =  malloc(sizeof(t_contenido));
         contenido->recorrido = 0;
-        list_add(pagina->contenidos_pagina, contenido);
+        list_add(pagina->listado_de_contenido, contenido);
         list_add(tabla_paginas->paginas, pagina);
         i++;
     }
@@ -64,15 +64,15 @@ int main(int argc, char **argv)
 
     //CASO PRUEBA DE MEMALLOC
     t_paquete *paquete1 = serializar_alloc(5);
-    guardarMemoria(paquete1);
+    memAlloc(paquete1);
     free(paquete1);
 
     paquete1 = serializar_alloc(10);
-    guardarMemoria(paquete1);
+    memAlloc(paquete1);
     free(paquete1);
 
     paquete1 = serializar_alloc(3);
-    guardarMemoria(paquete1);
+    memAlloc(paquete1);
     free(paquete1);
 
 
@@ -101,11 +101,11 @@ static void *ejecutar_operacion(int client)
                 break;
             case MEMALLOC:
                 log_info(logger_memoria, "recibi orden de almacenar memoria del cliente %d", client);
-                guardarMemoria(paquete);
+                memAlloc(paquete);
                 break;
             case MEMWRITE:
                 log_info(logger_memoria, "recibi orden de guardar en memoria del cliente %d", client);
-                guardarMemoria(paquete);
+                memAlloc(paquete);
                 break;
             default:
                 log_error(logger_memoria, "Codigo de operacion desconocido");

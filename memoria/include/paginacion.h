@@ -5,10 +5,9 @@
 #include <commons/collections/list.h>
 #include "tlb.h"
 
-void guardarMemoria(t_paquete *paquete);
 int getPaginaByDireccion(uint32_t direccion);
-
+int getPrimeraPaginaDisponible(int size);
 t_heap_metadata *memRead(uint32_t direccion);
-
-
+t_contenidos_pagina *getLastContenidoByPagina(t_pagina* pagina);
+t_contenidos_pagina *getLastHeaderContenidoByPagina(t_pagina* pagina);
 #endif

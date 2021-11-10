@@ -1,15 +1,50 @@
 #include "paginacion.h"
 
-void guardarMemoria(t_paquete *paquete)
-{
-    int espacioAguardar = deserializar_alloc(paquete);
-    memAlloc(espacioAguardar);
-}
-
 int getPaginaByDireccion(uint32_t direccion){
     uint32_t inicio = tamanio_memoria;
     uint32_t resta =  direccion - inicio;
     return resta/config_memoria->TAMANIO_PAGINA;
+}
+int getPrimeraPaginaDisponible(int size)
+{
+    t_list_iterator *list_iterator = list_iterator_create(tabla_paginas->paginas);
+    int numeroPagina = -1;
+    bool pagainaFueEncontrada = false;
+    while (list_iterator_has_next(list_iterator) && !pagainaFueEncontrada)
+    {
+        t_pagina *paginaLeida = list_iterator_next(list_iterator);
+        int a = (config_memoria->TAMANIO_PAGINA - paginaLeida->tamanio_ocupado - size);
+        if (a >= 0)
+        {
+            pagainaFueEncontrada = true;
+            numeroPagina = paginaLeida->numero_pagina;
+        }
+    }
+    list_iterator_destroy(list_iterator);
+    return numeroPagina;
+}
+t_contenidos_pagina *getLastContenidoByPagina(t_pagina* pagina){
+     t_list_iterator *list_iterator = list_iterator_create(pagina->listado_de_contenido);
+     t_contenidos_pagina *contenido;
+     while (list_iterator_has_next(list_iterator))
+    {
+        contenido = list_iterator_next(list_iterator);
+    }
+    return contenido;
+}
+t_contenidos_pagina *getLastHeaderContenidoByPagina(t_pagina* pagina){
+     t_list_iterator *list_iterator = list_iterator_create(pagina->listado_de_contenido);
+     t_contenidos_pagina *contenido;
+     t_contenidos_pagina *contenidoFinal;
+     while (list_iterator_has_next(list_iterator))
+    {
+        contenido = list_iterator_next(list_iterator);
+        if(contenido->contenido_pagina == HEADER){
+            contenidoFinal = contenido;
+        }
+        
+    }
+    return contenidoFinal;
 }
 //////////////////////////////////////////////////////////////////////////////
 
