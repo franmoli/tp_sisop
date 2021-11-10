@@ -43,11 +43,10 @@ void atender_proceso (void* parametro ){
     char *nombre_semaforo = NULL;
     t_task *task_aux;
     while(1) {
-
 		t_paquete *paquete = recibir_paquete(socket_cliente);
         task_aux = malloc(sizeof(t_task));
-        printf("Nueva op\n");
-        
+        printf("Nueva op %d\n", paquete->codigo_operacion);
+        sleep(2);
         //Analizo el código de operación recibido y ejecuto acciones según corresponda
         switch(paquete->codigo_operacion) {
             case CLIENTE_TEST:
@@ -69,6 +68,11 @@ void atender_proceso (void* parametro ){
                 task_aux->nombre_semaforo = nombre_semaforo;
                 list_add(carpincho->task_list, task_aux);
                 break;
+            case CLIENTE_DESCONECTADO:
+                log_info(logger_kernel, "Desconectando cliente %d", socket_cliente);
+                close(socket_cliente);
+                return;
+                break;
             default:
                 log_error(logger_kernel, "Codigo de operacion desconocido");
                 break;
@@ -79,9 +83,6 @@ void atender_proceso (void* parametro ){
 		free(paquete->buffer->stream);
         free(paquete->buffer);
         free(paquete);
-
-        //Salgo del ciclo
-        break; 
 
 	}
     return;

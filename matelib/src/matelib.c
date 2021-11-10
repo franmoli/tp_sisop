@@ -67,16 +67,28 @@ int mate_init(mate_instance *lib_ref, char *config){
     }
     
     enviar_paquete(paquete, socket_cliente);
-    printf("init %d", socket_cliente);
+    printf("init %d\n", socket_cliente);
     
     free(string);
     return 0;
 }
 
 int mate_close(mate_instance *lib_ref){
-    free(lib_ref->group_info);
-    free(lib_ref->info_carpincho);
-    free(lib_ref);
+
+    t_paquete *paquete = malloc(sizeof(t_paquete));
+    t_buffer *buffer = malloc(sizeof(t_buffer));
+    paquete->codigo_operacion = CLIENTE_DESCONECTADO;
+    paquete->buffer = buffer;
+    buffer->size = 0;
+
+    
+    enviar_paquete(paquete, socket_cliente);
+
+    //free(lib_ref->group_info);
+    //free(lib_ref->info_carpincho);
+    //free(lib_ref);
+    
+    close(socket_cliente);
     return 0;
 }
 
@@ -86,16 +98,23 @@ int mate_sem_init(mate_instance *lib_ref, mate_sem_name sem, unsigned int value)
     
     
 
+    //----Crear paquete con nombre de semaforo y valor para que kernel haga el sem_init con el COD_OP correspondiente
+    //serializar inputs (nombre y valor init)
     
+    // creo un paquete vacío para testear
     t_paquete *paquete = malloc(sizeof(t_paquete));
     t_buffer *buffer = malloc(sizeof(t_buffer));
-    
-    //----Crear paquete con nombre de semaforo y valor para que kernel haga el sem_init con el COD_OP correspondiente
     paquete->codigo_operacion = INIT_SEM;
-    //serializar inputs (nombre y valor init)
     paquete->buffer = buffer;
     buffer->size = 0;
-    enviar_paquete(paquete,socket_cliente);
+
+    if(socket_cliente == -1){
+        log_error(lib_ref->logger,"No se pudo conectar a kernel ni a memoria");
+        return 1;
+    }
+    
+    enviar_paquete(paquete, socket_cliente);
+    sleep(1);
     printf("Enviado %d\n", socket_cliente);
     //----esperar señal de inicializacion correcta
     free(paquete);    
