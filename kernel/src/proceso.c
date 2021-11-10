@@ -98,32 +98,88 @@ void desbloquear(t_proceso *self){
     return;
 }
 
-void *solicitar_semaforo(char *nombre_semaforo, int id){
+void solicitar_semaforo(char *nombre_semaforo, int id){
     // traer de la lista el semaforo
-    //si no existe enviar codigo de error
-    //si existe revisar si esta > 0
-    //si no esta disponible, agregar a la lista de solicitantes
-    //si esta disponible restarle uno al value y enviar habilitacion para continuar
-    return NULL;
+    t_semaforo *semaforo_solicitado = traer_semaforo(nombre_semaforo);
+    
+    if(semaforo_solicitado == NULL) return; //TODO: ENVIAR ERROR AL CARPINCHO
+
+    if(semaforo_solicitado->value > 0){
+
+        //si esta disponible restarle uno al value y enviar habilitacion para continuar
+        semaforo_solicitado->value = semaforo_solicitado->value - 1;
+        enviar_sem_disponible(id);
+
+    }else{
+
+        //si no esta disponible, agregar a la lista de solicitantes
+        int *aux = malloc(sizeof(int));
+        *aux = id;
+        semaforo_solicitado->value = semaforo_solicitado->value - 1;
+        list_add(semaforo_solicitado->solicitantes, aux);
+
+    }
+    return ;
 }
 
 void iniciar_semaforo(char *nombre_semaforo, int valor){
-    //agergar a lista de semaforos
+
+    //crear el struct del semaforo
     t_semaforo *new_semaforo = malloc(sizeof(t_semaforo));
     new_semaforo->value = valor;
     new_semaforo->nombre_semaforo = string_new();
     string_append(&(new_semaforo->nombre_semaforo), nombre_semaforo);
     new_semaforo->solicitantes = list_create();
 
-    //printf("%s", new_semaforo->nombre_semaforo);
+    //agergar a lista de semaforos
     list_add(lista_semaforos, new_semaforo);
 
 }
 
 void postear_semaforo(char *nombre_semaforo){
+
     // traer de la lista el semaforo
-    //si no existe enviar codigo de error
-    //si existe revisar si esta > 0
-    //si no esta disponible, sumarle uno a value - enviar habilitacion de continuar a ese proceso, - sacarlo de la lista de solicitantes
-    //si esta disponible sumarle uno a value
+    t_semaforo *semaforo_solicitado = traer_semaforo(nombre_semaforo);
+    
+    if(semaforo_solicitado == NULL) return; //TODO: ENVIAR ERROR AL CARPINCHO
+
+    if(semaforo_solicitado->value >= 0){
+
+        //si esta disponible sumarle uno a value
+        semaforo_solicitado->value = semaforo_solicitado->value + 1;
+
+    }else{
+
+        //si no esta disponible: sumarle uno a value - sacarlo de la lista de solicitantes - enviar habilitacion de continuar a ese proceso 
+        //TODO: hacer un mutex para estas listas de semaforos
+        int *aux;
+        semaforo_solicitado->value = semaforo_solicitado->value + 1;
+        aux = list_remove(semaforo_solicitado->solicitantes, 0);
+        enviar_sem_disponible(*aux);
+
+    }
+}
+
+void enviar_sem_disponible(int id){
+    //enviar al id el sem disponible
+}
+
+t_semaforo *traer_semaforo(char *nombre_solicitado){
+
+    t_semaforo *semaforo_solicitado;
+    int index = 0;
+
+    while(index < list_size(lista_semaforos)){
+
+        semaforo_solicitado = list_get(lista_semaforos, index);
+        if(!strcmp(semaforo_solicitado->nombre_semaforo, nombre_solicitado)) break;
+        index++;
+
+    }
+
+    if(index == list_size(lista_semaforos)) return NULL;
+    
+
+    return semaforo_solicitado;
+
 }
