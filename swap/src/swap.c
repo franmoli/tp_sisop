@@ -6,6 +6,7 @@ int main(int argc, char **argv) {
     logger_swap = log_create("./cfg/swap.log", "SWAP", true, LOG_LEVEL_INFO);
     lista_paginas_almacenadas = list_create();
     lista_mapeos = list_create();
+    archivos_abiertos = list_create();
     log_info(logger_swap, "Programa inicializado correctamente");
 
     //Se carga la configuración
@@ -14,13 +15,18 @@ int main(int argc, char **argv) {
     config_swap = generar_config_swap(config_file);
     log_info(logger_swap, "Configuración cargada correctamente");
 
+    //Valido que el tamaño de SWAP sea múltiplo de la página
+    if(config_swap->TAMANIO_SWAP % config_swap->TAMANIO_PAGINA != 0) {
+        log_error(logger_swap, "El tamanio de los archivos de swap debe ser multiplo del tamanio de la pagina");
+        exit(-1);
+    }
+
     //Se inicializa el servidor
     socket_server = iniciar_servidor(config_swap->IP, string_itoa(config_swap->PUERTO), logger_swap);
 
     //Se inicializan los archivos
     log_info(logger_swap, "Aguarde un momento... Generando archivos...");
     crear_archivos_swap();
-    archivo_seleccionado = 1;
 
     /*Hardcodeo lectura de una página desde el archivo*/
     t_marco *marco_prueba = malloc(sizeof(t_marco));
