@@ -10,6 +10,7 @@
 #define CANT_MAX_SEM 10
 
 t_config_matelib *config_matelib;
+int socket_cliente;
 
 
 //-------------------Type Definitions----------------------/

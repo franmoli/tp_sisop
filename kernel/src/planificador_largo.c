@@ -40,8 +40,13 @@ void atender_proceso (void* parametro ){
     bool inicializado = false;
     int socket_cliente = *(int*)parametro;
     t_proceso *carpincho = malloc(sizeof(t_proceso)); 
+    char *nombre_semaforo = NULL;
+    t_task *task_aux;
     while(1) {
+
 		t_paquete *paquete = recibir_paquete(socket_cliente);
+        task_aux = malloc(sizeof(t_task));
+        printf("Nueva op\n");
         
         //Analizo el código de operación recibido y ejecuto acciones según corresponda
         switch(paquete->codigo_operacion) {
@@ -55,7 +60,15 @@ void atender_proceso (void* parametro ){
                     inicializado = true;
                 }
                 break;
-                
+            case INIT_SEM:
+                //nombre_semaforo = paquete->buffer;
+                nombre_semaforo = "semaforo_mock";
+                //agregar a lista de actividades
+                printf("Iniciando semáforo\n");
+                task_aux->id = INIT_SEM;
+                task_aux->nombre_semaforo = nombre_semaforo;
+                list_add(carpincho->task_list, task_aux);
+                break;
             default:
                 log_error(logger_kernel, "Codigo de operacion desconocido");
                 break;
@@ -85,6 +98,7 @@ t_proceso *nuevo_carpincho(int socket_cliente){
     nuevo_proceso->estimar = false;
     nuevo_proceso->termino_rafaga = false;
     nuevo_proceso->block = false;
+    nuevo_proceso->task_list = list_create();
 
     pthread_t hilo_proceso;
     pthread_create(&hilo_proceso, NULL, proceso, (void*)nuevo_proceso);
@@ -215,3 +229,4 @@ void *hilo_salida_a_exit(void *multiprogramacion_disponible_p){
     }
     return NULL;
 }
+

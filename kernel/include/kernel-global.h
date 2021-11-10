@@ -24,6 +24,7 @@ typedef enum {
 typedef struct {
     int id;
     t_status status;
+    t_list *task_list;
     int estimacion;
     int ejecucion_anterior;
     bool estimar;
@@ -32,6 +33,10 @@ typedef struct {
     bool salida_exit;
     bool salida_block;
 } t_proceso;
+typedef struct {
+    int id;
+    char *nombre_semaforo;
+} t_task;
 
 //Configuración
 t_config_kernel *config_kernel;
@@ -44,6 +49,7 @@ t_list *lista_exec;
 t_list *lista_blocked;
 t_list *lista_s_blocked;
 t_list *lista_s_ready;
+t_list *lista_semaforos;
 //Semaforos
 sem_t mutex_listas;
 sem_t proceso_finalizo_o_suspended;

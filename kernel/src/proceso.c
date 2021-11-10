@@ -4,39 +4,42 @@ void *proceso(void *self){
     t_proceso *proceso_struct = self;
     sem_wait(&proceso_inicializado);
     int index = 0;
+    int prev_status = -1;
     while(1){
         printf("esperando actual ed listax\n");
         sem_wait(&actualizacion_de_listas_1);
-
-        switch (proceso_struct->status){
-            case NEW:
-                printf("N - p: %d ", proceso_struct->id);
-                new();
-                sleep(1);
-                break;
-            case EXEC:
-                //TODO :proceso timestamp
-                printf("E - p: %d ", proceso_struct->id);
-                exec(proceso_struct);
-                /*if(exec(aux)){
-                    proceso_struct->salida_exit = true;
-                    printf("salida a exit \n");
-                    sem_post(&salida_a_exit);
-                    //sem_wait(&salida_a_exit_recibida);
-                    
-                }else{
-                    proceso_struct->termino_rafaga = true;
-                    //TODO: proceso calcular ejecucion real Y y setear para estimar
-                    printf("Salida a ready\n");
-                    sem_post(&salida_exec);
-                    //sem_wait(&salida_de_exec_recibida);
-                }*/
-                break;
-            case BLOCKED:
-                printf("B - p: %d ", proceso_struct->id);
-                break;
-            default:
-                printf("Estoy bloqueado y no hago nada %d\n", proceso_struct->id);
+        if(prev_status != proceso_struct->status){
+            switch (proceso_struct->status){
+                case NEW:
+                    printf("N - p: %d ", proceso_struct->id);
+                    new();
+                    sleep(1);
+                    break;
+                case EXEC:
+                    //TODO :proceso timestamp
+                    printf("E - p: %d ", proceso_struct->id);
+                    exec(proceso_struct);
+                    /*if(exec(aux)){
+                        proceso_struct->salida_exit = true;
+                        printf("salida a exit \n");
+                        sem_post(&salida_a_exit);
+                        //sem_wait(&salida_a_exit_recibida);
+                        
+                    }else{
+                        proceso_struct->termino_rafaga = true;
+                        //TODO: proceso calcular ejecucion real Y y setear para estimar
+                        printf("Salida a ready\n");
+                        sem_post(&salida_exec);
+                        //sem_wait(&salida_de_exec_recibida);
+                    }*/
+                    break;
+                case BLOCKED:
+                    printf("B - p: %d ", proceso_struct->id);
+                    break;
+                default:
+                    printf("Estoy bloqueado y no hago nada %d\n", proceso_struct->id);
+            }
+            prev_status = proceso_struct->status;
         }
         sem_post(&actualizacion_de_listas_1_recibido);
         sem_wait(&actualizacion_de_listas_2);
@@ -52,7 +55,10 @@ void new(){
     sleep(1);
 }
 
-void *exec(t_proceso *self){
+void exec(t_proceso *self){
+
+    //Enviar exec disponible
+
 
     bool bloquear_f = false;
     //Tarea mock
@@ -64,7 +70,6 @@ void *exec(t_proceso *self){
     }
 
     bloquear(self);
-    return NULL;
 }
 
 void bloquear(t_proceso *self){
@@ -81,4 +86,18 @@ void desbloquear(t_proceso *self){
     sleep(1);
     sem_post(&salida_block);
     return;
+}
+
+void *solicitar_semaforo(char *nombre_semaforo, int id){
+    return NULL;
+}
+
+void iniciar_semaforo(char *nombre_semaforo){
+    //agergar a lista de semaforos
+    //
+
+}
+
+void postear_semaforo(char *nombre_semaforo){
+
 }

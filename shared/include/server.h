@@ -14,7 +14,10 @@
 typedef enum {
 	CLIENTE_DESCONECTADO = 1,
 	CLIENTE_TEST = 2,
-    NUEVO_CARPINCHO = 3
+    NUEVO_CARPINCHO = 3,
+    SEM_WAIT = 4,
+    SEM_POST = 5,
+    INIT_SEM = 6
 } op_code;
 
 typedef struct {
