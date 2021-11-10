@@ -40,12 +40,14 @@ void atender_proceso (void* parametro ){
     bool inicializado = false;
     int socket_cliente = *(int*)parametro;
     t_proceso *carpincho = malloc(sizeof(t_proceso)); 
-    char *nombre_semaforo = NULL;
+    //char *nombre_semaforo = NULL;
+    char *nombre_semaforo = string_new();
+    string_append(&nombre_semaforo, "Semaforo mock");
     t_task *task_aux;
     while(1) {
 		t_paquete *paquete = recibir_paquete(socket_cliente);
         task_aux = malloc(sizeof(t_task));
-        sleep(2);
+        print_semaforos();
         //Analizo el código de operación recibido y ejecuto acciones según corresponda
         switch(paquete->codigo_operacion) {
             case CLIENTE_TEST:
@@ -60,10 +62,10 @@ void atender_proceso (void* parametro ){
                 break;
             case INIT_SEM:
                 //nombre_semaforo = paquete->buffer;
-                nombre_semaforo = "semaforo_mock";
                 //agregar a lista de actividades
                 task_aux->id = INIT_SEM;
                 task_aux->nombre_semaforo = nombre_semaforo;
+                task_aux->value = 2;
                 list_add(carpincho->task_list, task_aux);
                 break;
             case CLIENTE_DESCONECTADO:
@@ -120,7 +122,7 @@ t_proceso *nuevo_carpincho(int socket_cliente){
 void *planificador_largo_plazo(void *_){
 
     while(1){
-
+        print_semaforos();
         sem_wait(&cambio_de_listas);
         if(multiprogramacion_disponible){
             if(list_size(lista_s_ready)){
@@ -227,3 +229,14 @@ void *hilo_salida_a_exit(void *multiprogramacion_disponible_p){
     return NULL;
 }
 
+void print_semaforos(){
+    int index = 0;
+    t_semaforo *aux;
+    printf("Printing semaphores %d:\n", list_size(lista_semaforos));
+    while(index < list_size(lista_semaforos)){
+        aux = list_get(lista_semaforos, index);
+        printf("Semaforo \"%s\" - Valor%d - Solicitantes %d\n",aux->nombre_semaforo, aux->value, list_size(aux->solicitantes));
+        printf("\n");
+        index++;
+    }
+}

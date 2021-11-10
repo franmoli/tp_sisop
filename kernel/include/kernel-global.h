@@ -6,6 +6,7 @@
 #include <semaphore.h>
 #include <commons/log.h>
 
+#include "server.h"
 #include "config_utils.h"
 
 
@@ -33,10 +34,18 @@ typedef struct {
     bool salida_exit;
     bool salida_block;
 } t_proceso;
+
 typedef struct {
-    int id;
+    op_code id;
     char *nombre_semaforo;
+    int value;
 } t_task;
+
+typedef struct {
+    char *nombre_semaforo;
+    int value;
+    t_list *solicitantes;
+}t_semaforo;
 
 //Configuración
 t_config_kernel *config_kernel;

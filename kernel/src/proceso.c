@@ -36,7 +36,7 @@ void *proceso(void *self){
                     printf("B - p: %d ", proceso_struct->id);
                     break;
                 default:
-                    printf("Estoy bloqueado y no hago nada %d\n", proceso_struct->id);
+                    printf("Estoy en default y no hago nada %d - %d\n", proceso_struct->id, proceso_struct->status);
             }
             prev_status = proceso_struct->status;
         }
@@ -66,12 +66,19 @@ void exec(t_proceso *self){
         //Traer proxima operacion
         if(list_size(self->task_list)){
             next_task = list_get(self->task_list, 0);
-            printf("Tarea id %d\n", next_task->id);
+            switch (next_task->id){
+                case INIT_SEM:
+                    log_info(logger_kernel, "Iniciando semaforo: %s", next_task->nombre_semaforo);
+                    iniciar_semaforo(next_task->nombre_semaforo, next_task->value);
+                    break;
+
+            }
+            
+            bloquear_f = true;
         }
-        bloquear_f = true;
     }
 
-    
+    sleep(2);
     bloquear(self);
 }
 
@@ -95,9 +102,16 @@ void *solicitar_semaforo(char *nombre_semaforo, int id){
     return NULL;
 }
 
-void iniciar_semaforo(char *nombre_semaforo){
+void iniciar_semaforo(char *nombre_semaforo, int valor){
     //agergar a lista de semaforos
-    //
+    t_semaforo *new_semaforo = malloc(sizeof(t_semaforo));
+    new_semaforo->value = valor;
+    new_semaforo->nombre_semaforo = string_new();
+    string_append(&(new_semaforo->nombre_semaforo), nombre_semaforo);
+    new_semaforo->solicitantes = list_create();
+
+    //printf("%s", new_semaforo->nombre_semaforo);
+    list_add(lista_semaforos, new_semaforo);
 
 }
 

@@ -2,8 +2,8 @@
 #define KERNEL_H
 // Acá se están todas las declaraciones de funciones y librerias necesitadas Exclusivamente por kernel.c
 
-#include "kernel-global.h"
 #include "server.h"
+#include "kernel-global.h"
 #include "planificador_corto.h"
 #include "planificador_mediano.h"
 #include "planificador_largo.h"
