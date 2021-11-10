@@ -45,7 +45,6 @@ void atender_proceso (void* parametro ){
     while(1) {
 		t_paquete *paquete = recibir_paquete(socket_cliente);
         task_aux = malloc(sizeof(t_task));
-        printf("Nueva op %d\n", paquete->codigo_operacion);
         sleep(2);
         //Analizo el código de operación recibido y ejecuto acciones según corresponda
         switch(paquete->codigo_operacion) {
@@ -63,7 +62,6 @@ void atender_proceso (void* parametro ){
                 //nombre_semaforo = paquete->buffer;
                 nombre_semaforo = "semaforo_mock";
                 //agregar a lista de actividades
-                printf("Iniciando semáforo\n");
                 task_aux->id = INIT_SEM;
                 task_aux->nombre_semaforo = nombre_semaforo;
                 list_add(carpincho->task_list, task_aux);
@@ -135,7 +133,6 @@ void *planificador_largo_plazo(void *_){
 
                 //Se saca de new y se pasa a ready
                 mover_proceso_de_lista(lista_new, lista_ready, 0, READY);
-                printf("A ready\n");
                 multiprogramacion_disponible = multiprogramacion_disponible - 1;
             }
         }
@@ -147,7 +144,6 @@ void *hilo_salida_a_exit(void *multiprogramacion_disponible_p){
 
 
     while(1){
-        printf(".\n");
         sem_wait(&salida_a_exit);
         
         //printf("Ready: %d\n", list_size(lista_ready));

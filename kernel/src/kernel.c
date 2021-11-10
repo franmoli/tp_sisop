@@ -125,7 +125,6 @@ void iniciar_semaforos_generales(){
 
 void mover_proceso_de_lista(t_list *origen, t_list *destino, int index, int status){
     t_proceso *aux;
-    printf("Cambio\n");
     sem_wait(&mutex_listas);
         //printf("%p", origen);
         aux = list_remove(origen, index);
@@ -139,7 +138,6 @@ void mover_proceso_de_lista(t_list *origen, t_list *destino, int index, int stat
 }
 
 void avisar_cambio(){
-    printf("Avisando %d\n", cantidad_de_procesos);
     sem_wait(&mutex_cant_procesos);
     //Aviso que hubo un cambio de listas
     for(int i = 0; i < cantidad_de_procesos; i++){

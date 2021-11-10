@@ -6,7 +6,6 @@ void *proceso(void *self){
     int index = 0;
     int prev_status = -1;
     while(1){
-        printf("esperando actual ed listax\n");
         sem_wait(&actualizacion_de_listas_1);
         if(prev_status != proceso_struct->status){
             switch (proceso_struct->status){
@@ -58,17 +57,21 @@ void new(){
 void exec(t_proceso *self){
 
     //Enviar exec disponible
+    //El exec disponible se resolveria mandando el operacion recibida, asi solo se va a enviar cuando este en exec y empiece a procesar las solicitudes enviadas
 
-
+    t_task *next_task = NULL;
     bool bloquear_f = false;
-    //Tarea mock
-    printf("Haciendo la tarea - exec\n");
 
     while(!bloquear_f){
-        sleep(2);
+        //Traer proxima operacion
+        if(list_size(self->task_list)){
+            next_task = list_get(self->task_list, 0);
+            printf("Tarea id %d\n", next_task->id);
+        }
         bloquear_f = true;
     }
 
+    
     bloquear(self);
 }
 
