@@ -99,6 +99,11 @@ void desbloquear(t_proceso *self){
 }
 
 void *solicitar_semaforo(char *nombre_semaforo, int id){
+    // traer de la lista el semaforo
+    //si no existe enviar codigo de error
+    //si existe revisar si esta > 0
+    //si no esta disponible, agregar a la lista de solicitantes
+    //si esta disponible restarle uno al value y enviar habilitacion para continuar
     return NULL;
 }
 
@@ -116,5 +121,9 @@ void iniciar_semaforo(char *nombre_semaforo, int valor){
 }
 
 void postear_semaforo(char *nombre_semaforo){
-
+    // traer de la lista el semaforo
+    //si no existe enviar codigo de error
+    //si existe revisar si esta > 0
+    //si no esta disponible, sumarle uno a value - enviar habilitacion de continuar a ese proceso, - sacarlo de la lista de solicitantes
+    //si esta disponible sumarle uno a value
 }
