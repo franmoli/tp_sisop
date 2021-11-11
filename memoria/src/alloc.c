@@ -205,10 +205,11 @@ void memAlloc(t_paquete *paquete) {
     int paginaDisponible = getPrimeraPaginaDisponible(sizeof(t_heap_metadata));
     t_pagina* primeraPagina = list_get(tabla_paginas->paginas,paginaDisponible);
     int entraTotal = config_memoria->TAMANIO_PAGINA - primeraPagina->tamanio_ocupado - (sizeof(t_heap_metadata) * 2) - size;
+    t_contenidos_pagina *contenidoHeader;
     if (entraTotal >=0){
         //HEADER
         crearHeaderAlloc(primeraPagina,sizeof(t_heap_metadata));
-        t_contenidos_pagina *contenidoHeader = getLastContenidoByPagina(primeraPagina);
+        contenidoHeader = getLastContenidoByPagina(primeraPagina);
         t_heap_metadata* heap = traerAllocDeMemoria(contenidoHeader->dir_comienzo);
         heap->nextAlloc +=size;
         guardarAlloc(heap, contenidoHeader->dir_comienzo);
@@ -244,39 +245,20 @@ void memAlloc(t_paquete *paquete) {
 
         }else{
             //ENTRA SOLO EL HEADER
-            crearHeaderAlloc(primeraPagina,sizeof(t_heap_metadata));
-            t_contenidos_pagina *contenidoHeader = getLastContenidoByPagina(primeraPagina);
+            //EDITO ULTIMO HEAP
+            contenidoHeader = getLastContenidoByPagina(primeraPagina);
+            data->isFree = false;
+            data->nextAlloc = contenidoHeader->dir_fin + size;
+            guardarAlloc(data, contenidoHeader->dir_comienzo);
+
+            //GUARDO NUEVO HEAP
             data = traerAllocDeMemoria(contenidoHeader->dir_comienzo);
-            data->nextAlloc +=size;
+            data->prevAlloc =contenidoHeader->dir_fin;
+            data->nextAlloc = NULL;
+            data->isFree = true;
+            guardarAlloc(data, contenidoHeader->dir_fin);
         }
-        data = traerAllocDeMemoria(inicio);
-        log_info(logger_memoria, "Traje primer alloc de memoria");
-
-        log_info(logger_memoria, "Voy a guardar un nuevo alloc");
-        uint32_t a4 = data;
-        if(config_memoria->TAMANIO + tamanio_memoria < nextAnterior + sizeof(t_heap_metadata) * 2 + size) {
-            log_info(logger_memoria, "Memoria insuficiente");
-            //Nose si tendria que mandar a swap aca
-            return;
-        }
-
-        // Aca entonces tengo que guardar un nuevo alloc
-
-        data->isFree = false;
-        data->nextAlloc = nextAnterior + sizeof(t_heap_metadata) + size;
-
-        guardarAlloc(data, nextAnterior);
-
-        data->isFree = true;
-        data->prevAlloc = nextAnterior;
-        data->nextAlloc = NULL;
-
-        guardarAlloc(data,nextAnterior + size + sizeof(t_heap_metadata));
-
-        log_info(logger_memoria, "Fin Memalloc, guarde alloc nuevo al final");
-
         return;
-
     }
 }
 t_heap_metadata* getLastHeapFromPagina(int pagina){
