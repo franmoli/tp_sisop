@@ -14,11 +14,15 @@ void freeAlloc(uint32_t direccion) {
     alloc->isFree = true;
     uint32_t next = alloc->nextAlloc;
     uint32_t back = alloc->prevAlloc;
+    t_heap_metadata* anterior;
+    t_heap_metadata* posterior;
+    bool hayAnterior = false;
+    bool hayPosterior = false;
 
     if(alloc->prevAlloc!=0){// SI EXISTE ANTERIOR TRAERLO
-        t_heap_metadata* anterior = traerAllocDeMemoria(alloc->prevAlloc);
+        hayAnterior = true;
+        anterior = traerAllocDeMemoria(alloc->prevAlloc);
         
-
         int pagina = getPaginaByDireccion(direccion);
         t_pagina* paginaBuscada = list_get(tabla_paginas->paginas,pagina);
         paginaBuscada->tamanio_ocupado -= (alloc->nextAlloc- inicio -sizeof(t_heap_metadata));
@@ -27,10 +31,18 @@ void freeAlloc(uint32_t direccion) {
         anterior->nextAlloc = next;
         guardarAlloc(anterior,back);
     }
-    if(next != NULL){
-        t_heap_metadata* posterior = traerAllocDeMemoria(next);
+    if(next != NULL){ //SI EXISTE PROXIMO
+        hayPosterior=true;
+        posterior = traerAllocDeMemoria(next);
         posterior->prevAlloc = back;
         guardarAlloc(posterior,next);
+    }
+    if(hayAnterior && hayPosterior){
+        if(anterior->isFree && posterior->isFree){ //BASICAMENTE, SI AMBOS ESTAN LIBRES -> UNIRLOS
+            anterior->nextAlloc = posterior->nextAlloc;
+            free(posterior);
+            guardarAlloc(anterior,back);
+        }
     }
 }
 
