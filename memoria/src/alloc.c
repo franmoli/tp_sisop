@@ -1,52 +1,43 @@
 #include "alloc.h"
 
-
 // Memfree -> Libero alloc (flag isFree en true), me fijo el anterior y posterior y los unifico
 // TODO -> Meter paginacion (Mati gatooo)
 void freeAlloc(uint32_t direccion) {
 
+    uint32_t inicio = tamanio_memoria;
+    if(!direccionValida(direccion)){
+        //MATE FREE FAIÑT
+    }
     //Traigo de memoria el alloc
     t_heap_metadata* alloc = traerAllocDeMemoria(direccion);
 
     alloc->isFree = true;
+    uint32_t next = alloc->nextAlloc;
+    uint32_t back = alloc->prevAlloc;
 
-    t_heap_metadata* anterior = traerAllocDeMemoria(alloc->prevAlloc);
-    t_heap_metadata* posterior = malloc(sizeof(t_heap_metadata));
-    posterior->isFree = false;
-    if(alloc->nextAlloc != NULL) {
-        posterior = traerAllocDeMemoria(alloc->nextAlloc);
+    if(alloc->prevAlloc!=0){// SI EXISTE ANTERIOR TRAERLO
+        t_heap_metadata* anterior = traerAllocDeMemoria(alloc->prevAlloc);
+        
+
+        int pagina = getPaginaByDireccion(direccion);
+        t_pagina* paginaBuscada = list_get(tabla_paginas->paginas,pagina);
+        paginaBuscada->tamanio_ocupado -= (alloc->nextAlloc- inicio -sizeof(t_heap_metadata));
+
+        free(alloc);
+        anterior->nextAlloc = next;
+        guardarAlloc(anterior,back);
     }
-
-    if(anterior->isFree) {
-        //Juntar los 2 allocs
-        anterior->nextAlloc = alloc->nextAlloc;
-        guardarAlloc(anterior,alloc->prevAlloc);
-        if(alloc->nextAlloc != NULL) {
-            posterior->prevAlloc = alloc->prevAlloc;
-            guardarAlloc(posterior,alloc->nextAlloc);
-        }
-
+    if(next != NULL){
+        t_heap_metadata* posterior = traerAllocDeMemoria(next);
+        posterior->prevAlloc = back;
+        guardarAlloc(posterior,next);
     }
-
-    if(alloc->nextAlloc != NULL) {
-
-        if(posterior->isFree){
-            //Juntar los 2 allocs
-            alloc->nextAlloc = posterior->nextAlloc;
-            t_heap_metadata* posteriorDelPosterior = traerAllocDeMemoria(posterior->nextAlloc);
-
-            posteriorDelPosterior->prevAlloc = posterior->prevAlloc;
-
-            guardarAlloc(alloc, direccion);
-            guardarAlloc(posteriorDelPosterior,posterior->nextAlloc);
-
-        }
-
-    }
-
 }
 
-
+bool direccionValida(uint32_t direccion){
+    bool esValida = false;
+    return esValida;
+}
 t_heap_metadata* traerAllocDeMemoria(uint32_t direccion) {
 
     t_heap_metadata* data = malloc(sizeof(t_heap_metadata));
@@ -61,37 +52,6 @@ t_heap_metadata* traerAllocDeMemoria(uint32_t direccion) {
 
     return data;
 
-}
-
-void crearFooterAlloc(t_pagina *primeraPagina, int inicio,int size){
-    t_heap_metadata* alloc = malloc(sizeof(t_heap_metadata));
-
-    alloc->isFree = true;
-    alloc->prevAlloc = inicio;
-    alloc->nextAlloc = NULL;
-
-    int offset = 0;
-    t_contenidos_pagina *contenido = getLastContenidoByPagina(primeraPagina);
-    memcpy(contenido->dir_fin + offset, &alloc->prevAlloc, sizeof(uint32_t));
-    offset += sizeof(uint32_t);
-    memcpy(contenido->dir_fin + offset, &alloc->nextAlloc, sizeof(uint32_t));
-    offset += sizeof(uint32_t);
-    memcpy(contenido->dir_fin + offset, &alloc->isFree, sizeof(uint8_t));
-    offset += sizeof(uint8_t);
-    
-    t_contenidos_pagina *contenidoAnterior = getLastContenidoByPagina(primeraPagina);
-    t_contenidos_pagina *contenidoFooter = malloc(sizeof(t_contenidos_pagina));
-    
-    contenidoFooter->carpincho_id = socket_client;
-    contenidoFooter->dir_comienzo = contenidoAnterior->dir_fin;
-    contenidoFooter->tamanio =  sizeof(t_heap_metadata);
-    contenidoFooter->dir_fin = contenidoFooter->dir_comienzo + contenidoFooter->tamanio;
-    contenidoFooter->contenido_pagina = FOOTER;
-    primeraPagina->cantidad_contenidos +=1;
-    primeraPagina->tamanio_ocupado += size;
-    list_add(primeraPagina->listado_de_contenido, contenidoFooter);
-
-    free(alloc);
 }
 void crearPrimerAlloc(t_pagina* primeraPagina,int size) {
 

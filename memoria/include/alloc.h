@@ -11,6 +11,6 @@ void guardarAlloc(t_heap_metadata* data, uint32_t direccion);
 void memAlloc(t_paquete *paquete);
 void freeAlloc(uint32_t direccion);
 
-
+bool direccionValida(uint32_t direccion);
 t_heap_metadata* getLastHeapFromPagina(int pagina);
 #endif
