@@ -190,6 +190,41 @@ void memAlloc(t_paquete *paquete) {
         while(data->nextAlloc != NULL) {
             if(data->isFree){
 
+                //Estoy en un alloc libre y no es el ultimo, hacer si entra totalmente, sino que siga
+
+                 uint32_t sizeAlloc;
+                if(data->prevAlloc == NULL) {
+                    log_info(logger_memoria, "first alloc");
+                    sizeAlloc = data->nextAlloc - inicio - sizeof(t_heap_metadata);
+                } else {
+                    log_info(logger_memoria, "not first alloc");
+                    sizeAlloc = data->nextAlloc - nextAnterior - sizeof(t_heap_metadata);
+                }
+
+                if(size == sizeAlloc) {
+
+                    log_info(logger_memoria, "encontre un alloc con el mismo size");
+
+                    //Uso este alloc para guardar
+                    data->isFree = false;
+                    guardarAlloc(data, nextAnterior);
+                    return;
+                } 
+                else if(sizeAlloc > size + sizeof(t_heap_metadata)) {
+
+                    log_info(logger_memoria, "encontre un alloc con mayor size");
+
+                    data->isFree = false;
+                    data->nextAlloc = nextAnterior + sizeof(t_heap_metadata) + size;
+
+                    guardarAlloc(data, nextAnterior);
+
+                    data->isFree = true;
+                    data->prevAlloc = nextAnterior;
+                    data->nextAlloc = nextAnterior + sizeof(t_heap_metadata) * 2 + sizeAlloc;
+
+                    guardarAlloc(data,nextAnterior + sizeof(t_heap_metadata) + size);
+                }
             }
               nextAnterior = data->nextAlloc;
               data = traerAllocDeMemoria(data->nextAlloc);
