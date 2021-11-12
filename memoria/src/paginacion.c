@@ -13,8 +13,8 @@ int getPrimeraPaginaDisponible(int size)
     while (list_iterator_has_next(list_iterator) && !pagainaFueEncontrada)
     {
         t_pagina *paginaLeida = list_iterator_next(list_iterator);
-        int a = (config_memoria->TAMANIO_PAGINA - paginaLeida->tamanio_ocupado - size);
-        if (a >= 0)
+        int a = (config_memoria->TAMANIO_PAGINA - paginaLeida->tamanio_ocupado);
+        if (a > 0)
         {
             pagainaFueEncontrada = true;
             numeroPagina = paginaLeida->numero_pagina;

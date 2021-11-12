@@ -11,7 +11,6 @@ void guardarAlloc(t_heap_metadata* data, uint32_t direccion);
 void memAlloc(t_paquete *paquete);
 void freeAlloc(uint32_t direccion);
 
-void crearFooterAlloc(t_pagina *primeraPagina, int inicio,int size);
-void crearHeaderAlloc(t_pagina *primeraPagina,int size);
+
 t_heap_metadata* getLastHeapFromPagina(int pagina);
 #endif
