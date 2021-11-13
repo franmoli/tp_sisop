@@ -4,6 +4,7 @@
 #include "config_utils.h"
 #include "server.h"
 #include "serializaciones.h"
+#include <semaphore.h>
 
 //Configuración
 t_config_swap *config_swap;

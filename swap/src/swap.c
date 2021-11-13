@@ -7,6 +7,7 @@ int main(int argc, char **argv) {
     lista_paginas_almacenadas = list_create();
     lista_mapeos = list_create();
     archivos_abiertos = list_create();
+    sem_init(&mutex_operacion, 0, 1);
     log_info(logger_swap, "Programa inicializado correctamente");
 
     //Se carga la configuración
@@ -55,9 +56,15 @@ int main(int argc, char **argv) {
     do {
         socket_client = esperar_cliente(socket_server, logger_swap);
         if(socket_client != -1) {
+            sem_wait(&mutex_operacion);
+            printf("\nEntra un procesardo\n");
             cliente_recibido = 1;
             ejecutar_operacion(socket_client);
+            sem_post(&mutex_operacion);
         }
+
+        //Espero el tiempo de retardo
+        sleep(config_swap->RETARDO_SWAP);
     } while(cliente_recibido);
 
     //Fin del programa

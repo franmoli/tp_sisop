@@ -7,6 +7,7 @@
 
 //Variables globales
 t_config *config_file;
+sem_t mutex_operacion;
 
 //Funciones
 static void *ejecutar_operacion(int client);
