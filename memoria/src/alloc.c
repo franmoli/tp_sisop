@@ -2,9 +2,10 @@
 
 // Memfree -> Libero alloc (flag isFree en true), me fijo el anterior y posterior y los unifico
 // TODO -> Meter paginacion (Mati gatooo)
-void freeAlloc(uint32_t direccion) {
+void freeAlloc(t_paquete *paquete) {
 
     uint32_t inicio = tamanio_memoria;
+    uint32_t direccion = deserializar_alloc(paquete);
     if(!direccionValida(direccion)){
         //MATE FREE FAIÑT
     }
@@ -47,7 +48,7 @@ void freeAlloc(uint32_t direccion) {
 }
 
 bool direccionValida(uint32_t direccion){
-    bool esValida = false;
+    bool esValida = true;
     return esValida;
 }
 t_heap_metadata* traerAllocDeMemoria(uint32_t direccion) {
@@ -230,9 +231,9 @@ void memAlloc(t_paquete *paquete) {
              }
              else{
                  //ocupo el restante y pido otra
-                 if(list_size(tabla_paginas->paginas) + 1 <= tabla_paginas->paginas_totales_maximas){
-                    int restante = size  - (config_memoria->TAMANIO_PAGINA - pagina->tamanio_ocupado);
-
+                  int restante = size  - (config_memoria->TAMANIO_PAGINA - pagina->tamanio_ocupado);
+                 if(list_size(tabla_paginas->paginas) + round(restante) <= tabla_paginas->paginas_totales_maximas){
+                   
                     data->nextAlloc = nextAnterior + size;
                     data->isFree = false;
                     guardarAlloc(data,nextAnterior);

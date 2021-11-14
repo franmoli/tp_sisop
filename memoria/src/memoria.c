@@ -45,6 +45,10 @@ int main(int argc, char **argv)
     memAlloc(paquete1);
     free(paquete1);
 
+    paquete1 = serializar_alloc(10);
+    freeAlloc(paquete1);
+    free(paquete1);
+    
     paquete1 = serializar_alloc(3);
     memAlloc(paquete1);
     free(paquete1);
