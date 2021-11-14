@@ -12,9 +12,10 @@
 //Estructuras
 typedef struct {
     int numero_pagina;
+    int id_proceso;
     int base;
     int size;
-    char *file;
+    int file;
 } t_pagina_almacenada;
 
 typedef struct {
@@ -32,6 +33,6 @@ void crear_archivos_swap();
 void insertar_pagina_en_archivo(t_pagina *pagina);
 void leer_pagina_de_archivo(int numero_pagina);
 void borrar_archivos_swap();
-int seleccionar_archivo_escritura(int bytes_pagina);
+int seleccionar_archivo_escritura(int proceso_a_guardar, int bytes_pagina);
 
 #endif

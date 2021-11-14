@@ -25,18 +25,39 @@ void crear_archivos_swap() {
 /*
     Selección del archivo que se escribirá/leerá
 */
-int seleccionar_archivo_escritura(int bytes_a_guardar) {
+int seleccionar_archivo_escritura(int proceso_a_guardar, int bytes_a_guardar) {
     int archivo_seleccionado = -1;
     int tamanio_archivo_seleccionado = 0;
 
-    for(int i=0; i<list_size(archivos_abiertos); i++) {
-        t_informacion_archivo *archivo = list_get(archivos_abiertos, i);
+    //Analizo si la página pertenece a un proceso que ya fue almacenado previamente
+    int archivo_paginas_con_mismo_proceso = -1;
+    for(int i=0; i<list_size(lista_paginas_almacenadas); i++) {
+        t_pagina_almacenada *pagina = list_get(lista_paginas_almacenadas, i);
+        if(pagina->id_proceso == proceso_a_guardar) {
+            archivo_paginas_con_mismo_proceso = pagina->file;
+            break;
+        }
+    }
+
+    //Si se encontró un archivo que contenga páginas del mismo proceso, valido en el mismo
+    if(archivo_paginas_con_mismo_proceso >= 0) {
+        t_informacion_archivo *archivo = list_get(archivos_abiertos, archivo_paginas_con_mismo_proceso);
         //Valido que el archivo cuente con mas bytes de los que necesito almacenar
         if(bytes_a_guardar <= archivo->espacio_disponible) {
-            //Si el espacio disponible es mayor al de los archivos previamente recorridos, lo asigno
-            if(archivo->espacio_disponible > tamanio_archivo_seleccionado) {
-                tamanio_archivo_seleccionado = archivo->espacio_disponible;
-                archivo_seleccionado = archivo->numero_archivo;
+            archivo_seleccionado = archivo->numero_archivo;
+        } else {
+            archivo_seleccionado = -2;
+        }
+    } else {
+        for(int i=0; i<list_size(archivos_abiertos); i++) {
+            t_informacion_archivo *archivo = list_get(archivos_abiertos, i);
+            //Valido que el archivo cuente con mas bytes de los que necesito almacenar
+            if(bytes_a_guardar <= archivo->espacio_disponible) {
+                //Si el espacio disponible es mayor al de los archivos previamente recorridos, lo asigno
+                if(archivo->espacio_disponible > tamanio_archivo_seleccionado) {
+                    tamanio_archivo_seleccionado = archivo->espacio_disponible;
+                    archivo_seleccionado = archivo->numero_archivo;
+                }
             }
         }
     }
@@ -50,7 +71,7 @@ int seleccionar_archivo_escritura(int bytes_a_guardar) {
 void insertar_pagina_en_archivo(t_pagina *pagina) {
     //Selecciono el archivo
     int bytes_a_guardar = bytes_pagina(*pagina);
-    int posicion_archivo_obtenido = seleccionar_archivo_escritura(bytes_a_guardar);
+    int posicion_archivo_obtenido = seleccionar_archivo_escritura(pagina->id_carpincho, bytes_a_guardar);
 
     if(posicion_archivo_obtenido >= 0) {
         //Abro el archivo seleccionado
@@ -102,9 +123,10 @@ void insertar_pagina_en_archivo(t_pagina *pagina) {
         //Añado los datos de la página a la estructura administrativa
         t_pagina_almacenada *pagina_almacenada = malloc(sizeof(t_pagina_almacenada));
         pagina_almacenada->numero_pagina = pagina->numero_pagina;
+        pagina_almacenada->id_proceso = pagina->id_carpincho;
         pagina_almacenada->base = offset_inicial;
         pagina_almacenada->size = bytes_a_guardar;
-        pagina_almacenada->file = path_archivo;
+        pagina_almacenada->file = posicion_archivo_obtenido;
         list_add(lista_paginas_almacenadas, pagina_almacenada);
 
         //Actualizo la estructura administrativa de los archivos
@@ -116,8 +138,10 @@ void insertar_pagina_en_archivo(t_pagina *pagina) {
 
         log_info(logger_swap, "Pagina %d almacenada en %s", pagina->numero_pagina, path_archivo);
         free(pagina);
-    } else {
-        log_error(logger_swap, "No se ha podido guardar la pagina en ningun archivo dado que no hay espacio suficiente");
+    } else if(posicion_archivo_obtenido == -2) {
+        log_error(logger_swap, "No se ha podido guardar la pagina %d en el archivo dado que no hay espacio suficiente. No puede almacenarse en otros archivos dado que se encontraron paginas asociadas al mismo proceso (%d) en este archivo.", pagina->numero_pagina, pagina->id_carpincho);
+    } else if(posicion_archivo_obtenido == -1) {
+        log_error(logger_swap, "No se ha podido guardar la pagina %d en ningun archivo dado que no hay espacio suficiente", pagina->numero_pagina);
     }
 }
 
@@ -138,7 +162,8 @@ void leer_pagina_de_archivo(int numero_pagina) {
     //Si la página fue encontrada la voy a buscar, sino lanzo mensaje de aviso
     if(informacion_almacenamiento != NULL) {
         //Lectura del archivo
-        int archivo = open(informacion_almacenamiento->file, O_RDONLY);
+        char *path_archivo = list_get(config_swap->ARCHIVOS_SWAP, informacion_almacenamiento->file);
+        int archivo = open(path_archivo, O_RDONLY);
 
         struct stat statbuf;
         fstat(archivo, &statbuf);

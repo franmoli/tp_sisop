@@ -35,20 +35,35 @@ int main(int argc, char **argv) {
     t_pagina *pagina_prueba = malloc(sizeof(t_pagina));
     pagina_prueba->numero_pagina = 500;
     pagina_prueba->marco = marco_prueba;
+    pagina_prueba->id_carpincho = 0;
     t_pagina *pagina_prueba_2 = malloc(sizeof(t_pagina));
     pagina_prueba_2->numero_pagina = 12;
     pagina_prueba_2->marco = marco_prueba;
+    pagina_prueba_2->id_carpincho = 1;
     t_pagina *pagina_prueba_3 = malloc(sizeof(t_pagina));
     pagina_prueba_3->numero_pagina = 1256;
     pagina_prueba_3->marco = marco_prueba;
+    pagina_prueba_3->id_carpincho = 2;
+    t_pagina *pagina_prueba_4 = malloc(sizeof(t_pagina));
+    pagina_prueba_4->numero_pagina = 1555;
+    pagina_prueba_4->marco = marco_prueba;
+    pagina_prueba_4->id_carpincho = 1;
+    t_pagina *pagina_prueba_5 = malloc(sizeof(t_pagina));
+    pagina_prueba_5->numero_pagina = 2021;
+    pagina_prueba_5->marco = marco_prueba;
+    pagina_prueba_5->id_carpincho = 1;
 
     leer_pagina_de_archivo(23);
     insertar_pagina_en_archivo(pagina_prueba);
     insertar_pagina_en_archivo(pagina_prueba_2);
     insertar_pagina_en_archivo(pagina_prueba_3);
+    insertar_pagina_en_archivo(pagina_prueba_4);
+    insertar_pagina_en_archivo(pagina_prueba_5);
     leer_pagina_de_archivo(1256);
     leer_pagina_de_archivo(500);
     leer_pagina_de_archivo(12);
+    leer_pagina_de_archivo(1555);
+    leer_pagina_de_archivo(2021);
 
     //Se esperan conexiones
     log_info(logger_swap, "Esperando conexiones por parte de un cliente");
