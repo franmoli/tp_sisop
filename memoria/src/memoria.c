@@ -41,8 +41,8 @@ int main(int argc, char **argv)
 
     //CASO PRUEBA DE MEMALLOC
     t_paquete *paquete1 = serializar_alloc(5);
-    memAlloc(paquete1);
-    free(paquete1);
+    //memAlloc(paquete1);
+   /* free(paquete1);
 
     paquete1 = serializar_alloc(10);
     memAlloc(paquete1);
@@ -54,7 +54,7 @@ int main(int argc, char **argv)
     
     paquete1 = serializar_alloc(3);
     memAlloc(paquete1);
-    free(paquete1);
+    free(paquete1);*/
 
 
 
@@ -116,4 +116,5 @@ void generarDump(int signal){
 }
 void imprimirMetricas(int signal){
     log_info(logger_memoria,"SEÑAL RECIBIDA");
+    exit(0);
 }
