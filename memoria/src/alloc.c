@@ -26,6 +26,7 @@ void freeAlloc(t_paquete *paquete) {
         
         int pagina = getPaginaByDireccion(direccion);
         t_pagina* paginaBuscada = list_get(tabla_paginas->paginas,pagina);
+        int casa = (alloc->nextAlloc- inicio -sizeof(t_heap_metadata));
         paginaBuscada->tamanio_ocupado -= (alloc->nextAlloc- inicio -sizeof(t_heap_metadata));
 
         free(alloc);
@@ -206,7 +207,7 @@ void memAlloc(t_paquete *paquete) {
         int paginaLastAlloc = getPaginaByDireccion(nextAnterior);
          t_pagina* pagina = list_get(tabla_paginas->paginas,paginaLastAlloc);
          if(pagina->tamanio_ocupado < config_memoria->TAMANIO_PAGINA){
-             if(pagina->tamanio_ocupado + size < config_memoria->TAMANIO_PAGINA){
+             if(pagina->tamanio_ocupado + size <= config_memoria->TAMANIO_PAGINA){
                  //entra completo
                 data->nextAlloc = nextAnterior + size;
                 data->isFree = false;
@@ -234,7 +235,7 @@ void memAlloc(t_paquete *paquete) {
                   int restante = size  - (config_memoria->TAMANIO_PAGINA - pagina->tamanio_ocupado);
                  if(list_size(tabla_paginas->paginas) + round(restante) <= tabla_paginas->paginas_totales_maximas){
                    
-                    data->nextAlloc = nextAnterior + size;
+                    data->nextAlloc = nextAnterior + size + sizeof(t_heap_metadata);
                     data->isFree = false;
                     guardarAlloc(data,nextAnterior);
                     pagina->cantidad_contenidos+=1;
@@ -257,7 +258,7 @@ void memAlloc(t_paquete *paquete) {
                     guardarAlloc(data,nextAnterior + size + sizeof(t_heap_metadata));
 
                     paginaNueva->numero_pagina = list_size(tabla_paginas->paginas)+1;
-                    paginaNueva->tamanio_ocupado = size + sizeof(t_heap_metadata);  
+                    paginaNueva->tamanio_ocupado = restante + sizeof(t_heap_metadata);  
                     paginaNueva->cantidad_contenidos = 2;
                     list_add(tabla_paginas->paginas,paginaNueva);
                  }

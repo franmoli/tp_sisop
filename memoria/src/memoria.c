@@ -35,6 +35,9 @@ int main(int argc, char **argv)
         log_info(logger_memoria, "Fallo en la conexion a swap");
     }
 
+    signal(SIGINT, imprimirMetricas);
+    signal(SIGUSR1, generarDump);
+    signal(SIGUSR2, limpiarTlb);
 
     //CASO PRUEBA DE MEMALLOC
     t_paquete *paquete1 = serializar_alloc(5);
@@ -45,7 +48,7 @@ int main(int argc, char **argv)
     memAlloc(paquete1);
     free(paquete1);
 
-    paquete1 = serializar_alloc(10);
+    paquete1 = serializar_alloc(134542270);
     freeAlloc(paquete1);
     free(paquete1);
     
@@ -101,4 +104,13 @@ static void *ejecutar_operacion(int client)
 	close(client);
 	log_info(logger_memoria, "Se desconecto el cliente [%d]", client);
 	return NULL;
+}
+void limpiarTlb(int signal){
+    
+}
+void generarDump(int signal){
+
+}
+void imprimirMetricas(int signal){
+    log_info(logger_memoria,"SEÑAL RECIBIDA");
 }
