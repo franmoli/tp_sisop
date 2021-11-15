@@ -106,7 +106,10 @@ static void *ejecutar_operacion(int client)
 	return NULL;
 }
 void limpiarTlb(int signal){
-    
+    log_info(logger_memoria,"SEÑAL RECIBIDA LIMPIANDO TLB");
+    list_clean(tabla_tlb->tlb);
+    log_info(logger_memoria,"TLB VACIA");
+
 }
 void generarDump(int signal){
 
