@@ -7,7 +7,6 @@
 #include <math.h>
 
 t_heap_metadata* traerAllocDeMemoria(uint32_t);
-void crearPrimerAlloc(t_pagina* primeraPagina,int size);
 void guardarAlloc(t_heap_metadata* data, uint32_t direccion);
 
 void memAlloc(t_paquete *paquete);

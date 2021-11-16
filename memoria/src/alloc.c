@@ -72,66 +72,6 @@ t_heap_metadata* traerAllocDeMemoria(uint32_t direccion) {
     return data;
 
 }
-void crearPrimerAlloc(t_pagina* primeraPagina,int size) {
-
-    t_heap_metadata* newAlloc = malloc(sizeof(t_heap_metadata));
-    uint32_t inicio = tamanio_memoria;
-    newAlloc->isFree = false;
-    newAlloc->prevAlloc = NULL;
-    newAlloc->nextAlloc = inicio + size + sizeof(t_heap_metadata);
-
-    int offset = 0;
-    //memcpy(tamanio_memoria, &newAlloc, sizeof(t_heap_metadata));
-    memcpy(inicio + offset, &newAlloc->prevAlloc, sizeof(uint32_t));
-    offset += sizeof(uint32_t);
-    memcpy(inicio + offset, &newAlloc->nextAlloc, sizeof(uint32_t));
-    offset += sizeof(uint32_t);
-    memcpy(inicio + offset, &newAlloc->isFree, sizeof(uint8_t));
-
-    /*t_contenidos_pagina *contenidoNuevo = malloc(sizeof(t_contenidos_pagina));
-    contenidoNuevo->carpincho_id = socket_client;
-    contenidoNuevo->dir_comienzo = inicio;
-    contenidoNuevo->dir_fin = newAlloc->nextAlloc;
-    contenidoNuevo->tamanio = sizeof(t_heap_metadata);
-    contenidoNuevo->contenido_pagina = HEADER;
-
-    list_add(primeraPagina->listado_de_contenido, contenidoNuevo);
-
-    t_contenidos_pagina *contenido = malloc(sizeof(t_contenidos_pagina));
-    contenido->carpincho_id = socket_client;
-    contenido->dir_comienzo = contenidoNuevo->dir_fin;
-    contenido->tamanio =  size;
-    contenido->dir_fin = contenido->dir_comienzo + contenido->tamanio;
-    contenido->contenido_pagina = CONTENIDO;
-    list_add(primeraPagina->listado_de_contenido, contenido);*/
-    
-
-    //FOOTER
-    t_heap_metadata* alloc = malloc(sizeof(t_heap_metadata));
-
-    alloc->isFree = true;
-    alloc->prevAlloc = inicio;
-    alloc->nextAlloc = NULL;
-
-    offset = 0;
-
-    memcpy(newAlloc->nextAlloc +  offset, &alloc->prevAlloc, sizeof(uint32_t));
-    offset += sizeof(uint32_t);
-    memcpy(newAlloc->nextAlloc +  offset, &alloc->nextAlloc, sizeof(uint32_t));
-    offset += sizeof(uint32_t);
-    memcpy(newAlloc->nextAlloc +  offset, &alloc->isFree, sizeof(uint8_t));
-
-    free(newAlloc);
-    /*t_contenidos_pagina *contenidoFooter = malloc(sizeof(t_contenidos_pagina));
-    contenidoFooter->carpincho_id = socket_client;
-    contenidoFooter->dir_comienzo = contenidoNuevo->dir_fin;
-    contenidoFooter->tamanio =  sizeof(t_heap_metadata);
-    contenidoFooter->dir_fin = contenidoFooter->dir_comienzo + contenidoFooter->tamanio;
-    list_add(primeraPagina->listado_de_contenido, contenidoFooter);*/
-
-    free(alloc);
-}
-
 void guardarAlloc(t_heap_metadata* data, uint32_t direccion) {
 
     uint32_t offset = 0;
@@ -142,7 +82,6 @@ void guardarAlloc(t_heap_metadata* data, uint32_t direccion) {
     memcpy(direccion + offset, &data->isFree, sizeof(uint8_t));
 
 }
-
 
 void memAlloc(t_paquete *paquete) {
 
