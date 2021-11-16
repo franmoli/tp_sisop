@@ -61,8 +61,8 @@ t_heap_metadata* memRead(uint32_t direccion) {
 }
 int getMarco(){
 
-    t_list_iterator *list_iterator = list_iterator_create(tabla_marcos->marcos);
     int numeroPagina = -1;
+    t_list_iterator *list_iterator = list_iterator_create(tabla_marcos->marcos);
     bool marcoDisponible = false;
     while (list_iterator_has_next(list_iterator) && !marcoDisponible)
     {
@@ -76,14 +76,41 @@ int getMarco(){
     list_iterator_destroy(list_iterator);
     return numeroPagina;
 }
+int getFromTLB(int numero_pagina_buscado){
+
+    int numeroPagina = -1;
+    t_list_iterator *list_iterator = list_iterator_create(tabla_tlb->tlb);
+    bool marcoDisponible = false;
+    while (list_iterator_has_next(list_iterator) && !marcoDisponible)
+    {
+        t_tlb *tlb = list_iterator_next(list_iterator);
+        if (tlb->numero_pagina == numero_pagina_buscado)
+        {
+            marcoDisponible = true;
+            numeroPagina = tlb->numero_pagina;
+        }
+    }
+    list_iterator_destroy(list_iterator);
+    return numeroPagina;
+}
 int generarPaginaConMarco(){
     
     if(tabla_paginas->paginas_en_memoria <=config_memoria->MARCOS_POR_CARPINCHO){
-        return getMarco();
+        if(strcmp(config_memoria->TIPO_ASIGNACION, "FIJA") == 0){
+            return getMarco();
+        }else{
+
+        }
+        
     }
     else{
         log_error(logger_memoria,"ERROR EL CARPINCHO NO PUEDE ASIGNAR MAS MARCOS EN MEMORIA");
+        if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "CLOCK-M") == 0){
+            //SWAP CLOCK
+        }
+        else{
+            //SWAP LRU
+        }
         return -1;
     }
-    
 }

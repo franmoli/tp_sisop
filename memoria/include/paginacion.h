@@ -13,5 +13,6 @@ t_contenidos_pagina *getLastHeaderContenidoByPagina(t_pagina* pagina);
 
 //MARCOS
 int getMarco();
+int getFromTLB(int numero_pagina_buscado);
 int generarPaginaConMarco();
 #endif
