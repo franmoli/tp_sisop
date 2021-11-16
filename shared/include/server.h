@@ -16,6 +16,7 @@ typedef enum {
 	CLIENTE_TEST = 2,
     MEMALLOC = 3,
     MEMWRITE = 4,
+    MEMREAD = 5,
 } op_code;
 
 typedef struct {

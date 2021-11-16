@@ -49,9 +49,24 @@ t_contenidos_pagina *getLastHeaderContenidoByPagina(t_pagina* pagina){
 //////////////////////////////////////////////////////////////////////////////
 
 // Mem Read: Dada una direccion de memoria busco el contenido que se encuentra alli
-t_heap_metadata* memRead(uint32_t direccion) {
+t_heap_metadata* memRead(t_paquete* paquete) {
 
     //TODO: Tener en cuenta que la direccion pertenezca a una pagina de la tabla de este proceso
+    uint32_t direccion = deserializar_alloc(paquete);
+
+/*
+    //Traer pagina
+        if(!direccionValida(direccion)){
+        //MATE FREE FAIL
+    }
+
+    int nro_pagina = getPaginaByDireccion(direccion);
+
+    //Ir a la tlb
+    int nro_marco = getFromTlb(nro_pagina);
+
+    //Falta buscar posta la info en memoria
+*/
 
     t_heap_metadata* alloc = traerAllocDeMemoria(direccion);
 

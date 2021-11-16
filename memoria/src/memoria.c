@@ -83,6 +83,10 @@ static void *ejecutar_operacion(int client)
                 log_info(logger_memoria, "recibi orden de guardar en memoria del cliente %d", client);
                 memAlloc(paquete);
                 break;
+            case MEMREAD:
+                log_info(logger_memoria, "recibi orden de leer memoria del cliente %d", client);
+                t_heap_metadata* data = memRead(paquete);
+                break;
             default:
                 log_error(logger_memoria, "Codigo de operacion desconocido");
                 break;
