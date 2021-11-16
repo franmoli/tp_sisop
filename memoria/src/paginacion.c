@@ -59,3 +59,31 @@ t_heap_metadata* memRead(uint32_t direccion) {
     return alloc;
 
 }
+int getMarco(){
+
+    t_list_iterator *list_iterator = list_iterator_create(tabla_marcos->marcos);
+    int numeroPagina = -1;
+    bool marcoDisponible = false;
+    while (list_iterator_has_next(list_iterator) && !marcoDisponible)
+    {
+        t_marco *marco = list_iterator_next(list_iterator);
+        if (marco->isFree)
+        {
+            marcoDisponible = true;
+            numeroPagina = marco->numero_marco;
+        }
+    }
+    list_iterator_destroy(list_iterator);
+    return numeroPagina;
+}
+int generarPaginaConMarco(){
+    
+    if(tabla_paginas->paginas_en_memoria <=config_memoria->MARCOS_POR_CARPINCHO){
+        return getMarco();
+    }
+    else{
+        log_error(logger_memoria,"ERROR EL CARPINCHO NO PUEDE ASIGNAR MAS MARCOS EN MEMORIA");
+        return -1;
+    }
+    
+}

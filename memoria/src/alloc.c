@@ -21,30 +21,35 @@ void freeAlloc(t_paquete *paquete) {
     bool hayPosterior = false;
 
     if(alloc->prevAlloc!=0){// SI EXISTE ANTERIOR TRAERLO
-        hayAnterior = true;
         anterior = traerAllocDeMemoria(alloc->prevAlloc);
-        
-        int pagina = getPaginaByDireccion(direccion);
-        t_pagina* paginaBuscada = list_get(tabla_paginas->paginas,pagina);
-        int casa = (alloc->nextAlloc- inicio -sizeof(t_heap_metadata));
-        paginaBuscada->tamanio_ocupado -= (alloc->nextAlloc- inicio -sizeof(t_heap_metadata));
-
-        free(alloc);
-        anterior->nextAlloc = next;
-        guardarAlloc(anterior,back);
+        if(anterior->isFree)
+            hayAnterior = true;
+       
     }
     if(next != NULL){ //SI EXISTE PROXIMO
-        hayPosterior=true;
         posterior = traerAllocDeMemoria(next);
-        posterior->prevAlloc = back;
-        guardarAlloc(posterior,next);
+        if(posterior->isFree)
+            hayPosterior=true;
+
     }
     if(hayAnterior && hayPosterior){
-        if(anterior->isFree && posterior->isFree){ //BASICAMENTE, SI AMBOS ESTAN LIBRES -> UNIRLOS
-            anterior->nextAlloc = posterior->nextAlloc;
-            free(posterior);
-            guardarAlloc(anterior,back);
-        }
+        anterior->nextAlloc = posterior->nextAlloc;
+        free(alloc);
+        free(posterior);
+        guardarAlloc(anterior,back);
+        return;
+    }
+    if(hayAnterior){
+        anterior->nextAlloc = alloc->nextAlloc;
+        free(alloc);
+        guardarAlloc(anterior,back);
+        return;
+    }
+     if(hayPosterior){
+        alloc->nextAlloc = posterior->nextAlloc;
+        free(posterior);
+        guardarAlloc(alloc,direccion);
+        return;
     }
 }
 
@@ -69,7 +74,6 @@ t_heap_metadata* traerAllocDeMemoria(uint32_t direccion) {
 }
 void crearPrimerAlloc(t_pagina* primeraPagina,int size) {
 
-    //HEADER + DATA
     t_heap_metadata* newAlloc = malloc(sizeof(t_heap_metadata));
     uint32_t inicio = tamanio_memoria;
     newAlloc->isFree = false;
@@ -83,9 +87,8 @@ void crearPrimerAlloc(t_pagina* primeraPagina,int size) {
     memcpy(inicio + offset, &newAlloc->nextAlloc, sizeof(uint32_t));
     offset += sizeof(uint32_t);
     memcpy(inicio + offset, &newAlloc->isFree, sizeof(uint8_t));
-    offset += sizeof(uint8_t);
 
-    t_contenidos_pagina *contenidoNuevo = malloc(sizeof(t_contenidos_pagina));
+    /*t_contenidos_pagina *contenidoNuevo = malloc(sizeof(t_contenidos_pagina));
     contenidoNuevo->carpincho_id = socket_client;
     contenidoNuevo->dir_comienzo = inicio;
     contenidoNuevo->dir_fin = newAlloc->nextAlloc;
@@ -100,8 +103,8 @@ void crearPrimerAlloc(t_pagina* primeraPagina,int size) {
     contenido->tamanio =  size;
     contenido->dir_fin = contenido->dir_comienzo + contenido->tamanio;
     contenido->contenido_pagina = CONTENIDO;
-    list_add(primeraPagina->listado_de_contenido, contenido);
-    free(newAlloc);
+    list_add(primeraPagina->listado_de_contenido, contenido);*/
+    
 
     //FOOTER
     t_heap_metadata* alloc = malloc(sizeof(t_heap_metadata));
@@ -112,35 +115,31 @@ void crearPrimerAlloc(t_pagina* primeraPagina,int size) {
 
     offset = 0;
 
-    memcpy(inicio + size + sizeof(t_heap_metadata) + offset, &alloc->prevAlloc, sizeof(uint32_t));
+    memcpy(newAlloc->nextAlloc +  offset, &alloc->prevAlloc, sizeof(uint32_t));
     offset += sizeof(uint32_t);
-    memcpy(inicio + size + sizeof(t_heap_metadata) + offset, &alloc->nextAlloc, sizeof(uint32_t));
+    memcpy(newAlloc->nextAlloc +  offset, &alloc->nextAlloc, sizeof(uint32_t));
     offset += sizeof(uint32_t);
-    memcpy(inicio + size + sizeof(t_heap_metadata) + offset, &alloc->isFree, sizeof(uint8_t));
-    offset += sizeof(uint8_t);
+    memcpy(newAlloc->nextAlloc +  offset, &alloc->isFree, sizeof(uint8_t));
 
-    t_contenidos_pagina *contenidoFooter = malloc(sizeof(t_contenidos_pagina));
+    free(newAlloc);
+    /*t_contenidos_pagina *contenidoFooter = malloc(sizeof(t_contenidos_pagina));
     contenidoFooter->carpincho_id = socket_client;
     contenidoFooter->dir_comienzo = contenidoNuevo->dir_fin;
     contenidoFooter->tamanio =  sizeof(t_heap_metadata);
     contenidoFooter->dir_fin = contenidoFooter->dir_comienzo + contenidoFooter->tamanio;
-    list_add(primeraPagina->listado_de_contenido, contenidoFooter);
+    list_add(primeraPagina->listado_de_contenido, contenidoFooter);*/
 
     free(alloc);
-
-    log_info(logger_memoria, "Pude guardar primer alloc en memoria");
 }
 
 void guardarAlloc(t_heap_metadata* data, uint32_t direccion) {
 
     uint32_t offset = 0;
-    //memcpy(tamanio_memoria, &newAlloc, sizeof(t_heap_metadata));
     memcpy(direccion + offset, &data->prevAlloc, sizeof(uint32_t));
     offset += sizeof(uint32_t);
     memcpy(direccion + offset, &data->nextAlloc, sizeof(uint32_t));
     offset += sizeof(uint32_t);
     memcpy(direccion + offset, &data->isFree, sizeof(uint8_t));
-    offset += sizeof(uint8_t);
 
 }
 
@@ -150,14 +149,39 @@ void memAlloc(t_paquete *paquete) {
     int size = deserializar_alloc(paquete);
     uint32_t inicio = tamanio_memoria;
     if(list_size(tabla_paginas->paginas)==0){
-        t_pagina* pagina = malloc(sizeof(t_pagina));
+        int marco = generarPaginaConMarco();
+        
+        if(marco <0){
+            return;
+        }
+
+        t_pagina *pagina =malloc(sizeof(t_pagina));
         pagina->listado_de_contenido = list_create();
+        pagina->marco_asignado = marco;
         pagina->numero_pagina = 0;
         pagina->tamanio_ocupado = size + sizeof(t_heap_metadata) * 2;
         pagina->cantidad_contenidos = 3;
-        crearPrimerAlloc(pagina, size);
-        list_add(tabla_paginas->paginas,pagina);
-    }else{
+        
+        t_heap_metadata* comienzoAlloc = malloc(sizeof(t_heap_metadata));
+        comienzoAlloc->isFree = false;
+        comienzoAlloc->prevAlloc = NULL;
+        comienzoAlloc->nextAlloc = tamanio_memoria + sizeof(t_heap_metadata) + size;
+        guardarAlloc(comienzoAlloc,tamanio_memoria);
+        
+        uint32_t nextAlloc =  comienzoAlloc->nextAlloc;
+        comienzoAlloc->isFree = true;
+        comienzoAlloc->prevAlloc = tamanio_memoria;
+        comienzoAlloc->nextAlloc = NULL;
+        guardarAlloc(comienzoAlloc,nextAlloc);
+        
+        free(comienzoAlloc);
+        
+        list_add(tabla_paginas->paginas, pagina);
+        t_marco* marcoAsignado = list_get(tabla_marcos->marcos,marco);
+        marcoAsignado->isFree = false;
+        tabla_paginas->paginas_en_memoria+=1;
+    }
+    else{
         int paginaDisponible = getPrimeraPaginaDisponible(size);
         t_heap_metadata* data = traerAllocDeMemoria(inicio);
         uint32_t nextAnterior = tamanio_memoria;
@@ -166,7 +190,7 @@ void memAlloc(t_paquete *paquete) {
 
                 //Estoy en un alloc libre y no es el ultimo, hacer si entra totalmente, sino que siga
 
-                 uint32_t sizeAlloc;
+               /*  uint32_t sizeAlloc;
                 if(data->prevAlloc == NULL) {
                     log_info(logger_memoria, "first alloc");
                     sizeAlloc = data->nextAlloc - inicio - sizeof(t_heap_metadata);
@@ -198,7 +222,7 @@ void memAlloc(t_paquete *paquete) {
                     data->nextAlloc = nextAnterior + sizeof(t_heap_metadata) * 2 + sizeAlloc;
 
                     guardarAlloc(data,nextAnterior + sizeof(t_heap_metadata) + size);
-                }
+                }*/
             }
               nextAnterior = data->nextAlloc;
               data = traerAllocDeMemoria(data->nextAlloc);
@@ -241,16 +265,24 @@ void memAlloc(t_paquete *paquete) {
                     pagina->cantidad_contenidos+=1;
                     pagina->tamanio_ocupado += (size - restante);
                     
-                    t_contenidos_pagina *contenidoNuevo = malloc(sizeof(t_contenidos_pagina));
+                   /* t_contenidos_pagina *contenidoNuevo = malloc(sizeof(t_contenidos_pagina));
                     contenidoNuevo->carpincho_id = socket_client;
                     contenidoNuevo->dir_comienzo = nextAnterior;
                     contenidoNuevo->tamanio =  (size - restante);
                     contenidoNuevo->dir_fin = contenidoNuevo->dir_comienzo + contenidoNuevo->tamanio;
                     contenidoNuevo->contenido_pagina = FOOTER;
-                    list_add(pagina->listado_de_contenido, contenidoNuevo);
+                    list_add(pagina->listado_de_contenido, contenidoNuevo);*/
 
-                    t_pagina* paginaNueva = malloc(sizeof(t_pagina));
+
+                    int marco = getMarco();
+                    if(marco <0){
+                        return;
+                    }
+
+                    t_pagina *paginaNueva =malloc(sizeof(t_pagina));
                     paginaNueva->listado_de_contenido = list_create();
+                    paginaNueva->marco_asignado = marco;
+
 
                     data->isFree = true;
                     data->prevAlloc = nextAnterior;
@@ -260,7 +292,11 @@ void memAlloc(t_paquete *paquete) {
                     paginaNueva->numero_pagina = list_size(tabla_paginas->paginas)+1;
                     paginaNueva->tamanio_ocupado = restante + sizeof(t_heap_metadata);  
                     paginaNueva->cantidad_contenidos = 2;
+                    
                     list_add(tabla_paginas->paginas,paginaNueva);
+                    t_marco* marcoAsignado = list_get(tabla_marcos->marcos,marco);
+                    marcoAsignado->isFree = false;
+                    tabla_paginas->paginas_en_memoria+=1;
                  }
                  else{
                      //NO PUEDO PEDIR MAS PAGINAS

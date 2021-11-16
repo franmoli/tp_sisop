@@ -25,14 +25,23 @@ typedef struct{
 }t_tlb;
 
 typedef struct{
+    uint32_t numero_marco;
+    bool isFree;
+}t_marco;
+
+typedef struct{
     t_list *paginas;
     int paginas_totales_maximas;
+    int paginas_en_memoria;
 }t_tabla_paginas;
 
 typedef struct{
     uint32_t numero_pagina;
     uint32_t tamanio_ocupado;
     uint32_t cantidad_contenidos;
+    uint32_t marco_asignado;
+    bool bit_presencia;
+    bool bit_modificado;
     t_list*  listado_de_contenido;
 }t_pagina;
 
@@ -49,10 +58,15 @@ typedef struct{
     t_list *tlb;
 }t_tabla_tlb;
 
+typedef struct{
+    t_list *marcos;
+}t_tabla_marcos;
+
 t_config_memoria *config_memoria;
 t_log *logger_memoria;
 t_tabla_tlb* tabla_tlb;
 t_tabla_paginas* tabla_paginas;
+t_tabla_marcos* tabla_marcos;
 
 void* tamanio_memoria;
 int socket_server, socket_cliente_swap, socket_client;
