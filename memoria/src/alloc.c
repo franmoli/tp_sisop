@@ -47,6 +47,19 @@ void freeAlloc(t_paquete *paquete) {
     }
      if(hayPosterior){
         alloc->nextAlloc = posterior->nextAlloc;
+        int paginaNext = getPaginaByDireccion(next);
+        t_pagina* pagina_Next = list_get(tabla_paginas->paginas,paginaNext);
+        if(list_size(tabla_paginas->paginas)==pagina_Next->numero_pagina && pagina_Next->cantidad_contenidos==1){
+            list_remove(tabla_paginas->paginas,paginaNext);
+            free(pagina_Next);
+            tabla_paginas->paginas_en_memoria-=1;
+            int a = list_size(tabla_paginas->paginas);
+            a++;
+        }else{
+            pagina_Next->cantidad_contenidos-=1;
+            //restar tamanio ocupado
+            //pagina del alloc actual restar tamanio
+        }
         free(posterior);
         guardarAlloc(alloc,direccion);
         return;
@@ -55,6 +68,11 @@ void freeAlloc(t_paquete *paquete) {
 
 bool direccionValida(uint32_t direccion){
     bool esValida = true;
+    int numero_pagina = getPaginaByDireccion(direccion);
+    t_pagina *pagina =list_get(tabla_paginas->paginas,numero_pagina);
+    if(!pagina->bit_presencia)
+        esValida=false;
+
     return esValida;
 }
 t_heap_metadata* traerAllocDeMemoria(uint32_t direccion) {
@@ -101,6 +119,9 @@ void memAlloc(t_paquete *paquete) {
         pagina->tamanio_ocupado = size + sizeof(t_heap_metadata) * 2;
         pagina->cantidad_contenidos = 3;
         
+        pagina->bit_presencia=true;
+        pagina->bit_modificado=false;
+
         t_heap_metadata* comienzoAlloc = malloc(sizeof(t_heap_metadata));
         comienzoAlloc->isFree = false;
         comienzoAlloc->prevAlloc = NULL;
@@ -232,7 +253,11 @@ void memAlloc(t_paquete *paquete) {
                     paginaNueva->tamanio_ocupado = restante + sizeof(t_heap_metadata);  
                     paginaNueva->cantidad_contenidos = 2;
                     
+                    paginaNueva->bit_presencia=true;
+                    paginaNueva->bit_modificado=false;
+
                     list_add(tabla_paginas->paginas,paginaNueva);
+
                     t_marco* marcoAsignado = list_get(tabla_marcos->marcos,marco);
                     marcoAsignado->isFree = false;
                     tabla_paginas->paginas_en_memoria+=1;
