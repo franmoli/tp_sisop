@@ -5,4 +5,5 @@
 #include <commons/collections/list.h>
 
 int getTLBPaginaByMarco(int marco);
+int getFromTLB(int numero_pagina_buscado);
 #endif
