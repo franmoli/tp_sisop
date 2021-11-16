@@ -26,9 +26,14 @@ int getFromTLB(int numero_pagina_buscado){
         {
             marcoDisponible = true;
             numeroPagina = tlb->numero_pagina;
+
+            sleep(config_memoria->RETARDO_ACIERTO_TLB);
         }
     }
     list_iterator_destroy(list_iterator);
+    if(numeroPagina == -1)
+        sleep(config_memoria->RETARDO_FALLO_TLB);
+        
     return numeroPagina;
 }
 int asignarTlb(int pagina, int marco){
