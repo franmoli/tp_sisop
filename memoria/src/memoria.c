@@ -48,9 +48,10 @@ int main(int argc, char **argv)
     paquete1 = serializar_alloc(10);
     memAlloc(paquete1);
 
-    /*paquete1 = serializar_alloc(134542270);
-    freeAlloc(paquete1);*/
+    //paquete1 = serializar_alloc(134542270);
+    //freeAlloc(paquete1);
     
+    mostrarPaginas();
     /*paquete1 = serializar_alloc(3);
     memAlloc(paquete1);*/
     free(paquete1);

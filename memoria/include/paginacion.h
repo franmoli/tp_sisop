@@ -15,4 +15,6 @@ t_contenidos_pagina *getLastHeaderContenidoByPagina(t_pagina* pagina);
 int getMarco();
 
 int generarPaginaConMarco();
+
+void mostrarPaginas();
 #endif

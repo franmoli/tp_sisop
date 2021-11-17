@@ -1,8 +1,12 @@
 #include "paginacion.h"
 
 int getPaginaByDireccion(uint32_t direccion){
+    log_info(logger_memoria,"Dire:%d", direccion);
     uint32_t inicio = tamanio_memoria;
+    log_info(logger_memoria,"inicio:%d", inicio);
     uint32_t resta =  direccion - inicio;
+    log_info(logger_memoria,"resta:%d", resta);
+    log_info(logger_memoria,"config:%d", config_memoria->TAMANIO_PAGINA);
     return resta/config_memoria->TAMANIO_PAGINA;
 }
 int getPrimeraPaginaDisponible(int size)
@@ -110,5 +114,17 @@ int generarPaginaConMarco(){
             //SWAP LRU
         }
         return -1;
+    }
+}
+
+void mostrarPaginas(){
+    system("clear");
+    t_list_iterator *list_iterator = list_iterator_create(tabla_paginas->paginas);
+    int i= 0;
+    while (list_iterator_has_next(list_iterator))
+    {
+        t_pagina *paginaLeida = list_iterator_next(list_iterator);
+        printf("Entrada: %d PAGINA nro: %d. Marco Asignado:%d Tam Ocupado:%d \n",i,paginaLeida->numero_pagina, paginaLeida->marco_asignado, paginaLeida->tamanio_ocupado);
+        i++;
     }
 }

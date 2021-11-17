@@ -3,8 +3,9 @@
 // Memfree -> Libero alloc (flag isFree en true), me fijo el anterior y posterior y los unifico
 // TODO -> Meter paginacion (Mati gatooo)
 void freeAlloc(t_paquete *paquete) {
-
+    
     uint32_t inicio = tamanio_memoria;
+
     uint32_t direccion = deserializar_alloc(paquete);
     if(!direccionValida(direccion)){
         //MATE FREE FAIÑT
@@ -20,6 +21,7 @@ void freeAlloc(t_paquete *paquete) {
     bool hayAnterior = false;
     bool hayPosterior = false;
 
+    log_info(logger_memoria,"Llego bien 1");
     if(alloc->prevAlloc!=0){// SI EXISTE ANTERIOR TRAERLO
         anterior = traerAllocDeMemoria(alloc->prevAlloc);
         if(anterior->isFree)
@@ -32,6 +34,7 @@ void freeAlloc(t_paquete *paquete) {
             hayPosterior=true;
 
     }
+    log_info(logger_memoria,"Llego bien 2");
     if(hayAnterior && hayPosterior){
         anterior->nextAlloc = posterior->nextAlloc;
         free(alloc);
@@ -45,6 +48,8 @@ void freeAlloc(t_paquete *paquete) {
         guardarAlloc(anterior,back);
         return;
     }
+
+    log_info(logger_memoria,"Llego bien 3");
      if(hayPosterior){
         alloc->nextAlloc = posterior->nextAlloc;
         int paginaNext = getPaginaByDireccion(next);
@@ -60,8 +65,10 @@ void freeAlloc(t_paquete *paquete) {
             //restar tamanio ocupado
             //pagina del alloc actual restar tamanio
         }
+    log_info(logger_memoria,"Llego bien 4");
         free(posterior);
         guardarAlloc(alloc,direccion);
+    log_info(logger_memoria,"Llego bien 5");
         return;
     }
 }
@@ -69,6 +76,7 @@ void freeAlloc(t_paquete *paquete) {
 bool direccionValida(uint32_t direccion){
     bool esValida = true;
     int numero_pagina = getPaginaByDireccion(direccion);
+    log_info(logger_memoria,"Pagina:%d", numero_pagina);
     t_pagina *pagina =list_get(tabla_paginas->paginas,numero_pagina);
     if(!pagina->bit_presencia)
         esValida=false;
@@ -105,6 +113,7 @@ void memAlloc(t_paquete *paquete) {
 
     int size = deserializar_alloc(paquete);
     uint32_t inicio = tamanio_memoria;
+    
     if(list_size(tabla_paginas->paginas)==0){
         int marco = generarPaginaConMarco();
         
@@ -117,7 +126,7 @@ void memAlloc(t_paquete *paquete) {
         pagina->marco_asignado = marco;
         pagina->numero_pagina = 0;
         pagina->tamanio_ocupado = size + sizeof(t_heap_metadata) * 2;
-        pagina->cantidad_contenidos = 3;
+        pagina->cantidad_contenidos = 2;
         
         pagina->bit_presencia=true;
         pagina->bit_modificado=false;
@@ -249,9 +258,9 @@ void memAlloc(t_paquete *paquete) {
                     data->nextAlloc = NULL;
                     guardarAlloc(data,nextAnterior + size + sizeof(t_heap_metadata));
 
-                    paginaNueva->numero_pagina = list_size(tabla_paginas->paginas)+1;
+                    paginaNueva->numero_pagina = list_size(tabla_paginas->paginas);
                     paginaNueva->tamanio_ocupado = restante + sizeof(t_heap_metadata);  
-                    paginaNueva->cantidad_contenidos = 2;
+                    paginaNueva->cantidad_contenidos = 1;
                     
                     paginaNueva->bit_presencia=true;
                     paginaNueva->bit_modificado=false;
@@ -261,6 +270,8 @@ void memAlloc(t_paquete *paquete) {
                     t_marco* marcoAsignado = list_get(tabla_marcos->marcos,marco);
                     marcoAsignado->isFree = false;
                     tabla_paginas->paginas_en_memoria+=1;
+                    
+                    
                  }
                  else{
                      //NO PUEDO PEDIR MAS PAGINAS
