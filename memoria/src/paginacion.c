@@ -127,4 +127,5 @@ void mostrarPaginas(){
         printf("Entrada: %d PAGINA nro: %d. Marco Asignado:%d Tam Ocupado:%d \n",i,paginaLeida->numero_pagina, paginaLeida->marco_asignado, paginaLeida->tamanio_ocupado);
         i++;
     }
+    list_iterator_destroy(list_iterator);
 }

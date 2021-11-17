@@ -291,3 +291,17 @@ t_heap_metadata* getLastHeapFromPagina(int pagina){
     t_heap_metadata *metadata = traerAllocDeMemoria(contenidoUltimo->dir_comienzo);
     return metadata;
 }
+
+void mostrarAllocs(){
+    t_pagina *paginaLeida = list_get(tabla_paginas->paginas,0);
+    if(paginaLeida ==NULL)
+        return;
+
+    uint32_t inicio = tamanio_memoria + config_memoria->TAMANIO_PAGINA * paginaLeida->numero_pagina;
+    t_heap_metadata* data = traerAllocDeMemoria(inicio);
+    while (data->nextAlloc!=NULL)
+    {
+        printf("Prev Alloc: %d  Next Alloc: %d.IsFree:%d \n",data->prevAlloc, data->nextAlloc, data->isFree);
+        data = traerAllocDeMemoria(data->nextAlloc);
+    }
+}

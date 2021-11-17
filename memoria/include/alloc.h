@@ -14,4 +14,5 @@ void freeAlloc(t_paquete *paquete);
 
 bool direccionValida(uint32_t direccion);
 t_heap_metadata* getLastHeapFromPagina(int pagina);
+void mostrarAllocs();
 #endif

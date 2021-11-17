@@ -52,6 +52,7 @@ int main(int argc, char **argv)
     //freeAlloc(paquete1);
     
     mostrarPaginas();
+    mostrarAllocs();
     /*paquete1 = serializar_alloc(3);
     memAlloc(paquete1);*/
     free(paquete1);
