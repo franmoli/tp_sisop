@@ -25,6 +25,7 @@ typedef struct mate_inner_structure
 
 typedef struct mate_instance
 {
+    int socket;
     int32_t id;
     mate_inner_structure *info_carpincho;
     t_config_matelib *config;

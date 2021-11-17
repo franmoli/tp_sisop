@@ -17,7 +17,9 @@ typedef enum {
     NUEVO_CARPINCHO = 3,
     SEM_WAIT = 4,
     SEM_POST = 5,
-    INIT_SEM = 6
+    INIT_SEM = 6,
+    SEM_DESTROY = 7,
+    OP_ERROR = 8
 } op_code;
 
 typedef struct {

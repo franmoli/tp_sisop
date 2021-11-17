@@ -8,9 +8,6 @@
 t_config *arch_config;
 //Log
 t_log *logger_matelib;
-//Conexiones
-int socket_servidor;
-int socket_cliente;
-int socket_kernel;
+
 
 #endif
