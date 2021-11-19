@@ -13,6 +13,10 @@ int main(int argc, char **argv)
 	tabla_paginas = malloc(sizeof(t_tabla_paginas));
     tabla_paginas->paginas = list_create();
     tabla_paginas->paginas_en_memoria = 0;
+    tabla_paginas->Lru = list_create();
+    tabla_paginas->Clock = list_create();
+
+
     tabla_tlb = malloc(sizeof(t_tabla_tlb));
     tabla_tlb->tlb = list_create();
 

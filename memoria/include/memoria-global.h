@@ -31,6 +31,8 @@ typedef struct{
 
 typedef struct{
     t_list *paginas;
+    t_list *Lru;
+    t_list *Clock;
     int paginas_totales_maximas;
     int paginas_en_memoria;
 }t_tabla_paginas;

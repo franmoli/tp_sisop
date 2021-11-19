@@ -30,10 +30,22 @@ int getFromTLB(int numero_pagina_buscado){
             sleep(config_memoria->RETARDO_ACIERTO_TLB);
         }
     }
+
+    list_iterator = list_iterator_create(tabla_paginas->paginas);
+    while (list_iterator_has_next(list_iterator) && !marcoDisponible)
+    {
+        t_pagina *pagina = list_iterator_next(list_iterator);
+        if (pagina->numero_pagina == numero_pagina_buscado)
+        {
+            marcoDisponible = true;
+            numeroPagina = pagina->numero_pagina;
+
+            sleep(config_memoria->RETARDO_FALLO_TLB);
+        }
+    }
+
     list_iterator_destroy(list_iterator);
-    if(numeroPagina == -1)
-        sleep(config_memoria->RETARDO_FALLO_TLB);
-        
+
     return numeroPagina;
 }
 int asignarTlb(int pagina, int marco){
