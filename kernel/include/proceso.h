@@ -2,6 +2,7 @@
 #define PROCESO_H
 
 #include <unistd.h>
+#include <time.h>
 
 #include "kernel-global.h"
 

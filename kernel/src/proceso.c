@@ -1,10 +1,12 @@
 #include "proceso.h"
 
 void *proceso(void *self){
+
     t_proceso *proceso_struct = self;
     sem_wait(&proceso_inicializado);
-    int index = 0;
     int prev_status = -1;
+    int reloj_i = 0;
+
     while(1){
         sem_wait(&actualizacion_de_listas_1);
         if(prev_status != proceso_struct->status){
@@ -15,9 +17,14 @@ void *proceso(void *self){
                     sleep(1);
                     break;
                 case EXEC:
-                    //TODO :proceso timestamp
+
+                    reloj_i = clock();
                     printf("E - p: %d ", proceso_struct->id);
                     exec(proceso_struct);
+                    proceso_struct->ejecucion_anterior = clock() - reloj_i;
+                    proceso_struct->estimar = true;
+
+                    
                     /*if(exec(aux)){
                         proceso_struct->salida_exit = true;
                         printf("salida a exit \n");
