@@ -44,6 +44,7 @@ typedef struct{
     uint32_t marco_asignado;
     bool bit_presencia;
     bool bit_modificado;
+    int  usado;
     t_list*  listado_de_contenido;
 }t_pagina;
 

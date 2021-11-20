@@ -20,7 +20,8 @@
 			"paginacion.h": "c",
 			"tlb.h": "c",
 			"memoria-global.h": "c",
-			"list.h": "c"
+			"list.h": "c",
+			"memoria-virtual.h": "c"
 		}
 	}
 }

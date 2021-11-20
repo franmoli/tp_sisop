@@ -107,12 +107,7 @@ int generarPaginaConMarco(){
     }
     else{
         log_error(logger_memoria,"ERROR EL CARPINCHO NO PUEDE ASIGNAR MAS MARCOS EN MEMORIA");
-        if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "CLOCK-M") == 0){
-            //SWAP CLOCK
-        }
-        else{
-            //SWAP LRU
-        }
+        //reemplazarPagina();
         return -1;
     }
 }

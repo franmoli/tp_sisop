@@ -26,7 +26,7 @@ int main(int argc, char **argv)
 
 	tabla_paginas->paginas_totales_maximas =config_memoria->TAMANIO / config_memoria->TAMANIO_PAGINA;
     int i = 0;
-    while( i< tabla_paginas->paginas_totales_maximas){
+    while( i< config_memoria->CANTIDAD_ENTRADAS_TLB){
         t_marco *tlb = malloc(sizeof(t_marco));
         tlb->numero_marco = i;
         list_add(tabla_marcos->marcos, tlb);

@@ -11,4 +11,6 @@ void imprimirMetricas();
 void limpiarTlb();
 void generarDump();
 void recibirSignal(int signal);
+
+
 #endif

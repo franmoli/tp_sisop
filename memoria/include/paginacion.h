@@ -4,6 +4,7 @@
 #include "memoria-global.h"
 #include <commons/collections/list.h>
 #include "tlb.h"
+#include "memoria-virtual.h"
 
 int getPaginaByDireccion(uint32_t direccion);
 int getPrimeraPaginaDisponible(int size);
