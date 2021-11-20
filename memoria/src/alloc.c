@@ -159,19 +159,18 @@ void memAlloc(t_paquete *paquete) {
 
                 //Estoy en un alloc libre y no es el ultimo, hacer si entra totalmente, sino que siga
 
-               /*  uint32_t sizeAlloc;
+                 uint32_t sizeAlloc;
                 if(data->prevAlloc == NULL) {
-                    log_info(logger_memoria, "first alloc");
+                    log_info(logger_memoria, "Primer Alloc Posiblemente Libre");
                     sizeAlloc = data->nextAlloc - inicio - sizeof(t_heap_metadata);
                 } else {
-                    log_info(logger_memoria, "not first alloc");
+                    log_info(logger_memoria, "Alloc Del Medio Posiblemente Libre");
                     sizeAlloc = data->nextAlloc - nextAnterior - sizeof(t_heap_metadata);
                 }
-
+                
                 if(size == sizeAlloc) {
 
-                    log_info(logger_memoria, "encontre un alloc con el mismo size");
-
+                    log_info(logger_memoria, "Hay un Alloc Libre disponible paraa usar del mismo tamanio requerido");
                     //Uso este alloc para guardar
                     data->isFree = false;
                     guardarAlloc(data, nextAnterior);
@@ -179,7 +178,7 @@ void memAlloc(t_paquete *paquete) {
                 } 
                 else if(sizeAlloc > size + sizeof(t_heap_metadata)) {
 
-                    log_info(logger_memoria, "encontre un alloc con mayor size");
+                    log_info(logger_memoria, "Encontre un Alloc libre que tiene un tamanio mayor la requerido. Hay que separarlo");
 
                     data->isFree = false;
                     data->nextAlloc = nextAnterior + sizeof(t_heap_metadata) + size;
@@ -191,7 +190,7 @@ void memAlloc(t_paquete *paquete) {
                     data->nextAlloc = nextAnterior + sizeof(t_heap_metadata) * 2 + sizeAlloc;
 
                     guardarAlloc(data,nextAnterior + sizeof(t_heap_metadata) + size);
-                }*/
+                }
             }
               nextAnterior = data->nextAlloc;
               data = traerAllocDeMemoria(data->nextAlloc);
