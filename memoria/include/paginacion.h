@@ -3,6 +3,7 @@
 
 #include "memoria-global.h"
 #include <commons/collections/list.h>
+#include <commons/collections/queue.h>
 #include "tlb.h"
 #include "memoria-virtual.h"
 

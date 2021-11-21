@@ -56,3 +56,41 @@ int asignarTlb(int pagina, int marco){
          list_add(tabla_tlb->tlb,tlb);
      }
 }
+
+
+//Cuando hago un hit agrego el ttlb a la lista, si es fifo, agrego todo y saco el ultimo
+//Si es lru tengo que fijarme de todos los que estan el que hace mas tiempo no haya sido buscado
+
+void actualizarTLBFIFO(t_tlb *tlb){
+
+    //Validar tamaño de la cola, si tiene menos elementos que los que deberia tener tengo que hacer push sin pop
+
+    if(list_size(tabla_tlb->tlb) < entradas_tlb){
+        list_add(tabla_tlb->tlb, tlb);
+        queue_push(tlb_FIFO,tlb);
+        return;
+    }
+
+    t_tlb *old = malloc(sizeof(t_tlb));
+
+    old = queue_pop(tlb_FIFO);
+
+    //Busco en mi tlb y elimino ese elemento para colocar el nuevo
+    int index = 0;
+
+    t_list_iterator *list_iterator = list_iterator_create(tabla_tlb->tlb);
+    while (list_iterator_has_next(list_iterator))
+    {
+        t_tlb *tlbO = list_iterator_next(list_iterator);
+        if (tlbO->numero_pagina == old->numero_pagina && tlbO->numero_marco == old->numero_marco)
+        {
+            tlbO = list_replace(tabla_tlb->tlb,index,tlb);
+            free(tlbO);
+        }
+
+        index ++;
+    }
+
+    return;
+
+}

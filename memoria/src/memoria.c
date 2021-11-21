@@ -20,8 +20,13 @@ int main(int argc, char **argv)
     tabla_tlb = malloc(sizeof(t_tabla_tlb));
     tabla_tlb->tlb = list_create();
 
+    tlb_LRU = list_create();
+    tlb_FIFO = queue_create();
+    entradas_tlb = config_memoria->CANTIDAD_ENTRADAS_TLB;
+
     tabla_marcos = malloc(sizeof(t_tabla_marcos));
     tabla_marcos->marcos = list_create();
+
 
 
 	tabla_paginas->paginas_totales_maximas =config_memoria->TAMANIO / config_memoria->TAMANIO_PAGINA;

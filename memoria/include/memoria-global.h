@@ -4,6 +4,7 @@
 #include "config_utils.h"
 #include "server.h"
 #include "serializaciones.h"
+#include <commons/collections/queue.h>
 typedef enum
 {
 	CONTENIDO = 0,
@@ -70,6 +71,12 @@ t_log *logger_memoria;
 t_tabla_tlb* tabla_tlb;
 t_tabla_paginas* tabla_paginas;
 t_tabla_marcos* tabla_marcos;
+
+//Reemplazo tlb
+t_list *tlb_LRU;
+t_queue *tlb_FIFO;
+int entradas_tlb;
+
 
 void* tamanio_memoria;
 int socket_server, socket_cliente_swap, socket_client;

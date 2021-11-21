@@ -58,7 +58,6 @@ t_heap_metadata* memRead(t_paquete* paquete) {
     //TODO: Tener en cuenta que la direccion pertenezca a una pagina de la tabla de este proceso
     uint32_t direccion = deserializar_alloc(paquete);
 
-/*
     //Traer pagina
         if(!direccionValida(direccion)){
         //MATE FREE FAIL
@@ -67,10 +66,10 @@ t_heap_metadata* memRead(t_paquete* paquete) {
     int nro_pagina = getPaginaByDireccion(direccion);
 
     //Ir a la tlb
-    int nro_marco = getFromTlb(nro_pagina);
+    int nro_marco = getFromTLB(nro_pagina);
 
     //Falta buscar posta la info en memoria
-*/
+
 
     t_heap_metadata* alloc = traerAllocDeMemoria(direccion);
 
