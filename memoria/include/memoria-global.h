@@ -21,6 +21,7 @@ typedef struct {
 t_heap_metadata;
 
 typedef struct{
+    uint32_t pid;
     uint32_t numero_marco;
     uint32_t numero_pagina;
 }t_tlb;

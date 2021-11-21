@@ -94,3 +94,33 @@ void actualizarTLBFIFO(t_tlb *tlb){
     return;
 
 }
+
+int buscarEnTLB(int numero_pagina_buscada, int id){
+
+    if(list_size(tabla_tlb->tlb)==0){
+        //TLB vacio
+        return 1000;
+    }
+
+    int marco = -1;
+    t_list_iterator *list_iterator = list_iterator_create(tabla_tlb->tlb);
+    bool marcoDisponible = false;
+    while (list_iterator_has_next(list_iterator))
+    {
+        t_tlb *tlb = list_iterator_next(list_iterator);
+        if (tlb->numero_pagina == numero_pagina_buscada && tlb->pid == id)
+        {
+            marco = tlb->numero_marco;
+            sleep(config_memoria->RETARDO_ACIERTO_TLB);
+            //Aca deberia hacer una entrada a la estructura de reemplazo
+            list_iterator_destroy(list_iterator);
+            return marco;
+
+        }
+    }
+
+    //Hubo un miss
+    //Busco en memoria la pagina y activo el algoritmo de reemplazo
+
+
+}

@@ -27,7 +27,7 @@ int main(int argc, char **argv)
     tabla_marcos = malloc(sizeof(t_tabla_marcos));
     tabla_marcos->marcos = list_create();
 
-
+    tabla_procesos = list_create();
 
 	tabla_paginas->paginas_totales_maximas =config_memoria->TAMANIO / config_memoria->TAMANIO_PAGINA;
     int i = 0;
@@ -98,6 +98,10 @@ static void *ejecutar_operacion(int client)
                 log_info(logger_memoria, "recibi orden de leer memoria del cliente %d", client);
                 t_heap_metadata* data = memRead(paquete);
                 break;
+            case MATEINIT:
+                log_info(logger_memoria, "recibi un nuevo carpincho para inicializar del cliente %d", client);
+                inicializarCarpincho(paquete);
+                break;
             default:
                 log_error(logger_memoria, "Codigo de operacion desconocido");
                 break;
@@ -138,4 +142,21 @@ void generarDump(){
 void imprimirMetricas(){
     log_info(logger_memoria,"SEÑAL RECIBIDA");
     exit(EXIT_SUCCESS);
+}
+
+void inicializarCarpincho(t_paquete* paquete) {
+
+    int id = deserializar_alloc(paquete);
+
+    t_tabla_paginas* nuevaTabla = malloc(sizeof(t_tabla_paginas));
+
+    nuevaTabla->pid = id;
+    nuevaTabla->paginas = list_create();
+    nuevaTabla->Lru = list_create();
+    nuevaTabla->Clock = list_create();
+    nuevaTabla->paginas_en_memoria = 0;
+
+    list_add(tabla_procesos,nuevaTabla);
+
+    return;
 }

@@ -12,6 +12,7 @@ int getPrimeraPaginaDisponible(int size);
 t_heap_metadata *memRead(t_paquete* paquete);
 t_contenidos_pagina *getLastContenidoByPagina(t_pagina* pagina);
 t_contenidos_pagina *getLastHeaderContenidoByPagina(t_pagina* pagina);
+t_tabla_paginas* buscarTablaPorPID(int id);
 
 //MARCOS
 int getMarco();

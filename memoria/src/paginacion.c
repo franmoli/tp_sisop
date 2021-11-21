@@ -123,3 +123,31 @@ void mostrarPaginas(){
     }
     list_iterator_destroy(list_iterator);
 }
+
+t_tabla_paginas* buscarTablaPorPID(int id){
+
+    if(list_size(tabla_procesos)==0){
+        //No existen procesos
+        return 1000;
+    }
+
+    int numeroTabla = -1;
+    t_list_iterator *list_iterator = list_iterator_create(tabla_procesos);
+
+    while(list_iterator_has_next(list_iterator)) {
+
+        t_tabla_paginas *tabla = list_iterator_next(list_iterator);
+        if(tabla->pid == id){
+            list_iterator_destroy(list_iterator);
+            return tabla;
+        }
+
+    }
+
+    //No se encontro la tabla --> me pego un tiro
+    log_info(logger_memoria,"No se encontro la tabla perteneciente al proceso");
+    list_iterator_destroy(list_iterator);
+    return 1000;
+
+
+}
