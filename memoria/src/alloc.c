@@ -21,7 +21,6 @@ void freeAlloc(t_paquete *paquete) {
     bool hayAnterior = false;
     bool hayPosterior = false;
 
-    log_info(logger_memoria,"Llego bien 1");
     if(alloc->prevAlloc!=0){// SI EXISTE ANTERIOR TRAERLO
         anterior = traerAllocDeMemoria(alloc->prevAlloc);
         if(anterior->isFree)
@@ -34,7 +33,6 @@ void freeAlloc(t_paquete *paquete) {
             hayPosterior=true;
 
     }
-    log_info(logger_memoria,"Llego bien 2");
     if(hayAnterior && hayPosterior){
         anterior->nextAlloc = posterior->nextAlloc;
         free(alloc);
@@ -44,12 +42,15 @@ void freeAlloc(t_paquete *paquete) {
     }
     if(hayAnterior){
         anterior->nextAlloc = alloc->nextAlloc;
+        int paginaAlloc = getPaginaByDireccion(back);
+        t_pagina* pagina_alloc = list_get(tabla_paginas->paginas,paginaAlloc);
+        pagina_alloc->tamanio_ocupado-=next-back- sizeof(t_heap_metadata);
+        pagina_alloc->cantidad_contenidos-=1;
         free(alloc);
         guardarAlloc(anterior,back);
         return;
     }
 
-    log_info(logger_memoria,"Llego bien 3");
      if(hayPosterior){
         alloc->nextAlloc = posterior->nextAlloc;
         int paginaNext = getPaginaByDireccion(next);
@@ -58,17 +59,13 @@ void freeAlloc(t_paquete *paquete) {
             list_remove(tabla_paginas->paginas,paginaNext);
             free(pagina_Next);
             tabla_paginas->paginas_en_memoria-=1;
-            int a = list_size(tabla_paginas->paginas);
-            a++;
         }else{
             pagina_Next->cantidad_contenidos-=1;
             //restar tamanio ocupado
             //pagina del alloc actual restar tamanio
         }
-    log_info(logger_memoria,"Llego bien 4");
         free(posterior);
         guardarAlloc(alloc,direccion);
-    log_info(logger_memoria,"Llego bien 5");
         return;
     }
 }
@@ -172,6 +169,15 @@ void memAlloc(t_paquete *paquete) {
 
                     log_info(logger_memoria, "Hay un Alloc Libre disponible paraa usar del mismo tamanio requerido");
                     //Uso este alloc para guardar
+
+                    int pagina = getPaginaByDireccion(nextAnterior);
+                    t_pagina* paginaAlloc = list_get(tabla_paginas->paginas,pagina);
+                    if(paginaAlloc->bit_presencia){
+                        
+                    }
+                    paginaAlloc->cantidad_contenidos+=1;
+                    paginaAlloc->tamanio_ocupado+=size;
+                    
                     data->isFree = false;
                     guardarAlloc(data, nextAnterior);
                     return;
