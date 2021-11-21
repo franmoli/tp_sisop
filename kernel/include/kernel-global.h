@@ -5,6 +5,7 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include <commons/log.h>
+#include <time.h>
 
 #include "server.h"
 #include "config_utils.h"
@@ -28,6 +29,7 @@ typedef struct {
     t_list *task_list;
     int estimacion;
     int ejecucion_anterior;
+    int entrada_a_ready;
     bool estimar;
     bool termino_rafaga;
     bool block;

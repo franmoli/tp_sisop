@@ -76,7 +76,46 @@ void *planificador_corto_plazo_sjf (void *multiprocesamiento_p){
 }
 
 void *planificador_corto_plazo_hrrn (void *multiprocesamiento_p){
-    
+    t_proceso *aux;
+    int *multiprocesamiento = multiprocesamiento_p;
+
+    //calcular estimaciones
+    for(int i = 0; i < list_size(lista_ready); i++){
+
+        aux = list_get(lista_ready, i);
+        if(aux->estimar)
+            estimar(aux);
+
+    }
+
+    while(1){
+        
+        if(*multiprocesamiento && list_size(lista_ready)){
+            int index = -1;
+            int response_ratio = 0;
+
+            //se busca el response ratio mas alto
+            for(int i = 0; i < list_size(lista_ready); i++){
+
+                aux = list_get(lista_ready, i);
+                
+                if(calcular_response_ratio(aux) > response_ratio || i == 0){
+                    response_ratio = calcular_response_ratio(aux);
+                    index = i;
+                }
+            }
+
+            //Se saca de ready y se pasa a exec
+            mover_proceso_de_lista(lista_ready, lista_exec, index, EXEC);
+            sem_wait(&mutex_multiprocesamiento);
+            *multiprocesamiento = *multiprocesamiento - 1;
+            sem_post(&mutex_multiprocesamiento);
+
+        }
+    }
+
+
+    return NULL;
     return NULL;
 }
 
@@ -85,6 +124,14 @@ void estimar(t_proceso *proceso){
     proceso->estimacion = (alfa * proceso->ejecucion_anterior) + (( 1 - alfa) * proceso->estimacion);
     proceso->estimar = false;
     return;
+}
+
+int calcular_response_ratio(t_proceso *proceso){
+
+    int tiempo_transcurrido = clock() - proceso->entrada_a_ready;
+
+    return (tiempo_transcurrido + proceso->estimacion)/proceso->estimacion;
+
 }
 
 void *esperar_salida_exec(void *multiprocesamiento_p){

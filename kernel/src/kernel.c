@@ -128,6 +128,8 @@ void mover_proceso_de_lista(t_list *origen, t_list *destino, int index, int stat
     sem_wait(&mutex_listas);
         //printf("%p", origen);
         aux = list_remove(origen, index);
+        if(status == READY)
+            aux->entrada_a_ready = clock();
         aux->status =  status;
         aux->termino_rafaga = false;
         list_add(destino, aux);
