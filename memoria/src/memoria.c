@@ -12,21 +12,29 @@ int main(int argc, char **argv)
 	
 	tabla_paginas = malloc(sizeof(t_tabla_paginas));
     tabla_paginas->paginas = list_create();
+    tabla_paginas->paginas_en_memoria = 0;
+    tabla_paginas->Lru = list_create();
+    tabla_paginas->Clock = list_create();
 
-    tabla_tlb = malloc(sizeof(tabla_tlb));
+
+    tabla_tlb = malloc(sizeof(t_tabla_tlb));
     tabla_tlb->tlb = list_create();
+
+    tlb_LRU = list_create();
+    tlb_FIFO = queue_create();
+    entradas_tlb = config_memoria->CANTIDAD_ENTRADAS_TLB;
+
+    tabla_marcos = malloc(sizeof(t_tabla_marcos));
+    tabla_marcos->marcos = list_create();
+
+
+
 	tabla_paginas->paginas_totales_maximas =config_memoria->TAMANIO / config_memoria->TAMANIO_PAGINA;
     int i = 0;
-    while( i< tabla_paginas->paginas_totales_maximas){
-        t_pagina *pagina = malloc(sizeof(t_pagina));
-        pagina->tamanio_ocupado = 0;
-        pagina->numero_pagina = i;
-        pagina->cantidad_contenidos= 0;
-        pagina->contenidos_pagina = list_create();
-        t_contenidos_pagina *contenido =  malloc(sizeof(t_contenido));
-        contenido->recorrido = 0;
-        list_add(pagina->contenidos_pagina, contenido);
-        list_add(tabla_paginas->paginas, pagina);
+    while( i< config_memoria->CANTIDAD_ENTRADAS_TLB){
+        t_marco *tlb = malloc(sizeof(t_marco));
+        tlb->numero_marco = i;
+        list_add(tabla_marcos->marcos, tlb);
         i++;
     }
     //Conectar a swap
@@ -34,51 +42,30 @@ int main(int argc, char **argv)
     if(socket_cliente_swap == -1){
         log_info(logger_memoria, "Fallo en la conexion a swap");
     }
+    //PROGRAMA NORMAL
+    socket_server = iniciar_servidor("127.0.0.1", string_itoa(config_memoria->PUERTO), logger_memoria);
 
-   /* uint32_t inicio = tamanio_memoria;
 
-    log_info(logger_memoria, "Inicio memoria: %d", inicio);
-
-    memAlloc(5);
-    t_heap_metadata* data = memRead(tamanio_memoria);
-
-    log_info(logger_memoria, "PrevAlloc: %d", data->prevAlloc);
-    log_info(logger_memoria, "NextAlloc: %d", data->nextAlloc);
-    log_info(logger_memoria, "isFree: %d", data->isFree);
-
-    log_info(logger_memoria, "---------------");
-
-    t_heap_metadata* data2 = memRead(data->nextAlloc);
-
-    log_info(logger_memoria, "PrevAlloc: %d", data2->prevAlloc);
-    log_info(logger_memoria, "NextAlloc: %d", data2->nextAlloc);
-    log_info(logger_memoria, "isFree: %d", data2->isFree);
-
-    log_info(logger_memoria, "---------------");
-
-    memAlloc(6);
-    t_heap_metadata* data3 = memRead(data->nextAlloc);
-    log_info(logger_memoria, "otro alloc: %d", data3->prevAlloc);
-    log_info(logger_memoria, "ultimo alloc empieza en: %d", data3->nextAlloc);*/
-
+    signal(SIGINT, imprimirMetricas);
+    signal(SIGUSR1, generarDump);
+    signal(SIGUSR2, limpiarTlb);
 
     //CASO PRUEBA DE MEMALLOC
     t_paquete *paquete1 = serializar_alloc(5);
-    guardarMemoria(paquete1);
-    free(paquete1);
+    memAlloc(paquete1);
 
     paquete1 = serializar_alloc(10);
-    guardarMemoria(paquete1);
+    memAlloc(paquete1);
+
+    //paquete1 = serializar_alloc(134542270);
+    //freeAlloc(paquete1);
+    
+    mostrarPaginas();
+    mostrarAllocs();
+    /*paquete1 = serializar_alloc(3);
+    memAlloc(paquete1);*/
     free(paquete1);
 
-    paquete1 = serializar_alloc(3);
-    guardarMemoria(paquete1);
-    free(paquete1);
-
-
-
-    //PROGRAMA NORMAL
-    socket_server = iniciar_servidor("127.0.0.1", string_itoa(config_memoria->PUERTO), logger_memoria);
     while(1){
         socket_client = esperar_cliente(socket_server, logger_memoria);
 		if (socket_client != -1) {
@@ -101,11 +88,15 @@ static void *ejecutar_operacion(int client)
                 break;
             case MEMALLOC:
                 log_info(logger_memoria, "recibi orden de almacenar memoria del cliente %d", client);
-                guardarMemoria(paquete);
+                memAlloc(paquete);
                 break;
             case MEMWRITE:
                 log_info(logger_memoria, "recibi orden de guardar en memoria del cliente %d", client);
-                guardarMemoria(paquete);
+                memAlloc(paquete);
+                break;
+            case MEMREAD:
+                log_info(logger_memoria, "recibi orden de leer memoria del cliente %d", client);
+                t_heap_metadata* data = memRead(paquete);
                 break;
             default:
                 log_error(logger_memoria, "Codigo de operacion desconocido");
@@ -123,4 +114,28 @@ static void *ejecutar_operacion(int client)
 	close(client);
 	log_info(logger_memoria, "Se desconecto el cliente [%d]", client);
 	return NULL;
+}
+void recibirSignal(int signal){
+    if(signal == SIGINT){
+        imprimirMetricas();
+    }
+    if(signal ==SIGUSR1){
+        generarDump();
+    }
+    if(signal ==SIGUSR2){
+        limpiarTlb();
+    }
+}
+void limpiarTlb(){
+    log_info(logger_memoria,"SEÑAL RECIBIDA LIMPIANDO TLB");
+    list_clean(tabla_tlb->tlb);
+    log_info(logger_memoria,"TLB VACIA");
+
+}
+void generarDump(){
+
+}
+void imprimirMetricas(){
+    log_info(logger_memoria,"SEÑAL RECIBIDA");
+    exit(EXIT_SUCCESS);
 }

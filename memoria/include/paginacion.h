@@ -3,12 +3,20 @@
 
 #include "memoria-global.h"
 #include <commons/collections/list.h>
+#include <commons/collections/queue.h>
 #include "tlb.h"
+#include "memoria-virtual.h"
 
-void guardarMemoria(t_paquete *paquete);
 int getPaginaByDireccion(uint32_t direccion);
+int getPrimeraPaginaDisponible(int size);
+t_heap_metadata *memRead(t_paquete* paquete);
+t_contenidos_pagina *getLastContenidoByPagina(t_pagina* pagina);
+t_contenidos_pagina *getLastHeaderContenidoByPagina(t_pagina* pagina);
 
-t_heap_metadata *memRead(uint32_t direccion);
+//MARCOS
+int getMarco();
 
+int generarPaginaConMarco();
 
+void mostrarPaginas();
 #endif
