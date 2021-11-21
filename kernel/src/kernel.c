@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
     
     
     //Conectar a memoria (datos temporales hardcodeados)
-    int socket_cliente_memoria = crear_conexion(config_kernel->IP_MEMORIA, config_kernel->PUERTO_MEMORIA);
+    socket_cliente_memoria = crear_conexion(config_kernel->IP_MEMORIA, config_kernel->PUERTO_MEMORIA);
     if(socket_cliente_memoria == -1){
         log_error(logger_kernel, "Fallo en la conexion a memoria");
     }

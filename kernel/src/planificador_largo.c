@@ -73,10 +73,18 @@ void atender_proceso (void* parametro ){
                 close(socket_cliente);
                 return;
                 break;
+                
+            case MEMALLOC:
+            case MEMFREE:
+            case MEMREAD:
+            case MEMWRITE:
+                enviar_paquete(paquete, socket_cliente_memoria);
+                break;
             default:
                 log_error(logger_kernel, "Codigo de operacion desconocido");
                 break;
             
+
         }
 
         //Libero la memoria ocupada por el paquete

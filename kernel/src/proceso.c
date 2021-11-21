@@ -78,6 +78,18 @@ void exec(t_proceso *self){
                     log_info(logger_kernel, "Iniciando semaforo: %s", next_task->nombre_semaforo);
                     iniciar_semaforo(next_task->nombre_semaforo, next_task->value);
                     break;
+                case CLIENTE_DESCONECTADO:
+                case CLIENTE_TEST:
+                case NUEVO_CARPINCHO:
+                case SEM_WAIT:
+                case SEM_POST:
+                case SEM_DESTROY:
+                case OP_ERROR:
+                case MEMALLOC:
+                case MEMFREE:
+                case MEMREAD:
+                case MEMWRITE:
+                    break;
 
             }
             

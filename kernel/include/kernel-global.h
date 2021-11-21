@@ -86,6 +86,7 @@ sem_t solicitar_block;
 int cantidad_de_procesos;
 bool salida_de_exec;
 int multiprogramacion_disponible;
+int socket_cliente_memoria;
 
 //funciones
 void mover_proceso_de_lista(t_list *origen, t_list *destino, int index, int status);

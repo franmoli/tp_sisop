@@ -19,7 +19,11 @@ typedef enum {
     SEM_POST = 5,
     INIT_SEM = 6,
     SEM_DESTROY = 7,
-    OP_ERROR = 8
+    OP_ERROR = 8,
+    MEMALLOC = 9,
+    MEMFREE = 10,
+    MEMREAD = 11,
+    MEMWRITE = 12
 } op_code;
 
 typedef struct {
