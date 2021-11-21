@@ -31,6 +31,7 @@ typedef struct{
 }t_marco;
 
 typedef struct{
+    int pid;
     t_list *paginas;
     t_list *Lru;
     t_list *Clock;
@@ -71,6 +72,8 @@ t_log *logger_memoria;
 t_tabla_tlb* tabla_tlb;
 t_tabla_paginas* tabla_paginas;
 t_tabla_marcos* tabla_marcos;
+
+t_list* tabla_procesos;
 
 //Reemplazo tlb
 t_list *tlb_LRU;

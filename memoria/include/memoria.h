@@ -11,6 +11,7 @@ void imprimirMetricas();
 void limpiarTlb();
 void generarDump();
 void recibirSignal(int signal);
+void inicializarCarpincho(t_paquete* paquete);
 
 
 #endif
