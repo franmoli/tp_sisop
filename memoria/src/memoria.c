@@ -51,11 +51,11 @@ int main(int argc, char **argv)
     signal(SIGUSR2, limpiarTlb);
 
     //CASO PRUEBA DE MEMALLOC
-    t_paquete *paquete1 = serializar_alloc(5);
-    memAlloc(paquete1);
+    //t_paquete *paquete1 = serializar_alloc(5);
+    //memAlloc(paquete1);
 
-    paquete1 = serializar_alloc(10);
-    memAlloc(paquete1);
+    //paquete1 = serializar_alloc(10);
+    //memAlloc(paquete1);
 
     //paquete1 = serializar_alloc(134542270);
     //freeAlloc(paquete1);
@@ -64,7 +64,7 @@ int main(int argc, char **argv)
     //mostrarAllocs();
     /*paquete1 = serializar_alloc(3);
     memAlloc(paquete1);*/
-    free(paquete1);
+    //ree(paquete1);
 
     while(1){
         socket_client = esperar_cliente(socket_server, logger_memoria);

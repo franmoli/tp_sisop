@@ -17,7 +17,7 @@ t_tabla_paginas* buscarTablaPorPID(int id);
 //MARCOS
 int getMarco();
 
-int generarPaginaConMarco(t_tabla_paginas* tabla_paginas);
+int getMarcoParaPagina(t_tabla_paginas* tabla_paginas);
 
 void mostrarPaginas(t_tabla_paginas* tabla_paginas);
 #endif

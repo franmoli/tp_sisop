@@ -143,7 +143,7 @@ void memAlloc(t_paquete *paquete) {
     uint32_t inicio = tamanio_memoria;
     
     if(list_size(tabla_paginas->paginas)==0){
-        int marco = generarPaginaConMarco(tabla_paginas);
+        int marco = getMarcoParaPagina(tabla_paginas);
         
         if(marco <0){
             return;
@@ -155,8 +155,11 @@ void memAlloc(t_paquete *paquete) {
         pagina->numero_pagina = 0;
         pagina->tamanio_ocupado = size + sizeof(t_heap_metadata) * 2;
         pagina->cantidad_contenidos = 2;
+        pagina->bit_presencia = true;
         
-        pagina->bit_presencia=true;
+        if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "CLOCK-M") == 0)
+            pagina->bit_uso=true;
+
         pagina->bit_modificado=false;
 
         t_heap_metadata* comienzoAlloc = malloc(sizeof(t_heap_metadata));
@@ -297,8 +300,11 @@ void memAlloc(t_paquete *paquete) {
                     paginaNueva->numero_pagina = list_size(tabla_paginas->paginas);
                     paginaNueva->tamanio_ocupado = restante + sizeof(t_heap_metadata);  
                     paginaNueva->cantidad_contenidos = 1;
+                    paginaNueva->bit_presencia = true;
+
+                    if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "CLOCK-M") == 0) //SOLO CLOCK USA ESTE CAMPO
+                        paginaNueva->bit_uso=true;
                     
-                    paginaNueva->bit_presencia=true;
                     paginaNueva->bit_modificado=false;
 
                     list_add(tabla_paginas->paginas,paginaNueva);

@@ -45,6 +45,7 @@ typedef struct{
     uint32_t tamanio_ocupado;
     uint32_t cantidad_contenidos;
     uint32_t marco_asignado;
+    bool bit_uso;
     bool bit_presencia;
     bool bit_modificado;
     int  usado;
