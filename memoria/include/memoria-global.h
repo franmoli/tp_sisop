@@ -45,6 +45,7 @@ typedef struct{
     uint32_t tamanio_ocupado;
     uint32_t cantidad_contenidos;
     uint32_t marco_asignado;
+    uint32_t carpincho_id;
     bool bit_uso;
     bool bit_presencia;
     bool bit_modificado;

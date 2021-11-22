@@ -150,6 +150,36 @@ t_tabla_paginas* buscarTablaPorPID(int id){
     log_info(logger_memoria,"No se encontro la tabla perteneciente al proceso");
     list_iterator_destroy(list_iterator);
     return 1000;
+}
 
+int solicitarPaginaNueva(uint32_t carpincho_id){
 
+    t_tabla_paginas *tabla_paginas = buscarTablaPorPID(carpincho_id);
+    int marco = getMarcoParaPagina(tabla_paginas);   
+    if(marco <0){
+        log_error(logger_memoria,"No se pudo asignar un marco");
+        return;
+    }
+    int numero_pagina = 0;
+    if(list_size(tabla_paginas->paginas) > 0)
+        numero_pagina = list_size(tabla_paginas->paginas);
+
+    t_pagina *pagina =malloc(sizeof(t_pagina));
+    pagina->listado_de_contenido = list_create();
+    pagina->marco_asignado = marco;
+    pagina->numero_pagina = numero_pagina;
+    pagina->tamanio_ocupado = 0;
+    pagina->carpincho_id = carpincho_id;
+    pagina->cantidad_contenidos = 0;
+    pagina->bit_presencia = true;
+    if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "CLOCK-M") == 0) //SOLO CLOCK USA ESTE CAMPO
+        pagina->bit_uso=true;
+
+    list_add(tabla_paginas->paginas,pagina);
+
+    t_marco *marcoAsignado = list_get(tabla_marcos->marcos, marco);
+    marcoAsignado->isFree = false;
+    tabla_paginas->paginas_en_memoria += 1;
+    
+    return pagina->numero_pagina;
 }

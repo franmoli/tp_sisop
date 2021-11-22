@@ -50,10 +50,15 @@ int main(int argc, char **argv)
     signal(SIGUSR1, generarDump);
     signal(SIGUSR2, limpiarTlb);
 
+    t_paquete *paquete = serializar_mate_init(1);
+    inicializarCarpincho(paquete);
+    uint32_t carpincho_id = deserializar_mate_init(paquete)->carpincho_id;
     //CASO PRUEBA DE MEMALLOC
-    //t_paquete *paquete1 = serializar_alloc(5);
-    //memAlloc(paquete1);
-
+    t_paquete *paquete1 = serializar_alloc(5,carpincho_id);
+    memAlloc(paquete1);
+    
+    paquete1 = serializar_alloc(23,carpincho_id);
+    memAlloc(paquete1);
     //paquete1 = serializar_alloc(10);
     //memAlloc(paquete1);
 
@@ -146,7 +151,8 @@ void imprimirMetricas(){
 
 void inicializarCarpincho(t_paquete* paquete) {
 
-    int id = deserializar_alloc(paquete);
+    t_mateinit_serializado* mateInit_deserializado= deserializar_mate_init(paquete);
+    uint32_t id = mateInit_deserializado->carpincho_id;
 
     t_tabla_paginas* nuevaTabla = malloc(sizeof(t_tabla_paginas));
 
@@ -155,7 +161,7 @@ void inicializarCarpincho(t_paquete* paquete) {
     nuevaTabla->Lru = list_create();
     nuevaTabla->Clock = list_create();
     nuevaTabla->paginas_en_memoria = 0;
-
+    nuevaTabla->paginas_totales_maximas = config_memoria->TAMANIO / config_memoria->TAMANIO_PAGINA;
     list_add(tabla_procesos,nuevaTabla);
 
     return;

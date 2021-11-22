@@ -20,4 +20,5 @@ int getMarco();
 int getMarcoParaPagina(t_tabla_paginas* tabla_paginas);
 
 void mostrarPaginas(t_tabla_paginas* tabla_paginas);
+int solicitarPaginaNueva(uint32_t carpincho_id);
 #endif

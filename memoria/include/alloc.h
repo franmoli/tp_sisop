@@ -16,4 +16,7 @@ void freeAlloc(t_paquete *paquete);
 bool direccionValida(uint32_t direccion, uint32_t carpincho_id);
 t_heap_metadata* getLastHeapFromPagina(int pagina, int carpincho_id);
 void mostrarAllocs(int carpincho_id);
+
+void agregarPagina(t_pagina* pagina, t_heap_metadata* data, uint32_t nextAnterior, uint32_t size,bool ultimo);
+void crearPrimerHeader(t_pagina* pagina);
 #endif

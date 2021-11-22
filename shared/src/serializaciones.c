@@ -91,3 +91,27 @@ t_malloc_serializado* deserializar_alloc(t_paquete *paquete){
     memcpy(&(malloc_serializado->carpincho_id), stream + offset, sizeof(uint32_t));
     return malloc_serializado;
 }
+
+t_paquete *serializar_mate_init(uint32_t carpincho_id){
+    t_mateinit_serializado* malloc_serializado = malloc(sizeof(t_mateinit_serializado));
+    malloc_serializado->carpincho_id = carpincho_id;
+
+    t_paquete *paquete = malloc(sizeof(t_paquete));
+    t_buffer *new_buffer = malloc(sizeof(t_buffer));
+    new_buffer->size = sizeof(uint32_t)*2;
+    int offset = 0;
+    void *stream = malloc(new_buffer->size);
+    memcpy(stream + offset, &(malloc_serializado->carpincho_id), sizeof(uint32_t));
+
+    new_buffer->stream = stream;
+    paquete->buffer = new_buffer;
+    paquete->codigo_operacion = MATEINIT;
+    return paquete;
+}
+t_mateinit_serializado* deserializar_mate_init(t_paquete *paquete){
+    t_mateinit_serializado* malloc_serializado = malloc(sizeof(t_mateinit_serializado));
+    void *stream = paquete->buffer->stream;
+    int offset = 0;
+    memcpy(&(malloc_serializado->carpincho_id), stream + offset, sizeof(uint32_t));
+    return malloc_serializado;
+}
