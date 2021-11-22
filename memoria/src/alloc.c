@@ -6,8 +6,11 @@ void freeAlloc(t_paquete *paquete) {
     
     uint32_t inicio = tamanio_memoria;
 
-    uint32_t direccion = deserializar_alloc(paquete);
-    if(!direccionValida(direccion)){
+    uint32_t direccion =  deserializar_alloc(paquete);
+    uint32_t carpincho_id = 2;
+    t_tabla_paginas* tabla_paginas = buscarTablaPorPID(carpincho_id);
+
+    if(!direccionValida(direccion,carpincho_id)){
         //MATE FREE FAIÑT
     }
     //Traigo de memoria el alloc
@@ -16,6 +19,13 @@ void freeAlloc(t_paquete *paquete) {
     alloc->isFree = true;
     uint32_t next = alloc->nextAlloc;
     uint32_t back = alloc->prevAlloc;
+
+    int paginaAlloc = getPaginaByDireccion(back);
+    t_pagina* pagina_alloc = list_get(tabla_paginas->paginas,paginaAlloc);
+    pagina_alloc->tamanio_ocupado-=next-back- sizeof(t_heap_metadata);
+    pagina_alloc->cantidad_contenidos-=1;
+
+
     t_heap_metadata* anterior;
     t_heap_metadata* posterior;
     bool hayAnterior = false;
@@ -35,6 +45,18 @@ void freeAlloc(t_paquete *paquete) {
     }
     if(hayAnterior && hayPosterior){
         anterior->nextAlloc = posterior->nextAlloc;
+
+        int paginaNextAlloc = getPaginaByDireccion(next);
+        t_pagina* pagina_allocNext = list_get(tabla_paginas->paginas,paginaNextAlloc);
+        pagina_allocNext->tamanio_ocupado-=posterior->nextAlloc-next- sizeof(t_heap_metadata);
+        pagina_allocNext->cantidad_contenidos-=1;
+
+        if(list_size(tabla_paginas->paginas)==pagina_allocNext->numero_pagina && pagina_allocNext->cantidad_contenidos==1){
+            list_remove(tabla_paginas->paginas,pagina_allocNext);
+            free(pagina_allocNext);
+            tabla_paginas->paginas_en_memoria-=1;
+        }
+        
         free(alloc);
         free(posterior);
         guardarAlloc(anterior,back);
@@ -70,7 +92,10 @@ void freeAlloc(t_paquete *paquete) {
     }
 }
 
-bool direccionValida(uint32_t direccion){
+bool direccionValida(uint32_t direccion, uint32_t carpincho_id){
+
+    t_tabla_paginas* tabla_paginas = buscarTablaPorPID(carpincho_id);
+
     bool esValida = true;
     int numero_pagina = getPaginaByDireccion(direccion);
     log_info(logger_memoria,"Pagina:%d", numero_pagina);
@@ -108,11 +133,17 @@ void guardarAlloc(t_heap_metadata* data, uint32_t direccion) {
 
 void memAlloc(t_paquete *paquete) {
 
-    int size = deserializar_alloc(paquete);
+    
+    t_malloc_serializado* mallocDeserializado =  deserializar_alloc(paquete);
+    
+    int size = mallocDeserializado->size_reservar;
+    int carpincho_id = mallocDeserializado->carpincho_id;
+
+    t_tabla_paginas* tabla_paginas = buscarTablaPorPID(carpincho_id);
     uint32_t inicio = tamanio_memoria;
     
     if(list_size(tabla_paginas->paginas)==0){
-        int marco = generarPaginaConMarco();
+        int marco = generarPaginaConMarco(tabla_paginas);
         
         if(marco <0){
             return;
@@ -148,7 +179,7 @@ void memAlloc(t_paquete *paquete) {
         tabla_paginas->paginas_en_memoria+=1;
     }
     else{
-        int paginaDisponible = getPrimeraPaginaDisponible(size);
+        int paginaDisponible = getPrimeraPaginaDisponible(size, tabla_paginas);
         t_heap_metadata* data = traerAllocDeMemoria(inicio);
         uint32_t nextAnterior = tamanio_memoria;
         while(data->nextAlloc != NULL) {
@@ -290,14 +321,17 @@ void memAlloc(t_paquete *paquete) {
         }
     }
 }
-t_heap_metadata* getLastHeapFromPagina(int pagina){
+t_heap_metadata* getLastHeapFromPagina(int pagina, int carpincho_id){
+    
+    t_tabla_paginas* tabla_paginas = buscarTablaPorPID(carpincho_id);
     t_pagina *paginaBuscada = list_get(tabla_paginas->paginas,pagina);
     t_contenidos_pagina* contenidoUltimo = getLastContenidoByPagina(paginaBuscada);
     t_heap_metadata *metadata = traerAllocDeMemoria(contenidoUltimo->dir_comienzo);
     return metadata;
 }
 
-void mostrarAllocs(){
+void mostrarAllocs(int carpincho_id){
+    t_tabla_paginas* tabla_paginas = buscarTablaPorPID(carpincho_id);
     t_pagina *paginaLeida = list_get(tabla_paginas->paginas,0);
     if(paginaLeida ==NULL)
         return;

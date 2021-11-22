@@ -9,7 +9,7 @@ int getPaginaByDireccion(uint32_t direccion){
     log_info(logger_memoria,"config:%d", config_memoria->TAMANIO_PAGINA);
     return resta/config_memoria->TAMANIO_PAGINA;
 }
-int getPrimeraPaginaDisponible(int size)
+int getPrimeraPaginaDisponible(int size, t_tabla_paginas *tabla_paginas)
 {
     t_list_iterator *list_iterator = list_iterator_create(tabla_paginas->paginas);
     int numeroPagina = -1;
@@ -57,16 +57,18 @@ t_heap_metadata* memRead(t_paquete* paquete) {
 
     //TODO: Tener en cuenta que la direccion pertenezca a una pagina de la tabla de este proceso
     uint32_t direccion = deserializar_alloc(paquete);
-
+    uint32_t carpincho_id = 1;
     //Traer pagina
         if(!direccionValida(direccion)){
         //MATE FREE FAIL
     }
 
+     t_tabla_paginas* tabla_paginas = buscarTablaPorPID(carpincho_id);
+
     int nro_pagina = getPaginaByDireccion(direccion);
 
     //Ir a la tlb
-    int nro_marco = getFromTLB(nro_pagina);
+    int nro_marco = getFromTLB(nro_pagina, tabla_paginas);
 
     //Falta buscar posta la info en memoria
 
@@ -94,7 +96,7 @@ int getMarco(){
     list_iterator_destroy(list_iterator);
     return numeroPagina;
 }
-int generarPaginaConMarco(){
+int generarPaginaConMarco(t_tabla_paginas* tabla_paginas){
     
     if(tabla_paginas->paginas_en_memoria <=config_memoria->MARCOS_POR_CARPINCHO){
         if(strcmp(config_memoria->TIPO_ASIGNACION, "FIJA") == 0){
@@ -111,7 +113,7 @@ int generarPaginaConMarco(){
     }
 }
 
-void mostrarPaginas(){
+void mostrarPaginas(t_tabla_paginas* tabla_paginas){
     system("clear");
     t_list_iterator *list_iterator = list_iterator_create(tabla_paginas->paginas);
     int i= 0;

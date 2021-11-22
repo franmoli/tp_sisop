@@ -14,7 +14,7 @@ int getTLBPaginaByMarco(int marco){
     list_iterator_destroy(list_iterator);
     return 0;
 }
-int getFromTLB(int numero_pagina_buscado){
+int getFromTLB(int numero_pagina_buscado, t_tabla_paginas *tabla_paginas){
 
     int numeroPagina = -1;
     t_list_iterator *list_iterator = list_iterator_create(tabla_tlb->tlb);

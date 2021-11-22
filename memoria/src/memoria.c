@@ -10,11 +10,11 @@ int main(int argc, char **argv)
     log_info(logger_memoria, "Configuración cargada correctamente");
     tamanio_memoria = malloc(sizeof(config_memoria->TAMANIO));
 	
-	tabla_paginas = malloc(sizeof(t_tabla_paginas));
+	/*tabla_paginas = malloc(sizeof(t_tabla_paginas));
     tabla_paginas->paginas = list_create();
     tabla_paginas->paginas_en_memoria = 0;
     tabla_paginas->Lru = list_create();
-    tabla_paginas->Clock = list_create();
+    tabla_paginas->Clock = list_create();*/
 
 
     tabla_tlb = malloc(sizeof(t_tabla_tlb));
@@ -29,7 +29,7 @@ int main(int argc, char **argv)
 
     tabla_procesos = list_create();
 
-	tabla_paginas->paginas_totales_maximas =config_memoria->TAMANIO / config_memoria->TAMANIO_PAGINA;
+	//tabla_paginas->paginas_totales_maximas =config_memoria->TAMANIO / config_memoria->TAMANIO_PAGINA;
     int i = 0;
     while( i< config_memoria->CANTIDAD_ENTRADAS_TLB){
         t_marco *tlb = malloc(sizeof(t_marco));
@@ -60,8 +60,8 @@ int main(int argc, char **argv)
     //paquete1 = serializar_alloc(134542270);
     //freeAlloc(paquete1);
     
-    mostrarPaginas();
-    mostrarAllocs();
+    //mostrarPaginas();
+    //mostrarAllocs();
     /*paquete1 = serializar_alloc(3);
     memAlloc(paquete1);*/
     free(paquete1);

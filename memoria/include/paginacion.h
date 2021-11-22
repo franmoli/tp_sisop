@@ -8,7 +8,7 @@
 #include "memoria-virtual.h"
 
 int getPaginaByDireccion(uint32_t direccion);
-int getPrimeraPaginaDisponible(int size);
+int getPrimeraPaginaDisponible(int size, t_tabla_paginas *tabla_paginas);
 t_heap_metadata *memRead(t_paquete* paquete);
 t_contenidos_pagina *getLastContenidoByPagina(t_pagina* pagina);
 t_contenidos_pagina *getLastHeaderContenidoByPagina(t_pagina* pagina);
@@ -17,7 +17,7 @@ t_tabla_paginas* buscarTablaPorPID(int id);
 //MARCOS
 int getMarco();
 
-int generarPaginaConMarco();
+int generarPaginaConMarco(t_tabla_paginas* tabla_paginas);
 
-void mostrarPaginas();
+void mostrarPaginas(t_tabla_paginas* tabla_paginas);
 #endif
