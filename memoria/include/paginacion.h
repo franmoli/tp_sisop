@@ -14,8 +14,10 @@ t_contenidos_pagina *getLastContenidoByPagina(t_pagina* pagina);
 t_contenidos_pagina *getLastHeaderContenidoByPagina(t_pagina* pagina);
 t_tabla_paginas* buscarTablaPorPID(int id);
 
+
 //MARCOS
 int getMarco();
+int buscarMarcoEnMemoria(int numero_pagina_buscada, int id);
 
 int getMarcoParaPagina(t_tabla_paginas* tabla_paginas);
 

@@ -11,6 +11,6 @@ int getFromTLB(int numero_pagina_buscado, t_tabla_paginas *tabla_paginas);
 int buscarEnTLB(int numero_pagina, int id);
 
 //Reemplazo
-void actualizarTLBFIFO(t_tlb *tlb);
+void reordenarLRU(int numero_pagina_buscada, int id); 
 
 #endif

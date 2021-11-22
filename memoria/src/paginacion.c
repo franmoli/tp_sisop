@@ -152,6 +152,29 @@ t_tabla_paginas* buscarTablaPorPID(int id){
     return 1000;
 }
 
+int buscarMarcoEnMemoria(int numero_pagina_buscada, int id){
+
+    //Manejar error si no existe tabla
+    t_tabla_paginas *tabla = buscarTablaPorPID(id);
+
+    int numeroPagina = -1;
+    t_list_iterator *list_iterator = list_iterator_create(tabla->paginas);
+
+    while(list_iterator_has_next(list_iterator)) {
+
+        t_pagina *pagina = list_iterator_next(list_iterator);
+        if(pagina->numero_pagina == numero_pagina_buscada){
+            list_iterator_destroy(list_iterator);
+            return pagina->marco_asignado;
+        }
+
+    }
+
+    //No encontre la pagina
+    //Voy a swap
+
+}
+
 int solicitarPaginaNueva(uint32_t carpincho_id){
 
     t_tabla_paginas *tabla_paginas = buscarTablaPorPID(carpincho_id);
