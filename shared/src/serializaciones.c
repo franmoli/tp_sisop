@@ -102,3 +102,37 @@ t_mate_sem *deserializar_mate_sem_init(t_paquete *paquete){
     memcpy(&(datos_sem->nombre),stream + offset, sizeof(char)*15);
     return datos_sem;
 }
+
+t_paquete *serializar_mate_sem_resto(char *nombre_sem, op_code cod_op){
+    t_mate_sem *datos_sem = malloc(sizeof(t_mate_sem));
+    datos_sem->nombre = malloc(sizeof(char)*15);
+    datos_sem->nombre = nombre_sem;
+
+    t_paquete *paquete = malloc(sizeof(t_paquete));
+    t_buffer *buffer = malloc(sizeof(t_buffer));
+    buffer->size = sizeof(char)*15;
+
+    int offset = 0;
+    void *stream = malloc(buffer->size);
+
+    memcpy(stream + offset,&(datos_sem->nombre),sizeof(char)*15);
+
+    buffer->stream = stream;
+    paquete->buffer = buffer;
+    paquete->codigo_operacion = cod_op;
+
+    return paquete;
+}
+
+t_mate_sem *deserializar_mate_sem_resto(t_paquete *paquete){
+
+    t_mate_sem *datos_sem = malloc(sizeof(t_mate_sem));
+    datos_sem->nombre = malloc(sizeof(char)*15);
+    datos_sem->value = 0;
+    void *stream = paquete->buffer->stream;
+
+    int offset = 0;
+
+    memcpy(&(datos_sem->nombre),stream + offset, sizeof(char)*15);
+    return datos_sem;
+}
