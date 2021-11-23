@@ -23,6 +23,18 @@ void crear_archivos_swap() {
 }
 
 /*
+    Escritura en archivos de SWAP
+*/
+void escribir_en_archivo_swap(int archivo, void *mapping, int offset_final) {
+    //Almaceno la página mapeada en el archivo
+    ssize_t flag_escritura = write(archivo, mapping, offset_final);
+    if(flag_escritura != offset_final){
+        log_error(logger_swap, "No se pudo realizar la escritura en el archivo, revise el codigo. Abortando ejecucion.");
+        exit(-1);
+    }
+}
+
+/*
     Selección del archivo que se escribirá/leerá
 */
 int seleccionar_archivo_escritura(int proceso_a_guardar, int bytes_a_guardar) {
@@ -34,7 +46,7 @@ int seleccionar_archivo_escritura(int proceso_a_guardar, int bytes_a_guardar) {
     for(int i=0; i<list_size(lista_paginas_almacenadas); i++) {
         t_pagina_almacenada *pagina = list_get(lista_paginas_almacenadas, i);
         if(pagina->id_proceso == proceso_a_guardar) {
-            archivo_paginas_con_mismo_proceso = pagina->file;
+            archivo_paginas_con_mismo_proceso = pagina->marco->file;
             break;
         }
     }
@@ -70,7 +82,7 @@ int seleccionar_archivo_escritura(int proceso_a_guardar, int bytes_a_guardar) {
 */
 void insertar_pagina_en_archivo(t_pagina *pagina) {
     //Selecciono el archivo
-    int bytes_a_guardar = bytes_pagina(*pagina);
+    int bytes_a_guardar = config_swap->TAMANIO_PAGINA;
     int posicion_archivo_obtenido = seleccionar_archivo_escritura(pagina->id_carpincho, bytes_a_guardar);
 
     if(posicion_archivo_obtenido >= 0) {
@@ -89,49 +101,15 @@ void insertar_pagina_en_archivo(t_pagina *pagina) {
             log_error(logger_swap, "No pudo cargarse el archivo correctamente, revise el codigo. Abortando ejecucion.");
             exit(-1);
         }
-        int offset_inicial = statbuf.st_size;
-        int offset_final = offset_inicial;
-        log_info(logger_swap, "Archivo seleccionado: %s (%dB de espacio disponible)", path_archivo, config_swap->TAMANIO_SWAP - statbuf.st_size);
 
-        //Si es la primera pagina a insertar en el archivo, genero el mapeo del archivo correspondiente
-        if(offset_inicial == 0) {
-            void *mapeo_archivo = mmap(NULL, config_swap->TAMANIO_SWAP, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, archivo, 0);
-            list_add(lista_mapeos, mapeo_archivo);
+        //Analizo el tipo de asignación
+        if(strcmp(config_swap->TIPO_ASIGNACION, "GLOBAL") == 0) {
+            asignacion_global_de_pagina(statbuf.st_size, posicion_archivo_obtenido, path_archivo, archivo, pagina);
         }
-
-        //Obtengo el mapeo correspondiente al archivo
-        void *mapping = list_get(lista_mapeos, posicion_archivo_obtenido);
-        if(mapping == MAP_FAILED){
-            log_error(logger_swap, "El mapeado de la pagina fallo, revise el codigo. Abortanto ejecucion.");
-            exit(-1);
-        }
-
-        //Mapeo los datos de la pagina
-        log_info(logger_swap, "Escribiendo la pagina %d en el archivo %s en el offset %d", pagina->numero_pagina, path_archivo, offset_inicial);
-        memcpy(mapping + offset_final, &(pagina->numero_pagina), sizeof(pagina->numero_pagina));
-        offset_final += sizeof(pagina->numero_pagina);
-        memcpy(mapping + offset_final, &(pagina->marco->numero_marco), sizeof(pagina->marco->numero_marco));
-        offset_final += sizeof(pagina->marco->numero_marco);
-
-        //Almaceno la página mapeada en el archivo
-        ssize_t flag_escritura = write(archivo, mapping, offset_final);
-        if(flag_escritura != offset_final){
-            log_error(logger_swap, "No se pudo realizar la escritura en el archivo, revise el codigo. Abortando ejecucion.");
-            exit(-1);
-        }
-
-        //Añado los datos de la página a la estructura administrativa
-        t_pagina_almacenada *pagina_almacenada = malloc(sizeof(t_pagina_almacenada));
-        pagina_almacenada->numero_pagina = pagina->numero_pagina;
-        pagina_almacenada->id_proceso = pagina->id_carpincho;
-        pagina_almacenada->base = offset_inicial;
-        pagina_almacenada->size = bytes_a_guardar;
-        pagina_almacenada->file = posicion_archivo_obtenido;
-        list_add(lista_paginas_almacenadas, pagina_almacenada);
 
         //Actualizo la estructura administrativa de los archivos
         t_informacion_archivo *informacion_archivo = list_get(archivos_abiertos, posicion_archivo_obtenido);
-        informacion_archivo->espacio_disponible = config_swap->TAMANIO_SWAP - (statbuf.st_size + bytes_a_guardar);
+        informacion_archivo->espacio_disponible = informacion_archivo->espacio_disponible - config_swap->TAMANIO_PAGINA;
 
         //Cierro el archivo y libero la memoria de la página
         close(archivo);
@@ -162,7 +140,7 @@ void leer_pagina_de_archivo(int numero_pagina) {
     //Si la página fue encontrada la voy a buscar, sino lanzo mensaje de aviso
     if(informacion_almacenamiento != NULL) {
         //Lectura del archivo
-        char *path_archivo = list_get(config_swap->ARCHIVOS_SWAP, informacion_almacenamiento->file);
+        char *path_archivo = list_get(config_swap->ARCHIVOS_SWAP, informacion_almacenamiento->marco->file);
         int archivo = open(path_archivo, O_RDONLY);
 
         struct stat statbuf;
@@ -173,7 +151,7 @@ void leer_pagina_de_archivo(int numero_pagina) {
         t_pagina pagina_obtenida;
         t_marco marco_pagina;
 
-        int offset_actual = informacion_almacenamiento->base;
+        int offset_actual = informacion_almacenamiento->marco->base;
         memcpy(&pagina_obtenida.numero_pagina, paginas_obtenidas + offset_actual, sizeof(pagina_obtenida.numero_pagina));
         offset_actual += sizeof(pagina_obtenida.numero_pagina);
         memcpy(&marco_pagina, paginas_obtenidas + offset_actual, sizeof(marco_pagina));
@@ -187,6 +165,45 @@ void leer_pagina_de_archivo(int numero_pagina) {
         close(archivo);
     } else {
         log_error(logger_swap, "La pagina %d no se encuentra almacenada en los archivos de swap", numero_pagina);
+    }
+}
+
+/*
+    Eliminación de una página
+    Se utiliza cuando un proceso finaliza su ejecución
+*/
+void eliminar_pagina(int numero_pagina) {
+    t_pagina_almacenada *pagina = NULL;
+
+    //Busco la página entre aquellas que están almacenadas en archivos
+    for(int i=0; i<list_size(lista_paginas_almacenadas); i++) {
+        t_pagina_almacenada *pagina_almacenada = list_get(lista_paginas_almacenadas, i);
+        if(pagina_almacenada->numero_pagina == numero_pagina) {
+            pagina = pagina_almacenada;
+            break;
+        }
+    }
+
+    //Si la página fue encontrada, la elimino
+    if(pagina != NULL) {
+        pagina->marco->esta_libre = 1;
+
+        //Elimino la página
+        for(int i=0; i<list_size(lista_paginas_almacenadas); i++) {
+            t_pagina_almacenada *pagina_almacenada = list_get(lista_paginas_almacenadas, i);
+            if(pagina_almacenada->numero_pagina == numero_pagina) {
+                list_remove(lista_paginas_almacenadas, i);
+                break;
+            }
+        }
+
+        //Actualizo la información del archivo
+        t_informacion_archivo *archivo = list_get(archivos_abiertos, pagina->marco->file);
+        archivo->espacio_disponible = archivo->espacio_disponible + config_swap->TAMANIO_PAGINA;
+
+        free(pagina);
+    } else {
+        log_error(logger_swap, "La pagina %d no se encuentra almacenada en los archivos de swap. No pudo completarse el proceso de eliminacion.", numero_pagina);
     }
 }
 

@@ -45,6 +45,7 @@ typedef struct {
     t_list *ARCHIVOS_SWAP;
     int MARCOS_MAXIMOS;
     int RETARDO_SWAP;
+    char *TIPO_ASIGNACION;
 } t_config_swap;
 
 typedef struct {

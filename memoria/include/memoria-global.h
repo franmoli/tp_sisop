@@ -31,6 +31,7 @@ typedef struct{
     uint32_t numero_pagina;
     t_marco* marco;
     bool esta_vacia;
+    int id_carpincho;
 }t_pagina;
 
 t_tabla_paginas* tabla_paginas;

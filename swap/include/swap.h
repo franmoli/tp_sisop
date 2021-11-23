@@ -3,6 +3,7 @@
 
 #include "swap-global.h"
 #include "file-management.h"
+#include "asignaciones.h"
 #include <pthread.h>
 
 //Variables globales

@@ -3,10 +3,12 @@
 int main(int argc, char **argv) {
     //Inicio del programa
     system("clear");
+    contador_marcos = 0;
     logger_swap = log_create("./cfg/swap.log", "SWAP", true, LOG_LEVEL_INFO);
     lista_paginas_almacenadas = list_create();
     lista_mapeos = list_create();
     archivos_abiertos = list_create();
+    tabla_marcos = list_create();
     sem_init(&mutex_operacion, 0, 1);
     log_info(logger_swap, "Programa inicializado correctamente");
 
@@ -52,6 +54,14 @@ int main(int argc, char **argv) {
     pagina_prueba_5->numero_pagina = 2021;
     pagina_prueba_5->marco = marco_prueba;
     pagina_prueba_5->id_carpincho = 1;
+    t_pagina *pagina_prueba_6 = malloc(sizeof(t_pagina));
+    pagina_prueba_6->numero_pagina = 8000;
+    pagina_prueba_6->marco = marco_prueba;
+    pagina_prueba_6->id_carpincho = 0;
+    t_pagina *pagina_prueba_7 = malloc(sizeof(t_pagina));
+    pagina_prueba_7->numero_pagina = 7689;
+    pagina_prueba_7->marco = marco_prueba;
+    pagina_prueba_7->id_carpincho = 1;
 
     leer_pagina_de_archivo(23);
     insertar_pagina_en_archivo(pagina_prueba);
@@ -64,6 +74,13 @@ int main(int argc, char **argv) {
     leer_pagina_de_archivo(12);
     leer_pagina_de_archivo(1555);
     leer_pagina_de_archivo(2021);
+    eliminar_pagina(5000);
+    eliminar_pagina(500);
+    leer_pagina_de_archivo(500);
+    insertar_pagina_en_archivo(pagina_prueba_6);
+    insertar_pagina_en_archivo(pagina_prueba_7);
+    leer_pagina_de_archivo(8000);
+    leer_pagina_de_archivo(7689);
 
     //Se esperan conexiones
     log_info(logger_swap, "Esperando conexiones por parte de un cliente");
