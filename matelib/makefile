@@ -40,7 +40,3 @@ $(PROCESS_NAME): $(OBJ) $(SHARED_OBJ)
 clean:
 	rm -f $(ODIR)/*.o *~ core $(INCDIR)/*~ $(PROCESS_NAME) $(SHARED_ODIR)/*.o 		
 
-.PHONY: carpincho
-
-carpincho: $(OBJ) $(SHARED_OBJ)
-	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
