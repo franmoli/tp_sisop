@@ -18,6 +18,7 @@ typedef enum {
     MEMWRITE = 4,
     MEMREAD = 5,
     MATEINIT = 6,
+    SWAPFREE = 7,
 } op_code;
 
 typedef struct {

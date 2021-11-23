@@ -98,11 +98,11 @@ int getMarco(){
 }
 int getMarcoParaPagina(t_tabla_paginas* tabla_paginas){
     
-    if(tabla_paginas->paginas_en_memoria <=config_memoria->MARCOS_POR_CARPINCHO){
-        if(strcmp(config_memoria->TIPO_ASIGNACION, "FIJA") == 0){
+    if(strcmp(config_memoria->TIPO_ASIGNACION, "FIJA") == 0){
+        if(tabla_paginas->paginas_en_memoria <=config_memoria->MARCOS_POR_CARPINCHO){
             return getMarco();
         }else{
-
+            
         }
         
     }

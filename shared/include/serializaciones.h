@@ -24,9 +24,18 @@ typedef struct
 	uint32_t carpincho_id;
 } t_mateinit_serializado;
 
+typedef struct
+{
+	uint32_t carpincho_id;
+	bool swap_free;
+} t_swap_serializado;
+
 t_paquete *serializar_alloc(uint32_t size, uint32_t carpincho_id);
 t_malloc_serializado* deserializar_alloc(t_paquete *paquete);
 
 t_paquete *serializar_mate_init(uint32_t carpincho_id);
 t_mateinit_serializado* deserializar_mate_init(t_paquete *paquete);
+
+t_paquete *serializar_consulta_swap(uint32_t carpincho_id);
+t_swap_serializado* deserializar_swap(t_paquete *paquete);
 #endif

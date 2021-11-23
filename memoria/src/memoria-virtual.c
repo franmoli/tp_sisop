@@ -2,6 +2,10 @@
 
 t_pagina* reemplazarPagina(t_pagina* paginaAgregar, int carpincho_id){
 
+    if(!swapTieneEspacio(carpincho_id)){
+        //return PAGE_FAULT;
+    }
+
     t_tabla_paginas* tabla_paginas = buscarTablaPorPID(carpincho_id);
     if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "CLOCK-M") == 0){
         //SWAP CLOCK
@@ -15,6 +19,9 @@ t_pagina* reemplazarPagina(t_pagina* paginaAgregar, int carpincho_id){
     }
     return NULL;
 }
+
+//LRU saca la pagina que hace mas tiempo no se hace referencia
+//Cuando hago memread o memwrite significa una referencia
 
 int eliminarPrimerElementoLista(int carpincho_id){
     t_tabla_paginas* tabla_paginas = buscarTablaPorPID(carpincho_id);
@@ -36,4 +43,12 @@ int eliminarPrimerElementoLista(int carpincho_id){
     free(tabla_paginas->Lru);
     tabla_paginas->Lru = paginas;
     return marco;
+}
+
+bool swapTieneEspacio(int carpincho_id) {
+
+    t_paquete *paquete = serializar_consulta_swap(carpincho_id);
+    //Enviar a swap y ver como esperar respuesta
+    return true;
+
 }

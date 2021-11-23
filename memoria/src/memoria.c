@@ -71,6 +71,11 @@ int main(int argc, char **argv)
     memAlloc(paquete1);*/
     //ree(paquete1);
 
+    t_paquete *paquete2 = serializar_consulta_swap(15);
+    t_swap_serializado* swap_deserializado = deserializar_swap(paquete2);
+	log_info(logger_memoria, "ID desde swap: %d",swap_deserializado->carpincho_id);
+	log_info(logger_memoria, "ID desde swap: %d",swap_deserializado->swap_free);
+
     while(1){
         socket_client = esperar_cliente(socket_server, logger_memoria);
 		if (socket_client != -1) {
