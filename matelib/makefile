@@ -29,7 +29,11 @@ SHARED_SRC = $(wildcard $(SHARED_SRCDIR)/*.c)
 SHARED_OBJ = $(patsubst $(SHARED_SRCDIR)/%.c,$(SHARED_ODIR)/%.o,$(SHARED_SRC))
 
 $(PROCESS_NAME): $(OBJ) $(SHARED_OBJ)
-	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+	$(CC) -o lib$@.so $^ $(CFLAGS) $(LIBS)
+	sudo cp lib$@.so /usr/include/lib$@.so
+	sudo cp lib$@.so /usr/include/lib/lib$@.so
+	sudo cp lib$@.so /usr/bin/lib$@.so
+	sudo cp lib$@.so /usr/lib/lib$@.so
 
 .PHONY: clean
 
