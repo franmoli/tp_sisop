@@ -2,10 +2,6 @@
 
 t_pagina* reemplazarPagina(t_pagina* paginaAgregar, int carpincho_id){
 
-    if(!swapTieneEspacio(carpincho_id)){
-        //return PAGE_FAULT;
-    }
-
     t_tabla_paginas* tabla_paginas = buscarTablaPorPID(carpincho_id);
     if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "CLOCK-M") == 0){
         //SWAP CLOCK
@@ -45,10 +41,8 @@ int eliminarPrimerElementoLista(int carpincho_id){
     return marco;
 }
 
-bool swapTieneEspacio(int carpincho_id) {
-
+void consultaSwap(int carpincho_id) {
     t_paquete *paquete = serializar_consulta_swap(carpincho_id);
     //Enviar a swap y ver como esperar respuesta
-    return true;
-
+    return;
 }

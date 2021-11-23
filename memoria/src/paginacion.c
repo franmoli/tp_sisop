@@ -79,30 +79,43 @@ t_heap_metadata* memRead(t_paquete* paquete) {
     return alloc;
 
 }
-int getMarco(){
+int getMarco(t_tabla_paginas* tabla_paginas){
 
-    int numeroPagina = -1;
-    t_list_iterator *list_iterator = list_iterator_create(tabla_marcos->marcos);
-    bool marcoDisponible = false;
-    while (list_iterator_has_next(list_iterator) && !marcoDisponible)
-    {
-        t_marco *marco = list_iterator_next(list_iterator);
-        if (marco->isFree)
+    int numeroMarco = -1;
+    if(config_memoria->TIPO_ASIGNACION != "FIJA"){
+        t_list_iterator *list_iterator = list_iterator_create(tabla_marcos->marcos);
+        bool marcoDisponible = false;
+        while (list_iterator_has_next(list_iterator) && !marcoDisponible)
         {
-            marcoDisponible = true;
-            numeroPagina = marco->numero_marco;
+            t_marco *marco = list_iterator_next(list_iterator);
+            if (marco->isFree)
+            {
+                marcoDisponible = true;
+                numeroMarco = marco->numero_marco;
+                list_iterator_destroy(list_iterator);
+                return numeroMarco;
+            }
         }
+
+        //Busco disponibilidad en swap -> hayEspacio mv.c
+        
+    }else
+    {
+        if(tabla_paginas->paginas_en_memoria <=config_memoria->MARCOS_POR_CARPINCHO){
+            //Asigno una nueva pagina al marco correspondiente
+            numeroMarco = tabla_paginas->pid * config_memoria->MARCOS_POR_CARPINCHO + tabla_paginas->paginas_en_memoria;
+            return numeroMarco;
+        }
+        //Busco disponibilidad en swap -> hayEspacio mv.c
     }
-    list_iterator_destroy(list_iterator);
-    return numeroPagina;
+
 }
 int getMarcoParaPagina(t_tabla_paginas* tabla_paginas){
     
     if(strcmp(config_memoria->TIPO_ASIGNACION, "FIJA") == 0){
         if(tabla_paginas->paginas_en_memoria <=config_memoria->MARCOS_POR_CARPINCHO){
-            return getMarco();
+            return getMarco(tabla_paginas);
         }else{
-            
         }
         
     }
@@ -178,7 +191,9 @@ int buscarMarcoEnMemoria(int numero_pagina_buscada, int id){
 int solicitarPaginaNueva(uint32_t carpincho_id){
 
     t_tabla_paginas *tabla_paginas = buscarTablaPorPID(carpincho_id);
-    int marco = getMarcoParaPagina(tabla_paginas);   
+
+    //Para agregar la pagina nueva primero tengo que ver si puedo agregarla si es asignacion fija o dinamica -> 
+    int marco = getMarco(tabla_paginas);   
     if(marco <0){
         log_error(logger_memoria,"No se pudo asignar un marco");
         return;

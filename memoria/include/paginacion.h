@@ -16,7 +16,7 @@ t_tabla_paginas* buscarTablaPorPID(int id);
 
 
 //MARCOS
-int getMarco();
+int getMarco(t_tabla_paginas* tabla_paginas);
 int buscarMarcoEnMemoria(int numero_pagina_buscada, int id);
 
 int getMarcoParaPagina(t_tabla_paginas* tabla_paginas);
