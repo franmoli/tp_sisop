@@ -63,3 +63,42 @@ t_pagina deserializar_pagina(void *stream, int offset) {
 
     return pagina;
 }
+
+t_paquete *serializar_mate_sem_init(uint32_t valor, char *nombre_sem){
+
+    t_mate_sem *datos_sem = malloc(sizeof(t_mate_sem));
+    datos_sem->nombre = malloc(sizeof(char)*15);
+    datos_sem->nombre = nombre_sem;
+    datos_sem->value = valor;
+
+    t_paquete *paquete = malloc(sizeof(t_paquete));
+    t_buffer *buffer = malloc(sizeof(t_buffer));
+    buffer->size = sizeof(uint32_t) + sizeof(char)*15;
+
+    int offset = 0;
+    void *stream = malloc(buffer->size);
+
+    memcpy(stream + offset, &(datos_sem->value), sizeof(uint32_t));
+    offset+= sizeof(uint32_t);
+    memcpy(stream + offset, &(datos_sem->nombre), sizeof(char)*15);
+
+    buffer->stream = stream;
+    paquete->buffer = buffer;
+    paquete->codigo_operacion = INIT_SEM;
+
+    return paquete;
+}
+
+t_mate_sem *deserializar_mate_sem_init(t_paquete *paquete){
+
+    t_mate_sem *datos_sem = malloc(sizeof(t_mate_sem));
+    datos_sem->nombre = malloc(sizeof(char)*15);
+    void *stream = paquete->buffer->stream;
+
+    int offset = 0;
+    
+    memcpy(&(datos_sem->value),stream + offset, sizeof(uint32_t));
+    offset += sizeof(uint32_t);
+    memcpy(&(datos_sem->nombre),stream + offset, sizeof(char)*15);
+    return datos_sem;
+}

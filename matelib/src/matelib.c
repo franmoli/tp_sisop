@@ -100,13 +100,14 @@ int mate_sem_init(mate_instance *lib_ref, mate_sem_name sem, unsigned int value)
     //----Crear paquete con nombre de semaforo y valor para que kernel haga el sem_init con el COD_OP correspondiente
     //serializar inputs (nombre y valor init)
     
-    // creo un paquete vacío para testear
-    t_paquete *paquete = malloc(sizeof(t_paquete));
-    t_buffer *buffer = malloc(sizeof(t_buffer));
+    t_paquete *paquete = serializar_mate_sem_init(value,sem);
+    
+    /*t_buffer *buffer = malloc(sizeof(t_buffer));
     paquete->codigo_operacion = INIT_SEM;
     paquete->buffer = buffer;
     paquete->buffer->size = 0;
-
+    */
+    
     enviar_paquete(paquete, lib_ref->socket);
     sleep(1);
     printf("Enviado %d\n", lib_ref->socket);

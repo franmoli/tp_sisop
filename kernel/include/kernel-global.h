@@ -6,7 +6,7 @@
 #include <semaphore.h>
 #include <commons/log.h>
 #include <time.h>
-
+#include "matelib.h"
 #include "server.h"
 #include "config_utils.h"
 
@@ -48,6 +48,11 @@ typedef struct {
     int value;
     t_list *solicitantes;
 }t_semaforo;
+
+typedef struct {
+    char *nombre;
+    uint32_t value;
+}t_mate_sem;
 
 //Configuración
 t_config_kernel *config_kernel;

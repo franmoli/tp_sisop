@@ -3,9 +3,7 @@
 
 #include <stdint.h>
 #include "matelib-global.h"
-#include <pthread.h>
 #include <time.h>
-#include <semaphore.h>
 
 #define CANT_MAX_SEM 10
 

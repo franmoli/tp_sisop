@@ -3,6 +3,7 @@
 
 #include "server.h"
 #include "config_utils.h"
+#include "serializaciones.h"
 
 //Config
 t_config *arch_config;
