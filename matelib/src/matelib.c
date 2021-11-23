@@ -209,14 +209,14 @@ int mate_call_io(mate_instance *lib_ref, mate_io_resource io, void *msg){
 }
 
 //-----------------------------------Funciones Modulo Memoria -----------------------------------
-/*
+
 mate_pointer mate_memalloc(mate_instance *lib_ref, int size){
 
-    mate_pointer p;
+    mate_pointer p = 0;
 
     return p;
 }
-*/
+
 int mate_memfree(mate_instance *lib_ref, mate_pointer addr){
 
 
