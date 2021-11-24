@@ -31,6 +31,11 @@ typedef struct{
 }t_tlb;
 
 typedef struct{
+    uint32_t pid;
+    uint32_t numero_pagina;
+}t_reemplazo;
+
+typedef struct{
     uint32_t numero_marco;
     bool isFree;
 }t_marco;
@@ -94,6 +99,9 @@ t_list *tlb_LRU;
 t_queue *tlb_FIFO;
 int entradas_tlb;
 
+//Reemplazo LRU y CLOCK
+t_list *reemplazo_LRU;
+t_list *reemplazo_CLOCK;
 
 void* tamanio_memoria;
 int socket_server, socket_cliente_swap, socket_client;

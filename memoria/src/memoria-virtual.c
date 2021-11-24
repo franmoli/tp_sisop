@@ -41,6 +41,26 @@ int eliminarPrimerElementoLista(int carpincho_id){
     return marco;
 }
 
+/*
+void reemplazarLRUGlobal(int nro_pagina, int carpincho_id){
+
+    int index = 0;
+    t_list_iterator *list_iterator = list_iterator_create(reemplazo_LRU);
+    while (list_iterator_has_next(list_iterator))
+    {
+        t_reemplazo *pagina = list_iterator_next(list_iterator);
+        if(pagina->numero){
+            list_add(paginas,paginaList);
+        }
+
+    }
+    list_iterator_destroy(list_iterator);
+
+
+
+}
+*/
+
 void consultaSwap(int carpincho_id) {
     t_paquete *paquete = serializar_consulta_swap(carpincho_id);
     //Enviar a swap y ver como esperar respuesta

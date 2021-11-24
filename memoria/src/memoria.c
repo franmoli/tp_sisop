@@ -23,6 +23,15 @@ int main(int argc, char **argv)
     tlb_FIFO = queue_create();
     entradas_tlb = config_memoria->CANTIDAD_ENTRADAS_TLB;
 
+    if(config_memoria->TIPO_ASIGNACION != "FIJA"){
+        if(config_memoria->ALGORITMO_REEMPLAZO_MMU == "LRU"){
+            reemplazo_LRU = list_create();
+        }else 
+        {
+            reemplazo_CLOCK = list_create();
+        }
+    }
+
     tabla_marcos = malloc(sizeof(t_tabla_marcos));
     tabla_marcos->marcos = list_create();
 
