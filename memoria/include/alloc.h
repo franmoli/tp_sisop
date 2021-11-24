@@ -18,5 +18,6 @@ t_heap_metadata* getLastHeapFromPagina(int pagina, int carpincho_id);
 void mostrarAllocs(int carpincho_id);
 
 void agregarPagina(t_pagina* pagina, t_heap_metadata* data, uint32_t nextAnterior, uint32_t size,bool ultimo);
-void crearPrimerHeader(t_pagina* pagina);
+void crearPrimerHeader(t_pagina* pagina, uint32_t size);
+void asignarFooterSeparado(t_pagina* pagina,t_heap_metadata* data,uint32_t size, uint32_t nextAnterior);
 #endif
