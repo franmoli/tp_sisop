@@ -32,55 +32,37 @@ int main(int argc, char **argv) {
     crear_archivos_swap();
 
     /*Hardcodeo lectura de una página desde el archivo*/
-    t_marco *marco_prueba = malloc(sizeof(t_marco));
-    marco_prueba->numero_marco = 500;
     t_pagina *pagina_prueba = malloc(sizeof(t_pagina));
-    pagina_prueba->numero_pagina = 500;
-    pagina_prueba->marco = marco_prueba;
+    pagina_prueba->numero_pagina = 1;
     pagina_prueba->id_carpincho = 0;
     t_pagina *pagina_prueba_2 = malloc(sizeof(t_pagina));
-    pagina_prueba_2->numero_pagina = 12;
-    pagina_prueba_2->marco = marco_prueba;
+    pagina_prueba_2->numero_pagina = 2;
     pagina_prueba_2->id_carpincho = 1;
     t_pagina *pagina_prueba_3 = malloc(sizeof(t_pagina));
-    pagina_prueba_3->numero_pagina = 1256;
-    pagina_prueba_3->marco = marco_prueba;
+    pagina_prueba_3->numero_pagina = 3;
     pagina_prueba_3->id_carpincho = 2;
     t_pagina *pagina_prueba_4 = malloc(sizeof(t_pagina));
-    pagina_prueba_4->numero_pagina = 1555;
-    pagina_prueba_4->marco = marco_prueba;
+    pagina_prueba_4->numero_pagina = 4;
     pagina_prueba_4->id_carpincho = 1;
-    t_pagina *pagina_prueba_5 = malloc(sizeof(t_pagina));
-    pagina_prueba_5->numero_pagina = 2021;
-    pagina_prueba_5->marco = marco_prueba;
-    pagina_prueba_5->id_carpincho = 1;
-    t_pagina *pagina_prueba_6 = malloc(sizeof(t_pagina));
-    pagina_prueba_6->numero_pagina = 8000;
-    pagina_prueba_6->marco = marco_prueba;
-    pagina_prueba_6->id_carpincho = 0;
-    t_pagina *pagina_prueba_7 = malloc(sizeof(t_pagina));
-    pagina_prueba_7->numero_pagina = 7689;
-    pagina_prueba_7->marco = marco_prueba;
-    pagina_prueba_7->id_carpincho = 1;
 
-    leer_pagina_de_archivo(23);
     insertar_pagina_en_archivo(pagina_prueba);
     insertar_pagina_en_archivo(pagina_prueba_2);
     insertar_pagina_en_archivo(pagina_prueba_3);
     insertar_pagina_en_archivo(pagina_prueba_4);
-    insertar_pagina_en_archivo(pagina_prueba_5);
-    leer_pagina_de_archivo(1256);
-    leer_pagina_de_archivo(500);
-    leer_pagina_de_archivo(12);
-    leer_pagina_de_archivo(1555);
-    leer_pagina_de_archivo(2021);
-    eliminar_pagina(5000);
-    eliminar_pagina(500);
-    leer_pagina_de_archivo(500);
-    insertar_pagina_en_archivo(pagina_prueba_6);
-    insertar_pagina_en_archivo(pagina_prueba_7);
-    leer_pagina_de_archivo(8000);
-    leer_pagina_de_archivo(7689);
+
+    eliminar_pagina(1);
+    pagina_prueba_3 = malloc(sizeof(t_pagina));
+    pagina_prueba_3->numero_pagina = 3;
+    pagina_prueba_3->id_carpincho = 2;
+    insertar_pagina_en_archivo(pagina_prueba_3);
+    pagina_prueba_3 = malloc(sizeof(t_pagina));
+    pagina_prueba_3->numero_pagina = 8;
+    pagina_prueba_3->id_carpincho = 2;
+    insertar_pagina_en_archivo(pagina_prueba_3);
+    pagina_prueba_3 = malloc(sizeof(t_pagina));
+    pagina_prueba_3->numero_pagina = 6;
+    pagina_prueba_3->id_carpincho = 10;
+    insertar_pagina_en_archivo(pagina_prueba_3);
 
     //Se esperan conexiones
     log_info(logger_swap, "Esperando conexiones por parte de un cliente");

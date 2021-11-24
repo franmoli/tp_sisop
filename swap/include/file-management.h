@@ -16,6 +16,7 @@ typedef struct {
     int file;
     int base;
     bool esta_libre;
+    int proceso_asignado;
 } t_entrada_tabla_marcos;
 
 typedef struct {
@@ -43,7 +44,9 @@ void borrar_archivos_swap();
 //Funciones de marcos
 t_entrada_tabla_marcos* seleccionar_marco(int numero_marco);
 t_entrada_tabla_marcos* seleccionar_marco_libre(int archivo_seleccionado);
+t_entrada_tabla_marcos* seleccionar_marco_libre_fija(int proceso, int archivo_seleccionado);
 t_entrada_tabla_marcos* instanciar_marco_global(int file);
+void instanciar_marcos_fija(int file);
 
 //Funciones de páginas
 void insertar_pagina_en_archivo(t_pagina *pagina);
@@ -51,6 +54,7 @@ void leer_pagina_de_archivo(int numero_pagina);
 void eliminar_pagina(int numero_pagina);
 
 //Esquemas de asignación
-void asignacion_global_de_pagina(int current_file_size, int posicion_archivo, char *path_archivo, int archivo, t_pagina *pagina);
+void asignacion_global_de_pagina(int posicion_archivo, char *path_archivo, int archivo, t_pagina *pagina);
+void asignacion_fija_de_pagina(int posicion_archivo, char *path_archivo, int archivo, t_pagina *pagina);
 
 #endif

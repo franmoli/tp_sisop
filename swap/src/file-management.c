@@ -11,7 +11,6 @@ void crear_archivos_swap() {
 
         FILE *file = fopen(path, "wb");
         fwrite(&init_value, 0, 1, file);
-
         fclose(file);
 
         //Agrego el archivo creado a la lista de archivos abiertos
@@ -19,6 +18,11 @@ void crear_archivos_swap() {
         informacion_archivo->numero_archivo = i;
         informacion_archivo->espacio_disponible = config_swap->TAMANIO_SWAP;
         list_add(archivos_abiertos, informacion_archivo);
+
+        //Si el esquema de asignación es fija, genero los marcos correspondientes
+        if(strcmp(config_swap->TIPO_ASIGNACION, "FIJA") == 0) {
+            instanciar_marcos_fija(i);
+        }
     }
 }
 
@@ -101,20 +105,15 @@ void insertar_pagina_en_archivo(t_pagina *pagina) {
             log_error(logger_swap, "No pudo cargarse el archivo correctamente, revise el codigo. Abortando ejecucion.");
             exit(-1);
         }
-
         //Analizo el tipo de asignación
         if(strcmp(config_swap->TIPO_ASIGNACION, "GLOBAL") == 0) {
-            asignacion_global_de_pagina(statbuf.st_size, posicion_archivo_obtenido, path_archivo, archivo, pagina);
+            asignacion_global_de_pagina(posicion_archivo_obtenido, path_archivo, archivo, pagina);
+        } else if(strcmp(config_swap->TIPO_ASIGNACION, "FIJA") == 0) {
+            asignacion_fija_de_pagina(posicion_archivo_obtenido, path_archivo, archivo, pagina);
         }
-
-        //Actualizo la estructura administrativa de los archivos
-        t_informacion_archivo *informacion_archivo = list_get(archivos_abiertos, posicion_archivo_obtenido);
-        informacion_archivo->espacio_disponible = informacion_archivo->espacio_disponible - config_swap->TAMANIO_PAGINA;
 
         //Cierro el archivo y libero la memoria de la página
         close(archivo);
-
-        log_info(logger_swap, "Pagina %d almacenada en %s", pagina->numero_pagina, path_archivo);
         free(pagina);
     } else if(posicion_archivo_obtenido == -2) {
         log_error(logger_swap, "No se ha podido guardar la pagina %d en el archivo dado que no hay espacio suficiente. No puede almacenarse en otros archivos dado que se encontraron paginas asociadas al mismo proceso (%d) en este archivo.", pagina->numero_pagina, pagina->id_carpincho);
@@ -149,18 +148,12 @@ void leer_pagina_de_archivo(int numero_pagina) {
         //Obtengo la página dentro del archivo
         void *paginas_obtenidas = mmap(0, statbuf.st_size, PROT_READ, MAP_PRIVATE, archivo, 0);
         t_pagina pagina_obtenida;
-        t_marco marco_pagina;
 
         int offset_actual = informacion_almacenamiento->marco->base;
         memcpy(&pagina_obtenida.numero_pagina, paginas_obtenidas + offset_actual, sizeof(pagina_obtenida.numero_pagina));
         offset_actual += sizeof(pagina_obtenida.numero_pagina);
-        memcpy(&marco_pagina, paginas_obtenidas + offset_actual, sizeof(marco_pagina));
-        offset_actual += sizeof(marco_pagina);
-        pagina_obtenida.marco = malloc(bytes_marco(marco_pagina));
-        pagina_obtenida.marco->numero_marco = marco_pagina.numero_marco;
 
         printf("Numero de pagina: %d\n", pagina_obtenida.numero_pagina);
-        printf("Numero de marco: %d\n", pagina_obtenida.marco->numero_marco);
 
         close(archivo);
     } else {
@@ -187,13 +180,29 @@ void eliminar_pagina(int numero_pagina) {
     //Si la página fue encontrada, la elimino
     if(pagina != NULL) {
         pagina->marco->esta_libre = 1;
+        pagina->marco->proceso_asignado = -1;
 
         //Elimino la página
+        int paginas_proceso = -1;
         for(int i=0; i<list_size(lista_paginas_almacenadas); i++) {
             t_pagina_almacenada *pagina_almacenada = list_get(lista_paginas_almacenadas, i);
             if(pagina_almacenada->numero_pagina == numero_pagina) {
                 list_remove(lista_paginas_almacenadas, i);
-                break;
+            }
+            if(pagina_almacenada->id_proceso == pagina->id_proceso) {
+                paginas_proceso++;
+            }
+        }
+
+        //Si no quedan más paginas del mismo proceso y la asignación es fija, hay que eliminar las reservaciones de marcos
+        if(strcmp(config_swap->TIPO_ASIGNACION, "FIJA") == 0) {
+            if(paginas_proceso == 0) {
+                for(int i=0; i<list_size(tabla_marcos); i++) {
+                    t_entrada_tabla_marcos *marco = list_get(tabla_marcos, i);
+                    if(marco->proceso_asignado == pagina->id_proceso) {
+                        marco->proceso_asignado = -1;
+                    }
+                }
             }
         }
 
