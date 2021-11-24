@@ -20,4 +20,5 @@ void mostrarAllocs(int carpincho_id);
 void agregarPagina(t_pagina* pagina, t_heap_metadata* data, uint32_t nextAnterior, uint32_t size,bool ultimo);
 void crearPrimerHeader(t_pagina* pagina, uint32_t size);
 void asignarFooterSeparado(t_pagina* pagina,t_heap_metadata* data,uint32_t size, uint32_t nextAnterior);
+t_pagina* asignarFooterSeparadoSubContenido(t_contenido subcontenido, t_pagina* pagina,uint32_t nextAnterior);
 #endif

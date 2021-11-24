@@ -309,6 +309,8 @@ void agregarPagina(t_pagina *pagina, t_heap_metadata *data, uint32_t nextAnterio
                 contenido->contenido_pagina = FOOTER;
                 contenido->dir_comienzo = inicio + pagina->marco_asignado * config_memoria->TAMANIO_PAGINA + nextAnterior;
                 contenido->dir_fin = contenido->dir_comienzo + size;
+                contenido->tamanio = size;
+                contenido->carpincho_id = pagina->carpincho_id;
                 list_add(pagina->listado_de_contenido, contenido);
 
                 guardarAlloc(data, contenido->dir_comienzo);
@@ -417,13 +419,33 @@ void agregarPagina(t_pagina *pagina, t_heap_metadata *data, uint32_t nextAnterio
 }
 void asignarFooterSeparado(t_pagina* pagina,t_heap_metadata* data,uint32_t size, uint32_t nextAnterior){
     int restante = size - (config_memoria->TAMANIO_PAGINA - pagina->tamanio_ocupado);
+    uint32_t inicio = tamanio_memoria;
     data->prevAlloc = nextAnterior;
     nextAnterior = data->nextAlloc;
     data->nextAlloc = NULL;
     data->isFree = true;
+    guardarAlloc(data, inicio + pagina->marco_asignado * config_memoria->TAMANIO_PAGINA + nextAnterior);
+    pagina = asignarFooterSeparadoSubContenido(PREV, pagina,nextAnterior);
+    pagina = asignarFooterSeparadoSubContenido(NEXT, pagina,nextAnterior);
+    pagina = asignarFooterSeparadoSubContenido(FREE, pagina,nextAnterior);
+}
 
-    t_contenidos_pagina *contenido =malloc(sizeof(t_contenidos_pagina));
+t_pagina* asignarFooterSeparadoSubContenido(t_contenido subcontenido, t_pagina* pagina, uint32_t nextAnterior){
+    t_tabla_paginas *tabla_paginas = buscarTablaPorPID(pagina->carpincho_id);
+    uint32_t inicio = tamanio_memoria;
     
+    if(!pagina->tamanio_ocupado + sizeof(uint32_t) <= config_memoria->TAMANIO_PAGINA){
+        int nro_pagina_nueva = solicitarPaginaNueva(pagina->carpincho_id);
+        pagina = list_get(tabla_paginas->paginas, nro_pagina_nueva);
+    }
+    pagina->tamanio_ocupado += sizeof(uint32_t);
+    t_contenidos_pagina *contenido =malloc(sizeof(t_contenidos_pagina));
+    contenido->carpincho_id = pagina->carpincho_id;
+    contenido->tamanio = sizeof(uint32_t);
+    contenido->subcontenido = PREV;
+    contenido->dir_comienzo = inicio + pagina->marco_asignado * config_memoria->TAMANIO_PAGINA + nextAnterior;
+    contenido->dir_fin = contenido->dir_comienzo + sizeof(uint32_t);
+    list_add(pagina->listado_de_contenido, contenido);
 }
 t_heap_metadata *getLastHeapFromPagina(int pagina, int carpincho_id)
 {
