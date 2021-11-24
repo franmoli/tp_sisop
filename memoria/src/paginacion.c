@@ -209,7 +209,7 @@ int solicitarPaginaNueva(uint32_t carpincho_id)
 
     t_tabla_paginas *tabla_paginas = buscarTablaPorPID(carpincho_id);
 
-    //Para agregar la pagina nueva primero tengo que ver si puedo agregarla si es asignacion fija o dinamica -> 
+    //Para agregar la pagina nueva primero tengo que ver si puedo agregarla si es asignacion fija o dinamica
     int marco = getMarco(tabla_paginas);   
     if(marco <0){
         log_error(logger_memoria,"No se pudo asignar un marco");
