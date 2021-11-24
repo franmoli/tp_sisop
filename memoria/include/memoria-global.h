@@ -11,6 +11,10 @@ typedef enum
     ALLOC = 1,
     HEADER = 2,
     FOOTER = 3,
+    RESTO_CONTENIDO = 4,
+    PREV = 5,
+    NEXT = 6,
+    FREE = 7,
 } t_contenido;
 
 typedef struct {
@@ -54,12 +58,20 @@ typedef struct{
 }t_pagina;
 
 typedef struct{
+    t_contenido contenido_pagina;
+    uint32_t pagina_seguir;
+    uint32_t desplazamiento;
+}
+t_subcontenido;
+
+typedef struct{
 		uint32_t dir_comienzo; // NO DEBE SER UN PUNTERO
 		uint32_t dir_fin;
         uint32_t tamanio; 
         uint32_t carpincho_id;
         uint32_t recorrido;
 		t_contenido contenido_pagina; //antes era un puntero
+        t_subcontenido *subcontenido; //PREV-NEXT-FREE
 	} t_contenidos_pagina;
 
 typedef struct{

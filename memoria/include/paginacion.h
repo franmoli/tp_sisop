@@ -7,7 +7,8 @@
 #include "tlb.h"
 #include "memoria-virtual.h"
 
-int getPaginaByDireccion(uint32_t direccion);
+int getPaginaByDireccionLogica(uint32_t direccion);
+int getPaginaByDireccionFisica(uint32_t direccion);
 int getPrimeraPaginaDisponible(int size, t_tabla_paginas *tabla_paginas);
 t_heap_metadata *memRead(t_paquete* paquete);
 t_contenidos_pagina *getLastContenidoByPagina(t_pagina* pagina);
@@ -23,4 +24,7 @@ int getMarcoParaPagina(t_tabla_paginas* tabla_paginas);
 
 void mostrarPaginas(t_tabla_paginas* tabla_paginas);
 int solicitarPaginaNueva(uint32_t carpincho_id);
+
+t_contenidos_pagina* getContenidoPaginaByTipo(t_contenidos_pagina* contenidos, t_contenido tipo);
+t_contenidos_pagina *getContenidoPaginaByTipoAndSize(t_contenidos_pagina *contenidos, t_contenido tipo, uint32_t nextAlloc);
 #endif
