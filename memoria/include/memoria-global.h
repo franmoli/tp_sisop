@@ -15,6 +15,7 @@ typedef enum
     PREV = 5,
     NEXT = 6,
     FREE = 7,
+    RESTO_ALLOC = 8,
 } t_contenido;
 
 typedef struct {

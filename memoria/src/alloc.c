@@ -440,12 +440,20 @@ t_pagina* asignarFooterSeparadoSubContenido(t_contenido subcontenido, t_pagina* 
     }
     pagina->tamanio_ocupado += sizeof(uint32_t);
     t_contenidos_pagina *contenido =malloc(sizeof(t_contenidos_pagina));
+
+    t_subcontenido* subcontenido_agregar = malloc(sizeof(t_subcontenido));
+    subcontenido_agregar->contenido_pagina = subcontenido;
+    subcontenido_agregar->pagina_seguir = pagina->numero_pagina;
+    subcontenido_agregar->desplazamiento=nextAnterior;
+
     contenido->carpincho_id = pagina->carpincho_id;
     contenido->tamanio = sizeof(uint32_t);
-    contenido->subcontenido = PREV;
+    contenido->subcontenido = subcontenido_agregar;
+    contenido->contenido_pagina = RESTO_ALLOC;
     contenido->dir_comienzo = inicio + pagina->marco_asignado * config_memoria->TAMANIO_PAGINA + nextAnterior;
     contenido->dir_fin = contenido->dir_comienzo + sizeof(uint32_t);
     list_add(pagina->listado_de_contenido, contenido);
+
 }
 t_heap_metadata *getLastHeapFromPagina(int pagina, int carpincho_id)
 {
