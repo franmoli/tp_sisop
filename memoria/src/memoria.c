@@ -28,7 +28,8 @@ int main(int argc, char **argv)
             reemplazo_LRU = list_create();
         }else 
         {
-            reemplazo_CLOCK = list_create();
+            reemplazo_CLOCK = malloc(sizeof(t_lista_clock));
+            reemplazo_CLOCK->paginas = list_create();
         }
     }
 

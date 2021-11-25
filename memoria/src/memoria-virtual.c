@@ -137,6 +137,16 @@ void actualizarLRU(int nro_pagina, int carpincho_id){
 
 }
 
+int reemplazarClockM(int nro_pagina, int carpincho_id) {
+    if(config_memoria->TIPO_ASIGNACION == "FIJA"){
+        //CLock para asignacion fija
+    }else
+    {
+        //Clock para asignacion dinamica
+        
+    }
+}
+
 
 void consultaSwap(int carpincho_id) {
     t_paquete *paquete = serializar_consulta_swap(carpincho_id);
