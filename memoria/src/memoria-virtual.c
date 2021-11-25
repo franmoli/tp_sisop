@@ -81,6 +81,34 @@ int reemplazarLRU(int nro_pagina, int carpincho_id){
 
 }
 
+void actualizarLRU(int nro_pagina, int carpincho_id){
+
+    if(config_memoria->TIPO_ASIGNACION == "FIJA"){
+        //LRU CON FIJA
+        
+    }else
+    {
+        //LRU CON GLOBAL
+        t_reemplazo* pagina = malloc(sizeof(t_reemplazo));
+        t_list_iterator *list_iterator = list_iterator_create(reemplazo_LRU);
+        int index = 0;
+
+        while (list_iterator_has_next(list_iterator))
+        {
+            pagina = list_iterator_next(list_iterator);
+            if(pagina->pid == carpincho_id && pagina->numero_pagina == nro_pagina){
+                list_remove(reemplazo_LRU,index);
+                list_add(reemplazo_LRU,pagina);
+                list_iterator_destroy(list_iterator);
+                return;
+            }
+            index++;
+        }
+        return;
+    }
+
+}
+
 
 void consultaSwap(int carpincho_id) {
     t_paquete *paquete = serializar_consulta_swap(carpincho_id);
