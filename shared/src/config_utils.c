@@ -104,6 +104,7 @@ t_config_swap *generar_config_swap(t_config *config) {
     config_swap->MARCOS_MAXIMOS = config_get_int_value(config, "MARCOS_MAXIMOS");
     config_swap->RETARDO_SWAP = config_get_int_value(config, "RETARDO_SWAP");
     config_swap->ARCHIVOS_SWAP = file_paths;
+    config_swap->TIPO_ASIGNACION = config_get_string_value(config, "TIPO_ASIGNACION");
     
     return config_swap;
 }

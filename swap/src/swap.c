@@ -3,7 +3,13 @@
 int main(int argc, char **argv) {
     //Inicio del programa
     system("clear");
+    contador_marcos = 0;
     logger_swap = log_create("./cfg/swap.log", "SWAP", true, LOG_LEVEL_INFO);
+    lista_paginas_almacenadas = list_create();
+    lista_mapeos = list_create();
+    archivos_abiertos = list_create();
+    tabla_marcos = list_create();
+    sem_init(&mutex_operacion, 0, 1);
     log_info(logger_swap, "Programa inicializado correctamente");
 
     //Se carga la configuración
@@ -11,31 +17,52 @@ int main(int argc, char **argv) {
     config_file = leer_config_file("./cfg/swap.cfg");
     config_swap = generar_config_swap(config_file);
     log_info(logger_swap, "Configuración cargada correctamente");
-    tamanio_archivo = config_swap->TAMANIO_SWAP/config_swap->TAMANIO_PAGINA;
+
+    //Valido que el tamaño de SWAP sea múltiplo de la página
+    if(config_swap->TAMANIO_SWAP % config_swap->TAMANIO_PAGINA != 0) {
+        log_error(logger_swap, "El tamanio de los archivos de swap debe ser multiplo del tamanio de la pagina");
+        exit(-1);
+    }
 
     //Se inicializa el servidor
     socket_server = iniciar_servidor(config_swap->IP, string_itoa(config_swap->PUERTO), logger_swap);
 
     //Se inicializan los archivos
     log_info(logger_swap, "Aguarde un momento... Generando archivos...");
-    for(int i=1; i<=(tamanio_archivo); i++) {
-        crear_archivo_swap(i);
-    }
-    archivo_seleccionado = 1;
+    crear_archivos_swap();
 
     /*Hardcodeo lectura de una página desde el archivo*/
-    t_marco *marco_prueba = malloc(sizeof(t_marco));
-    marco_prueba->numero_marco = 500;
     t_pagina *pagina_prueba = malloc(sizeof(t_pagina));
-    pagina_prueba->numero_pagina = 500;
-    pagina_prueba->marco = marco_prueba;
-
-    printf("********** ARCHIVO NORMAL **********\n");
-    printf("Numero de pagina: %d\n", pagina_prueba->numero_pagina);
-    printf("Numero de marco: %d\n\n", pagina_prueba->marco->numero_marco);
+    pagina_prueba->numero_pagina = 1;
+    pagina_prueba->id_carpincho = 0;
+    t_pagina *pagina_prueba_2 = malloc(sizeof(t_pagina));
+    pagina_prueba_2->numero_pagina = 2;
+    pagina_prueba_2->id_carpincho = 1;
+    t_pagina *pagina_prueba_3 = malloc(sizeof(t_pagina));
+    pagina_prueba_3->numero_pagina = 3;
+    pagina_prueba_3->id_carpincho = 2;
+    t_pagina *pagina_prueba_4 = malloc(sizeof(t_pagina));
+    pagina_prueba_4->numero_pagina = 4;
+    pagina_prueba_4->id_carpincho = 1;
 
     insertar_pagina_en_archivo(pagina_prueba);
-    leer_pagina_de_archivo();
+    insertar_pagina_en_archivo(pagina_prueba_2);
+    insertar_pagina_en_archivo(pagina_prueba_3);
+    insertar_pagina_en_archivo(pagina_prueba_4);
+
+    eliminar_pagina(1);
+    pagina_prueba_3 = malloc(sizeof(t_pagina));
+    pagina_prueba_3->numero_pagina = 3;
+    pagina_prueba_3->id_carpincho = 2;
+    insertar_pagina_en_archivo(pagina_prueba_3);
+    pagina_prueba_3 = malloc(sizeof(t_pagina));
+    pagina_prueba_3->numero_pagina = 8;
+    pagina_prueba_3->id_carpincho = 2;
+    insertar_pagina_en_archivo(pagina_prueba_3);
+    pagina_prueba_3 = malloc(sizeof(t_pagina));
+    pagina_prueba_3->numero_pagina = 6;
+    pagina_prueba_3->id_carpincho = 10;
+    insertar_pagina_en_archivo(pagina_prueba_3);
 
     //Se esperan conexiones
     log_info(logger_swap, "Esperando conexiones por parte de un cliente");
@@ -43,9 +70,15 @@ int main(int argc, char **argv) {
     do {
         socket_client = esperar_cliente(socket_server, logger_swap);
         if(socket_client != -1) {
+            sem_wait(&mutex_operacion);
+            printf("\nEntra un procesardo\n");
             cliente_recibido = 1;
             ejecutar_operacion(socket_client);
+            sem_post(&mutex_operacion);
         }
+
+        //Espero el tiempo de retardo
+        sleep(config_swap->RETARDO_SWAP);
     } while(cliente_recibido);
 
     //Fin del programa
@@ -77,106 +110,6 @@ static void *ejecutar_operacion(int client) {
 	log_info(logger_swap, "El cliente %d ha finalizado su ejecución y se desconecto", client);
 	
     return NULL;
-}
-
-/* Manejo de archivos */
-void siguiente_archivo() {
-    archivo_seleccionado++;
-    if(archivo_seleccionado > tamanio_archivo) {
-        archivo_seleccionado = 1;
-    }
-}
-
-void crear_archivo_swap(int numero_particion) {
-    char *path = string_new();
-    string_append_with_format(&path, "files/%s.bin", string_itoa(numero_particion));
-    list_add(config_swap->ARCHIVOS_SWAP, path);
-
-    FILE *file;
-    file = fopen(path, "wb");
-    fwrite(&path, sizeof(tamanio_archivo), 1, file);
-}
-
-void insertar_pagina_en_archivo(t_pagina *pagina) {
-    bool pagina_guardada = 0;
-    struct stat statbuf;
-
-    do {
-        char *path_archivo_actual = list_get(config_swap->ARCHIVOS_SWAP, archivo_seleccionado-1);
-        int archivo = open(path_archivo_actual, O_WRONLY);
-        if(archivo < 0){
-            log_error(logger_swap, "No pudo encontrarse el archivo en la ruta especificada (%s). Abortando ejecucion.", path_archivo_actual);
-            exit(-1);
-        }
-
-        if(bytes_pagina(*pagina) <= tamanio_archivo) {
-            //Obtengo datos del archivo
-            int archivo_cargado_correctamente = fstat(archivo, &statbuf);
-            if(archivo_cargado_correctamente == -1) {
-                log_error(logger_swap, "No pudo cargarse el archivo correctamente, revise el codigo. Abortando ejecucion.");
-                exit(-1);
-            }
-
-            //Asumo que el contenido de la página se reemplaza ya que solo podrá haber una página por archivo
-            t_pagina *mapping = mmap(NULL, bytes_pagina(*pagina), PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, archivo, 0);
-            if(mapping == MAP_FAILED){
-                log_error(logger_swap, "El mapeado de la pagina fallo, revise el codigo. Abortanto ejecucion.");
-                exit(-1);
-            }
-            mapping->numero_pagina = pagina->numero_pagina;
-            mapping->marco = pagina->marco;
-
-            ssize_t flag_escritura = write(archivo, mapping, bytes_pagina(*pagina));
-            if(flag_escritura != bytes_pagina(*pagina)){
-                log_error(logger_swap, "No se pudo realizar la escritura en el archivo, revise el codigo. Abortando ejecucion.");
-                exit(-1);
-            }
-
-            close(archivo);
-            free(pagina);
-            pagina_guardada = 1;
-        } else {
-            close(archivo);
-            siguiente_archivo();
-        }
-    } while(pagina_guardada == 0 && archivo_seleccionado < tamanio_archivo);
-
-    if(pagina_guardada == 0) {
-        log_error(logger_swap, "No se ha podido guardar la pagina en ningun archivo dado que no hay espacio suficiente");
-    } else {
-        log_info(logger_swap, "Pagina almacenada en el archivo %d.bin", archivo_seleccionado);
-    }
-}
-
-void leer_pagina_de_archivo() {
-    //TODO: hacer algoritmo de busqueda de página a través de archivos
-    char *path_archivo_pagina = list_get(config_swap->ARCHIVOS_SWAP, archivo_seleccionado-1);
-    int archivo = open(path_archivo_pagina, O_RDONLY);
-
-    struct stat buffer_stat;
-    fstat(archivo, &buffer_stat);
-    int size_archivo = buffer_stat.st_size;
-
-    t_pagina *pagina_obtenida = malloc(sizeof(t_pagina));
-    
-    pagina_obtenida = mmap(0, size_archivo, PROT_READ, MAP_PRIVATE, archivo, 0);
-    printf("Numero de pagina: %d\n", pagina_obtenida->numero_pagina);
-    printf("Numero de marco: %d\n", pagina_obtenida->marco->numero_marco);
-    
-    int validacion_mapeo = munmap(pagina_obtenida, sizeof(t_pagina));
-    if(validacion_mapeo != 0) {
-        log_error(logger_swap, "Ha ocurrido un error al desmapear la pagina, revisa el codigo. Abortando ejecucion.");
-        exit(-1);
-    }
-
-    close(archivo);
-}
-
-void borrar_archivos_swap() {
-    for(int i=0; i<list_size(config_swap->ARCHIVOS_SWAP); i++) {
-        char *path = list_get(config_swap->ARCHIVOS_SWAP, i);
-        remove(path);
-    }
 }
 
 /* Liberado de memoria */
