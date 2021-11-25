@@ -62,9 +62,19 @@ int reemplazarLRU(int nro_pagina, int carpincho_id){
     int numeroMarco = -1;
 
     if(config_memoria->TIPO_ASIGNACION == "FIJA"){
+
         //LRU CON FIJA
+        t_tabla_paginas* tabla_paginas = buscarTablaPorPID(carpincho_id);
+        t_reemplazo* old = malloc(sizeof(t_reemplazo));
+        old = list_get(tabla_paginas->Lru,0);
+        t_pagina* oldPage = getPaginaByNumero(old->numero_pagina,old->pid);
+
+        numeroMarco = oldPage->marco_asignado;
+
+        list_remove(tabla_paginas->Lru,0);
+        list_add(tabla_paginas->Lru,paginaNueva);
         
-    }else
+    } else
     {
         //LRU CON GLOBAL
         t_reemplazo* paginaOld = malloc(sizeof(t_pagina));
@@ -85,6 +95,24 @@ void actualizarLRU(int nro_pagina, int carpincho_id){
 
     if(config_memoria->TIPO_ASIGNACION == "FIJA"){
         //LRU CON FIJA
+        t_tabla_paginas* tabla_paginas = buscarTablaPorPID(carpincho_id);
+        t_reemplazo* pagina = malloc(sizeof(t_reemplazo));
+        t_list_iterator *list_iterator = list_iterator_create(tabla_paginas->Lru);
+        int index = 0;
+
+        while (list_iterator_has_next(list_iterator))
+        {
+            pagina = list_iterator_next(list_iterator);
+            if(pagina->numero_pagina == nro_pagina){
+                list_remove(tabla_paginas->Lru,index);
+                list_add(tabla_paginas->Lru,pagina);
+                list_iterator_destroy(list_iterator);
+                return;
+            }
+            index++;
+        }
+        return;
+
         
     }else
     {
