@@ -14,6 +14,7 @@ t_heap_metadata *memRead(t_paquete* paquete);
 t_contenidos_pagina *getLastContenidoByPagina(t_pagina* pagina);
 t_contenidos_pagina *getLastHeaderContenidoByPagina(t_pagina* pagina);
 t_tabla_paginas* buscarTablaPorPID(int id);
+t_pagina *getPaginaByNumero(int nro_pagina, int carpincho_id);
 
 
 //MARCOS

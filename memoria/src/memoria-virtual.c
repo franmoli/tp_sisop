@@ -1,5 +1,6 @@
 #include "memoria-virtual.h"
 
+/*
 t_pagina* reemplazarPagina(t_pagina* paginaAgregar, int carpincho_id){
 
     t_tabla_paginas* tabla_paginas = buscarTablaPorPID(carpincho_id);
@@ -14,6 +15,18 @@ t_pagina* reemplazarPagina(t_pagina* paginaAgregar, int carpincho_id){
         list_add(tabla_paginas->Lru,paginaAgregar);
     }
     return NULL;
+}*/
+
+int reemplazarPagina(int nro_pagina, int carpincho_id){
+    t_tabla_paginas* tabla_paginas = buscarTablaPorPID(carpincho_id);
+    if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "CLOCK-M") == 0){
+        //SWAP CLOCK
+    }
+    else{
+        //SWAP LRU
+        int marco = reemplazarLRU(nro_pagina,carpincho_id);
+        return marco;
+    }
 }
 
 //LRU saca la pagina que hace mas tiempo no se hace referencia
@@ -41,25 +54,33 @@ int eliminarPrimerElementoLista(int carpincho_id){
     return marco;
 }
 
-/*
-void reemplazarLRUGlobal(int nro_pagina, int carpincho_id){
+int reemplazarLRU(int nro_pagina, int carpincho_id){
 
-    int index = 0;
-    t_list_iterator *list_iterator = list_iterator_create(reemplazo_LRU);
-    while (list_iterator_has_next(list_iterator))
+    t_reemplazo* paginaNueva = malloc(sizeof(t_reemplazo));
+    paginaNueva->numero_pagina = nro_pagina;
+    paginaNueva->pid = carpincho_id;
+    int numeroMarco = -1;
+
+    if(config_memoria->TIPO_ASIGNACION == "FIJA"){
+        //LRU CON FIJA
+        
+    }else
     {
-        t_reemplazo *pagina = list_iterator_next(list_iterator);
-        if(pagina->numero){
-            list_add(paginas,paginaList);
-        }
+        //LRU CON GLOBAL
+        t_reemplazo* paginaOld = malloc(sizeof(t_pagina));
+        paginaOld = list_get(reemplazo_LRU,0);
+        t_pagina* paginaVieja = getPaginaByNumero(paginaOld->numero_pagina,paginaOld->pid);
 
+        numeroMarco = paginaVieja->marco_asignado;
+
+        list_remove(reemplazo_LRU,0);
+        list_add(reemplazo_LRU,paginaNueva);
+        
     }
-    list_iterator_destroy(list_iterator);
-
-
+    return numeroMarco;
 
 }
-*/
+
 
 void consultaSwap(int carpincho_id) {
     t_paquete *paquete = serializar_consulta_swap(carpincho_id);

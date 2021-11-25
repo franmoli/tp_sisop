@@ -105,8 +105,6 @@ int getMarco(t_tabla_paginas* tabla_paginas){
                 return numeroMarco;
             }
         }
-
-        //Busco disponibilidad en swap -> hayEspacio mv.c
         
     }else
     {
@@ -115,8 +113,11 @@ int getMarco(t_tabla_paginas* tabla_paginas){
             numeroMarco = tabla_paginas->pid * config_memoria->MARCOS_POR_CARPINCHO + tabla_paginas->paginas_en_memoria;
             return numeroMarco;
         }
-        //Busco disponibilidad en swap -> hayEspacio mv.c
+
     }
+
+    //numeroMarco = buscarDisponibilidadSwap(int carpincho_id);
+    return numeroMarco;
 
 }
 
@@ -211,10 +212,13 @@ int solicitarPaginaNueva(uint32_t carpincho_id)
 
     //Para agregar la pagina nueva primero tengo que ver si puedo agregarla si es asignacion fija o dinamica
     int marco = getMarco(tabla_paginas);   
-    if(marco <0){
+    if(marco < -1){
         log_error(logger_memoria,"No se pudo asignar un marco");
-
         return;
+    }
+    if(marco == -1){
+        log_info(logger_memoria, "Tengo que ir a swap");
+        reemplazarPagina(list_size(tabla_paginas->paginas),tabla_paginas->pid);
     }
     int numero_pagina = 0;
     if (list_size(tabla_paginas->paginas) > 0)
@@ -273,4 +277,12 @@ t_contenidos_pagina *getContenidoPaginaByTipoAndSize(t_contenidos_pagina *conten
     }
     list_iterator_destroy(list_iterator);
     return contenidoBuscado;
+}
+t_pagina *getPaginaByNumero(int nro_pagina, int carpincho_id){
+    t_pagina *pagina = malloc(sizeof(t_pagina));
+    t_tabla_paginas *tabla_paginas = buscarTablaPorPID(carpincho_id);
+
+    pagina = list_get(tabla_paginas->paginas,nro_pagina);
+    return pagina;
+
 }
