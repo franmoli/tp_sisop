@@ -49,6 +49,7 @@ void atender_proceso (void* parametro ){
         //task_aux = malloc(sizeof(t_task));
         //print_semaforos();
         //Analizo el código de operación recibido y ejecuto acciones según corresponda
+        printf("Paquete recibido %d\n", paquete->codigo_operacion);
         switch(paquete->codigo_operacion) {
             case CLIENTE_TEST:
                 log_info(logger_kernel, "Mensaje de prueba recibido correctamente por el cliente %d", socket_cliente);
@@ -63,6 +64,7 @@ void atender_proceso (void* parametro ){
             case INIT_SEM:
                 //nombre_semaforo = paquete->buffer;
                 //agregar a lista de actividades
+                printf("Here\n");
                 task_aux->id = INIT_SEM;
                 task_aux->nombre_semaforo = nombre_semaforo;
                 task_aux->value = 2;
@@ -164,9 +166,7 @@ void *hilo_salida_a_exit(void *multiprogramacion_disponible_p){
     while(1){
         sem_wait(&salida_a_exit);
         
-        //printf("Ready: %d\n", list_size(lista_ready));
-        //printf("Block: %d\n", list_size(lista_blocked));
-        //printf("Exec: %d\n", list_size(lista_exec));
+        
         bool encontrado = false;
         //int tamanio_lista_exec = list_size(lista_exec);
         int tamanio_lista_blocked = list_size(lista_blocked);

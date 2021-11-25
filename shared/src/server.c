@@ -75,7 +75,6 @@ int esperar_cliente(int socket_servidor, t_log* logger) {
 void *serializar_paquete(t_paquete *paquete, int *bytes) {
 	void *magic = malloc(*bytes);
 	int desplazamiento = 0;
-	
 	memcpy(magic + desplazamiento, &(paquete->codigo_operacion), sizeof(op_code));
 	desplazamiento+= sizeof(op_code);
 	memcpy(magic + desplazamiento, &(paquete->buffer->size), sizeof(u_int32_t));
@@ -89,11 +88,14 @@ void *serializar_paquete(t_paquete *paquete, int *bytes) {
 /* Utilizar esta función para enviar un paquete */
 void enviar_paquete(t_paquete *paquete, int socket_cliente) {
 	int bytes = paquete->buffer->size + 2*sizeof(int);
+	printf("Paquete a enviar: opcode %d | buffer size %d | dest %d\n", paquete->codigo_operacion, paquete->buffer->size, socket_cliente);
 	paquete = serializar_paquete(paquete, &bytes);
-	
-	send(socket_cliente, paquete, bytes, 0);
 
+	int error =send(socket_cliente, paquete, bytes, 0);
 	free(paquete);
+	if(error == -1){
+		printf("Hubo un error en el envio");
+	}
 }
 
 /* Utilizar esta función para recibir un paquete */

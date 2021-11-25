@@ -19,7 +19,8 @@ t_config_matelib* obtenerConfig(char* config){
 
 int mate_init(mate_instance *lib_ref, char *config){
 
-
+    printf("mate instance %p\n", lib_ref);
+    printf("socket %p\n", &((*lib_ref).socket));
     char *string = malloc(sizeof(char)*50);
     socket_cliente   = -1;
 
@@ -33,7 +34,7 @@ int mate_init(mate_instance *lib_ref, char *config){
     lib_ref->group_info = malloc(sizeof(mate_inner_structure));
     lib_ref->info_carpincho = malloc(sizeof(mate_inner_structure));
 
-    sprintf(string,"./cfg/%d",lib_ref->id);
+    sprintf(string,"../cfg/%d",lib_ref->id);
     strcat(string,".cfg");
     
     //TODO Fijarse como usar el log_level_debug para instanciarlo desde config (string to enum)
@@ -53,7 +54,7 @@ int mate_init(mate_instance *lib_ref, char *config){
         exit(EXIT_FAILURE);
     }
     lib_ref->socket = socket_cliente;
-
+    printf("Socket cliente%d\n", socket_cliente);
     //Creo el paquete para enviar la señal a kernel o memoria.
     t_paquete *paquete = malloc(sizeof(t_paquete));
     t_buffer *buffer = malloc(sizeof(t_buffer));
@@ -101,32 +102,27 @@ int mate_close(mate_instance *lib_ref){
 
 int mate_sem_init(mate_instance *lib_ref, mate_sem_name sem, unsigned int value){
     
-    
-
     //----Crear paquete con nombre de semaforo y valor para que kernel haga el sem_init con el COD_OP correspondiente
     //serializar inputs (nombre y valor init)
-    
-    t_paquete *paquete = serializar_mate_sem_init(value,sem);
+    printf("mate instance %p\n", lib_ref);
+    printf("socket %p\n", &((*lib_ref).socket));
+    printf("Socket %d\n", lib_ref->socket);
+    t_paquete *paquete = malloc(sizeof(t_paquete)); 
     t_buffer *buffer = malloc(sizeof(t_buffer));
-    paquete->codigo_operacion = NUEVO_CARPINCHO;
+
+    unsigned long stream_size = sizeof(uint32_t) + sizeof(char)*strlen(sem) +1;
     paquete->buffer = buffer;
-    buffer->size = 0;
-    /*t_buffer *buffer = malloc(sizeof(t_buffer));
+    buffer->stream = malloc(stream_size);
+    buffer->size = stream_size;
     paquete->codigo_operacion = INIT_SEM;
-    paquete->buffer = buffer;
-    paquete->buffer->size = 0;
-    */
-    printf("Serializado \n");
+    serializar_mate_sem_init(buffer->stream, value, sem);
     
     enviar_paquete(paquete, lib_ref->socket);
     sleep(1);
-    printf("Enviado %d\n", lib_ref->socket);
 
     free(paquete);
     //----esperar señal de inicializacion correcta
-    printf("liberado\n");
     t_paquete *paquete_recibido = recibir_paquete(lib_ref->socket);
-    printf("packt recvd \n");
     if(paquete_recibido->codigo_operacion == INIT_SEM){
         log_info(lib_ref->logger,"La funcion SEM_INIT se ejecuto exitosamente");
         return 0;
@@ -146,9 +142,7 @@ int mate_sem_wait(mate_instance *lib_ref, mate_sem_name sem){
     //serializar inputs (nombre y valor init)
     
     //agregar buffer al paquete
-    printf("Packt enviando \n");
     enviar_paquete(paquete,lib_ref->socket);
-    printf("Packt enviado \n");
     free(paquete); 
 
     //----esperar señal de inicializacion correcta
