@@ -2,7 +2,7 @@
 
 /**************************** Memoria <---> Swap ****************************/
 //Cálculos de bytes
-int bytes_marco(t_marco marco) {
+/*int bytes_marco(t_marco marco) {
     int bytes_marco = 0;
 
     bytes_marco += sizeof(marco.numero_marco);
@@ -62,4 +62,84 @@ t_pagina deserializar_pagina(void *stream, int offset) {
     pagina.marco->numero_marco = marco_pagina.numero_marco;
 
     return pagina;
+}*/
+t_paquete *serializar_alloc(uint32_t size, uint32_t carpincho_id){
+    t_malloc_serializado* malloc_serializado = malloc(sizeof(t_malloc_serializado));
+    malloc_serializado->size_reservar = size;
+    malloc_serializado->carpincho_id = carpincho_id;
+
+    t_paquete *paquete = malloc(sizeof(t_paquete));
+    t_buffer *new_buffer = malloc(sizeof(t_buffer));
+    new_buffer->size = sizeof(uint32_t)*2;
+    int offset = 0;
+    void *stream = malloc(new_buffer->size);
+    memcpy(stream + offset, &(malloc_serializado->size_reservar), sizeof(uint32_t));
+    offset += sizeof(uint32_t);
+    memcpy(stream + offset, &(malloc_serializado->carpincho_id), sizeof(uint32_t));
+
+    new_buffer->stream = stream;
+    paquete->buffer = new_buffer;
+    paquete->codigo_operacion = MEMALLOC;
+    return paquete;
+}
+t_malloc_serializado* deserializar_alloc(t_paquete *paquete){
+    t_malloc_serializado* malloc_serializado = malloc(sizeof(t_malloc_serializado));
+    void *stream = paquete->buffer->stream;
+    int offset = 0;
+    memcpy(&(malloc_serializado->size_reservar), stream + offset, sizeof(uint32_t));
+    offset += sizeof(uint32_t);
+    memcpy(&(malloc_serializado->carpincho_id), stream + offset, sizeof(uint32_t));
+    return malloc_serializado;
+}
+
+t_paquete *serializar_mate_init(uint32_t carpincho_id){
+    t_mateinit_serializado* malloc_serializado = malloc(sizeof(t_mateinit_serializado));
+    malloc_serializado->carpincho_id = carpincho_id;
+
+    t_paquete *paquete = malloc(sizeof(t_paquete));
+    t_buffer *new_buffer = malloc(sizeof(t_buffer));
+    new_buffer->size = sizeof(uint32_t)*2;
+    int offset = 0;
+    void *stream = malloc(new_buffer->size);
+    memcpy(stream + offset, &(malloc_serializado->carpincho_id), sizeof(uint32_t));
+
+    new_buffer->stream = stream;
+    paquete->buffer = new_buffer;
+    paquete->codigo_operacion = MATEINIT;
+    return paquete;
+}
+t_mateinit_serializado* deserializar_mate_init(t_paquete *paquete){
+    t_mateinit_serializado* malloc_serializado = malloc(sizeof(t_mateinit_serializado));
+    void *stream = paquete->buffer->stream;
+    int offset = 0;
+    memcpy(&(malloc_serializado->carpincho_id), stream + offset, sizeof(uint32_t));
+    return malloc_serializado;
+}
+t_paquete *serializar_consulta_swap(uint32_t carpincho_id){
+    t_swap_serializado* swap_serializado = malloc(sizeof(t_swap_serializado));
+    swap_serializado->carpincho_id = carpincho_id;
+    swap_serializado->swap_free = false;
+
+    t_paquete *paquete = malloc(sizeof(t_paquete));
+    t_buffer *new_buffer = malloc(sizeof(t_buffer));
+    new_buffer->size = sizeof(uint32_t)*2 + sizeof(bool);
+    int offset = 0;
+    void *stream = malloc(new_buffer->size);
+    memcpy(stream + offset, &(swap_serializado->carpincho_id), sizeof(uint32_t));
+    offset+=(sizeof(uint32_t));
+    memcpy(stream + offset, &(swap_serializado->swap_free), sizeof(bool));
+
+    new_buffer->stream = stream;
+    paquete->buffer = new_buffer;
+    paquete->codigo_operacion = SWAPFREE;
+    return paquete;
+}
+t_swap_serializado* deserializar_swap(t_paquete *paquete){
+    t_swap_serializado* swap_serializado = malloc(sizeof(t_swap_serializado));
+    void *stream = paquete->buffer->stream;
+    int offset = 0;
+    memcpy(&(swap_serializado->carpincho_id), stream + offset, sizeof(uint32_t));
+    offset+=sizeof(uint32_t);
+    memcpy(&(swap_serializado->swap_free), stream + offset, sizeof(bool));
+    return swap_serializado;
 }
