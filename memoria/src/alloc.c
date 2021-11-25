@@ -453,7 +453,7 @@ t_pagina* asignarFooterSeparadoSubContenido(t_contenido subcontenido, t_pagina* 
     contenido->dir_comienzo = inicio + pagina->marco_asignado * config_memoria->TAMANIO_PAGINA + nextAnterior;
     contenido->dir_fin = contenido->dir_comienzo + sizeof(uint32_t);
     list_add(pagina->listado_de_contenido, contenido);
-
+    return pagina;
 }
 t_heap_metadata *getLastHeapFromPagina(int pagina, int carpincho_id)
 {

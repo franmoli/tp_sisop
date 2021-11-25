@@ -72,11 +72,11 @@ int main(int argc, char **argv)
     paquete1 = serializar_alloc(3, carpincho_id);
     memAlloc(paquete1);
 
-    paquete1 = serializar_alloc(134546366, carpincho_id);
+    /*paquete1 = serializar_alloc(134546366, carpincho_id);
     freeAlloc(paquete1);
 
     paquete1 = serializar_alloc(134546398, carpincho_id);
-    freeAlloc(paquete1);
+    freeAlloc(paquete1);*/
     //paquete1 = serializar_alloc(10);
     //memAlloc(paquete1);
 
@@ -89,10 +89,10 @@ int main(int argc, char **argv)
     memAlloc(paquete1);*/
     //ree(paquete1);
 
-    t_paquete *paquete2 = serializar_consulta_swap(15);
+    /*t_paquete *paquete2 = serializar_consulta_swap(15);
     t_swap_serializado* swap_deserializado = deserializar_swap(paquete2);
 	log_info(logger_memoria, "ID desde swap: %d",swap_deserializado->carpincho_id);
-	log_info(logger_memoria, "ID desde swap: %d",swap_deserializado->swap_free);
+	log_info(logger_memoria, "ID desde swap: %d",swap_deserializado->swap_free);*/
 
     while (1)
     {
