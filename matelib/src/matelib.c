@@ -15,11 +15,16 @@ t_config_matelib* obtenerConfig(char* config){
 
 //-----------------------------------Instanciacion -----------------------------------
 
+
+
 int mate_init(mate_instance *lib_ref, char *config){
+
+
     char *string = malloc(sizeof(char)*50);
     socket_cliente   = -1;
 
     lib_ref = malloc(sizeof(mate_instance));
+    
     config_matelib = obtenerConfig(config);
     
     lib_ref->id             = obtenerIDRandom();
@@ -32,20 +37,20 @@ int mate_init(mate_instance *lib_ref, char *config){
     strcat(string,".cfg");
     
     //TODO Fijarse como usar el log_level_debug para instanciarlo desde config (string to enum)
-    lib_ref->logger = log_create(string,"MATELIB",0,LOG_LEVEL_DEBUG);
+    lib_ref->logger = log_create(string,"MATELIB",true,LOG_LEVEL_DEBUG);
     
     free(string);
 
     //Conexion con kernel y en caso que no exista, conexion con memoria
     socket_cliente = crear_conexion(config_matelib->IP_KERNEL, config_matelib->PUERTO_KERNEL);
-    log_info(lib_ref->logger,"Conectando a kernel...");
+    log_info(lib_ref->logger,"Conectando a kernel ip - %s | puerto - %s  ...", config_matelib->IP_KERNEL, config_matelib->PUERTO_KERNEL);
     if(socket_cliente == -1){
         socket_cliente = crear_conexion(config_matelib->IP_MEMORIA, config_matelib->PUERTO_MEMORIA);
         log_info(lib_ref->logger,"No pudo conectarse a kernel. Conectando a memoria...");
     }
     if(socket_cliente == -1){
         log_error(lib_ref->logger,"No se pudo conectar a ningun modulo");
-        return 1;
+        exit(EXIT_FAILURE);
     }
     lib_ref->socket = socket_cliente;
 
@@ -101,12 +106,16 @@ int mate_sem_init(mate_instance *lib_ref, mate_sem_name sem, unsigned int value)
     //serializar inputs (nombre y valor init)
     
     t_paquete *paquete = serializar_mate_sem_init(value,sem);
-    
+    t_buffer *buffer = malloc(sizeof(t_buffer));
+    paquete->codigo_operacion = NUEVO_CARPINCHO;
+    paquete->buffer = buffer;
+    buffer->size = 0;
     /*t_buffer *buffer = malloc(sizeof(t_buffer));
     paquete->codigo_operacion = INIT_SEM;
     paquete->buffer = buffer;
     paquete->buffer->size = 0;
     */
+    printf("Serializado \n");
     
     enviar_paquete(paquete, lib_ref->socket);
     sleep(1);
@@ -114,9 +123,9 @@ int mate_sem_init(mate_instance *lib_ref, mate_sem_name sem, unsigned int value)
 
     free(paquete);
     //----esperar señal de inicializacion correcta
-    
+    printf("liberado\n");
     t_paquete *paquete_recibido = recibir_paquete(lib_ref->socket);
-    
+    printf("packt recvd \n");
     if(paquete_recibido->codigo_operacion == INIT_SEM){
         log_info(lib_ref->logger,"La funcion SEM_INIT se ejecuto exitosamente");
         return 0;
@@ -136,8 +145,9 @@ int mate_sem_wait(mate_instance *lib_ref, mate_sem_name sem){
     //serializar inputs (nombre y valor init)
     
     //agregar buffer al paquete
-    
+    printf("Packt enviando \n");
     enviar_paquete(paquete,lib_ref->socket);
+    printf("Packt enviado \n");
     free(paquete); 
 
     //----esperar señal de inicializacion correcta

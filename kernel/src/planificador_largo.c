@@ -46,8 +46,8 @@ void atender_proceso (void* parametro ){
     t_task *task_aux;
     while(1) {
 		t_paquete *paquete = recibir_paquete(socket_cliente);
-        task_aux = malloc(sizeof(t_task));
-        print_semaforos();
+        //task_aux = malloc(sizeof(t_task));
+        //print_semaforos();
         //Analizo el código de operación recibido y ejecuto acciones según corresponda
         switch(paquete->codigo_operacion) {
             case CLIENTE_TEST:
@@ -82,6 +82,7 @@ void atender_proceso (void* parametro ){
                 break;
             default:
                 log_error(logger_kernel, "Codigo de operacion desconocido");
+                exit(EXIT_FAILURE);
                 break;
             
 
@@ -124,6 +125,15 @@ t_proceso *nuevo_carpincho(int socket_cliente){
     avisar_cambio();
     sem_post(&libre_para_inicializar_proceso);
 
+    //Enviar confirmacion a carpincho
+     t_paquete *paquete = malloc(sizeof(t_paquete));
+    t_buffer *buffer = malloc(sizeof(t_buffer));
+    paquete->codigo_operacion = NUEVO_CARPINCHO;
+    paquete->buffer = buffer;
+    buffer->size = 0;
+    enviar_paquete(paquete, socket_cliente);
+    free(paquete);
+    free(buffer);
     return nuevo_proceso;
 }
 

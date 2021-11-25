@@ -44,7 +44,7 @@ int crear_conexion(char *ip, char *puerto) {
 	getaddrinfo(ip, puerto, &hints, &server_info);
 
 	int socket_cliente = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol);
-
+	printf("Conectado a socket %d\n", socket_cliente);
 	if(connect(socket_cliente, server_info->ai_addr, server_info->ai_addrlen) == -1) {
 		freeaddrinfo(server_info);	
 		return -1;
@@ -98,8 +98,12 @@ t_paquete* recibir_paquete(int socket_cliente) {
 	paquete->buffer = malloc(sizeof(t_buffer));
 
 	recv(socket_cliente, &(paquete->codigo_operacion), sizeof(uint32_t), MSG_WAITALL);
+	if(paquete->codigo_operacion == 0 || paquete->codigo_operacion < 0)
+		exit(EXIT_FAILURE);
 	recv(socket_cliente, &(paquete->buffer->size), sizeof(uint32_t), 0);
-	paquete->buffer->stream = malloc(paquete->buffer->size);
-	recv(socket_cliente, paquete->buffer->stream, paquete->buffer->size, 0);
+	if(paquete->buffer->size){
+		paquete->buffer->stream = malloc(paquete->buffer->size);
+		recv(socket_cliente, paquete->buffer->stream, paquete->buffer->size, 0);
+	}
 	return paquete;
 }
