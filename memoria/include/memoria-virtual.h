@@ -12,5 +12,5 @@ void consultaSwap(int carpincho_id);
 //Reemplazo
 int reemplazarLRU(int nro_pagina, int carpincho_id);
 void actualizarLRU(int nro_pagina, int carpincho_id);
-int reemplazarClockM(int nro_pagina, int carpincho_id);
+int reemplazarClockM(int nro_pagina, int carpincho_id, int referido, int modificado);
 #endif

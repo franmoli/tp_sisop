@@ -137,14 +137,62 @@ void actualizarLRU(int nro_pagina, int carpincho_id){
 
 }
 
-int reemplazarClockM(int nro_pagina, int carpincho_id) {
+int reemplazarClockM(int nro_pagina, int carpincho_id, int referido, int modificado) {
+
+    t_clock* paginaNueva = malloc(sizeof(t_clock));
+    paginaNueva->numero_pagina = nro_pagina;
+    paginaNueva->pid = carpincho_id;
+    paginaNueva->bit_referido = referido;       //Definir referido
+    paginaNueva->bit_modificado = modificado;   //Definir modificado
+    int numeroMarco = -1;
+    int inicioLista = reemplazo_CLOCK->ultimo;
+
+
     if(config_memoria->TIPO_ASIGNACION == "FIJA"){
         //CLock para asignacion fija
     }else
     {
-        //Clock para asignacion dinamica
+        //Clock para asignacion dinamica -> Supongo que ya estan todas las paginas en la lista
+        t_clock* pagina = malloc(sizeof(t_reemplazo));
+        t_list_iterator *list_iterator = list_iterator_create(reemplazo_CLOCK->paginas);
+        int index = 0;
+
+        while (list_iterator_has_next(list_iterator))
+        {
+            pagina = list_iterator_next(list_iterator);
+            t_clock *ultimoClock = list_get(reemplazo_CLOCK->paginas,reemplazo_CLOCK->ultimo);
+            while(pagina->pid != ultimoClock->pid && pagina->numero_pagina != ultimoClock->numero_pagina){
+                pagina = list_iterator_next(list_iterator);
+            }
+            //Primera vuelta
+            if(pagina->bit_referido == 0 && pagina->bit_modificado == 0){
+                t_clock *clockOld = list_replace(reemplazo_CLOCK->paginas,reemplazo_CLOCK->ultimo,paginaNueva);
+                t_pagina* paginaVieja = getPaginaByNumero(clockOld->numero_pagina,clockOld->pid);
+                numeroMarco = paginaVieja->marco_asignado;
+                reemplazo_CLOCK->ultimo++;
+
+                list_iterator_destroy(list_iterator);
+                return numeroMarco;
+            }
+            reemplazo_CLOCK->ultimo++;
+        }
+
+        //Llegue al final de la lista
+        //Tengo que volver a empezar en lista hasta que llegue a ultimo y ahi termino primera vuelta
         
+
+        
+
     }
+
+/*
+
+    typedef struct{
+    uint32_t pid;
+    uint32_t numero_pagina;
+    int bit_referido;
+    int bit_modificado;
+    }t_clock;*/
 }
 
 
