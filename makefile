@@ -9,6 +9,6 @@ kernel_c :
 
 kernel_r :
 	cd $(KERNEL_DIR) && \
-	./exec
+	./vexec
 
 all : matelib_c kernel_c kernel_r

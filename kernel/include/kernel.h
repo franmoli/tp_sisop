@@ -13,6 +13,8 @@ void liberar_memoria_y_finalizar(t_config_kernel *config_kernel, t_log *logger_k
 void print_inicializacion (t_config_kernel *config_kernel);
 void iniciar_listas();
 void iniciar_semaforos_generales();
+void iniciar_debug_console();
+void *debug_console(void *_ );
 
 t_config *config_file;
 

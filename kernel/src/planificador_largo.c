@@ -88,8 +88,8 @@ void atender_proceso (void* parametro ){
         }
 
         //Libero la memoria ocupada por el paquete
-		free(paquete->buffer->stream);
-        free(paquete->buffer);
+		//free(paquete->buffer->stream);
+        //free(paquete->buffer);
         free(paquete);
 
 	}
@@ -139,7 +139,6 @@ t_proceso *nuevo_carpincho(int socket_cliente){
 void *planificador_largo_plazo(void *_){
 
     while(1){
-        print_semaforos();
         sem_wait(&cambio_de_listas);
         if(multiprogramacion_disponible){
             if(list_size(lista_s_ready)){
@@ -246,14 +245,3 @@ void *hilo_salida_a_exit(void *multiprogramacion_disponible_p){
     return NULL;
 }
 
-void print_semaforos(){
-    int index = 0;
-    t_semaforo *aux;
-    printf("Printing semaphores %d:\n", list_size(lista_semaforos));
-    while(index < list_size(lista_semaforos)){
-        aux = list_get(lista_semaforos, index);
-        printf("Semaforo \"%s\" - Valor%d - Solicitantes %d\n",aux->nombre_semaforo, aux->value, list_size(aux->solicitantes));
-        printf("\n");
-        index++;
-    }
-}
