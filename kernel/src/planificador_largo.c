@@ -85,7 +85,6 @@ void atender_proceso (void* parametro ){
                 exit(EXIT_FAILURE);
                 break;
             
-
         }
 
         //Libero la memoria ocupada por el paquete

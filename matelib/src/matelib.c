@@ -89,9 +89,10 @@ int mate_close(mate_instance *lib_ref){
     
     close(lib_ref->socket);
     
-    free(lib_ref->group_info);
-    free(lib_ref->info_carpincho);
-    free(lib_ref);    
+    //free(lib_ref->group_info);
+    //printf("Group info freed\n");
+    //free(lib_ref->info_carpincho);
+    //free(lib_ref);    
     
     return 0;
 }

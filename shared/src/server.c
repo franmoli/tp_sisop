@@ -24,11 +24,15 @@ int iniciar_servidor(char *ip, char *puerto, t_log *logger) {
         break;
     }
 
-	listen(socket_servidor, SOMAXCONN);
+	int error = listen(socket_servidor, SOMAXCONN);
     freeaddrinfo(servinfo);
-
-    log_info(logger, "Componente preparado para recibir conexiones con socket %d", socket_servidor);
-    return socket_servidor;
+	if(error != -1){
+    	log_info(logger, "Componente preparado para recibir conexiones con socket %d", socket_servidor);
+    	return socket_servidor;
+	}else{
+		log_error(logger, "Se produjo un error en la creacion del servidor\n");
+		exit(EXIT_FAILURE);
+	}
 }
 
 /* Utilizar esta función para conectarse a otro servidor */
