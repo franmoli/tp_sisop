@@ -5,7 +5,7 @@
 void freeAlloc(t_paquete *paquete)
 {
 
-    uint32_t inicio = tamanio_memoria;
+   uint32_t inicio = tamanio_memoria;
 
     t_malloc_serializado *mallocDeserializado = deserializar_alloc(paquete);
 
@@ -18,17 +18,19 @@ void freeAlloc(t_paquete *paquete)
     {
         //MATE FREE FAIÑT
     }
+    int nropaginaAllocActual = getPaginaByDireccionLogica(direccion);
+    t_pagina* paginaAllocActual = list_get(tabla_paginas->paginas, nropaginaAllocActual);
     //Traigo de memoria el alloc
-    t_heap_metadata *alloc = traerAllocDeMemoria(direccion);
+    t_heap_metadata *alloc = traerAllocDeMemoria(inicio + direccion + config_memoria->TAMANIO_PAGINA * paginaAllocActual->marco_asignado );
 
     alloc->isFree = true;
     uint32_t next = alloc->nextAlloc;
     uint32_t back = alloc->prevAlloc;
 
-    int paginaAlloc = getPaginaByDireccionLogica(back);
-    t_pagina *pagina_alloc = list_get(tabla_paginas->paginas, paginaAlloc);
-    pagina_alloc->tamanio_ocupado -= next - back - sizeof(t_heap_metadata);
-    pagina_alloc->cantidad_contenidos -= 1;
+    int nropaginaAllocAnterior = getPaginaByDireccionLogica(back);
+    t_pagina *pagina_alloc_anterior = list_get(tabla_paginas->paginas, nropaginaAllocAnterior);
+    pagina_alloc_anterior->tamanio_ocupado -= next - back - sizeof(t_heap_metadata);
+    pagina_alloc_anterior->cantidad_contenidos -= 1;
 
     t_heap_metadata *anterior;
     t_heap_metadata *posterior;
@@ -50,10 +52,10 @@ void freeAlloc(t_paquete *paquete)
     if (hayAnterior && hayPosterior)
     {
         int paginaNextAlloc = getPaginaByDireccionLogica(next);
-        if (paginaNextAlloc == paginaAlloc)
+        if (paginaNextAlloc == nropaginaAllocAnterior)
         {
             //TODO EL CONTENIDO ESTA EN UNA MISMA PAGINA
-            t_pagina *pagina_alloc = list_get(tabla_paginas->paginas, paginaAlloc);
+            t_pagina *pagina_alloc = list_get(tabla_paginas->paginas, nropaginaAllocAnterior);
             pagina_alloc->tamanio_ocupado -= next - back - sizeof(t_heap_metadata);
             pagina_alloc->cantidad_contenidos -= 1;
         }
