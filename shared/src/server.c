@@ -89,12 +89,11 @@ void *serializar_paquete(t_paquete *paquete, int *bytes) {
 void enviar_paquete(t_paquete *paquete, int socket_cliente) {
 	int bytes = paquete->buffer->size + 2*sizeof(int);
 	printf("Paquete a enviar: opcode %d | buffer size %d | dest %d\n", paquete->codigo_operacion, paquete->buffer->size, socket_cliente);
-	paquete = serializar_paquete(paquete, &bytes);
-
-	int error =send(socket_cliente, paquete, bytes, 0);
-	free(paquete);
+	void *a_enviar = serializar_paquete(paquete, &bytes);
+	int error =send(socket_cliente, a_enviar, bytes, 0);
+	//free(paquete);
 	if(error == -1){
-		printf("Hubo un error en el envio");
+		printf("Hubo un error en el envio\n");
 	}
 }
 
