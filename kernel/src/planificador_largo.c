@@ -40,13 +40,14 @@ void atender_proceso (void* parametro ){
     bool inicializado = false;
     int socket_cliente = *(int*)parametro;
     t_proceso *carpincho = malloc(sizeof(t_proceso)); 
+    carpincho->task_list = list_create();
     //char *nombre_semaforo = NULL;
     char *nombre_semaforo = string_new();
     string_append(&nombre_semaforo, "Semaforo mock");
     t_task *task_aux;
     while(1) {
 		t_paquete *paquete = recibir_paquete(socket_cliente);
-        //task_aux = malloc(sizeof(t_task));
+        task_aux = malloc(sizeof(t_task));
         //print_semaforos();
         //Analizo el código de operación recibido y ejecuto acciones según corresponda
         printf("Paquete recibido %d\n", paquete->codigo_operacion);

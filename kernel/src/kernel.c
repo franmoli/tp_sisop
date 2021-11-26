@@ -215,18 +215,22 @@ void print_task_lists(){
     t_task *aux_task;
     t_proceso *aux_proceso;
 
-    while(index < list_size(lista_ready)){
+    while(index <= list_size(lista_ready)-1){
         aux_proceso = list_get(lista_ready, index);
+        
+        
+        while(index2 <= list_size(aux_proceso->task_list)-1){
 
-        printf("Task - proceso : %d\n", aux_proceso->id);
-
-        while(index < list_size(aux_proceso->task_list)){
             aux_task = list_get(aux_proceso->task_list, index2);
-            printf("\bTask - Id : %d\n", aux_task->id);
+            if(aux_task != NULL)
+                printf("\bTask - Id : %d\n", aux_task->id);
+                printf("Nombre-sem %s\n", aux_task->nombre_semaforo);
             
+            aux_task = NULL;
             index2++;
         }
 
         index++;
     }
+    printf("Pass\n");
 }
