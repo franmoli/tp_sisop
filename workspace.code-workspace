@@ -16,7 +16,12 @@
 	"settings": {
 		"files.associations": {
 			"kernel.h": "c",
-			"memoria.h": "c"
+			"memoria.h": "c",
+			"paginacion.h": "c",
+			"tlb.h": "c",
+			"memoria-global.h": "c",
+			"list.h": "c",
+			"memoria-virtual.h": "c"
 		}
 	}
 }

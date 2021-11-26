@@ -71,8 +71,9 @@ t_config_memoria *generarConfigMemoria(t_config *config){
     config_memoria->ALGORITMO_REEMPLAZO_TLB = config_get_string_value(config, "ALGORITMO_REEMPLAZO_TLB");
     config_memoria->RETARDO_ACIERTO_TLB = config_get_int_value(config, "RETARDO_ACIERTO_TLB");
     config_memoria->RETARDO_FALLO_TLB = config_get_int_value(config, "RETARDO_FALLO_TLB");
-    config_memoria->MARCOS_MAXIMOS = config_get_int_value(config, "MARCOS_MAXIMOS");
+    config_memoria->MARCOS_POR_CARPINCHO = config_get_int_value(config, "MARCOS_POR_CARPINCHO");
     config_memoria->TAMANIO_PAGINA = config_get_int_value(config, "TAMANIO_PAGINA");
+    config_memoria->PATH_DUMP_TLB = config_get_string_value(config, "PATH_DUMP_TLB");
     return config_memoria;
 }
 
@@ -103,6 +104,7 @@ t_config_swap *generar_config_swap(t_config *config) {
     config_swap->MARCOS_MAXIMOS = config_get_int_value(config, "MARCOS_MAXIMOS");
     config_swap->RETARDO_SWAP = config_get_int_value(config, "RETARDO_SWAP");
     config_swap->ARCHIVOS_SWAP = file_paths;
+    config_swap->TIPO_ASIGNACION = config_get_string_value(config, "TIPO_ASIGNACION");
     
     return config_swap;
 }
