@@ -91,7 +91,7 @@ typedef struct{
 t_config_memoria *config_memoria;
 t_log *logger_memoria;
 t_tabla_tlb* tabla_tlb;
-t_tabla_marcos* tabla_marcos;
+t_tabla_marcos* tabla_marcos_memoria;
 
 t_list* tabla_procesos;
 

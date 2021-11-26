@@ -92,7 +92,7 @@ t_heap_metadata *memRead(t_paquete *paquete)
 int getMarco(t_tabla_paginas* tabla_paginas){
     int numeroMarco = -1;
     if(config_memoria->TIPO_ASIGNACION != "FIJA"){
-        t_list_iterator *list_iterator = list_iterator_create(tabla_marcos->marcos);
+        t_list_iterator *list_iterator = list_iterator_create(tabla_marcos_memoria->marcos);
         bool marcoDisponible = false;
         while (list_iterator_has_next(list_iterator) && !marcoDisponible)
         {
@@ -237,7 +237,7 @@ int solicitarPaginaNueva(uint32_t carpincho_id)
 
     list_add(tabla_paginas->paginas, pagina);
 
-    t_marco *marcoAsignado = list_get(tabla_marcos->marcos, marco);
+    t_marco *marcoAsignado = list_get(tabla_marcos_memoria->marcos, marco);
     marcoAsignado->isFree = false;
     tabla_paginas->paginas_en_memoria += 1;
 

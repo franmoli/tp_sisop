@@ -32,8 +32,8 @@ int main(int argc, char **argv)
         }
     }
 
-    tabla_marcos = malloc(sizeof(t_tabla_marcos));
-    tabla_marcos->marcos = list_create();
+    tabla_marcos_memoria = malloc(sizeof(t_tabla_marcos));
+    tabla_marcos_memoria->marcos = list_create();
 
     tabla_procesos = list_create();
 
@@ -43,7 +43,7 @@ int main(int argc, char **argv)
     {
         t_marco *tlb = malloc(sizeof(t_marco));
         tlb->numero_marco = i;
-        list_add(tabla_marcos->marcos, tlb);
+        list_add(tabla_marcos_memoria->marcos, tlb);
         i++;
     }
     //Conectar a swap
