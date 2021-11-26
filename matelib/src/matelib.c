@@ -17,20 +17,19 @@ t_config_matelib* obtenerConfig(char* config){
 
 
 
-int mate_init(mate_instance *lib_ref, char *config){
+int mate_init(mate_instance_pointer *instance_pointer, char *config){
 
-   
     char *string = malloc(sizeof(char)*50);
     socket_cliente   = -1;
 
-    lib_ref = malloc(sizeof(mate_instance));
+    instance_pointer->group_info = malloc(sizeof(mate_instance));
+    mate_instance *lib_ref = instance_pointer->group_info;
     
     config_matelib = obtenerConfig(config);
     
     lib_ref->id             = obtenerIDRandom();
     lib_ref->config         = config_matelib;
-    //Quizas se saca el group_info
-    lib_ref->group_info = malloc(sizeof(mate_inner_structure));
+    
     lib_ref->info_carpincho = malloc(sizeof(mate_inner_structure));
 
     sprintf(string,"./cfg/%d",lib_ref->id);
@@ -77,7 +76,9 @@ int mate_init(mate_instance *lib_ref, char *config){
     }
 }
 
-int mate_close(mate_instance *lib_ref){
+int mate_close(mate_instance_pointer *instance_pointer){
+
+    mate_instance *lib_ref = instance_pointer->group_info;
 
     t_paquete *paquete = malloc(sizeof(t_paquete));
     t_buffer *buffer = malloc(sizeof(t_buffer));
@@ -99,11 +100,10 @@ int mate_close(mate_instance *lib_ref){
 
 //-----------------------------------Semaforos-----------------------------------
 
-int mate_sem_init(mate_instance *lib_ref, mate_sem_name sem, unsigned int value){
+int mate_sem_init(mate_instance_pointer *instance_pointer, mate_sem_name sem, unsigned int value){
     
-    //----Crear paquete con nombre de semaforo y valor para que kernel haga el sem_init con el COD_OP correspondiente
-    //serializar inputs (nombre y valor init)
-    printf("Socket %d\n", lib_ref->socket);
+    
+    mate_instance *lib_ref = instance_pointer->group_info;
     t_paquete *paquete = malloc(sizeof(t_paquete)); 
     t_buffer *buffer = malloc(sizeof(t_buffer));
 
@@ -115,10 +115,13 @@ int mate_sem_init(mate_instance *lib_ref, mate_sem_name sem, unsigned int value)
     serializar_mate_sem_init(buffer->stream, value, sem);
     enviar_paquete(paquete, lib_ref->socket);
     sleep(1);
-
+    printf("Ahora libero paquete\n");
     free(paquete);
+    printf("Liberado\n");
+
     //----esperar señal de inicializacion correcta
     t_paquete *paquete_recibido = recibir_paquete(lib_ref->socket);
+    
     if(paquete_recibido->codigo_operacion == INIT_SEM){
         log_info(lib_ref->logger,"La funcion SEM_INIT se ejecuto exitosamente");
         return 0;
@@ -128,8 +131,10 @@ int mate_sem_init(mate_instance *lib_ref, mate_sem_name sem, unsigned int value)
     }
 }
 
-int mate_sem_wait(mate_instance *lib_ref, mate_sem_name sem){
-    
+int mate_sem_wait(mate_instance_pointer *instance_pointer, mate_sem_name sem){
+
+    mate_instance *lib_ref = instance_pointer->group_info;
+
     t_paquete *paquete = malloc(sizeof(t_paquete));
     
     //----Crear paquete con nombre de semaforo y valor para que kernel haga el sem_wait con el COD_OP correspondiente
@@ -153,7 +158,9 @@ int mate_sem_wait(mate_instance *lib_ref, mate_sem_name sem){
     }
 }
 
-int mate_sem_post(mate_instance *lib_ref, mate_sem_name sem){
+int mate_sem_post(mate_instance_pointer *instance_pointer, mate_sem_name sem){
+
+    mate_instance *lib_ref = instance_pointer->group_info;
 
      t_paquete *paquete = malloc(sizeof(t_paquete));
     
@@ -179,7 +186,9 @@ int mate_sem_post(mate_instance *lib_ref, mate_sem_name sem){
     }
 }
 
-int mate_sem_destroy(mate_instance *lib_ref, mate_sem_name sem){
+int mate_sem_destroy(mate_instance_pointer *instance_pointer, mate_sem_name sem){
+
+    mate_instance *lib_ref = instance_pointer->group_info;
 
     t_paquete *paquete = malloc(sizeof(t_paquete));
     t_buffer *buffer = malloc(sizeof(t_buffer));
@@ -203,7 +212,9 @@ int mate_sem_destroy(mate_instance *lib_ref, mate_sem_name sem){
 
 //-----------------------------------Funcion Entrada/Salida-----------------------------------
 
-int mate_call_io(mate_instance *lib_ref, mate_io_resource io, void *msg){
+int mate_call_io(mate_instance_pointer *instance_pointer, mate_io_resource io, void *msg){
+
+    //mate_instance *lib_ref = instance_pointer->group_info;
     
 
     return 1;
@@ -211,31 +222,35 @@ int mate_call_io(mate_instance *lib_ref, mate_io_resource io, void *msg){
 
 //-----------------------------------Funciones Modulo Memoria -----------------------------------
 
-mate_pointer mate_memalloc(mate_instance *lib_ref, int size){
+mate_pointer mate_memalloc(mate_instance_pointer *instance_pointer, int size){
+
+    //mate_instance *lib_ref = instance_pointer->group_info;
 
     mate_pointer p = 0;
 
     return p;
 }
 
-int mate_memfree(mate_instance *lib_ref, mate_pointer addr){
+int mate_memfree(mate_instance_pointer *instance_pointer, mate_pointer addr){
+
+    //mate_instance *lib_ref = instance_pointer->group_info;
+
+
+    return 1;
+}   
+
+int mate_memread(mate_instance_pointer *instance_pointer, mate_pointer origin, void *dest, int size){
+
+    //mate_instance *lib_ref = instance_pointer->group_info;
 
 
     return 1;
 }
 
-int mate_memread(mate_instance *lib_ref, mate_pointer origin, void *dest, int size){
+int mate_memwrite(mate_instance_pointer *instance_pointer, void *origin, mate_pointer dest, int size){
+
+    //mate_instance *lib_ref = instance_pointer->group_info;
 
 
     return 1;
-}
-
-int mate_memwrite(mate_instance *lib_ref, void *origin, mate_pointer dest, int size){
-
-
-    return 1;
-}
-
-int test(int num){
-    return num + 1;
 }

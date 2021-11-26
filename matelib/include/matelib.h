@@ -31,6 +31,10 @@ typedef struct mate_instance
     t_log *logger;
 } mate_instance;
 
+typedef struct mate_instance_pointer{
+    void *group_info;
+}mate_instance_pointer;
+
 typedef char *mate_io_resource;
 
 typedef int32_t mate_pointer;
