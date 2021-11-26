@@ -46,32 +46,32 @@ t_config_matelib* obtenerConfig(char* config);
 int iniciar_conexion_con_modulos(mate_instance *lib_ref);
 
 //------------------General Functions---------------------/
-int mate_init(mate_instance *lib_ref, char *config);
+int mate_init(mate_instance_pointer *instance_pointer, char *config);
 
-int mate_close(mate_instance *lib_ref);
+int mate_close(mate_instance_pointer *instance_pointer);
 
 //-----------------Semaphore Functions---------------------/
-int mate_sem_init(mate_instance *lib_ref, mate_sem_name sem, unsigned int value);
+int mate_sem_init(mate_instance_pointer *instance_pointer, mate_sem_name sem, unsigned int value);
 
-int mate_sem_wait(mate_instance *lib_ref, mate_sem_name sem);
+int mate_sem_wait(mate_instance_pointer *instance_pointer, mate_sem_name sem);
 
-int mate_sem_post(mate_instance *lib_ref, mate_sem_name sem);
+int mate_sem_post(mate_instance_pointer *instance_pointer, mate_sem_name sem);
 
-int mate_sem_destroy(mate_instance *lib_ref, mate_sem_name sem);
+int mate_sem_destroy(mate_instance_pointer *instance_pointer, mate_sem_name sem);
 
 //--------------------IO Functions------------------------/
 
-int mate_call_io(mate_instance *lib_ref, mate_io_resource io, void *msg);
+int mate_call_io(mate_instance_pointer *instance_pointer, mate_io_resource io, void *msg);
 
 //--------------Memory Module Functions-------------------/
 
-//mate_pointer mate_memalloc(mate_instance *lib_ref, int size);
+//mate_pointer mate_memalloc(mate_instance_pointer *instance_pointer, int size);
 
-int mate_memfree(mate_instance *lib_ref, mate_pointer addr);
+int mate_memfree(mate_instance_pointer *instance_pointer, mate_pointer addr);
 
-int mate_memread(mate_instance *lib_ref, mate_pointer origin, void *dest, int size);
+int mate_memread(mate_instance_pointer *instance_pointer, mate_pointer origin, void *dest, int size);
 
-int mate_memwrite(mate_instance *lib_ref, void *origin, mate_pointer dest, int size);
+int mate_memwrite(mate_instance_pointer *instance_pointer, void *origin, mate_pointer dest, int size);
 
 //-------------------Liberacion memoria------------------/
 
