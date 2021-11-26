@@ -2,12 +2,12 @@ PROCESS_NAME=matelib
 IDIR =./include
 SHARED_IDIR = ../shared/include
 CC=gcc
-CFLAGS=-I$(IDIR) -I$(SHARED_IDIR) -g -Wall
+CFLAGS=-I$(IDIR) -I$(SHARED_IDIR) -g -Wall -Werror -shared
 
 
 ODIR=./obj
 SRCDIR =./src
-LIBS=-lcommons -lpthread -lreadline -lcunit -lrt -fpic
+LIBS=-lcommons -lpthread -lreadline -lcunit -lrt -fPIC -lc
 
 SHARED_SRCDIR = ../shared/src
 SHARED_ODIR = ../shared/obj
@@ -29,14 +29,14 @@ SHARED_SRC = $(wildcard $(SHARED_SRCDIR)/*.c)
 SHARED_OBJ = $(patsubst $(SHARED_SRCDIR)/%.c,$(SHARED_ODIR)/%.o,$(SHARED_SRC))
 
 $(PROCESS_NAME): $(OBJ) $(SHARED_OBJ)
-	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+	$(CC) -Wl,-soname,lib$@.so $^ $(CFLAGS) $(LIBS) -o lib$@.so
+	sudo cp lib$@.so /usr/include/lib$@.so
+	sudo cp lib$@.so /usr/include/lib/lib$@.so
+	sudo cp lib$@.so /usr/bin/lib$@.so
+	sudo cp lib$@.so /usr/lib/lib$@.so
 
 .PHONY: clean
 
 clean:
-	rm -f $(ODIR)/*.o *~ core $(INCDIR)/*~ $(PROCESS_NAME) $(SHARED_ODIR)/*.o 
+	rm -f $(ODIR)/*.o *~ core $(INCDIR)/*~ $(PROCESS_NAME) $(SHARED_ODIR)/*.o 		
 
-.PHONY: carpincho
-
-carpincho: $(OBJ) $(SHARED_OBJ)
-	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)

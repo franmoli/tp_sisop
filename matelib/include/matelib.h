@@ -3,34 +3,27 @@
 
 #include <stdint.h>
 #include "matelib-global.h"
-#include <pthread.h>
 #include <time.h>
-#include <semaphore.h>
 
 #define CANT_MAX_SEM 10
 
 t_config_matelib *config_matelib;
+int socket_cliente;
 
 
 //-------------------Type Definitions----------------------/
 
 typedef char *mate_sem_name;
 
-typedef struct sem_struct{
-    mate_sem_name nombre;
-    sem_t *semaforo;
-    bool ocupado;
-}sem_struct;
-
 typedef struct mate_inner_structure
 {
     void *memory;
-    struct sem_struct lista_sem[CANT_MAX_SEM]; 
     int32_t cod_op;
 } mate_inner_structure;
 
 typedef struct mate_instance
 {
+    int socket;
     int32_t id;
     mate_inner_structure *info_carpincho;
     t_config_matelib *config;
@@ -46,8 +39,7 @@ typedef int32_t mate_pointer;
 
 int32_t obtenerIDRandom();
 t_config_matelib* obtenerConfig(char* config);
-int encontrar_lugar_libre(mate_instance *lib_ref);
-void inicializar_lista_sem(mate_instance *lib_ref);
+int iniciar_conexion_con_modulos(mate_instance *lib_ref);
 
 //------------------General Functions---------------------/
 int mate_init(mate_instance *lib_ref, char *config);

@@ -12,14 +12,20 @@
 
 //Estructuras
 typedef enum {
-	CLIENTE_DESCONECTADO = 1,
-	CLIENTE_TEST = 2,
+	  CLIENTE_DESCONECTADO = 1,
+	  CLIENTE_TEST = 2,
     NUEVO_CARPINCHO = 3,
-    MEMWRITE = 4,
-    MEMREAD = 5,
-    MATEINIT = 6,
-    SWAPFREE = 7,
-     MEMALLOC = 8,
+    SEM_WAIT = 4,
+    SEM_POST = 5,
+    INIT_SEM = 6,
+    SEM_DESTROY = 7,
+    OP_ERROR = 8,
+    MEMALLOC = 9,
+    MEMFREE = 10,
+    MEMREAD = 11,
+    MEMWRITE = 12,
+    MATEINIT = 13,
+    SWAPFREE = 14,
 } op_code;
 
 typedef struct {

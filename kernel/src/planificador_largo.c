@@ -3,8 +3,6 @@
 void iniciar_planificador_largo(){
     //Iniciar servidor y empiezo a escuchar procesos
     printf("Inicio planificador LARGO \n");
-    int *multiprogramacion_disponible = malloc(sizeof(int));
-    *multiprogramacion_disponible = config_kernel->GRADO_MULTIPROGRAMACION;
 
     pthread_t hilo_servidor;
     pthread_create(&hilo_servidor, NULL, iniciar_servidor_kernel, (void *)NULL);
@@ -13,7 +11,7 @@ void iniciar_planificador_largo(){
     pthread_create(&hilo_planificador, NULL, planificador_largo_plazo, (void *)NULL);
 
     pthread_t hilo_exit;
-    pthread_create(&hilo_exit, NULL, hilo_salida_a_exit, (void *)multiprogramacion_disponible);
+    pthread_create(&hilo_exit, NULL, hilo_salida_a_exit, (void *)NULL);
 }
 
 
@@ -37,42 +35,71 @@ void *iniciar_servidor_kernel(void *_){
     return NULL;
 }
 
+//Atencion de nuevas operaciones
 void atender_proceso (void* parametro ){
     bool inicializado = false;
     int socket_cliente = *(int*)parametro;
+    t_proceso *carpincho = malloc(sizeof(t_proceso)); 
+    //char *nombre_semaforo = NULL;
+    char *nombre_semaforo = string_new();
+    string_append(&nombre_semaforo, "Semaforo mock");
+    t_task *task_aux;
     while(1) {
 		t_paquete *paquete = recibir_paquete(socket_cliente);
-        
+        //task_aux = malloc(sizeof(t_task));
+        //print_semaforos();
         //Analizo el código de operación recibido y ejecuto acciones según corresponda
+        printf("Paquete recibido %d\n", paquete->codigo_operacion);
         switch(paquete->codigo_operacion) {
             case CLIENTE_TEST:
                 log_info(logger_kernel, "Mensaje de prueba recibido correctamente por el cliente %d", socket_cliente);
                 break;
+
             case NUEVO_CARPINCHO:
                 if(!inicializado){
-                    nuevo_carpincho(socket_cliente);
+                    carpincho = nuevo_carpincho(socket_cliente);
                     inicializado = true;
                 }
                 break;
-            //TODO: case OPERACION_SARASA
-            // agregar a lista de operaciones del proceso     
+            case INIT_SEM:
+                //nombre_semaforo = paquete->buffer;
+                //agregar a lista de actividades
+                printf("Here\n");
+                task_aux->id = INIT_SEM;
+                task_aux->nombre_semaforo = nombre_semaforo;
+                task_aux->value = 2;
+                list_add(carpincho->task_list, task_aux);
+                break;
+            case CLIENTE_DESCONECTADO:
+                log_info(logger_kernel, "Desconectando cliente %d", socket_cliente);
+                close(socket_cliente);
+                return;
+                break;
+                
+            case MEMALLOC:
+            case MEMFREE:
+            case MEMREAD:
+            case MEMWRITE:
+                enviar_paquete(paquete, socket_cliente_memoria);
+                break;
             default:
                 log_error(logger_kernel, "Codigo de operacion desconocido");
+                exit(EXIT_FAILURE);
                 break;
+            
         }
 
         //Libero la memoria ocupada por el paquete
-		free(paquete->buffer->stream);
-        free(paquete->buffer);
+		//free(paquete->buffer->stream);
+        //free(paquete->buffer);
         free(paquete);
 
-        //Salgo del ciclo
-        break; 
 	}
     return;
 }
 
-void nuevo_carpincho(int socket_cliente){
+t_proceso *nuevo_carpincho(int socket_cliente){
+
     t_proceso *nuevo_proceso = malloc(sizeof(t_proceso));
 
     nuevo_proceso->id = socket_cliente;
@@ -82,6 +109,7 @@ void nuevo_carpincho(int socket_cliente){
     nuevo_proceso->estimar = false;
     nuevo_proceso->termino_rafaga = false;
     nuevo_proceso->block = false;
+    nuevo_proceso->task_list = list_create();
 
     pthread_t hilo_proceso;
     pthread_create(&hilo_proceso, NULL, proceso, (void*)nuevo_proceso);
@@ -98,31 +126,35 @@ void nuevo_carpincho(int socket_cliente){
     avisar_cambio();
     sem_post(&libre_para_inicializar_proceso);
 
+    //Enviar confirmacion a carpincho
+     t_paquete *paquete = malloc(sizeof(t_paquete));
+    t_buffer *buffer = malloc(sizeof(t_buffer));
+    paquete->codigo_operacion = NUEVO_CARPINCHO;
+    paquete->buffer = buffer;
+    buffer->size = 0;
+    enviar_paquete(paquete, socket_cliente);
+    free(paquete);
+    free(buffer);
+    return nuevo_proceso;
 }
 
 void *planificador_largo_plazo(void *_){
 
-    int *multiprogramacion_disponible = malloc(sizeof(int));
-    *multiprogramacion_disponible = config_kernel->GRADO_MULTIPROGRAMACION;
-
     while(1){
-        if(*multiprogramacion_disponible){
-            if(list_size(lista_new)){
+        sem_wait(&cambio_de_listas);
+        if(multiprogramacion_disponible){
+            if(list_size(lista_s_ready)){
+                //Se saca de suspended y se pasa a ready
+                mover_proceso_de_lista(lista_s_ready, lista_ready, 0, READY);
+
+                multiprogramacion_disponible = multiprogramacion_disponible - 1;
+
+            }else if(list_size(lista_new)){
 
                 //Se saca de new y se pasa a ready
                 mover_proceso_de_lista(lista_new, lista_ready, 0, READY);
-
-                *multiprogramacion_disponible = *multiprogramacion_disponible - 1;
+                multiprogramacion_disponible = multiprogramacion_disponible - 1;
             }
-        }else{
-
-            printf("me trabé planif largo listas:\n");
-            printf("Ready: %d\n", list_size(lista_ready));
-            printf("Block: %d\n", list_size(lista_blocked));
-            printf("Exec: %d\n", list_size(lista_exec));
-            printf(".");
-            sem_wait(&proceso_finalizo_o_suspended);
-            *multiprogramacion_disponible = *multiprogramacion_disponible + 1;
         }
     }
     return NULL;
@@ -130,15 +162,11 @@ void *planificador_largo_plazo(void *_){
 
 void *hilo_salida_a_exit(void *multiprogramacion_disponible_p){
 
-    int *multiprogramacion_disponible = multiprogramacion_disponible_p;
 
     while(1){
-        printf(".\n");
         sem_wait(&salida_a_exit);
         
-        //printf("Ready: %d\n", list_size(lista_ready));
-        //printf("Block: %d\n", list_size(lista_blocked));
-        //printf("Exec: %d\n", list_size(lista_exec));
+        
         bool encontrado = false;
         //int tamanio_lista_exec = list_size(lista_exec);
         int tamanio_lista_blocked = list_size(lista_blocked);
@@ -147,19 +175,23 @@ void *hilo_salida_a_exit(void *multiprogramacion_disponible_p){
 
 
         //Busco en exec
-        printf("Exec: %d \n", list_size(lista_exec));        
+        //printf("Exec: %d \n", list_size(lista_exec));        
         while(!encontrado && (index < list_size(lista_exec))){
-            printf("Exec: %d \n", list_size(lista_exec));
+            //printf("Exec: %d \n", list_size(lista_exec));
             t_proceso *aux = list_get(lista_exec, index);
             if(aux->salida_exit){
+                   // printf("Espera en exit - procesos\n");
                     sem_wait(&mutex_cant_procesos);
+                    //printf("Pasó en exit\n");  
+                    //printf(".");                  
                     sem_wait(&mutex_listas);
                         aux = list_remove(lista_exec, index );
                     sem_post(&mutex_listas);
                     cantidad_de_procesos--;
                     sem_post(&mutex_cant_procesos);
-                
-                 printf("Saco proceso %d\n", aux->id);
+                    //printf("Post-procesos-planif-exit\n");
+                 //printf("Saco proceso %d\n", aux->id);
+                 //printf(".");
                 encontrado = true;
             }
             index ++;
@@ -180,7 +212,7 @@ void *hilo_salida_a_exit(void *multiprogramacion_disponible_p){
                     sem_post(&mutex_cant_procesos);
                 
 
-                printf("Saco proceso %d\n", aux->id);
+                //printf("Saco proceso %d\n", aux->id);
                 encontrado = true;
             }
             index ++;
@@ -194,7 +226,7 @@ void *hilo_salida_a_exit(void *multiprogramacion_disponible_p){
                 aux = list_remove(lista_blocked, index);
                 sem_post(&mutex_listas);
                 
-                printf("Saco proceso %d\n", aux->id);
+                //printf("Saco proceso %d\n", aux->id);
                 encontrado = true;
             }
             index ++;
@@ -202,7 +234,7 @@ void *hilo_salida_a_exit(void *multiprogramacion_disponible_p){
 
         if(encontrado){
             sem_wait(&mutex_multiprogramacion);
-            *multiprogramacion_disponible = *multiprogramacion_disponible + 1;
+            multiprogramacion_disponible = multiprogramacion_disponible + 1;
             sem_post(&mutex_multiprogramacion);
             sem_post(&proceso_finalizo_o_suspended);
             sem_post(&liberar_multiprocesamiento);
@@ -212,3 +244,4 @@ void *hilo_salida_a_exit(void *multiprogramacion_disponible_p){
     }
     return NULL;
 }
+
