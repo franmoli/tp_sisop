@@ -26,7 +26,8 @@ typedef enum {
     MEMWRITE = 12,
     MATEINIT = 13,
     SWAPFREE = 14,
-    SWAPSAVE = 15
+    SWAPSAVE = 15,
+    CALLIO = 16
 } op_code;
 
 typedef struct {

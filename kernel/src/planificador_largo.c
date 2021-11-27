@@ -76,7 +76,7 @@ void atender_proceso (void* parametro ){
                 task->id = INIT_SEM;
                 task->nombre_semaforo = malloc(sizeof(info_sem->nombre));
                 task->nombre_semaforo = info_sem->nombre;
-                printf("sem_name puto si sale 'recv' = %s\n",info_sem->nombre);
+                printf("sem_name = %s\n",info_sem->nombre);
                 task->value = info_sem->value;
                 printf("sem_value = %d\n",task->value);
                 list_add(carpincho->task_list, task);
@@ -152,7 +152,7 @@ t_proceso *nuevo_carpincho(int socket_cliente){
     paquete->buffer = buffer;
     buffer->size = 0;
     enviar_paquete(paquete, socket_cliente);
-    free(paquete);
+    //free(paquete);
     free(buffer);
     return nuevo_proceso;
 }

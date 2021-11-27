@@ -19,9 +19,9 @@ t_paquete *serializar_mate_sem_init(uint32_t valor, char *nombre_sem){
     
     int offset = 0;
 
-    memcpy(stream + offset, &(datos_sem->value), sizeof(uint32_t));
-    offset+= sizeof(uint32_t);
     memcpy(stream + offset, &(datos_sem->nombre), sizeof(char)*strlen(nombre_sem)+1);
+    offset+= sizeof(char)*strlen(nombre_sem)+1;
+    memcpy(stream + offset, &(datos_sem->value), sizeof(uint32_t));
 
     buffer->stream = stream;
     paquete->buffer = buffer;
@@ -38,11 +38,10 @@ t_mate_sem *deserializar_mate_sem_init(t_paquete *paquete){
     printf("el tamanio del buffer del paquete recibido es: %d\n",paquete->buffer->size);
 
     int offset = 0;
-    
+    memcpy(&(datos_sem->nombre),stream + offset, paquete->buffer->size);
+    offset += paquete->buffer->size - sizeof(u_int32_t);    
     memcpy(&(datos_sem->value),stream + offset, sizeof(uint32_t));
-    offset += sizeof(uint32_t);
-    memcpy(&(datos_sem->nombre),stream + offset, paquete->buffer->size - sizeof(u_int32_t));
-    
+   
     return datos_sem;
 }
 
@@ -80,6 +79,43 @@ t_mate_sem *deserializar_mate_sem_resto(t_paquete *paquete){
     memcpy(&(datos_sem->nombre),stream + offset, paquete->buffer->size);
     return datos_sem;
 }
+
+t_paquete *serializar_mate_call_io(char *resource, void *msg){
+
+    t_mate_call_io *aux = malloc(sizeof(t_mate_call_io));
+    aux->resource = malloc(sizeof(char)*strlen(resource)+1);
+    aux->resource = resource;
+    aux->msg = malloc(sizeof(msg)+1);
+    aux->msg = msg;
+
+    t_paquete *paquete = malloc(sizeof(t_paquete));
+    t_buffer *buffer = malloc(sizeof(t_buffer));
+    buffer->size = sizeof(char)*strlen(resource) + sizeof(msg) + 2;
+
+    void *stream = malloc(buffer->size);
+
+    int offset = 0;
+
+    memcpy(stream + offset, &(aux->resource),sizeof(char)*strlen(resource)+1);
+    offset += sizeof(char)*strlen(resource) + 1;
+    memcpy(stream + offset, &(aux->msg),sizeof(msg) + 1);
+
+    buffer->stream = stream;
+    paquete->buffer = buffer;
+    paquete->codigo_operacion = CALLIO;
+
+    return paquete;
+}
+
+/*t_mate_call_io *deserializar_mate_call_io(t_paquete *paquete){
+    t_mate_call_io *datos = malloc(sizeof(t_mate_call_io));
+    void *stream = malloc(paquete->buffer->size);
+    stream = paquete->buffer->stream;
+
+    int offset = 0;
+
+    return datos;
+}*/
 
 /* Allocs */
 t_paquete *serializar_alloc(uint32_t size, uint32_t carpincho_id){
@@ -232,3 +268,4 @@ void* serializar_pagina(t_pagina_swap pagina) {
 
     return stream;
 }
+

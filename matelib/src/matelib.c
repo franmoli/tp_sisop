@@ -61,8 +61,8 @@ int mate_init(mate_instance_pointer *instance_pointer, char *config){
     buffer->size = 0;
     
     enviar_paquete(paquete, lib_ref->socket);
-    printf("init %d\n", lib_ref->socket);
-    free(paquete);
+
+    free(buffer);
 
     //Compruebo que la operacion fue exitosa
     t_paquete *paquete_recibido = recibir_paquete(lib_ref->socket);
@@ -87,7 +87,7 @@ int mate_close(mate_instance_pointer *instance_pointer){
     buffer->size = 0;
 
     enviar_paquete(paquete, socket_cliente);
-    
+    free(buffer);
     close(lib_ref->socket);
     
     //free(lib_ref->group_info);
@@ -104,11 +104,10 @@ int mate_sem_init(mate_instance_pointer *instance_pointer, mate_sem_name sem, un
     
     
     mate_instance *lib_ref = instance_pointer->group_info;
+    
     t_paquete *paquete = serializar_mate_sem_init(value, sem);
     enviar_paquete(paquete, lib_ref->socket);
     sleep(1);
-    printf("Ahora libero paquete\n");
-    free(paquete);
 
     //----esperar señal de inicializacion correcta
     t_paquete *paquete_recibido = recibir_paquete(lib_ref->socket);
@@ -129,13 +128,9 @@ int mate_sem_wait(mate_instance_pointer *instance_pointer, mate_sem_name sem){
     t_paquete *paquete = malloc(sizeof(t_paquete));
     
     //----Crear paquete con nombre de semaforo y valor para que kernel haga el sem_wait con el COD_OP correspondiente
-    
-    paquete->codigo_operacion = SEM_WAIT;
     //serializar inputs (nombre y valor init)
-    
-    //agregar buffer al paquete
+    paquete = serializar_mate_sem_resto(sem,SEM_WAIT);
     enviar_paquete(paquete,lib_ref->socket);
-    free(paquete); 
 
     //----esperar señal de inicializacion correcta
     t_paquete *paquete_recibido = recibir_paquete(lib_ref->socket);
@@ -153,17 +148,12 @@ int mate_sem_post(mate_instance_pointer *instance_pointer, mate_sem_name sem){
 
     mate_instance *lib_ref = instance_pointer->group_info;
 
-     t_paquete *paquete = malloc(sizeof(t_paquete));
+    t_paquete *paquete = malloc(sizeof(t_paquete));
     
     //----Crear paquete con nombre de semaforo y valor para que kernel haga el sem_post con el COD_OP correspondiente
-    
-    paquete->codigo_operacion = SEM_POST;
     //serializar inputs (nombre y valor init)
-    
-    //agregar buffer al paquete
-    
+    paquete = serializar_mate_sem_resto(sem,SEM_POST);    
     enviar_paquete(paquete,lib_ref->socket);
-    free(paquete); 
 
     //Esperar señal de inicializacion correcta
     t_paquete *paquete_recibido = recibir_paquete(lib_ref->socket);
@@ -182,14 +172,9 @@ int mate_sem_destroy(mate_instance_pointer *instance_pointer, mate_sem_name sem)
     mate_instance *lib_ref = instance_pointer->group_info;
 
     t_paquete *paquete = malloc(sizeof(t_paquete));
-    t_buffer *buffer = malloc(sizeof(t_buffer));
-    paquete->codigo_operacion = SEM_DESTROY;
-    buffer->size = 0;
-    paquete->buffer = buffer;
 
+    paquete = serializar_mate_sem_resto(sem,SEM_DESTROY); 
     enviar_paquete(paquete,lib_ref->socket);
-    free(paquete);
-    free(buffer);
 
     t_paquete *paquete_recibido = recibir_paquete(lib_ref->socket);
     if(paquete_recibido->codigo_operacion == SEM_DESTROY){
@@ -205,19 +190,27 @@ int mate_sem_destroy(mate_instance_pointer *instance_pointer, mate_sem_name sem)
 
 int mate_call_io(mate_instance_pointer *instance_pointer, mate_io_resource io, void *msg){
 
-    //mate_instance *lib_ref = instance_pointer->group_info;
-    
+    mate_instance *lib_ref = instance_pointer->group_info;
+    t_paquete *paquete = malloc(sizeof(t_paquete));
 
-    return 1;
+    paquete = serializar_mate_call_io(io,msg);
+    enviar_paquete(paquete,lib_ref->socket);
+
+//  HACER VERIFICACION CON EL RECIBIR PAQUETE
+
+    return 0;
 }
 
 //-----------------------------------Funciones Modulo Memoria -----------------------------------
 
 mate_pointer mate_memalloc(mate_instance_pointer *instance_pointer, int size){
 
-    //mate_instance *lib_ref = instance_pointer->group_info;
-
     mate_pointer p = 0;
+    /*mate_instance *lib_ref = instance_pointer->group_info;
+
+    t_paquete *paquete = malloc(sizeof(t_paquete));
+    paquete = serializar_mate_memalloc()
+    */
 
     return p;
 }
