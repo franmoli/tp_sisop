@@ -5,6 +5,7 @@
 #include "server.h"
 #include "kernel-global.h"
 #include "proceso.h"
+#include "serializaciones.h"
 
 void iniciar_planificador_largo();
 void atender_proceso (void* parametro);

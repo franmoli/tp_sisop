@@ -66,10 +66,28 @@ void atender_proceso (void* parametro ){
                 //nombre_semaforo = paquete->buffer;
                 //agregar a lista de actividades
                 printf("Here\n");
-                task_aux->id = INIT_SEM;
+                /*task_aux->id = INIT_SEM;
                 task_aux->nombre_semaforo = nombre_semaforo;
                 task_aux->value = 2;
                 list_add(carpincho->task_list, task_aux);
+                */
+                t_mate_sem *info_sem = deserializar_mate_sem_init(paquete);
+                t_task *task = malloc(sizeof(t_task));
+                task->id = INIT_SEM;
+                task->nombre_semaforo = malloc(sizeof(info_sem->nombre));
+                task->nombre_semaforo = info_sem->nombre;
+                printf("sem_name puto si sale 'recv' = %s\n",info_sem->nombre);
+                task->value = info_sem->value;
+                printf("sem_value = %d\n",task->value);
+                list_add(carpincho->task_list, task);
+                t_paquete *paq_env = malloc(sizeof(t_paquete));
+                t_buffer *buf_env = malloc(sizeof(t_buffer));
+                buf_env->size = 0;
+                paq_env->buffer = buf_env;
+                paq_env->codigo_operacion = INIT_SEM;
+                enviar_paquete(paq_env, socket_cliente);
+                free(buf_env);
+                free(paq_env);
                 break;
             case CLIENTE_DESCONECTADO:
                 log_info(logger_kernel, "Desconectando cliente %d", socket_cliente);

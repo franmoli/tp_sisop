@@ -12,8 +12,8 @@
 
 //Estructuras
 typedef enum {
-	  CLIENTE_DESCONECTADO = 1,
-	  CLIENTE_TEST = 2,
+	CLIENTE_DESCONECTADO = 1,
+	CLIENTE_TEST = 2,
     NUEVO_CARPINCHO = 3,
     SEM_WAIT = 4,
     SEM_POST = 5,
