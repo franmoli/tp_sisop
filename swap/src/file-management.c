@@ -87,7 +87,8 @@ int seleccionar_archivo_escritura(int proceso_a_guardar, int bytes_a_guardar) {
 void insertar_pagina_en_archivo(t_pagina *pagina) {
     //Selecciono el archivo
     int bytes_a_guardar = config_swap->TAMANIO_PAGINA;
-    int posicion_archivo_obtenido = seleccionar_archivo_escritura(pagina->id_carpincho, bytes_a_guardar);
+    int id_carpincho = 0;
+    int posicion_archivo_obtenido = seleccionar_archivo_escritura(id_carpincho, bytes_a_guardar);
 
     if(posicion_archivo_obtenido >= 0) {
         //Abro el archivo seleccionado
@@ -116,7 +117,7 @@ void insertar_pagina_en_archivo(t_pagina *pagina) {
         close(archivo);
         free(pagina);
     } else if(posicion_archivo_obtenido == -2) {
-        log_error(logger_swap, "No se ha podido guardar la pagina %d en el archivo dado que no hay espacio suficiente. No puede almacenarse en otros archivos dado que se encontraron paginas asociadas al mismo proceso (%d) en este archivo.", pagina->numero_pagina, pagina->id_carpincho);
+        log_error(logger_swap, "No se ha podido guardar la pagina %d en el archivo dado que no hay espacio suficiente. No puede almacenarse en otros archivos dado que se encontraron paginas asociadas al mismo proceso (%d) en este archivo.", pagina->numero_pagina, id_carpincho);
     } else if(posicion_archivo_obtenido == -1) {
         log_error(logger_swap, "No se ha podido guardar la pagina %d en ningun archivo dado que no hay espacio suficiente", pagina->numero_pagina);
     }

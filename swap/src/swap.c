@@ -31,39 +31,6 @@ int main(int argc, char **argv) {
     log_info(logger_swap, "Aguarde un momento... Generando archivos...");
     crear_archivos_swap();
 
-    /*Hardcodeo lectura de una página desde el archivo*/
-    t_pagina *pagina_prueba = malloc(sizeof(t_pagina));
-    pagina_prueba->numero_pagina = 1;
-    pagina_prueba->id_carpincho = 0;
-    t_pagina *pagina_prueba_2 = malloc(sizeof(t_pagina));
-    pagina_prueba_2->numero_pagina = 2;
-    pagina_prueba_2->id_carpincho = 1;
-    t_pagina *pagina_prueba_3 = malloc(sizeof(t_pagina));
-    pagina_prueba_3->numero_pagina = 3;
-    pagina_prueba_3->id_carpincho = 2;
-    t_pagina *pagina_prueba_4 = malloc(sizeof(t_pagina));
-    pagina_prueba_4->numero_pagina = 4;
-    pagina_prueba_4->id_carpincho = 1;
-
-    insertar_pagina_en_archivo(pagina_prueba);
-    insertar_pagina_en_archivo(pagina_prueba_2);
-    insertar_pagina_en_archivo(pagina_prueba_3);
-    insertar_pagina_en_archivo(pagina_prueba_4);
-
-    eliminar_pagina(1);
-    pagina_prueba_3 = malloc(sizeof(t_pagina));
-    pagina_prueba_3->numero_pagina = 3;
-    pagina_prueba_3->id_carpincho = 2;
-    insertar_pagina_en_archivo(pagina_prueba_3);
-    pagina_prueba_3 = malloc(sizeof(t_pagina));
-    pagina_prueba_3->numero_pagina = 8;
-    pagina_prueba_3->id_carpincho = 2;
-    insertar_pagina_en_archivo(pagina_prueba_3);
-    pagina_prueba_3 = malloc(sizeof(t_pagina));
-    pagina_prueba_3->numero_pagina = 6;
-    pagina_prueba_3->id_carpincho = 10;
-    insertar_pagina_en_archivo(pagina_prueba_3);
-
     //Se esperan conexiones
     log_info(logger_swap, "Esperando conexiones por parte de un cliente");
     bool cliente_recibido = 0;
@@ -71,9 +38,10 @@ int main(int argc, char **argv) {
         socket_client = esperar_cliente(socket_server, logger_swap);
         if(socket_client != -1) {
             sem_wait(&mutex_operacion);
-            printf("\nEntra un procesardo\n");
+
             cliente_recibido = 1;
             ejecutar_operacion(socket_client);
+            
             sem_post(&mutex_operacion);
         }
 
@@ -92,8 +60,25 @@ static void *ejecutar_operacion(int client) {
 
     //Analizo el código de operación recibido y ejecuto acciones según corresponda
     switch(paquete->codigo_operacion) {
-        case CLIENTE_TEST:
-            log_info(logger_swap, "Mensaje de prueba recibido correctamente por el cliente %d", client);
+        case SWAPSAVE:
+            //Deserializo la página enviada por Memoria
+            t_pagina_swap *pagina = malloc(sizeof(t_pagina_swap));
+            *pagina = serializar_pagina(paquete->buffer->stream);
+
+            printf("\n\nPagina deserializada:\n");
+            printf("PID: %d\n", pagina->pid);
+            printf("Numero pagina: %d\n", pagina->numero_pagina);
+            for(int i=0; i<list_size(pagina->contenido_heap_info); i++) {
+                t_info_heap_swap *contenido_heap = list_get(pagina->contenido_heap_info, i);
+                printf("Contenido heap %d\n", i+1);
+                printf("\tPrevAlloc: %d\n", contenido_heap->contenido->prevAlloc);
+                printf("\tNextAlloc: %d\n", contenido_heap->contenido->nextAlloc);
+                printf("\tIsFree: %d", contenido_heap->contenido->isFree);
+            }
+            printf("\n\n");
+
+            //Inserto la página en los archivos de swap
+
             break;
         default:
             log_error(logger_swap, "Codigo de operacion desconocido");
