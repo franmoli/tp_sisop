@@ -18,6 +18,8 @@ void freeAlloc(t_paquete *paquete)
     if (!direccionValida(direccion, carpincho_id))
     {
         //MATE FREE FAIÑT
+        log_error(logger_memoria,"Direccion invalida");
+        return;
     }
     int nropaginaAllocActual = getPaginaByDireccionLogica(direccion);
     t_pagina* pagina_alloc_actual = list_get(tabla_paginas->paginas, nropaginaAllocActual);
@@ -80,16 +82,26 @@ void freeAlloc(t_paquete *paquete)
          if(pagina_alloc_anterior->numero_pagina == pagina_alloc_actual->numero_pagina){
              pagina_alloc_actual->tamanio_ocupado-= resta;
              pagina_alloc_actual->cantidad_contenidos-=1;
+             anterior->nextAlloc = alloc->nextAlloc;
+             if(next != NULL)
+                posterior->prevAlloc =alloc->prevAlloc;
+
+             free(alloc);
              eliminarcontenidoBydireccion(direccion, pagina_alloc_actual);
             return;
         }
-        anterior->nextAlloc = alloc->nextAlloc;
-        int paginaAlloc = getPaginaByDireccionLogica(back);
-        t_pagina *pagina_alloc = list_get(tabla_paginas->paginas, paginaAlloc);
-        pagina_alloc->tamanio_ocupado -= next - back - sizeof(t_heap_metadata);
-        pagina_alloc->cantidad_contenidos -= 1;
-        free(alloc);
-        guardarAlloc(anterior, back);
+        
+        //NO ESTA PROBADO ESTO, HAY QUE PROBARLO
+        int disponible = config_memoria->TAMANIO_PAGINA - sizeof(t_heap_metadata) - direccion;
+        int en_pagina = config_memoria->TAMANIO_PAGINA  - disponible;
+        pagina_alloc_actual->tamanio_ocupado-=en_pagina;
+        pagina_alloc_actual->cantidad_contenidos-=1;
+        eliminarcontenidoBydireccion(direccion, pagina_alloc_actual);
+
+        int resto = back + sizeof(t_heap_metadata) + config_memoria->TAMANIO_PAGINA * pagina_alloc_anterior->numero_pagina;
+        pagina_alloc_anterior->tamanio_ocupado-= resto;
+        pagina_alloc_anterior->cantidad_contenidos-=1;
+        eliminarcontenidoBydireccion(back, pagina_alloc_anterior);
         return;
     }
 
@@ -117,6 +129,7 @@ void freeAlloc(t_paquete *paquete)
         guardarAlloc(alloc, direccion);
         return;
     }
+
     int posiblepagina = next / config_memoria->TAMANIO_PAGINA;
     if(posiblepagina == pagina_alloc_actual->numero_pagina){
         //ESTA TODO EN EL MISMO ALLOC
