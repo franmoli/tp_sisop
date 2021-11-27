@@ -104,20 +104,11 @@ int mate_sem_init(mate_instance_pointer *instance_pointer, mate_sem_name sem, un
     
     
     mate_instance *lib_ref = instance_pointer->group_info;
-    t_paquete *paquete = malloc(sizeof(t_paquete)); 
-    t_buffer *buffer = malloc(sizeof(t_buffer));
-
-    unsigned long stream_size = sizeof(uint32_t) + sizeof(char)*strlen(sem) +1;
-    buffer->stream = malloc(stream_size);
-    buffer->size = stream_size;
-    paquete->codigo_operacion = INIT_SEM;
-    buffer->stream = serializar_mate_sem_init(buffer->stream, value, sem);
-    paquete->buffer = buffer;
+    t_paquete *paquete = serializar_mate_sem_init(value, sem);
     enviar_paquete(paquete, lib_ref->socket);
     sleep(1);
     printf("Ahora libero paquete\n");
     free(paquete);
-    printf("Liberado\n");
 
     //----esperar señal de inicializacion correcta
     t_paquete *paquete_recibido = recibir_paquete(lib_ref->socket);

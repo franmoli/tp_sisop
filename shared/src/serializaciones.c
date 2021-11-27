@@ -2,23 +2,32 @@
 
 /**************************** Memoria <---> Swap ****************************/
 /* Mate sem init  */
-void *serializar_mate_sem_init(void *stream, uint32_t valor, char *nombre_sem){
+t_paquete *serializar_mate_sem_init(uint32_t valor, char *nombre_sem){
     t_mate_sem *datos_sem = malloc(sizeof(t_mate_sem));
     datos_sem->nombre = malloc(sizeof(char)*strlen(nombre_sem)+1);
     datos_sem->nombre = nombre_sem;
     datos_sem->value = valor;
 
-    void *stream1 = malloc(sizeof(u_int32_t)+sizeof(char)*strlen(nombre_sem)+1);
+    t_paquete *paquete = malloc(sizeof(t_paquete));
+    t_buffer *buffer = malloc(sizeof(t_buffer));
+    u_int32_t stream_size = sizeof(uint32_t) + sizeof(char)*strlen(nombre_sem) + 1;
+    buffer->size = stream_size;
+
+    void *stream = malloc(buffer->size);
 
     printf("estoy en el serializar, el nombre del semaforo es: %s\n",datos_sem->nombre);
     
     int offset = 0;
 
-    memcpy(stream1 + offset, &(datos_sem->value), sizeof(uint32_t));
+    memcpy(stream + offset, &(datos_sem->value), sizeof(uint32_t));
     offset+= sizeof(uint32_t);
-    memcpy(stream1 + offset, &(datos_sem->nombre), sizeof(char)*strlen(nombre_sem)+1);
+    memcpy(stream + offset, &(datos_sem->nombre), sizeof(char)*strlen(nombre_sem)+1);
 
-    return stream1;
+    buffer->stream = stream;
+    paquete->buffer = buffer;
+    paquete->codigo_operacion = INIT_SEM;
+
+    return paquete;
 }
 
 t_mate_sem *deserializar_mate_sem_init(t_paquete *paquete){
@@ -26,13 +35,14 @@ t_mate_sem *deserializar_mate_sem_init(t_paquete *paquete){
     t_mate_sem *datos_sem = malloc(sizeof(t_mate_sem));
     datos_sem->nombre = malloc(paquete->buffer->size - sizeof(u_int32_t));
     void *stream = paquete->buffer->stream;
+    printf("el tamanio del buffer del paquete recibido es: %d\n",paquete->buffer->size);
 
     int offset = 0;
     
     memcpy(&(datos_sem->value),stream + offset, sizeof(uint32_t));
     offset += sizeof(uint32_t);
     memcpy(&(datos_sem->nombre),stream + offset, paquete->buffer->size - sizeof(u_int32_t));
-    printf("estoy en el deserializar, el nombre del semaforo es: %s\n",datos_sem->nombre);
+    
     return datos_sem;
 }
 
