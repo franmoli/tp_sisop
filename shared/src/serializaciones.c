@@ -148,3 +148,67 @@ t_swap_serializado* deserializar_swap(t_paquete *paquete){
     memcpy(&(swap_serializado->swap_free), stream + offset, sizeof(bool));
     return swap_serializado;
 }
+
+//--------------------------------------------------------------------------------------------
+int bytes_pagina(t_pagina_swap pagina) {
+    int size = 0;
+
+    size += sizeof(pagina.tipo_contenido);
+    size += sizeof(pagina.pid);
+    size += sizeof(pagina.numero_pagina);
+
+    //Contenidos heap
+    size += sizeof(pagina.contenido_heap_info->elements_count);
+    for(int i=0; i<list_size(pagina.contenido_heap_info); i++) {
+		t_info_heap_swap *contenido = list_get(pagina.contenido_heap_info, i);
+		size += bytes_info_heap(*contenido);
+	}
+
+    return size;
+}
+
+int bytes_info_heap(t_info_heap_swap info) {
+    int size = 0;
+
+    //Heap metadata
+    size += sizeof(info.contenido->prevAlloc);
+    size += sizeof(info.contenido->nextAlloc);
+    size += sizeof(info.contenido->isFree);
+
+    return size;
+}
+//--------------------------------------------------------------------------------------------
+void* serializar_pagina(t_pagina_swap pagina) {
+    int bytes = bytes_pagina(pagina);
+    void *stream = malloc(bytes);
+    int offset = 0;
+
+    //Tipo de contenido
+    memcpy(stream + offset, &(pagina.tipo_contenido), sizeof(int));
+	offset += sizeof(int);
+
+    //PID
+    memcpy(stream + offset, &(pagina.pid), sizeof(uint32_t));
+	offset += sizeof(uint32_t);
+
+    //Número de pagina
+    memcpy(stream + offset, &(pagina.numero_pagina), sizeof(uint32_t));
+	offset += sizeof(uint32_t);
+
+    //Contenido heap
+    memcpy(stream + offset, &(pagina.contenido_heap_info->elements_count), sizeof(uint32_t));
+	offset += sizeof(uint32_t);
+    
+    for(int i=0; i<list_size(pagina.contenido_heap_info); i++) {
+        t_info_heap_swap *contenido = list_get(pagina.contenido_heap_info, i);
+
+        memcpy(stream + offset, &(contenido->contenido->prevAlloc), sizeof(uint32_t));
+	    offset += sizeof(uint32_t);
+        memcpy(stream + offset, &(contenido->contenido->nextAlloc), sizeof(uint32_t));
+	    offset += sizeof(uint32_t);
+        memcpy(stream + offset, &(contenido->contenido->isFree), sizeof(uint8_t));
+	    offset += sizeof(uint8_t);
+    }
+
+    return stream;
+}

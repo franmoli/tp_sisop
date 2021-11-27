@@ -5,6 +5,7 @@
 #include "server.h"
 #include "serializaciones.h"
 #include <commons/collections/queue.h>
+
 typedef enum
 {
 	CONTENIDO = 0,
@@ -106,4 +107,48 @@ t_list *reemplazo_CLOCK;
 
 void* tamanio_memoria;
 int socket_server, socket_cliente_swap, socket_client;
+
+/* Conexión de MEMORIA con SWAP */
+enum info_contenido {
+	AMBOS = 0, 
+	CARPINCHO = 1,
+	HEAP = 2
+}; 
+
+typedef struct {
+    enum info_contenido tipo_contenido;
+	uint32_t pid;
+	uint32_t numero_pagina;
+	t_list* contenido_heap_info;
+	//t_list* contenido_carpincho_info;
+} t_pagina_swap;
+
+typedef struct {
+	//uint32_t inicio;
+	//uint32_t fin;
+	t_heap_metadata* contenido;
+} t_info_heap_swap;
+
+typedef struct {
+	uint32_t size_proximo_contenido;
+	uint32_t inicio;
+	uint32_t fin;
+	//t_carpincho* carpincho;
+} t_info_carpincho_swap;
+
+//Funciones para el calculo de bytes
+int bytes_pagina(t_pagina_swap pagina);
+int bytes_info_heap(t_info_heap_swap info);
+//int bytes_info_carpincho(t_carpincho info);
+
+//Funciones para serializar
+void* serializar_pagina(t_pagina_swap pagina);
+void* serializar_info_heap(t_heap_metadata info);
+//void* serializar_info_carpincho(t_carpincho info);
+
+//Funciones para deserializar
+t_pagina_swap deserializar_pagina(void *stream);
+t_heap_metadata deserializar_info_heap(void *stream);
+//t_carpincho deserializar_info_carpincho(void *stream);
+
 #endif

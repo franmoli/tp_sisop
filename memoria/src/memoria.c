@@ -2,6 +2,7 @@
 
 int main(int argc, char **argv)
 {
+    system("clear");
     logger_memoria = log_create("./cfg/memoria.log", "MEMORIA", true, LOG_LEVEL_INFO);
     log_info(logger_memoria, "Programa inicializado correctamente");
     pthread_t hilo_client;
@@ -9,103 +10,154 @@ int main(int argc, char **argv)
     config_memoria = generarConfigMemoria(config);
     log_info(logger_memoria, "Configuración cargada correctamente");
     tamanio_memoria = malloc(sizeof(config_memoria->TAMANIO));
-
-    /*tabla_paginas = malloc(sizeof(t_tabla_paginas));
-    tabla_paginas->paginas = list_create();
-    tabla_paginas->paginas_en_memoria = 0;
-    tabla_paginas->Lru = list_create();
-    tabla_paginas->Clock = list_create();*/
-
-    tabla_tlb = malloc(sizeof(t_tabla_tlb));
-    tabla_tlb->tlb = list_create();
-
-    tlb_LRU = list_create();
-    tlb_FIFO = queue_create();
-    entradas_tlb = config_memoria->CANTIDAD_ENTRADAS_TLB;
-
-    if(config_memoria->TIPO_ASIGNACION != "FIJA"){
-        if(config_memoria->ALGORITMO_REEMPLAZO_MMU == "LRU"){
-            reemplazo_LRU = list_create();
-        }else 
-        {
-            reemplazo_CLOCK = list_create();
-        }
-    }
-
-    tabla_marcos_memoria = malloc(sizeof(t_tabla_marcos));
-    tabla_marcos_memoria->marcos = list_create();
-
-    tabla_procesos = list_create();
-
-    //tabla_paginas->paginas_totales_maximas =config_memoria->TAMANIO / config_memoria->TAMANIO_PAGINA;
-    int i = 0;
-    while (i < config_memoria->CANTIDAD_ENTRADAS_TLB)
-    {
-        t_marco *tlb = malloc(sizeof(t_marco));
-        tlb->numero_marco = i;
-        list_add(tabla_marcos_memoria->marcos, tlb);
-        i++;
-    }
-    //Conectar a swap
-    socket_cliente_swap = crear_conexion("127.0.0.1", "5001");
-    if (socket_cliente_swap == -1)
-    {
-        log_info(logger_memoria, "Fallo en la conexion a swap");
-    }
-    //PROGRAMA NORMAL
     socket_server = iniciar_servidor("127.0.0.1", string_itoa(config_memoria->PUERTO), logger_memoria);
 
-    signal(SIGINT, imprimirMetricas);
-    signal(SIGUSR1, generarDump);
-    signal(SIGUSR2, limpiarTlb);
+    if(0) {
+        /*tabla_paginas = malloc(sizeof(t_tabla_paginas));
+        tabla_paginas->paginas = list_create();
+        tabla_paginas->paginas_en_memoria = 0;
+        tabla_paginas->Lru = list_create();
+        tabla_paginas->Clock = list_create();*/
 
-    t_paquete *paquete = serializar_mate_init(1);
-    inicializarCarpincho(paquete);
-    uint32_t carpincho_id = deserializar_mate_init(paquete)->carpincho_id;
-    //CASO PRUEBA DE MEMALLOC
-    t_paquete *paquete1 = serializar_alloc(5, carpincho_id);
-    memAlloc(paquete1);
+        tabla_tlb = malloc(sizeof(t_tabla_tlb));
+        tabla_tlb->tlb = list_create();
 
-    paquete1 = serializar_alloc(23, carpincho_id);
-    memAlloc(paquete1);
+        tlb_LRU = list_create();
+        tlb_FIFO = queue_create();
+        entradas_tlb = config_memoria->CANTIDAD_ENTRADAS_TLB;
 
-    paquete1 = serializar_alloc(3, carpincho_id);
-    memAlloc(paquete1);
+        if(strcmp(config_memoria->TIPO_ASIGNACION, "FIJA") != 0){
+            if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "LRU") == 0) {
+                reemplazo_LRU = list_create();
+            }else 
+            {
+                reemplazo_CLOCK = list_create();
+            }
+        }
 
-    /*paquete1 = serializar_alloc(134546366, carpincho_id);
-    freeAlloc(paquete1);
+        tabla_marcos_memoria = malloc(sizeof(t_tabla_marcos));
+        tabla_marcos_memoria->marcos = list_create();
 
-    paquete1 = serializar_alloc(134546398, carpincho_id);
-    freeAlloc(paquete1);*/
-    //paquete1 = serializar_alloc(10);
-    //memAlloc(paquete1);
+        tabla_procesos = list_create();
 
-    //paquete1 = serializar_alloc(134542270);
-    //freeAlloc(paquete1);
-
-    //mostrarPaginas();
-    //mostrarAllocs();
-    /*paquete1 = serializar_alloc(3);
-    memAlloc(paquete1);*/
-    //ree(paquete1);
-
-    /*t_paquete *paquete2 = serializar_consulta_swap(15);
-    t_swap_serializado* swap_deserializado = deserializar_swap(paquete2);
-	log_info(logger_memoria, "ID desde swap: %d",swap_deserializado->carpincho_id);
-	log_info(logger_memoria, "ID desde swap: %d",swap_deserializado->swap_free);*/
-
-    while (1)
-    {
-        socket_client = esperar_cliente(socket_server, logger_memoria);
-        if (socket_client != -1)
+        //tabla_paginas->paginas_totales_maximas =config_memoria->TAMANIO / config_memoria->TAMANIO_PAGINA;
+        int i = 0;
+        while (i < config_memoria->CANTIDAD_ENTRADAS_TLB)
         {
-            pthread_create(&hilo_client, NULL, (void *)ejecutar_operacion, (void *)socket_client);
+            t_marco *tlb = malloc(sizeof(t_marco));
+            tlb->numero_marco = i;
+            list_add(tabla_marcos_memoria->marcos, tlb);
+            i++;
+        }
+        //Conectar a swap
+        socket_cliente_swap = crear_conexion("127.0.0.1", "5001");
+        if (socket_cliente_swap == -1)
+        {
+            log_info(logger_memoria, "Fallo en la conexion a swap");
+        }
+        //PROGRAMA NORMAL
+        socket_server = iniciar_servidor("127.0.0.1", string_itoa(config_memoria->PUERTO), logger_memoria);
+
+        signal(SIGINT, imprimirMetricas);
+        signal(SIGUSR1, generarDump);
+        signal(SIGUSR2, limpiarTlb);
+
+        t_paquete *paquete = serializar_mate_init(1);
+        inicializarCarpincho(paquete);
+        uint32_t carpincho_id = deserializar_mate_init(paquete)->carpincho_id;
+        //CASO PRUEBA DE MEMALLOC
+        t_paquete *paquete1 = serializar_alloc(5, carpincho_id);
+        memAlloc(paquete1);
+
+        paquete1 = serializar_alloc(23, carpincho_id);
+        memAlloc(paquete1);
+
+        paquete1 = serializar_alloc(3, carpincho_id);
+        memAlloc(paquete1);
+
+        /*paquete1 = serializar_alloc(134546366, carpincho_id);
+        freeAlloc(paquete1);
+
+        paquete1 = serializar_alloc(134546398, carpincho_id);
+        freeAlloc(paquete1);*/
+        //paquete1 = serializar_alloc(10);
+        //memAlloc(paquete1);
+
+        //paquete1 = serializar_alloc(134542270);
+        //freeAlloc(paquete1);
+
+        //mostrarPaginas();
+        //mostrarAllocs();
+        /*paquete1 = serializar_alloc(3);
+        memAlloc(paquete1);*/
+        //ree(paquete1);
+
+        /*t_paquete *paquete2 = serializar_consulta_swap(15);
+        t_swap_serializado* swap_deserializado = deserializar_swap(paquete2);
+        log_info(logger_memoria, "ID desde swap: %d",swap_deserializado->carpincho_id);
+        log_info(logger_memoria, "ID desde swap: %d",swap_deserializado->swap_free);*/
+    }
+
+    /* Mandar página a SWAP */
+    t_heap_metadata *heap_metadata = malloc(sizeof(t_heap_metadata));
+    heap_metadata->prevAlloc = 0;
+    heap_metadata->nextAlloc = 5;
+    heap_metadata->isFree = 1;
+
+    t_info_heap_swap *contenido_heap_1 = malloc(sizeof(t_info_heap_swap));
+    contenido_heap_1->contenido = heap_metadata;
+
+    t_info_heap_swap *contenido_heap_2 = malloc(sizeof(t_info_heap_swap));
+    contenido_heap_2->contenido = heap_metadata;
+
+    t_list *lista_contenidos_heap = list_create();
+    list_add(lista_contenidos_heap, contenido_heap_1);
+    list_add(lista_contenidos_heap, contenido_heap_2);
+
+    t_pagina_swap *pagina_prueba = malloc(sizeof(t_pagina_swap));
+    pagina_prueba->tipo_contenido = AMBOS;
+    pagina_prueba->pid = 180;
+    pagina_prueba->numero_pagina = 1;
+    pagina_prueba->contenido_heap_info = lista_contenidos_heap;
+
+    log_info(logger_memoria, "Se intentara enviar una pagina al modulo de SWAP para almacenarla en un archivo");
+    log_info(logger_memoria, "Size contenido heap 1: %d", bytes_info_heap(*contenido_heap_1));
+    log_info(logger_memoria, "Size contenido heap 2: %d", bytes_info_heap(*contenido_heap_2));
+    log_info(logger_memoria, "Size pagina: %d", bytes_pagina(*pagina_prueba));
+
+    void *pagina_serializada = serializar_pagina(*pagina_prueba);
+
+    t_buffer *buffer = malloc(sizeof(t_buffer));
+	buffer->size = bytes_pagina(*pagina_prueba);
+	buffer->stream = pagina_serializada;
+
+    t_paquete *paquete = malloc(sizeof(t_paquete));
+	paquete->codigo_operacion = SWAPSAVE;
+	paquete->buffer = buffer;
+
+    enviar_paquete(paquete, socket_server);
+
+    /* Recibir página de SWAP */
+
+    if(0) {
+        while (1)
+        {
+            socket_client = esperar_cliente(socket_server, logger_memoria);
+            if (socket_client != -1)
+            {
+                pthread_create(&hilo_client, NULL, (void *)ejecutar_operacion, (void *)socket_client);
+            }
         }
     }
     log_info(logger_memoria, "Programa finalizado con éxito");
     log_destroy(logger_memoria);
     liberar_config(config);
 }
+
+void test() {
+    printf("FUNCIONA");
+}
+
 static void *ejecutar_operacion(int client)
 {
     while (1)

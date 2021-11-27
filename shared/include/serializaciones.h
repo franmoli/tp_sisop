@@ -11,19 +11,16 @@
 #include "../../memoria/include/memoria-global.h"
 #include "../../kernel/include/kernel-global.h"
 
-typedef struct
-{
+typedef struct {
 	uint32_t size_reservar;
 	uint32_t carpincho_id;
 } t_malloc_serializado;
 
-typedef struct
-{
+typedef struct {
 	uint32_t carpincho_id;
 } t_mateinit_serializado;
 
-typedef struct
-{
+typedef struct {
 	uint32_t carpincho_id;
 	bool swap_free;
 } t_swap_serializado;

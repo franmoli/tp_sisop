@@ -12,8 +12,8 @@
 
 //Estructuras
 typedef enum {
-	  CLIENTE_DESCONECTADO = 1,
-	  CLIENTE_TEST = 2,
+	CLIENTE_DESCONECTADO = 1,
+	CLIENTE_TEST = 2,
     NUEVO_CARPINCHO = 3,
     SEM_WAIT = 4,
     SEM_POST = 5,
@@ -26,6 +26,7 @@ typedef enum {
     MEMWRITE = 12,
     MATEINIT = 13,
     SWAPFREE = 14,
+    SWAPSAVE = 15
 } op_code;
 
 typedef struct {
@@ -42,8 +43,8 @@ typedef struct {
 int iniciar_servidor(char *ip, char *puerto, t_log *logger);
 int crear_conexion(char *ip, char* puerto);
 int esperar_cliente(int socket_servidor, t_log *logger);
-void* serializar_paquete(t_paquete* paquete, int *bytes);
-void enviar_paquete(t_paquete* paquete, int socket_cliente);
+void* serializar_paquete(t_paquete *paquete, int *bytes);
+void enviar_paquete(t_paquete *paquete, int socket_cliente);
 t_paquete *recibir_paquete(int socket_cliente);
 
 #endif
