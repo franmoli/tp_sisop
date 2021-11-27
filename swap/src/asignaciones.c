@@ -172,9 +172,10 @@ void asignacion_global_de_pagina(int posicion_archivo, char *path_archivo, int a
     offset += sizeof(pagina->numero_pagina);
 
     //Añado los datos de la página a la estructura administrativa
+    int id_carpincho = 0;
     t_pagina_almacenada *pagina_almacenada = malloc(sizeof(t_pagina_almacenada));
     pagina_almacenada->numero_pagina = pagina->numero_pagina;
-    pagina_almacenada->id_proceso = pagina->id_carpincho;
+    pagina_almacenada->id_proceso = id_carpincho;
     pagina_almacenada->marco = marco_seleccionado;
     list_add(lista_paginas_almacenadas, pagina_almacenada);
 
@@ -208,7 +209,8 @@ void asignacion_fija_de_pagina(int posicion_archivo, char *path_archivo, int arc
 
     //Selecciono el offset de inicio y de final
     int offset;
-    t_entrada_tabla_marcos *marco_seleccionado = seleccionar_marco_libre_fija(pagina->id_carpincho, posicion_archivo);
+    int id_carpincho = 0;
+    t_entrada_tabla_marcos *marco_seleccionado = seleccionar_marco_libre_fija(id_carpincho, posicion_archivo);
     if(marco_seleccionado != NULL) {
         offset = marco_seleccionado->base;
 
@@ -220,7 +222,7 @@ void asignacion_fija_de_pagina(int posicion_archivo, char *path_archivo, int arc
         //Añado los datos de la página a la estructura administrativa
         t_pagina_almacenada *pagina_almacenada = malloc(sizeof(t_pagina_almacenada));
         pagina_almacenada->numero_pagina = pagina->numero_pagina;
-        pagina_almacenada->id_proceso = pagina->id_carpincho;
+        pagina_almacenada->id_proceso = id_carpincho;
         pagina_almacenada->marco = marco_seleccionado;
         list_add(lista_paginas_almacenadas, pagina_almacenada);
 

@@ -269,3 +269,43 @@ void* serializar_pagina(t_pagina_swap pagina) {
     return stream;
 }
 
+t_pagina_swap deserializar_pagina(void *stream) {
+    t_pagina_swap pagina;
+    int offset = 0;
+
+    //Tipo de contenido
+    memcpy(&pagina.tipo_contenido, stream + offset, sizeof(uint32_t));
+	offset += sizeof(uint32_t);
+
+    //PID
+    memcpy(&pagina.pid, stream + offset, sizeof(uint32_t));
+	offset += sizeof(uint32_t);
+
+    //Número de página
+    memcpy(&pagina.numero_pagina, stream + offset, sizeof(uint32_t));
+	offset += sizeof(uint32_t);
+
+    //Contenido heap
+    int cantidad_elementos = 0;
+    memcpy(&cantidad_elementos, stream + offset, sizeof(uint32_t));
+	offset += sizeof(uint32_t);
+
+    t_list *contenidos_heap = list_create();
+    for(int i=0; i<cantidad_elementos; i++) {
+        t_info_heap_swap *contenido_heap = malloc(sizeof(t_info_heap_swap));
+        
+        t_heap_metadata heap_metadata;
+        memcpy(&heap_metadata.prevAlloc, stream + offset, sizeof(uint32_t));
+	    offset += sizeof(uint32_t);
+        memcpy(&heap_metadata.nextAlloc, stream + offset, sizeof(uint32_t));
+	    offset += sizeof(uint32_t);
+        memcpy(&heap_metadata.isFree, stream + offset, sizeof(uint8_t));
+	    offset += sizeof(uint8_t);
+
+        contenido_heap->contenido = &heap_metadata;
+        list_add(contenidos_heap, contenido_heap);
+    }
+
+    pagina.contenido_heap_info = contenidos_heap;
+    return pagina;
+}

@@ -141,14 +141,8 @@ int bytes_pagina(t_pagina_swap pagina);
 int bytes_info_heap(t_info_heap_swap info);
 //int bytes_info_carpincho(t_carpincho info);
 
-//Funciones para serializar
+//Funciones para serializar y deserializar
 void* serializar_pagina(t_pagina_swap pagina);
-void* serializar_info_heap(t_heap_metadata info);
-//void* serializar_info_carpincho(t_carpincho info);
-
-//Funciones para deserializar
 t_pagina_swap deserializar_pagina(void *stream);
-t_heap_metadata deserializar_info_heap(void *stream);
-//t_carpincho deserializar_info_carpincho(void *stream);
 
 #endif
