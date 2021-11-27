@@ -20,9 +20,9 @@ void freeAlloc(t_paquete *paquete)
         //MATE FREE FAIÑT
     }
     int nropaginaAllocActual = getPaginaByDireccionLogica(direccion);
-    t_pagina* paginaAllocActual = list_get(tabla_paginas->paginas, nropaginaAllocActual);
+    t_pagina* pagina_alloc_actual = list_get(tabla_paginas->paginas, nropaginaAllocActual);
     //Traigo de memoria el alloc
-    t_heap_metadata *alloc = traerAllocDeMemoria(inicio + direccion + config_memoria->TAMANIO_PAGINA * paginaAllocActual->marco_asignado );
+    t_heap_metadata *alloc = traerAllocDeMemoria(inicio + direccion + config_memoria->TAMANIO_PAGINA * pagina_alloc_actual->marco_asignado );
     alloc->isFree = true;
     uint32_t next = alloc->nextAlloc;
     uint32_t back = alloc->prevAlloc;
@@ -119,8 +119,49 @@ void freeAlloc(t_paquete *paquete)
         guardarAlloc(alloc, direccion);
         return;
     }
-}
+    int posiblepagina = next / config_memoria->TAMANIO_PAGINA;
+    if(posiblepagina == pagina_alloc_actual->numero_pagina){
+        //ESTA TODO EN EL MISMO ALLOC
+        int resta = next - sizeof(t_heap_metadata) - direccion;
+        pagina_alloc_actual->tamanio_ocupado -= resta;
+        eliminarcontenidoBydireccion(direccion, pagina_alloc_actual);
+    }else{
+        //NO ESTA TODO EN LA MISMA PAGINA
+        int tamanio = config_memoria->TAMANIO_PAGINA - sizeof(t_heap_metadata) - direccion;
+        pagina_alloc_actual->tamanio_ocupado-=tamanio;
 
+        pagina_alloc_actual->cantidad_contenidos-=1;
+
+        eliminarcontenidoBydireccion(direccion, pagina_alloc_actual);
+        int resto = next - config_memoria->TAMANIO_PAGINA * pagina_alloc_siguiente->numero_pagina;
+        pagina_alloc_siguiente->tamanio_ocupado-= resto;
+        pagina_alloc_siguiente->cantidad_contenidos-=1;
+        eliminarcontenidoBydireccion(0, pagina_alloc_siguiente);
+    }
+}
+void eliminarcontenidoBydireccion(uint32_t direccion,t_pagina* pagina){
+    t_list_iterator *list_iterator = list_iterator_create(pagina->listado_de_contenido);
+    uint32_t inicio = tamanio_memoria;
+    t_list* nuevos = list_create();
+     t_contenidos_pagina *contenido_borrar;
+    while (list_iterator_has_next(list_iterator))
+    {
+        t_contenidos_pagina *contenido_actual = list_iterator_next(list_iterator);
+        int direccion_fisica = inicio + direccion + config_memoria->TAMANIO_PAGINA * pagina->numero_pagina;
+        if(contenido_actual->dir_comienzo == direccion_fisica){
+            contenido_borrar = contenido_actual;
+        }else{
+            list_add(nuevos,contenido_actual);
+        }
+    }
+    if(list_size(nuevos) > 0){
+        free(contenido_borrar);
+        pagina->listado_de_contenido = nuevos;
+    }
+        
+     
+     list_iterator_destroy(list_iterator);
+}
 bool direccionValida(uint32_t direccion, uint32_t carpincho_id)
 {
 
