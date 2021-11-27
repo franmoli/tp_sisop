@@ -28,7 +28,7 @@ typedef struct {
 t_paquete *serializar_mate_init(uint32_t carpincho_id);
 t_mateinit_serializado* deserializar_mate_init(t_paquete *paquete);
 
-void *serializar_mate_sem_init(void **stream,uint32_t valor, char *nombre_sem);
+t_paquete *serializar_mate_sem_init(uint32_t valor, char *nombre_sem);
 t_mate_sem *deserializar_mate_sem_init(t_paquete *paquete);
 t_paquete *serializar_mate_sem_resto(char *nombre_sem,op_code cod_op);
 t_mate_sem *deserializar_mate_sem_resto(t_paquete *paquete);
