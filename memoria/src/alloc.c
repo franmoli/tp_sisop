@@ -421,7 +421,7 @@ int agregarPagina(t_pagina *pagina, t_heap_metadata *data, uint32_t nextAnterior
             }
             else
             {
-                if (data->prevAlloc == NULL && index_alloc==0)
+                if (data->prevAlloc == NULL && index == 0)
                 {
                     data->nextAlloc = nextAnterior + size;
                     t_contenidos_pagina *c = list_get(pagina->listado_de_contenido, 0);
