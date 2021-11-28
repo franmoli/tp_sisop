@@ -274,8 +274,8 @@ t_pagina_swap deserializar_pagina(void *stream) {
     int offset = 0;
 
     //Tipo de contenido
-    memcpy(&pagina.tipo_contenido, stream + offset, sizeof(uint32_t));
-	offset += sizeof(uint32_t);
+    memcpy(&pagina.tipo_contenido, stream + offset, sizeof(int));
+	offset += sizeof(int);
 
     //PID
     memcpy(&pagina.pid, stream + offset, sizeof(uint32_t));
@@ -293,16 +293,16 @@ t_pagina_swap deserializar_pagina(void *stream) {
     t_list *contenidos_heap = list_create();
     for(int i=0; i<cantidad_elementos; i++) {
         t_info_heap_swap *contenido_heap = malloc(sizeof(t_info_heap_swap));
+        t_heap_metadata *heap_metadata = malloc(sizeof(t_heap_metadata));
         
-        t_heap_metadata heap_metadata;
-        memcpy(&heap_metadata.prevAlloc, stream + offset, sizeof(uint32_t));
+        memcpy(&((*heap_metadata).prevAlloc), stream + offset, sizeof(uint32_t));
 	    offset += sizeof(uint32_t);
-        memcpy(&heap_metadata.nextAlloc, stream + offset, sizeof(uint32_t));
+        memcpy(&((*heap_metadata).nextAlloc), stream + offset, sizeof(uint32_t));
 	    offset += sizeof(uint32_t);
-        memcpy(&heap_metadata.isFree, stream + offset, sizeof(uint8_t));
+        memcpy(&((*heap_metadata).isFree), stream + offset, sizeof(uint8_t));
 	    offset += sizeof(uint8_t);
 
-        contenido_heap->contenido = &heap_metadata;
+        contenido_heap->contenido = heap_metadata;
         list_add(contenidos_heap, contenido_heap);
     }
 
