@@ -143,15 +143,20 @@ void freeAlloc(t_paquete *paquete)
     if (posterior_free)
     {
         if(pagina_alloc_actual->numero_pagina == pagina_alloc_siguiente->numero_pagina){
-            if( back!= 0 && direccion!=0){ //HAY UNO ANTERIOR
-
+            if( back!= 0 && direccion!=0){ //HAY UNO ANTERIOR NO LIBRE
+                
+                alloc->isFree = true;
+                alloc->nextAlloc = posterior->nextAlloc;
+    
                 int resta = next - sizeof(t_heap_metadata) - direccion;
                 pagina_alloc_actual->tamanio_ocupado -= resta;
                 pagina_alloc_actual->cantidad_contenidos-=1;
                 int direccion_fisica = inicio + direccion+ config_memoria->TAMANIO_PAGINA * pagina_alloc_actual->marco_asignado;
                 guardarAlloc(alloc,direccion_fisica);
-                eliminarcontenidoBydireccion(direccion, pagina_alloc_actual);
+                eliminarcontenidoBydireccion(posterior, pagina_alloc_actual);
                 eliminarcontenidoBydireccion(direccion + sizeof(t_heap_metadata), pagina_alloc_actual);
+                free(posterior);
+                return;
             }else{
                 //SOY EL PRIMER ALLOC
                 int resta = next - sizeof(t_heap_metadata) - direccion;
