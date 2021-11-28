@@ -14,4 +14,8 @@ int reemplazarLRU(int nro_pagina, int carpincho_id);
 int reemplazarClockM(int nro_pagina, int carpincho_id, int referido, int modificado);
 void actualizarModificado(uint32_t nro_pagina, uint32_t carpincho_id);
 void actualizarReferido(uint32_t nro_pagina, uint32_t carpincho_id);
+
+void actualizarLRU(int nro_pagina, int carpincho_id);
+int reemplazarClockM(int nro_pagina, int carpincho_id, int referido, int modificado);
+
 #endif
