@@ -269,7 +269,7 @@ void memAlloc(t_paquete *paquete)
         crearPrimerHeader(pagina, size);
         t_contenidos_pagina *contenido = list_get(pagina->listado_de_contenido, 0);
         t_heap_metadata *header = traerAllocDeMemoria(contenido->dir_comienzo);
-        agregarPagina(pagina, header, contenido->dir_comienzo - inicio, sizeof(t_heap_metadata), true);
+        agregarPagina(pagina, header, contenido->dir_comienzo - inicio, sizeof(t_heap_metadata), true,0);
     }
     else
     {
@@ -286,6 +286,7 @@ void memAlloc(t_paquete *paquete)
         t_contenidos_pagina *contenido = getContenidoPaginaByTipo(primera_pagina->listado_de_contenido, HEADER);
         t_heap_metadata *data = traerAllocDeMemoria(contenido->dir_comienzo);
         uint32_t nextAnterior = tamanio_memoria;
+        int index = 0;
         while (data->nextAlloc != 0)
         {
             if (data->isFree)
@@ -348,11 +349,12 @@ void memAlloc(t_paquete *paquete)
             
             //t_contenidos_pagina *contenido_actual = getContenidoPaginaByTipoAndSize(pagina_Disponible->listado_de_contenido,CONTENIDO,data->nextAlloc);
             data = traerAllocDeMemoria(direccion);
+            index++;
         }
         //Nuevo Alloc
         int paginaLastAlloc = getPaginaByDireccionLogica(nextAnterior);
         t_pagina *pagina = list_get(tabla_paginas->paginas, paginaLastAlloc);
-        return agregarPagina(pagina, data, nextAnterior, size, false);
+        return agregarPagina(pagina, data, nextAnterior, size, false, index);
     }
 }
 void crearPrimerHeader(t_pagina *pagina, uint32_t size)
@@ -384,7 +386,7 @@ void crearPrimerHeader(t_pagina *pagina, uint32_t size)
     free(data);
 }
 
-int agregarPagina(t_pagina *pagina, t_heap_metadata *data, uint32_t nextAnterior, uint32_t size, bool ultimo)
+int agregarPagina(t_pagina *pagina, t_heap_metadata *data, uint32_t nextAnterior, uint32_t size, bool ultimo, int index_alloc)
 {
     bool agregado = false;
     uint32_t inicio = tamanio_memoria;
@@ -419,7 +421,7 @@ int agregarPagina(t_pagina *pagina, t_heap_metadata *data, uint32_t nextAnterior
             }
             else
             {
-                if (data->prevAlloc == NULL)
+                if (data->prevAlloc == NULL && index_alloc==0)
                 {
                     data->nextAlloc = nextAnterior + size;
                     t_contenidos_pagina *c = list_get(pagina->listado_de_contenido, 0);
@@ -438,7 +440,7 @@ int agregarPagina(t_pagina *pagina, t_heap_metadata *data, uint32_t nextAnterior
                     list_add(pagina->listado_de_contenido, contenido);
 
                     data->isFree = false;
-                    return agregarPagina(pagina, data, nextAnterior, sizeof(t_heap_metadata), true);
+                    return agregarPagina(pagina, data, nextAnterior, sizeof(t_heap_metadata), true,index_alloc);
                 }
                 else
                 {
@@ -458,7 +460,7 @@ int agregarPagina(t_pagina *pagina, t_heap_metadata *data, uint32_t nextAnterior
                 contenido = list_get(pagina->listado_de_contenido, list_size(pagina->listado_de_contenido) - 1);
                 guardarAlloc(data, contenido->dir_comienzo);
                 data = traerAllocDeMemoria(contenido->dir_comienzo);
-                return agregarPagina(pagina, data, nextAnterior, sizeof(t_heap_metadata), true);
+                return agregarPagina(pagina, data, nextAnterior, sizeof(t_heap_metadata), true,index_alloc);
             }
             
         }
@@ -501,7 +503,7 @@ int agregarPagina(t_pagina *pagina, t_heap_metadata *data, uint32_t nextAnterior
 
                 list_add(pagina->listado_de_contenido,contenido_nuevo);
                 pagina->cantidad_contenidos += 1;
-                return agregarPagina(pagina, data, restante, restante + sizeof(t_heap_metadata), true);
+                return agregarPagina(pagina, data, restante, restante + sizeof(t_heap_metadata), true,index_alloc);
             }
         }
     }

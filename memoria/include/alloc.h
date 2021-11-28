@@ -17,7 +17,7 @@ bool direccionValida(uint32_t direccion, uint32_t carpincho_id);
 t_heap_metadata* getLastHeapFromPagina(int pagina, int carpincho_id);
 void mostrarAllocs(int carpincho_id);
 
-int agregarPagina(t_pagina* pagina, t_heap_metadata* data, uint32_t nextAnterior, uint32_t size,bool ultimo);
+int agregarPagina(t_pagina* pagina, t_heap_metadata* data, uint32_t nextAnterior, uint32_t size,bool ultimo, int index);
 void crearPrimerHeader(t_pagina* pagina, uint32_t size);
 void asignarFooterSeparado(t_pagina* pagina,t_heap_metadata* data,uint32_t size, uint32_t nextAnterior);
 t_pagina* asignarFooterSeparadoSubContenido(t_contenido subcontenido, t_pagina* pagina,uint32_t nextAnterior);
