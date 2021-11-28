@@ -87,9 +87,11 @@ void freeAlloc(t_paquete *paquete)
                     //ESTA TODO EN EL MISMO ALLOC
                     int resta = next - sizeof(t_heap_metadata) - direccion;
                     pagina_alloc_actual->tamanio_ocupado -= resta;
+                    pagina_alloc_actual->cantidad_contenidos-=1;
                     int direccion_fisica = inicio + direccion+ config_memoria->TAMANIO_PAGINA * pagina_alloc_actual->marco_asignado;
                     guardarAlloc(alloc,direccion_fisica);
                     eliminarcontenidoBydireccion(direccion, pagina_alloc_actual);
+                    eliminarcontenidoBydireccion(direccion + sizeof(t_heap_metadata), pagina_alloc_actual);
                 }else{
                     //NO ESTA TODO EN LA MISMA PAGINA
                     int tamanio = config_memoria->TAMANIO_PAGINA - sizeof(t_heap_metadata) - direccion;
@@ -106,8 +108,7 @@ void freeAlloc(t_paquete *paquete)
                 guardarAlloc(anterior,back + inicio + config_memoria->TAMANIO_PAGINA * pagina_alloc_anterior->marco_asignado);
                 guardarAlloc(posterior,next + inicio + config_memoria->TAMANIO_PAGINA * pagina_alloc_siguiente->marco_asignado);
                 pagina_alloc_actual->tamanio_ocupado-= sizeof(t_heap_metadata);
-                pagina_alloc_actual->cantidad_contenidos-=1;
-                //eliminarcontenidoBydireccion(direccion, pagina_alloc_actual);
+                pagina_alloc_actual->cantidad_contenidos-=2;
                 free(alloc);
                 return;
              }else{
@@ -173,7 +174,7 @@ void freeAlloc(t_paquete *paquete)
         alloc->isFree;
         int direccion_fisica = inicio + direccion+ config_memoria->TAMANIO_PAGINA * pagina_alloc_actual->marco_asignado;
         guardarAlloc(alloc,direccion_fisica);
-        eliminarcontenidoBydireccion(direccion, pagina_alloc_actual);
+        eliminarcontenidoBydireccion(direccion + sizeof(t_heap_metadata), pagina_alloc_actual);
     }else{
         //NO ESTA TODO EN LA MISMA PAGINA
         int tamanio = config_memoria->TAMANIO_PAGINA - sizeof(t_heap_metadata) - direccion;
@@ -200,7 +201,6 @@ void eliminarcontenidoBydireccion(uint32_t direccion,t_pagina* pagina){
         int direccion_fisica = inicio + direccion + config_memoria->TAMANIO_PAGINA * pagina->numero_pagina;
         if(contenido_actual->dir_comienzo == direccion_fisica){
             contenido_borrar = contenido_actual;
-            encontrado = true;
         }else{
             list_add(nuevos,contenido_actual);
         }
@@ -454,7 +454,7 @@ int agregarPagina(t_pagina *pagina, t_heap_metadata *data, uint32_t nextAnterior
                 
             }
             if(!agregado){
-                contenido->dir_comienzo = inicio + pagina->marco_asignado * config_memoria->TAMANIO_PAGINA + nextAnterior;
+                contenido->dir_comienzo = inicio + pagina->marco_asignado * config_memoria->TAMANIO_PAGINA + nextAnterior + sizeof(t_heap_metadata);
                 contenido->contenido_pagina = CONTENIDO;
                 contenido->dir_fin = contenido->dir_comienzo + size;
 
