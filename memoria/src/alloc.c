@@ -105,9 +105,9 @@ void freeAlloc(t_paquete *paquete)
                 posterior->prevAlloc = alloc->prevAlloc;
                 guardarAlloc(anterior,back + inicio + config_memoria->TAMANIO_PAGINA * pagina_alloc_anterior->marco_asignado);
                 guardarAlloc(posterior,next + inicio + config_memoria->TAMANIO_PAGINA * pagina_alloc_siguiente->marco_asignado);
-                pagina_alloc_actual-= sizeof(t_heap_metadata);
+                pagina_alloc_actual->tamanio_ocupado-= sizeof(t_heap_metadata);
                 pagina_alloc_actual->cantidad_contenidos-=1;
-                eliminarcontenidoBydireccion(direccion, pagina_alloc_siguiente);
+                eliminarcontenidoBydireccion(direccion, pagina_alloc_actual);
                 free(alloc);
                 return;
              }else{
