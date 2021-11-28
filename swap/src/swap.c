@@ -59,30 +59,15 @@ static void *ejecutar_operacion(int client) {
     t_paquete *paquete = recibir_paquete(client);
 
     //Analizo el código de operación recibido y ejecuto acciones según corresponda
-    switch(paquete->codigo_operacion) {
-        case SWAPSAVE:
-            //Deserializo la página enviada por Memoria
-            t_pagina_swap *pagina = malloc(sizeof(t_pagina_swap));
-            *pagina = serializar_pagina(paquete->buffer->stream);
+    if(paquete->codigo_operacion == SWAPSAVE) {
+        //Deserializo la página enviada por Memoria
+        t_pagina_swap *pagina = malloc(sizeof(t_pagina_swap));
+        *pagina = deserializar_pagina(paquete->buffer->stream);
 
-            printf("\n\nPagina deserializada:\n");
-            printf("PID: %d\n", pagina->pid);
-            printf("Numero pagina: %d\n", pagina->numero_pagina);
-            for(int i=0; i<list_size(pagina->contenido_heap_info); i++) {
-                t_info_heap_swap *contenido_heap = list_get(pagina->contenido_heap_info, i);
-                printf("Contenido heap %d\n", i+1);
-                printf("\tPrevAlloc: %d\n", contenido_heap->contenido->prevAlloc);
-                printf("\tNextAlloc: %d\n", contenido_heap->contenido->nextAlloc);
-                printf("\tIsFree: %d", contenido_heap->contenido->isFree);
-            }
-            printf("\n\n");
-
-            //Inserto la página en los archivos de swap
-
-            break;
-        default:
-            log_error(logger_swap, "Codigo de operacion desconocido");
-            break;
+        //Inserto la página en los archivos de swap
+        insertar_pagina_en_archivo(pagina);
+    } else {
+        log_error(logger_swap, "Codigo de operacion desconocido");
     }
 
     //Libero la memoria ocupada por el paquete

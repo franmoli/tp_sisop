@@ -10,7 +10,11 @@ int main(int argc, char **argv)
     config_memoria = generarConfigMemoria(config);
     log_info(logger_memoria, "Configuración cargada correctamente");
     tamanio_memoria = malloc(sizeof(config_memoria->TAMANIO));
-    socket_server = iniciar_servidor("127.0.0.1", string_itoa(config_memoria->PUERTO), logger_memoria);
+    socket_cliente_swap = crear_conexion("127.0.0.1", "5001");
+    if (socket_cliente_swap == -1)
+    {
+        log_info(logger_memoria, "Fallo en la conexion a swap");
+    }
 
     if(0) {
         /*tabla_paginas = malloc(sizeof(t_tabla_paginas));
@@ -121,10 +125,7 @@ int main(int argc, char **argv)
     pagina_prueba->contenido_heap_info = lista_contenidos_heap;
 
     log_info(logger_memoria, "Se intentara enviar una pagina al modulo de SWAP para almacenarla en un archivo");
-    log_info(logger_memoria, "Size contenido heap 1: %d", bytes_info_heap(*contenido_heap_1));
-    log_info(logger_memoria, "Size contenido heap 2: %d", bytes_info_heap(*contenido_heap_2));
-    log_info(logger_memoria, "Size pagina: %d", bytes_pagina(*pagina_prueba));
-
+    
     void *pagina_serializada = serializar_pagina(*pagina_prueba);
 
     t_buffer *buffer = malloc(sizeof(t_buffer));
@@ -135,7 +136,7 @@ int main(int argc, char **argv)
 	paquete->codigo_operacion = SWAPSAVE;
 	paquete->buffer = buffer;
 
-    enviar_paquete(paquete, socket_server);
+    enviar_paquete(paquete, socket_cliente_swap);
 
     /* Recibir página de SWAP */
 

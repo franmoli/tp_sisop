@@ -6,8 +6,7 @@
 #include "serializaciones.h"
 #include <commons/collections/queue.h>
 
-typedef enum
-{
+typedef enum {
 	CONTENIDO = 0,
     ALLOC = 1,
     HEADER = 2,
