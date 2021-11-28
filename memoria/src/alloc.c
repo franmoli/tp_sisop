@@ -38,7 +38,7 @@ void freeAlloc(t_paquete *paquete)
     bool hayAnterior = false;
     bool hayPosterior = false;
 
-    if (alloc->prevAlloc != 0)
+    if (back != 0 && direccion!= 0)
     { // SI EXISTE ANTERIOR TRAERLO
         int nropaginaAllocAnterior = getPaginaByDireccionLogica(back);
         pagina_alloc_anterior = list_get(tabla_paginas->paginas, nropaginaAllocAnterior);
