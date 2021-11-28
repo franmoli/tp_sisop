@@ -78,8 +78,8 @@ int main(int argc, char **argv)
     paquete1 = serializar_alloc(0, carpincho_id);
     freeAlloc(paquete1);
 
-    /*paquete1 = serializar_alloc(11, carpincho_id);
-    freeAlloc(paquete1);*/
+    paquete1 = serializar_alloc(10, carpincho_id);
+    freeAlloc(paquete1);
 
     //paquete1 = serializar_alloc(134546398, carpincho_id);
     //freeAlloc(paquete1);

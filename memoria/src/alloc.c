@@ -107,7 +107,7 @@ void freeAlloc(t_paquete *paquete)
                 guardarAlloc(posterior,next + inicio + config_memoria->TAMANIO_PAGINA * pagina_alloc_siguiente->marco_asignado);
                 pagina_alloc_actual->tamanio_ocupado-= sizeof(t_heap_metadata);
                 pagina_alloc_actual->cantidad_contenidos-=1;
-                eliminarcontenidoBydireccion(direccion, pagina_alloc_actual);
+                //eliminarcontenidoBydireccion(direccion, pagina_alloc_actual);
                 free(alloc);
                 return;
              }else{
@@ -192,19 +192,23 @@ void eliminarcontenidoBydireccion(uint32_t direccion,t_pagina* pagina){
     t_list_iterator *list_iterator = list_iterator_create(pagina->listado_de_contenido);
     uint32_t inicio = tamanio_memoria;
     t_list* nuevos = list_create();
-     t_contenidos_pagina *contenido_borrar;
+    t_contenidos_pagina *contenido_borrar;
+    bool encontrado = false;
     while (list_iterator_has_next(list_iterator))
     {
         t_contenidos_pagina *contenido_actual = list_iterator_next(list_iterator);
         int direccion_fisica = inicio + direccion + config_memoria->TAMANIO_PAGINA * pagina->numero_pagina;
         if(contenido_actual->dir_comienzo == direccion_fisica){
             contenido_borrar = contenido_actual;
+            encontrado = true;
         }else{
             list_add(nuevos,contenido_actual);
         }
     }
     if(list_size(nuevos) > 0 || pagina->cantidad_contenidos == 0){
-        free(contenido_borrar);
+        if(encontrado)
+            free(contenido_borrar);
+            
         pagina->listado_de_contenido = nuevos;
     }
     
