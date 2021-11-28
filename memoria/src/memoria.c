@@ -75,10 +75,10 @@ int main(int argc, char **argv)
     paquete1 = serializar_alloc(3, carpincho_id);
     memAlloc(paquete1);
 
-    paquete1 = serializar_alloc(46, carpincho_id);
+    paquete1 = serializar_alloc(14, carpincho_id);
     freeAlloc(paquete1);
 
-    paquete1 = serializar_alloc(14, carpincho_id);
+    paquete1 = serializar_alloc(0, carpincho_id);
     freeAlloc(paquete1);
 
     //paquete1 = serializar_alloc(134546398, carpincho_id);

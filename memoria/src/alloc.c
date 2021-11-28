@@ -159,13 +159,17 @@ void freeAlloc(t_paquete *paquete)
                 return;
             }else{
                 //SOY EL PRIMER ALLOC
+                alloc->isFree = true;
+                alloc->nextAlloc = posterior->nextAlloc;
+
                 int resta = next - sizeof(t_heap_metadata) - direccion;
                 pagina_alloc_actual->tamanio_ocupado -= resta;
                 pagina_alloc_actual->cantidad_contenidos-=1;
                 int direccion_fisica = inicio + direccion+ config_memoria->TAMANIO_PAGINA * pagina_alloc_actual->marco_asignado;
                 guardarAlloc(alloc,direccion_fisica);
-                eliminarcontenidoBydireccion(direccion, pagina_alloc_actual);
+                eliminarcontenidoBydireccion(posterior, pagina_alloc_actual);
                 eliminarcontenidoBydireccion(direccion + sizeof(t_heap_metadata), pagina_alloc_actual);
+                free(posterior);
             }
             return;
         }
@@ -211,6 +215,8 @@ void freeAlloc(t_paquete *paquete)
         pagina_alloc_siguiente->tamanio_ocupado-= resto;
         pagina_alloc_siguiente->cantidad_contenidos-=1;
         eliminarcontenidoBydireccion(0, pagina_alloc_siguiente);
+
+        guardarAlloc(alloc, inicio + direccion + config_memoria->TAMANIO_PAGINA * pagina_alloc_actual->marco_asignado);
     }
 }
 void eliminarcontenidoBydireccion(uint32_t direccion,t_pagina* pagina){
