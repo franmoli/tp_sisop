@@ -377,6 +377,7 @@ void crearPrimerHeader(t_pagina *pagina, uint32_t size)
     contenido->dir_comienzo = inicio + (pagina->marco_asignado * config_memoria->TAMANIO_PAGINA);
     contenido->dir_fin = contenido->dir_comienzo + sizeof(t_heap_metadata);
     contenido->contenido_pagina = HEADER;
+    contenido->tamanio = sizeof(t_heap_metadata);
     list_add(pagina->listado_de_contenido, contenido);
 
     t_contenidos_pagina *contenido_contenido = malloc(sizeof(t_contenidos_pagina));
@@ -384,6 +385,7 @@ void crearPrimerHeader(t_pagina *pagina, uint32_t size)
     contenido_contenido->dir_comienzo = contenido->dir_fin;
     contenido_contenido->dir_fin = contenido_contenido->dir_comienzo + size;
     contenido_contenido->contenido_pagina = CONTENIDO;
+    contenido_contenido->tamanio = size;
     list_add(pagina->listado_de_contenido, contenido_contenido);
 
     guardarAlloc(data, contenido->dir_comienzo);
@@ -461,7 +463,8 @@ int agregarPagina(t_pagina *pagina, t_heap_metadata *data, uint32_t nextAnterior
                 pagina->cantidad_contenidos += 1;
                 pagina->tamanio_ocupado += size;
                 list_add(pagina->listado_de_contenido, contenido);
-                contenido = list_get(pagina->listado_de_contenido, list_size(pagina->listado_de_contenido) - 1);
+                int index = list_size(pagina->listado_de_contenido) - 2;
+                contenido = list_get(pagina->listado_de_contenido, index);
                 guardarAlloc(data, contenido->dir_comienzo);
                 data = traerAllocDeMemoria(contenido->dir_comienzo);
                 return agregarPagina(pagina, data, nextAnterior, sizeof(t_heap_metadata), true,index_alloc);
