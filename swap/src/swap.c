@@ -24,7 +24,7 @@ int main(int argc, char **argv) {
         exit(-1);
     }
 
-    //Se inicializa el servidor
+    //Se inicializan el servidor y la conexión con memoria
     socket_server = iniciar_servidor(config_swap->IP, string_itoa(config_swap->PUERTO), logger_swap);
 
     //Se inicializan los archivos
@@ -33,29 +33,28 @@ int main(int argc, char **argv) {
 
     //Se esperan conexiones
     log_info(logger_swap, "Esperando conexiones por parte de un cliente");
-    bool cliente_recibido = 0;
-    do {
-        socket_client = esperar_cliente(socket_server, logger_swap);
-        if(socket_client != -1) {
+    socket_client = esperar_cliente(socket_server, logger_swap);
+
+    if(socket_client != -1) {
+        int resultado_operacion = 0;
+        while(resultado_operacion == 0) {
             sem_wait(&mutex_operacion);
-
-            cliente_recibido = 1;
-            ejecutar_operacion(socket_client);
-            
+            resultado_operacion = ejecutar_operacion(socket_client);
             sem_post(&mutex_operacion);
-        }
 
-        //Espero el tiempo de retardo
-        sleep(config_swap->RETARDO_SWAP);
-    } while(cliente_recibido);
+            //Espero el tiempo de retardo
+            sleep(config_swap->RETARDO_SWAP);
+        }
+    }
 
     //Fin del programa
+    close(socket_client);
     borrar_archivos_swap();
     liberar_memoria_y_finalizar();
     return 1;
 }
 
-static void *ejecutar_operacion(int client) {
+int ejecutar_operacion(int client) {
     t_paquete *paquete = recibir_paquete(client);
 
     //Analizo el código de operación recibido y ejecuto acciones según corresponda
@@ -66,8 +65,35 @@ static void *ejecutar_operacion(int client) {
 
         //Inserto la página en los archivos de swap
         insertar_pagina_en_archivo(pagina);
+    } else if(paquete->codigo_operacion == SWAPFREE) {
+        //Deserializo el pedido enviado por Memoria
+        int pagina_solicitada;
+        memcpy(&pagina_solicitada, paquete->buffer->stream + 0, sizeof(int));
+	    
+        //Busco la página y la envío en caso correcto
+        t_pagina_swap pagina = leer_pagina_de_archivo(pagina_solicitada);
+
+        if(pagina.numero_pagina >= 0) {
+            void *pagina_serializada = serializar_pagina(pagina);
+
+            t_buffer *buffer = malloc(sizeof(t_buffer));
+            buffer->size = bytes_pagina(pagina);
+            buffer->stream = pagina_serializada;
+
+            t_paquete *paquete_respuesta = malloc(sizeof(t_paquete));
+            paquete_respuesta->codigo_operacion = SWAPFREE;
+            paquete_respuesta->buffer = buffer;
+
+            enviar_paquete(paquete_respuesta, socket_client);
+        }
     } else {
-        log_error(logger_swap, "Codigo de operacion desconocido");
+        log_info(logger_swap, "Memoria se esta preparando para finalizar, apagando memoria virtual");
+        
+        free(paquete->buffer->stream);
+        free(paquete->buffer);
+        free(paquete); 
+        
+        return -1;
     }
 
     //Libero la memoria ocupada por el paquete
@@ -75,11 +101,7 @@ static void *ejecutar_operacion(int client) {
     free(paquete->buffer);
     free(paquete); 
 
-    //Cierro el cliente
-	close(client);
-	log_info(logger_swap, "El cliente %d ha finalizado su ejecución y se desconecto", client);
-	
-    return NULL;
+    return 0;
 }
 
 /* Liberado de memoria */

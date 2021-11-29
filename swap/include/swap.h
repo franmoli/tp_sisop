@@ -11,7 +11,7 @@ t_config *config_file;
 sem_t mutex_operacion;
 
 //Funciones
-static void *ejecutar_operacion(int client);
+int ejecutar_operacion(int client);
 void liberar_memoria_y_finalizar();
 void destruir_elementos_lista(void *elemento);
 

@@ -48,14 +48,12 @@ int crear_conexion(char *ip, char *puerto) {
 	getaddrinfo(ip, puerto, &hints, &server_info);
 
 	int socket_cliente = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol);
-	printf("Conectado a socket %d\n", socket_cliente);
 	if(connect(socket_cliente, server_info->ai_addr, server_info->ai_addrlen) == -1) {
 		freeaddrinfo(server_info);	
 		return -1;
 	}
 
 	freeaddrinfo(server_info);
-
 	return socket_cliente;
 }
 

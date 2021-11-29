@@ -84,12 +84,13 @@ t_config_swap *generar_config_swap(t_config *config) {
     t_list *file_paths = list_create();
     if(strlen(file_paths_unformatted) > 2) {
         char *file_paths_substring = string_substring(file_paths_unformatted, 1, strlen(file_paths_unformatted)-2);
-        char **file_paths_formatted = string_split(file_paths_substring, ", ");
+        char **file_paths_formatted = string_split(file_paths_substring, ",");
 
         int contador = 0;
         while(file_paths_formatted[contador] != NULL) {
+            string_trim(&file_paths_formatted[contador]);
             list_add(file_paths, file_paths_formatted[contador]);
-            contador += 2;
+            contador += 1;
         }
 
         free(file_paths_substring);

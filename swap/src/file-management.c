@@ -125,7 +125,8 @@ void insertar_pagina_en_archivo(t_pagina_swap *pagina) {
 /*
     Lectura de una página de un archivo de SWAP
 */
-void leer_pagina_de_archivo(int numero_pagina) {
+t_pagina_swap leer_pagina_de_archivo(int numero_pagina) {
+    log_info(logger_swap, "Se ha solicitado la pagina %d para enviar a memoria principal", numero_pagina);
     //Me fijo si la página solicitada es una de las páginas almacenadas
     t_pagina_almacenada *informacion_almacenamiento = NULL;
     for(int i=0; i<list_size(lista_paginas_almacenadas); i++) {
@@ -137,6 +138,7 @@ void leer_pagina_de_archivo(int numero_pagina) {
     }
 
     //Si la página fue encontrada la voy a buscar, sino lanzo mensaje de aviso
+    t_pagina_swap pagina_obtenida;
     if(informacion_almacenamiento != NULL) {
         //Lectura del archivo
         char *path_archivo = list_get(config_swap->ARCHIVOS_SWAP, informacion_almacenamiento->marco->file);
@@ -147,18 +149,44 @@ void leer_pagina_de_archivo(int numero_pagina) {
 
         //Obtengo la página dentro del archivo
         void *paginas_obtenidas = mmap(0, statbuf.st_size, PROT_READ, MAP_PRIVATE, archivo, 0);
-        t_pagina pagina_obtenida;
 
         int offset_actual = informacion_almacenamiento->marco->base;
-        memcpy(&pagina_obtenida.numero_pagina, paginas_obtenidas + offset_actual, sizeof(pagina_obtenida.numero_pagina));
-        offset_actual += sizeof(pagina_obtenida.numero_pagina);
+        memcpy(&pagina_obtenida.tipo_contenido, paginas_obtenidas + offset_actual, sizeof(int));
+        offset_actual += sizeof(pagina_obtenida.tipo_contenido);
+        memcpy(&pagina_obtenida.pid, paginas_obtenidas + offset_actual, sizeof(uint32_t));
+        offset_actual += sizeof(uint32_t);
+        memcpy(&pagina_obtenida.numero_pagina, paginas_obtenidas + offset_actual, sizeof(uint32_t));
+        offset_actual += sizeof(uint32_t);
 
-        printf("Numero de pagina: %d\n", pagina_obtenida.numero_pagina);
+        int cantidad_contenidos_heap = 0;
+        memcpy(&cantidad_contenidos_heap, paginas_obtenidas + offset_actual, sizeof(uint32_t));
+        offset_actual += sizeof(uint32_t);
+
+        t_list *contenidos_heap = list_create();
+        for(int i=0; i<cantidad_contenidos_heap; i++) {
+            t_info_heap_swap *contenido_heap = malloc(sizeof(t_info_heap_swap));
+            t_heap_metadata *heap_metadata = malloc(sizeof(t_heap_metadata));
+            
+            memcpy(&((*heap_metadata).prevAlloc), paginas_obtenidas + offset_actual, sizeof(uint32_t));
+            offset_actual += sizeof(uint32_t);
+            memcpy(&((*heap_metadata).nextAlloc), paginas_obtenidas + offset_actual, sizeof(uint32_t));
+            offset_actual += sizeof(uint32_t);
+            memcpy(&((*heap_metadata).isFree), paginas_obtenidas + offset_actual, sizeof(uint8_t));
+            offset_actual += sizeof(uint8_t);
+
+            contenido_heap->contenido = heap_metadata;
+            list_add(contenidos_heap, contenido_heap);
+        }
+        pagina_obtenida.contenido_heap_info = contenidos_heap;
 
         close(archivo);
+        eliminar_pagina(numero_pagina);
+        log_info(logger_swap, "Pagina %d recuperada con exito", numero_pagina);
     } else {
         log_error(logger_swap, "La pagina %d no se encuentra almacenada en los archivos de swap", numero_pagina);
+        pagina_obtenida.numero_pagina = -1;
     }
+    return pagina_obtenida;
 }
 
 /*

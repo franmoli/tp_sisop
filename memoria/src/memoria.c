@@ -10,9 +10,10 @@ int main(int argc, char **argv)
     config_memoria = generarConfigMemoria(config);
     log_info(logger_memoria, "Configuración cargada correctamente");
     tamanio_memoria = malloc(sizeof(config_memoria->TAMANIO));
-    socket_cliente_swap = crear_conexion("127.0.0.1", "5001");
-    if (socket_cliente_swap == -1)
-    {
+
+    socket_server = iniciar_servidor(config_memoria->IP, string_itoa(config_memoria->PUERTO), logger_memoria);
+    socket_cliente_swap = crear_conexion(config_memoria->IP, "5002");
+    if (socket_cliente_swap == -1) {
         log_info(logger_memoria, "Fallo en la conexion a swap");
     }
 
@@ -54,13 +55,12 @@ int main(int argc, char **argv)
             i++;
         }
         //Conectar a swap
-        socket_cliente_swap = crear_conexion("127.0.0.1", "5001");
-        if (socket_cliente_swap == -1)
-        {
+        socket_cliente_swap = crear_conexion(config_memoria->IP, "5002");
+        if (socket_cliente_swap == -1) {
             log_info(logger_memoria, "Fallo en la conexion a swap");
         }
         //PROGRAMA NORMAL
-        socket_server = iniciar_servidor("127.0.0.1", string_itoa(config_memoria->PUERTO), logger_memoria);
+        socket_server = iniciar_servidor(config_memoria->IP, string_itoa(config_memoria->PUERTO), logger_memoria);
 
         signal(SIGINT, imprimirMetricas);
         signal(SIGUSR1, generarDump);
@@ -137,8 +137,44 @@ int main(int argc, char **argv)
 	paquete->buffer = buffer;
 
     enviar_paquete(paquete, socket_cliente_swap);
+    free(buffer);
 
     /* Recibir página de SWAP */
+    int numero_pagina = 1;
+
+    void *pedido_pagina_serializado = malloc(sizeof(int));
+    memcpy(pedido_pagina_serializado + 0, &numero_pagina, sizeof(int));
+
+    buffer = malloc(sizeof(t_buffer));
+    buffer->size = sizeof(int);
+    buffer->stream = pedido_pagina_serializado;
+
+    paquete = malloc(sizeof(t_paquete));
+    paquete->codigo_operacion = SWAPFREE;
+    paquete->buffer = buffer;
+
+    enviar_paquete(paquete, socket_cliente_swap);
+    free(buffer);
+
+    log_info(logger_memoria, "Esperando respuesta por parte de SWAP");
+    
+    t_paquete *paquete_recibido = recibir_paquete(socket_cliente_swap);
+    t_pagina_swap *pagina = malloc(sizeof(t_pagina_swap));
+    *pagina = deserializar_pagina(paquete_recibido->buffer->stream);
+
+    printf("\n\nPagina deserializada:\n");
+    printf("PID: %d\n", pagina->pid);
+    printf("Numero pagina: %d\n", pagina->numero_pagina);
+    for(int i=0; i<list_size(pagina->contenido_heap_info); i++) {
+        t_info_heap_swap *contenido_heap = list_get(pagina->contenido_heap_info, i);
+        printf("Contenido heap %d\n", i+1);
+        printf("\tPrevAlloc: %d\n", contenido_heap->contenido->prevAlloc);
+        printf("\tNextAlloc: %d\n", contenido_heap->contenido->nextAlloc);
+        printf("\tIsFree: %d\n", contenido_heap->contenido->isFree);
+    }
+    printf("\n\n");
+
+    log_info(logger_memoria, "Paquete recibido por parte de SWAP");
 
     if(0) {
         while (1)
@@ -153,10 +189,6 @@ int main(int argc, char **argv)
     log_info(logger_memoria, "Programa finalizado con éxito");
     log_destroy(logger_memoria);
     liberar_config(config);
-}
-
-void test() {
-    printf("FUNCIONA");
 }
 
 static void *ejecutar_operacion(int client)

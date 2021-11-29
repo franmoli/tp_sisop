@@ -175,6 +175,8 @@ void asignacion_global_de_pagina(int posicion_archivo, char *path_archivo, int a
     offset += sizeof(uint32_t);
     memcpy(mapping + offset, &(pagina->numero_pagina), sizeof(uint32_t));
     offset += sizeof(uint32_t);
+    memcpy(mapping + offset, &(pagina->contenido_heap_info->elements_count), sizeof(uint32_t));
+    offset += sizeof(uint32_t);
 
     for(int i=0; i<list_size(pagina->contenido_heap_info); i++) {
         t_info_heap_swap *contenido_heap = list_get(pagina->contenido_heap_info, i);
@@ -230,8 +232,23 @@ void asignacion_fija_de_pagina(int posicion_archivo, char *path_archivo, int arc
 
         //Mapeo los datos de la pagina
         log_info(logger_swap, "Escribiendo la pagina %d en el archivo %s en el marco %d", pagina->numero_pagina, path_archivo, marco_seleccionado->numero_marco);
-        memcpy(mapping + offset, &(pagina->numero_pagina), sizeof(pagina->numero_pagina));
-        offset += sizeof(pagina->numero_pagina);
+    
+        memcpy(mapping + offset, &(pagina->tipo_contenido), sizeof(int));
+        offset += sizeof(int);
+        memcpy(mapping + offset, &(pagina->pid), sizeof(uint32_t));
+        offset += sizeof(uint32_t);
+        memcpy(mapping + offset, &(pagina->numero_pagina), sizeof(uint32_t));
+        offset += sizeof(uint32_t);
+
+        for(int i=0; i<list_size(pagina->contenido_heap_info); i++) {
+            t_info_heap_swap *contenido_heap = list_get(pagina->contenido_heap_info, i);
+            memcpy(mapping + offset, &(contenido_heap->contenido->prevAlloc), sizeof(uint32_t));
+            offset += sizeof(uint32_t);
+            memcpy(mapping + offset, &(contenido_heap->contenido->nextAlloc), sizeof(uint32_t));
+            offset += sizeof(uint32_t);
+            memcpy(mapping + offset, &(contenido_heap->contenido->isFree), sizeof(uint8_t));
+            offset += sizeof(uint8_t);
+        }
 
         //Añado los datos de la página a la estructura administrativa
         t_pagina_almacenada *pagina_almacenada = malloc(sizeof(t_pagina_almacenada));
