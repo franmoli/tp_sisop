@@ -286,3 +286,11 @@ t_pagina *getPaginaByNumero(int nro_pagina, int carpincho_id){
     return pagina;
 
 }
+void liberarPagina(t_pagina* pagina, uint32_t carpincho_id){
+    t_tabla_paginas *tabla_paginas = buscarTablaPorPID(carpincho_id);
+    t_marco *marcoAsignado = list_get(tabla_marcos_memoria->marcos, pagina->marco_asignado);
+    marcoAsignado->isFree = true;
+
+    list_remove(tabla_paginas->paginas,pagina->numero_pagina);
+    tabla_paginas->paginas_en_memoria-=1;
+}

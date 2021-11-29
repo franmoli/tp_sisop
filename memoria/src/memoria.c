@@ -16,7 +16,7 @@ int main(int argc, char **argv)
         log_info(logger_memoria, "Fallo en la conexion a swap");
     }
 
-    if(0) {
+    
         /*tabla_paginas = malloc(sizeof(t_tabla_paginas));
         tabla_paginas->paginas = list_create();
         tabla_paginas->paginas_en_memoria = 0;
@@ -85,6 +85,8 @@ int main(int argc, char **argv)
 
         paquete1 = serializar_alloc(14, carpincho_id);
         freeAlloc(paquete1);
+        paquete1 = serializar_alloc(46, carpincho_id);
+        freeAlloc(paquete1);
         //paquete1 = serializar_alloc(10);
         //memAlloc(paquete1);
 
@@ -101,10 +103,9 @@ int main(int argc, char **argv)
         t_swap_serializado* swap_deserializado = deserializar_swap(paquete2);
         log_info(logger_memoria, "ID desde swap: %d",swap_deserializado->carpincho_id);
         log_info(logger_memoria, "ID desde swap: %d",swap_deserializado->swap_free);*/
-    }
 
     /* Mandar página a SWAP */
-    t_heap_metadata *heap_metadata = malloc(sizeof(t_heap_metadata));
+    /*t_heap_metadata *heap_metadata = malloc(sizeof(t_heap_metadata));
     heap_metadata->prevAlloc = 0;
     heap_metadata->nextAlloc = 5;
     heap_metadata->isFree = 1;
@@ -137,18 +138,16 @@ int main(int argc, char **argv)
 	paquete->codigo_operacion = SWAPSAVE;
 	paquete->buffer = buffer;
 
-    enviar_paquete(paquete, socket_cliente_swap);
+    enviar_paquete(paquete, socket_cliente_swap);*/
 
     /* Recibir página de SWAP */
 
-    if(0) {
-        while (1)
+    while (1)
+    {
+        socket_client = esperar_cliente(socket_server, logger_memoria);
+        if (socket_client != -1)
         {
-            socket_client = esperar_cliente(socket_server, logger_memoria);
-            if (socket_client != -1)
-            {
-                pthread_create(&hilo_client, NULL, (void *)ejecutar_operacion, (void *)socket_client);
-            }
+            pthread_create(&hilo_client, NULL, (void *)ejecutar_operacion, (void *)socket_client);
         }
     }
     log_info(logger_memoria, "Programa finalizado con éxito");
