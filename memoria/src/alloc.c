@@ -56,29 +56,6 @@ void freeAlloc(t_paquete *paquete)
         if (posterior->isFree)
             posterior_free = true;
     }
-    /*if (anterior_free && posterior_free)
-    {
-        if (pagina_alloc_anterior->numero_pagina == pagina_alloc_siguiente->numero_pagina)
-        {
-            //TODO EL CONTENIDO ESTA EN UNA MISMA PAGINA
-            int resta = next - sizeof(t_heap_metadata) - direccion;
-            pagina_alloc_actual->tamanio_ocupado -= resta;
-            eliminarcontenidoBydireccion(back, pagina_alloc_actual);
-            eliminarcontenidoBydireccion(direccion, pagina_alloc_actual);
-            eliminarcontenidoBydireccion(next, pagina_alloc_actual);
-            return;
-        }
-        // NO ESTA TODO EN LA MISMA PAGINA
-        bool limpiado = false;
-        if(pagina_alloc_anterior->numero_pagina == pagina_alloc_actual->numero_pagina){
-
-        }
-        if(pagina_alloc_actual->numero_pagina == pagina_alloc_siguiente->numero_pagina){
-            
-        }
-        return;
-    }*/
-
     bool alloc_fue_liberado = false;
     if (anterior_free) //PROBADO
     {
