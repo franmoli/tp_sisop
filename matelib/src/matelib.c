@@ -40,6 +40,13 @@ int mate_init(mate_instance_pointer *instance_pointer, char *config){
     
     free(string);
 
+    //test borrar
+    t_paquete *test_p = serializar(1, 4, INT, 3, CHAR_PTR, "PRUEBA");
+    int test_i = 0;
+    char *test_c = NULL;
+    deserializar(test_p, 4, INT, &test_i, CHAR_PTR, &test_c);
+    printf("\n\n Cosas deserializadas int %d, str %s\n\n", test_i, test_c);
+
     //Conexion con kernel y en caso que no exista, conexion con memoria
     socket_cliente = crear_conexion(config_matelib->IP_KERNEL, config_matelib->PUERTO_KERNEL);
     log_info(lib_ref->logger,"Conectando a kernel ip - %s | puerto - %s  ...", config_matelib->IP_KERNEL, config_matelib->PUERTO_KERNEL);

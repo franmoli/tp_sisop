@@ -34,5 +34,10 @@ clean:
 run: clean build $(CARPINCHOS)
 	./build/PruebaBase_Carpincho1 cfg/matelib.cfg
 
+vrun: clean build $(CARPINCHOS)
+	valgrind ./build/PruebaBase_Carpincho1 cfg/matelib.cfg
+
 .PHONY:
 	compile clean run
+
+	

@@ -160,6 +160,9 @@ void *debug_console(void *_ ){
         if(string_contains(input, "task")){
             print_task_lists();
         }
+        if(string_contains(input, "exit")){
+            exit(EXIT_SUCCESS);
+        }
 
     }
 

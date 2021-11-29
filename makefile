@@ -12,3 +12,5 @@ kernel_r :
 	./exec
 
 all : matelib_c kernel_c kernel_r
+
+compile : matelib_c kernel_c
