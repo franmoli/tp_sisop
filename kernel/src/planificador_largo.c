@@ -37,20 +37,23 @@ void *iniciar_servidor_kernel(void *_){
 
 //Atencion de nuevas operaciones
 void atender_proceso (void* parametro ){
+
     bool inicializado = false;
     int socket_cliente = *(int*)parametro;
     t_proceso *carpincho = malloc(sizeof(t_proceso)); 
     carpincho->task_list = list_create();
-    //char *nombre_semaforo = NULL;
-    char *nombre_semaforo = string_new();
-    string_append(&nombre_semaforo, "Semaforo mock");
     t_task *task_aux;
+    t_mate_sem *semaforo_recibido = NULL;
+    char *test=NULL;
+
     while(1) {
+
 		t_paquete *paquete = recibir_paquete(socket_cliente);
         task_aux = malloc(sizeof(t_task));
-        //print_semaforos();
+
         //Analizo el código de operación recibido y ejecuto acciones según corresponda
         printf("Paquete recibido %d\n", paquete->codigo_operacion);
+
         switch(paquete->codigo_operacion) {
             case CLIENTE_TEST:
                 log_info(logger_kernel, "Mensaje de prueba recibido correctamente por el cliente %d", socket_cliente);
@@ -63,22 +66,15 @@ void atender_proceso (void* parametro ){
                 }
                 break;
             case INIT_SEM:
-                //nombre_semaforo = paquete->buffer;
-                //agregar a lista de actividades
-                printf("Here\n");
-                /*task_aux->id = INIT_SEM;
-                task_aux->nombre_semaforo = nombre_semaforo;
-                task_aux->value = 2;
-                list_add(carpincho->task_list, task_aux);
-                */
-                t_mate_sem *info_sem = deserializar_mate_sem_init(paquete);
+
+                semaforo_recibido = malloc(sizeof(t_mate_sem));
+                semaforo_recibido->nombre = NULL;
+                deserializar(paquete, 4, U_INT, &(semaforo_recibido->value), CHAR_PTR, &semaforo_recibido->nombre);
+
+                printf("Sem value %d | Sem name %s\n\n", semaforo_recibido->value, semaforo_recibido->nombre);
+
                 t_task *task = malloc(sizeof(t_task));
                 task->id = INIT_SEM;
-                task->nombre_semaforo = malloc(sizeof(info_sem->nombre));
-                task->nombre_semaforo = info_sem->nombre;
-                printf("sem_name = %s\n",info_sem->nombre);
-                task->value = info_sem->value;
-                printf("sem_value = %d\n",task->value);
                 list_add(carpincho->task_list, task);
                 t_paquete *paq_env = malloc(sizeof(t_paquete));
                 t_buffer *buf_env = malloc(sizeof(t_buffer));

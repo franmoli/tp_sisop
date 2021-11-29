@@ -39,13 +39,12 @@ typedef struct {
 
 typedef struct {
     op_code id;
-    char *nombre_semaforo;
-    int value;
+    void *datos_tarea;
 } t_task;
 
 typedef struct {
     char *nombre_semaforo;
-    int value;
+    uint32_t value;
     t_list *solicitantes;
 }t_semaforo;
 

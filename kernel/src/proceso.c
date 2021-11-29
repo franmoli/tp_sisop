@@ -75,8 +75,8 @@ void exec(t_proceso *self){
             next_task = list_get(self->task_list, 0);
             switch (next_task->id){
                 case INIT_SEM:
-                    log_info(logger_kernel, "Iniciando semaforo: %s", next_task->nombre_semaforo);
-                    iniciar_semaforo(next_task->nombre_semaforo, next_task->value);
+                    //log_info(logger_kernel, "Iniciando semaforo: %s", next_task->nombre_semaforo);
+                    //iniciar_semaforo(next_task->nombre_semaforo, next_task->value);
                     break;
                 case CLIENTE_DESCONECTADO:
                 case CLIENTE_TEST:

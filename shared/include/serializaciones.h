@@ -36,7 +36,8 @@ typedef enum {
     CHAR_PTR = 2,
     UINT32 = 3,
     BOOL = 4,
-    LIST = 5
+    LIST = 5,
+	U_INT = 6
 }t_type;
 
 t_paquete *serializar_mate_init(uint32_t carpincho_id);

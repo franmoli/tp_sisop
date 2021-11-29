@@ -321,6 +321,7 @@ t_paquete * serializar (int codigo_operacion, int arg_count, ...){
 
     //Declaracion de parametros posibles
     int param_i = 0;
+    unsigned int param_un_i = 0; 
     char *param_s = NULL;
     uint32_t param_ui = 0;
     bool param_b = false;
@@ -387,6 +388,13 @@ t_paquete * serializar (int codigo_operacion, int arg_count, ...){
 
                     serializar_single(&stream, paquete_aux->buffer->stream, &size, added_size, &offset);
                 }
+                break;
+            case U_INT:
+                param_un_i = va_arg(valist, unsigned int);
+                added_size = sizeof(unsigned int);
+
+                serializar_single(&stream, &param_un_i, &size, added_size, &offset);
+
                 break;
         }
     }
@@ -487,6 +495,12 @@ void deserializar(t_paquete *paquete, int arg_count, ...){
             case BOOL:
                 param = va_arg(valist, void*);
                 size = sizeof(bool);
+                deserializar_single(stream, param, size, &offset);
+
+                break;
+            case U_INT:
+                param = va_arg(valist, void*);
+                size = sizeof(unsigned int);
                 deserializar_single(stream, param, size, &offset);
 
                 break;

@@ -217,6 +217,7 @@ void print_task_lists(){
     int index2 =  0;
     t_task *aux_task;
     t_proceso *aux_proceso;
+    t_semaforo *op_semaforo = NULL;
 
     while(index <= list_size(lista_ready)-1){
         aux_proceso = list_get(lista_ready, index);
@@ -227,7 +228,8 @@ void print_task_lists(){
             aux_task = list_get(aux_proceso->task_list, index2);
             if(aux_task != NULL)
                 printf("\bTask - Id : %d\n", aux_task->id);
-                printf("Nombre-sem %s\n", aux_task->nombre_semaforo);
+                op_semaforo = aux_task->datos_tarea;
+                printf("Nombre-sem %s\n", op_semaforo->nombre_semaforo);
             
             aux_task = NULL;
             index2++;
