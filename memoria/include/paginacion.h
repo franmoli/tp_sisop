@@ -28,4 +28,6 @@ int solicitarPaginaNueva(uint32_t carpincho_id);
 
 t_contenidos_pagina* getContenidoPaginaByTipo(t_contenidos_pagina* contenidos, t_contenido tipo);
 t_contenidos_pagina *getContenidoPaginaByTipoAndSize(t_contenidos_pagina *contenidos, t_contenido tipo, uint32_t nextAlloc);
+
+void liberarPagina(t_pagina* pagina, uint32_t carpincho_id);
 #endif

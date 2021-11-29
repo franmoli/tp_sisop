@@ -17,7 +17,7 @@ int main(int argc, char **argv)
         log_info(logger_memoria, "Fallo en la conexion a swap");
     }
 
-    if(0) {
+    
         /*tabla_paginas = malloc(sizeof(t_tabla_paginas));
         tabla_paginas->paginas = list_create();
         tabla_paginas->paginas_en_memoria = 0;
@@ -69,6 +69,8 @@ int main(int argc, char **argv)
         t_paquete *paquete = serializar_mate_init(1);
         inicializarCarpincho(paquete);
         uint32_t carpincho_id = deserializar_mate_init(paquete)->carpincho_id;
+       
+       
         //CASO PRUEBA DE MEMALLOC
         t_paquete *paquete1 = serializar_alloc(5, carpincho_id);
         memAlloc(paquete1);
@@ -79,11 +81,12 @@ int main(int argc, char **argv)
         paquete1 = serializar_alloc(3, carpincho_id);
         memAlloc(paquete1);
 
-        /*paquete1 = serializar_alloc(134546366, carpincho_id);
-        freeAlloc(paquete1);
+       
 
-        paquete1 = serializar_alloc(134546398, carpincho_id);
-        freeAlloc(paquete1);*/
+        paquete1 = serializar_alloc(14, carpincho_id);
+        freeAlloc(paquete1);
+        paquete1 = serializar_alloc(46, carpincho_id);
+        freeAlloc(paquete1);
         //paquete1 = serializar_alloc(10);
         //memAlloc(paquete1);
 
@@ -100,10 +103,9 @@ int main(int argc, char **argv)
         t_swap_serializado* swap_deserializado = deserializar_swap(paquete2);
         log_info(logger_memoria, "ID desde swap: %d",swap_deserializado->carpincho_id);
         log_info(logger_memoria, "ID desde swap: %d",swap_deserializado->swap_free);*/
-    }
 
     /* Mandar página a SWAP */
-    t_heap_metadata *heap_metadata = malloc(sizeof(t_heap_metadata));
+    /*t_heap_metadata *heap_metadata = malloc(sizeof(t_heap_metadata));
     heap_metadata->prevAlloc = 0;
     heap_metadata->nextAlloc = 5;
     heap_metadata->isFree = 1;
@@ -139,7 +141,7 @@ int main(int argc, char **argv)
     enviar_paquete(paquete, socket_cliente_swap);
     free(buffer);
 
-    /* Recibir página de SWAP */
+     Recibir página de SWAP 
     int numero_pagina = 1;
 
     void *pedido_pagina_serializado = malloc(sizeof(int));
@@ -175,15 +177,13 @@ int main(int argc, char **argv)
     printf("\n\n");
 
     log_info(logger_memoria, "Paquete recibido por parte de SWAP");
-
-    if(0) {
-        while (1)
+*/
+    while (1)
+    {
+        socket_client = esperar_cliente(socket_server, logger_memoria);
+        if (socket_client != -1)
         {
-            socket_client = esperar_cliente(socket_server, logger_memoria);
-            if (socket_client != -1)
-            {
-                pthread_create(&hilo_client, NULL, (void *)ejecutar_operacion, (void *)socket_client);
-            }
+            pthread_create(&hilo_client, NULL, (void *)ejecutar_operacion, (void *)socket_client);
         }
     }
     log_info(logger_memoria, "Programa finalizado con éxito");
