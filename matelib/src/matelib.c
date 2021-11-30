@@ -134,11 +134,7 @@ int mate_sem_wait(mate_instance_pointer *instance_pointer, mate_sem_name sem){
 
     mate_instance *lib_ref = instance_pointer->group_info;
 
-    t_paquete *paquete = malloc(sizeof(t_paquete));
-    
-    //----Crear paquete con nombre de semaforo y valor para que kernel haga el sem_wait con el COD_OP correspondiente
-    //serializar inputs (nombre y valor init)
-    paquete = serializar_mate_sem_resto(sem,SEM_WAIT);
+    t_paquete *paquete = serializar(SEM_WAIT,1,CHAR_PTR,sem);
     enviar_paquete(paquete,lib_ref->socket);
 
     //----esperar señal de inicializacion correcta
@@ -157,11 +153,7 @@ int mate_sem_post(mate_instance_pointer *instance_pointer, mate_sem_name sem){
 
     mate_instance *lib_ref = instance_pointer->group_info;
 
-    t_paquete *paquete = malloc(sizeof(t_paquete));
-    
-    //----Crear paquete con nombre de semaforo y valor para que kernel haga el sem_post con el COD_OP correspondiente
-    //serializar inputs (nombre y valor init)
-    paquete = serializar_mate_sem_resto(sem,SEM_POST);    
+    t_paquete *paquete = serializar(SEM_POST,1,CHAR_PTR,sem);    
     enviar_paquete(paquete,lib_ref->socket);
 
     //Esperar señal de inicializacion correcta
@@ -180,9 +172,7 @@ int mate_sem_destroy(mate_instance_pointer *instance_pointer, mate_sem_name sem)
 
     mate_instance *lib_ref = instance_pointer->group_info;
 
-    t_paquete *paquete = malloc(sizeof(t_paquete));
-
-    paquete = serializar_mate_sem_resto(sem,SEM_DESTROY); 
+    t_paquete *paquete = serializar(SEM_DESTROY,1,CHAR_PTR,sem); 
     enviar_paquete(paquete,lib_ref->socket);
 
     t_paquete *paquete_recibido = recibir_paquete(lib_ref->socket);
@@ -190,7 +180,7 @@ int mate_sem_destroy(mate_instance_pointer *instance_pointer, mate_sem_name sem)
         log_info(lib_ref->logger,"La funcion SEM_DESTROY se ejecuto exitosamente");
         return 0;
     }else{
-        log_error(lib_ref->logger,"La funcion SEM_DESTROY se ejecuto correctamente");
+        log_error(lib_ref->logger,"La funcion SEM_DESTROY no se ejecuto correctamente");
         return 1;
     }
 }
@@ -200,10 +190,11 @@ int mate_sem_destroy(mate_instance_pointer *instance_pointer, mate_sem_name sem)
 int mate_call_io(mate_instance_pointer *instance_pointer, mate_io_resource io, void *msg){
 
     mate_instance *lib_ref = instance_pointer->group_info;
-    t_paquete *paquete = malloc(sizeof(t_paquete));
 
-    paquete = serializar_mate_call_io(io,msg);
+    t_paquete *paquete = serializar(CALLIO,2,CHAR_PTR,io,CHAR_PTR,msg);
     enviar_paquete(paquete,lib_ref->socket);
+
+    log_info(lib_ref->logger,"Se llamo a la funcion mate_call_io");
 
 //  HACER VERIFICACION CON EL RECIBIR PAQUETE
 
@@ -214,36 +205,70 @@ int mate_call_io(mate_instance_pointer *instance_pointer, mate_io_resource io, v
 
 mate_pointer mate_memalloc(mate_instance_pointer *instance_pointer, int size){
 
-    mate_pointer p = 0;
-    /*mate_instance *lib_ref = instance_pointer->group_info;
+    mate_pointer p = -1;
+    mate_instance *lib_ref = instance_pointer->group_info;
 
-    t_paquete *paquete = malloc(sizeof(t_paquete));
-    paquete = serializar_mate_memalloc()
-    */
+    t_paquete *paquete = serializar(MEMALLOC,1,INT,size);
+    enviar_paquete(paquete,lib_ref->socket);
 
+    t_paquete *paquete_recibido = recibir_paquete(lib_ref->socket);    
+    if(paquete_recibido->codigo_operacion == MEMALLOC){
+        deserializar(paquete_recibido,1,INT,&p);
+        log_info(lib_ref->logger,"La funcion MEM_ALLOC se ejecuto correctamente");
+    
+    }else{
+        log_error(lib_ref->logger,"La funcion MEM_ALLOC no se ejecuto correctamente");
+    }
     return p;
 }
 
 int mate_memfree(mate_instance_pointer *instance_pointer, mate_pointer addr){
 
-    //mate_instance *lib_ref = instance_pointer->group_info;
+    mate_instance *lib_ref = instance_pointer->group_info;
 
+    t_paquete *paquete = serializar(MEMFREE,1,INT,addr);
+    enviar_paquete(paquete,lib_ref->socket);
 
-    return 1;
+    t_paquete *paquete_recibido = recibir_paquete(lib_ref->socket);    
+    if(paquete_recibido->codigo_operacion == MEMFREE){
+        log_info(lib_ref->logger,"La funcion MEM_FREE se ejecuto correctamente");
+        return 0;    
+    }else{
+        log_error(lib_ref->logger,"La funcion MEM_FREE no se ejecuto correctamente");
+        return -1;
+    }
 }   
 
 int mate_memread(mate_instance_pointer *instance_pointer, mate_pointer origin, void *dest, int size){
 
-    //mate_instance *lib_ref = instance_pointer->group_info;
+    mate_instance *lib_ref = instance_pointer->group_info;
 
+    t_paquete *paquete = serializar(MEMREAD,3,INT,origin,CHAR_PTR,dest,INT,size);
+    enviar_paquete(paquete,lib_ref->socket);
 
-    return 1;
+    t_paquete *paquete_recibido = recibir_paquete(lib_ref->socket);    
+    if(paquete_recibido->codigo_operacion == MEMREAD){
+        log_info(lib_ref->logger,"La funcion MEM_READ se ejecuto correctamente");
+        return 0;    
+    }else{
+        log_error(lib_ref->logger,"La funcion MEM_READ no se ejecuto correctamente");
+        return -1;
+    }
 }
 
 int mate_memwrite(mate_instance_pointer *instance_pointer, void *origin, mate_pointer dest, int size){
 
-    //mate_instance *lib_ref = instance_pointer->group_info;
+    mate_instance *lib_ref = instance_pointer->group_info;
 
+    t_paquete *paquete = serializar(MEMREAD,3,CHAR_PTR,origin,INT,dest,INT,size);
+    enviar_paquete(paquete,lib_ref->socket);
 
-    return 1;
+    t_paquete *paquete_recibido = recibir_paquete(lib_ref->socket);    
+    if(paquete_recibido->codigo_operacion == MEMWRITE){
+        log_info(lib_ref->logger,"La funcion MEM_WRITE se ejecuto correctamente");
+        return 0;    
+    }else{
+        log_error(lib_ref->logger,"La funcion MEM_WRITE no se ejecuto correctamente");
+        return -1;
+    }
 }
