@@ -164,6 +164,108 @@ void escribirEnMemoria(int marco, int desplazamiento, int size, void* contenido)
     offset += size;
 }
 
+void* traerMarcoDeMemoria(t_pagina* pagina){
+/*
+typedef struct{
+		uint32_t dir_comienzo; // NO DEBE SER UN PUNTERO
+		uint32_t dir_fin;
+        uint32_t tamanio; 
+        uint32_t carpincho_id;
+        uint32_t recorrido;
+		t_contenido contenido_pagina; //antes era un puntero
+        t_subcontenido *subcontenido; //PREV-NEXT-FREE
+	} t_contenidos_pagina;
+
+    */
+
+    int offset = 0;
+    int size = 0;
+    void* stream = malloc(config_memoria->TAMANIO_PAGINA);
+
+    t_list_iterator *list_iterator = list_iterator_create(pagina->listado_de_contenido);
+    t_contenidos_pagina *contenido;
+    while (list_iterator_has_next(list_iterator))
+    {
+        contenido = list_iterator_next(list_iterator);
+        size = contenido->dir_fin - contenido->dir_comienzo;
+
+        if(contenido->contenido_pagina == HEAP){
+
+            t_heap_metadata* heap = traerAllocIncompleto(pagina->marco_asignado,contenido->dir_comienzo,contenido->dir_fin);
+            if(heap->prevAlloc != -1){
+                memcpy(stream + offset, &(heap->prevAlloc),sizeof(uint32_t));
+                offset += sizeof(uint32_t);
+            }
+            if(heap->nextAlloc != -1){
+                memcpy(stream + offset, &(heap->nextAlloc),sizeof(uint32_t));
+                offset += sizeof(uint32_t);
+            }
+            if(heap->isFree != -1){
+                memcpy(stream + offset, &(heap->isFree),sizeof(bool));
+                offset += sizeof(bool);
+            }
+
+        }else
+        {
+            void* info = traerDeMemoria(pagina->marco_asignado,offset,size);
+            escribirEnMemoria(pagina->marco_asignado,offset,size,info);
+            offset += size;
+        }
+    }
+    list_iterator_destroy(list_iterator);
+    return stream;
+
+}
+
+t_heap_metadata* traerAllocIncompleto(int marco,uint32_t dir_comienzo, uint32_t dir_final){
+
+    t_heap_metadata* heap = malloc(sizeof(t_heap_metadata));
+    uint32_t direccion = marco * config_memoria->TAMANIO_PAGINA;
+    int offset = dir_comienzo % config_memoria->TAMANIO_PAGINA;
+    int size = dir_final - dir_comienzo;
+
+    switch(size)
+    {
+        case 9:
+            memcpy(&heap->prevAlloc, direccion + offset, sizeof(uint32_t));
+            offset += sizeof(uint32_t);
+            memcpy(&heap->nextAlloc, direccion + offset, sizeof(uint32_t));
+            offset += sizeof(uint32_t);
+            memcpy(&heap->isFree, direccion + offset, sizeof(bool));
+            offset += sizeof(bool);
+            break;
+        case 5:
+            heap->prevAlloc = -1;
+            memcpy(&heap->nextAlloc, direccion + offset, sizeof(uint32_t));
+            offset += sizeof(uint32_t);
+            memcpy(&heap->isFree, direccion + offset, sizeof(bool));
+            offset += sizeof(bool);
+            break;
+        case 1:
+            heap->prevAlloc = -1;
+            heap->nextAlloc = -1;
+            memcpy(&heap->isFree, direccion + offset, sizeof(bool));
+            offset += sizeof(bool);
+            break;
+        case 8:
+            memcpy(&heap->prevAlloc, direccion + offset, sizeof(uint32_t));
+            offset += sizeof(uint32_t);
+            memcpy(&heap->nextAlloc, direccion + offset, sizeof(uint32_t));
+            offset += sizeof(uint32_t);
+            heap->isFree = -1;
+            break;
+        case 4:
+            memcpy(&heap->prevAlloc, direccion + offset, sizeof(uint32_t));
+            offset += sizeof(uint32_t);
+            heap->nextAlloc = -1;
+            heap->isFree = -1;
+            break;
+    }
+
+    return heap;
+
+}
+
 int getMarco(t_tabla_paginas* tabla_paginas){
     int numeroMarco = -1;
     if(config_memoria->TIPO_ASIGNACION != "FIJA"){
