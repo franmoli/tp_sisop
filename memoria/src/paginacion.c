@@ -79,7 +79,7 @@ t_heap_metadata *memRead(t_paquete *paquete)
     int nro_pagina = getPaginaByDireccionLogica(direccion);
 
     //Ir a la tlb
-    int nro_marco = getFromTLB(nro_pagina, tabla_paginas);
+    //int nro_marco = getFromTLB(nro_pagina, tabla_paginas);
 
     //Falta buscar posta la info en memoria
 
