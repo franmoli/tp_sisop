@@ -62,31 +62,106 @@ t_contenidos_pagina *getLastHeaderContenidoByPagina(t_pagina *pagina)
 //////////////////////////////////////////////////////////////////////////////
 
 // Mem Read: Dada una direccion de memoria busco el contenido que se encuentra alli
-t_heap_metadata *memRead(t_paquete *paquete)
+void *memRead(t_paquete *paquete)
 {
 
-    //TODO: Tener en cuenta que la direccion pertenezca a una pagina de la tabla de este proceso
-    uint32_t direccion = deserializar_alloc(paquete);
-    uint32_t carpincho_id = 1;
-    //Traer pagina
-    if (!direccionValida(direccion))
-    {
-        //MATE FREE FAIL
-    }
+    /*1- Deserializo el paquete -> carpincho_id, direccion_logica
+      2- Con la dir logica calculo la pagina y el desplazamiento -> pagina = dir logica / tamaño_pagina ... deplazamiento = resto
+      3- Con la pagina y el pid busco en la tlb
+        3b- Si ocurre un miss sumo metrica y voy a memoria
+        3c- Si no esta en memoria voy a swap y cambio bits (referido)
+        3d- Si estaba en tlb sumo metrica HIT
+      4- Obtenido el marco, junto con el desplazamiento voy a memoria y busco la info
 
-    t_tabla_paginas *tabla_paginas = buscarTablaPorPID(carpincho_id);
+      typedef struct {
+	uint32_t size_reservar; -> direccion logica
+	uint32_t carpincho_id;
+} t_malloc_serializado;
+    */
 
-    int nro_pagina = getPaginaByDireccionLogica(direccion);
+   t_malloc_serializado* info = deserializar_alloc(paquete);
+   uint32_t dir_logica = info->size_reservar;
+   uint32_t carpincho_id = info->carpincho_id;
 
-    //Ir a la tlb
-    //int nro_marco = getFromTLB(nro_pagina, tabla_paginas);
+   int pagina = dir_logica / config_memoria->TAMANIO_PAGINA;
+   int desplazamiento = dir_logica % config_memoria->TAMANIO_PAGINA;
 
-    //Falta buscar posta la info en memoria
+   log_info(logger_memoria,"Voy a tlb");
+    int marco = -1;
 
-    t_heap_metadata *alloc = traerAllocDeMemoria(direccion);
+    marco = buscarEnTLB(pagina,carpincho_id);
 
-    log_info(logger_memoria, "Traje alloc de memoria");
-    return alloc;
+    log_info(logger_memoria,"Me traje el marco %d",marco);
+
+    //Si retorna -1 falta swap
+
+   // Paso 4
+   // Como se que tanto tengo que traer de memoria, creo que deberia ver el heap de ese alloc y traer esa cantidad en el contenido
+   int size = 4;
+
+   void* contenido = traerDeMemoria(marco,desplazamiento, size);
+   log_info(logger_memoria,"Traje contenido");
+   return contenido;
+
+}
+
+void* traerDeMemoria(int marco, int desplazamiento, int size)
+{
+    void* contenido = malloc(size);
+    uint32_t dir_fisica = tamanio_memoria + marco * config_memoria->TAMANIO_PAGINA + desplazamiento;
+    uint32_t offset = 0;
+
+    memcpy(&contenido, dir_fisica, size);
+    offset += size;
+
+    return contenido;
+}
+
+void memWrite(t_paquete *paquete)
+{
+    /*1- Deserializo paquete -> carpincho_id, direccion_logica, contenido_a_escribir
+      2- Con la dir logica calculo pagina y desplazamiento
+      3- Con la pagina y el pid busco en la tlb
+        3b- Si ocurre un miss sumo metrica y voy a memoria
+        3c- Si no esta en memoria voy a swap y cambio bits (modificado)
+        3d- Si estaba en tlb sumo metrica HIT
+      4- Obtenido el marco, junto con el desplazamiento voy a memoria y escribo la info
+    */
+
+   t_malloc_serializado* info = deserializar_alloc(paquete);
+   uint32_t dir_logica = info->size_reservar;
+   uint32_t carpincho_id = info->carpincho_id;
+   void* contenido = "holaholaholaholaholaola";
+   if(dir_logica == 105){
+       contenido = "holaholaholaol";
+   }
+
+   int pagina = dir_logica / config_memoria->TAMANIO_PAGINA;
+   int desplazamiento = dir_logica % config_memoria->TAMANIO_PAGINA;
+
+   // Paso 3
+    int marco = -1;
+
+    marco = buscarEnTLB(pagina,carpincho_id);
+
+    //Si retorna -1 falta swap
+
+   // Paso 4
+   // Como se que tanto tengo que traer de memoria, creo que deberia ver el heap de ese alloc y traer esa cantidad en el contenido
+
+   int size = 4;
+
+   escribirEnMemoria(marco,desplazamiento, size, contenido);
+   log_info(logger_memoria,"Escribi contenido");
+}
+
+void escribirEnMemoria(int marco, int desplazamiento, int size, void* contenido)
+{
+    uint32_t dir_fisica = tamanio_memoria + marco * config_memoria->TAMANIO_PAGINA + desplazamiento;
+    uint32_t offset = 0;
+
+    memcpy(dir_fisica,&contenido, size);
+    offset += size;
 }
 
 int getMarco(t_tabla_paginas* tabla_paginas){

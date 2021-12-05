@@ -10,7 +10,6 @@
 int getPaginaByDireccionLogica(uint32_t direccion);
 int getPaginaByDireccionFisica(uint32_t direccion);
 int getPrimeraPaginaDisponible(int size, t_tabla_paginas *tabla_paginas);
-t_heap_metadata *memRead(t_paquete* paquete);
 t_contenidos_pagina *getLastContenidoByPagina(t_pagina* pagina);
 t_contenidos_pagina *getLastHeaderContenidoByPagina(t_pagina* pagina);
 t_tabla_paginas* buscarTablaPorPID(int id);
@@ -30,4 +29,13 @@ t_contenidos_pagina* getContenidoPaginaByTipo(t_contenidos_pagina* contenidos, t
 t_contenidos_pagina *getContenidoPaginaByTipoAndSize(t_contenidos_pagina *contenidos, t_contenido tipo, uint32_t nextAlloc);
 
 void liberarPagina(t_pagina* pagina, uint32_t carpincho_id);
+
+//MEMREAD
+void *memRead(t_paquete *paquete);
+void* traerDeMemoria(int marco, int desplazamiento, int size);
+//MEMWRITE
+void memWrite(t_paquete *paquete);
+void escribirEnMemoria(int marco, int desplazamiento, int size, void* contenido);
+
+
 #endif
