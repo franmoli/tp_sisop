@@ -39,6 +39,7 @@ void escribirEnMemoria(int marco, int desplazamiento, int size, void* contenido)
 
 void* traerMarcoDeMemoria(t_pagina* pagina);
 t_heap_metadata* traerAllocIncompleto(int marco,uint32_t dir_comienzo, uint32_t dir_final);
-
+void escribirMarcoEnMemoria(t_pagina* pagina, void* stream);
+void escribirAllocIncompleto(int marco,uint32_t dir_comienzo,uint32_t dir_fin,void *stream);
 
 #endif

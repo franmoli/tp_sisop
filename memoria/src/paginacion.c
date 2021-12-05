@@ -266,6 +266,71 @@ t_heap_metadata* traerAllocIncompleto(int marco,uint32_t dir_comienzo, uint32_t 
 
 }
 
+void escribirMarcoEnMemoria(t_pagina* pagina, void* stream){
+
+    int offset = pagina->marco_asignado * config_memoria->TAMANIO_PAGINA;
+    int size = 0;
+
+    t_list_iterator *list_iterator = list_iterator_create(pagina->listado_de_contenido);
+    t_contenidos_pagina *contenido;
+    while (list_iterator_has_next(list_iterator))
+    {
+        contenido = list_iterator_next(list_iterator);
+        size = contenido->dir_fin - contenido->dir_comienzo;
+
+        if(contenido->contenido_pagina == HEAP){
+            escribirAllocIncompleto(pagina->marco_asignado,contenido->dir_comienzo,contenido->dir_fin,stream);
+            offset += size;
+        }else
+        {
+            //Ver si va bien
+            escribirEnMemoria(pagina->marco_asignado,offset,size,stream);
+            offset += size;
+        }
+    }
+    list_iterator_destroy(list_iterator);
+}
+
+void escribirAllocIncompleto(int marco,uint32_t dir_comienzo,uint32_t dir_fin,void *stream){
+
+    int size = dir_fin - dir_comienzo;
+    uint32_t direccion = marco * config_memoria->TAMANIO_PAGINA;
+    int offset = dir_comienzo % config_memoria->TAMANIO_PAGINA;
+
+    switch(size)
+    {
+        case 9:
+            memcpy(direccion + offset, &stream + offset, sizeof(uint32_t));
+            offset += sizeof(uint32_t);
+            memcpy(direccion + offset, &stream + offset, sizeof(uint32_t));
+            offset += sizeof(uint32_t);
+            memcpy(direccion + offset, &stream + offset, sizeof(bool));
+            offset += sizeof(bool);
+            break;
+        case 5:
+            memcpy(direccion + offset, &stream + offset, sizeof(uint32_t));
+            offset += sizeof(uint32_t);
+            memcpy(direccion + offset, &stream + offset, sizeof(bool));
+            offset += sizeof(bool);
+            break;
+        case 1:
+            memcpy(direccion + offset, &stream + offset, sizeof(bool));
+            offset += sizeof(bool);
+            break;
+        case 8:
+            memcpy(direccion + offset, &stream + offset, sizeof(uint32_t));
+            offset += sizeof(uint32_t);
+            memcpy(direccion + offset, &stream + offset, sizeof(uint32_t));
+            offset += sizeof(uint32_t);
+            break;
+        case 4:
+            memcpy(direccion + offset, &stream + offset, sizeof(uint32_t));
+            offset += sizeof(uint32_t);
+            break;
+    }
+
+}
+
 int getMarco(t_tabla_paginas* tabla_paginas){
     int numeroMarco = -1;
     if(config_memoria->TIPO_ASIGNACION != "FIJA"){
