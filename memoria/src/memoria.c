@@ -193,6 +193,14 @@ int main(int argc, char **argv)
 
 static void *ejecutar_operacion(int client)
 {
+    pthread_t hilo_respuesta;
+    if(0 !=pthread_create(&hilo_respuesta, NULL, (void *)receptor, NULL)){
+        log_error(logger_memoria, "ERROR AL CREAR EL HILO DE RESPUESTA MEMORIA");
+        close(client);
+        log_info(logger_memoria, "Se desconecto el cliente [%d]", client);
+        return NULL;
+    }
+    pthread_join(hilo_respuesta,NULL);
     while (1)
     {
         t_paquete *paquete = recibir_paquete(client);
