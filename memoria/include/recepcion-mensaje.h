@@ -3,5 +3,6 @@
 
 #include "memoria-global.h"
 
+void receptor();
 void analizar_paquete(t_paquete *paquete);
 #endif
