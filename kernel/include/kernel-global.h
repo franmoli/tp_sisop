@@ -35,6 +35,7 @@ typedef struct {
     bool block;
     bool salida_exit;
     bool salida_block;
+    int socket_carpincho;
 } t_proceso;
 
 typedef struct {

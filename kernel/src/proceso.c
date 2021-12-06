@@ -73,6 +73,7 @@ void exec(t_proceso *self){
         //Traer proxima operacion
         if(list_size(self->task_list)){
             next_task = list_get(self->task_list, 0);
+            t_paquete *paquete_recibido = NULL;
             switch (next_task->id){
                 case INIT_SEM:
                     //log_info(logger_kernel, "Iniciando semaforo: %s", next_task->nombre_semaforo);
@@ -86,10 +87,14 @@ void exec(t_proceso *self){
                 case SEM_POST:
                 case SEM_DESTROY:
                 case OP_ERROR:
+                    break;
                 case MEMALLOC:
                 case MEMFREE:
                 case MEMREAD:
                 case MEMWRITE:
+                    enviar_paquete(next_task->datos_tarea,socket_cliente_memoria);
+                    paquete_recibido = recibir_paquete(socket_cliente_memoria);
+                    enviar_paquete(paquete_recibido,self->socket_carpincho);
                     break;
 
             }

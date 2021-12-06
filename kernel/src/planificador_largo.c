@@ -42,6 +42,7 @@ void atender_proceso (void* parametro ){
     int socket_cliente = *(int*)parametro;
     t_proceso *carpincho = malloc(sizeof(t_proceso)); 
     carpincho->task_list = list_create();
+    carpincho->socket_carpincho = socket_cliente;
     t_task *task_aux = NULL;
     t_mate_sem *semaforo_recibido = NULL;
 
@@ -52,6 +53,7 @@ void atender_proceso (void* parametro ){
 
         //Analizo el código de operación recibido y ejecuto acciones según corresponda
         printf("Paquete recibido %d\n", paquete->codigo_operacion);
+        t_task *task = malloc(sizeof(t_task));
 
         switch(paquete->codigo_operacion) {
             case CLIENTE_TEST:
@@ -72,7 +74,7 @@ void atender_proceso (void* parametro ){
 
                 printf("Sem value %d | Sem name %s\n\n", semaforo_recibido->value, semaforo_recibido->nombre);
                 
-                t_task *task = malloc(sizeof(t_task));
+                
                 task->id = INIT_SEM;
                 list_add(carpincho->task_list, task);
 
@@ -86,10 +88,20 @@ void atender_proceso (void* parametro ){
                 break;
                 
             case MEMALLOC:
+                task->id = MEMALLOC;
+                task->datos_tarea = paquete;
+                break;
             case MEMFREE:
+                task->id = MEMFREE;
+                task->datos_tarea = paquete;
+                break;
             case MEMREAD:
+                task->id = MEMREAD;
+                task->datos_tarea = paquete;
+                break;
             case MEMWRITE:
-                enviar_paquete(paquete, socket_cliente_memoria);
+                task->id = MEMWRITE;
+                task->datos_tarea = paquete;
                 break;
             default:
                 log_error(logger_kernel, "Codigo de operacion desconocido");
