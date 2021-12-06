@@ -42,9 +42,8 @@ void atender_proceso (void* parametro ){
     int socket_cliente = *(int*)parametro;
     t_proceso *carpincho = malloc(sizeof(t_proceso)); 
     carpincho->task_list = list_create();
-    t_task *task_aux;
+    t_task *task_aux = NULL;
     t_mate_sem *semaforo_recibido = NULL;
-    char *test=NULL;
 
     while(1) {
 
@@ -69,21 +68,16 @@ void atender_proceso (void* parametro ){
 
                 semaforo_recibido = malloc(sizeof(t_mate_sem));
                 semaforo_recibido->nombre = NULL;
-                deserializar(paquete, 4, U_INT, &(semaforo_recibido->value), CHAR_PTR, &semaforo_recibido->nombre);
+                deserializar(paquete, 4, U_INT, &semaforo_recibido->value, CHAR_PTR, &semaforo_recibido->nombre);
 
                 printf("Sem value %d | Sem name %s\n\n", semaforo_recibido->value, semaforo_recibido->nombre);
-
+                
                 t_task *task = malloc(sizeof(t_task));
                 task->id = INIT_SEM;
                 list_add(carpincho->task_list, task);
-                t_paquete *paq_env = malloc(sizeof(t_paquete));
-                t_buffer *buf_env = malloc(sizeof(t_buffer));
-                buf_env->size = 0;
-                paq_env->buffer = buf_env;
-                paq_env->codigo_operacion = INIT_SEM;
-                enviar_paquete(paq_env, socket_cliente);
-                free(buf_env);
-                free(paq_env);
+
+                enviar_confirmacion(socket_cliente);
+                
                 break;
             case CLIENTE_DESCONECTADO:
                 log_info(logger_kernel, "Desconectando cliente %d", socket_cliente);
@@ -260,3 +254,17 @@ void *hilo_salida_a_exit(void *multiprogramacion_disponible_p){
     return NULL;
 }
 
+void enviar_confirmacion(int socket){
+    t_paquete *paquete = malloc(sizeof(t_paquete));
+    paquete->buffer = malloc(sizeof(t_buffer));
+    paquete->buffer->size = 0;
+    paquete->buffer->stream = NULL;
+    paquete->codigo_operacion = OP_CONFIRMADA;
+
+    enviar_paquete(paquete, socket);
+
+    free(paquete->buffer);
+    free(paquete);
+
+    return;
+}

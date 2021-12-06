@@ -36,9 +36,9 @@ int main(int argc, char *argv[]) {
 
     //mate_memwrite(&instance, saludo, saludoRef, strlen(saludo));
     mate_sem_init(&instance, SEMAFORO_SALUDO, 0);
-    printf("inicio sem saludo \n");
+    //printf("inicio sem saludo \n");
     //mate_sem_wait(&instance, SEMAFORO_SALUDO);
-    printf("wait sem saludo \n");
+    //printf("wait sem saludo \n");
     //mate_memread(&instance, saludoRef, saludo, strlen(saludo));
 
     printf(saludo);

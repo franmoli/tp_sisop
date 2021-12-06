@@ -24,7 +24,7 @@ int main(int argc, char **argv) {
     //Iniciar planificador de largo plazo
     iniciar_planificador_largo();
     //Iniciar planificador de corto plazo
-    //iniciar_planificador_corto();
+    iniciar_planificador_corto();
     //Iniciar planificador de mediano plazo
     //iniciar_planificador_mediano();
 

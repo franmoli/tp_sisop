@@ -77,6 +77,7 @@ void exec(t_proceso *self){
                 case INIT_SEM:
                     //log_info(logger_kernel, "Iniciando semaforo: %s", next_task->nombre_semaforo);
                     //iniciar_semaforo(next_task->nombre_semaforo, next_task->value);
+                    printf("Ejecuto la tarea init sem\n");
                     break;
                 case CLIENTE_DESCONECTADO:
                 case CLIENTE_TEST:
