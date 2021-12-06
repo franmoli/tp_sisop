@@ -5,7 +5,7 @@
 #include <pthread.h>
 #include "paginacion.h"
 #include <signal.h>
-
+#include "recepcion-mensaje.h"
 static void *ejecutar_operacion(int client);
 void imprimirMetricas();
 void limpiarTlb();
