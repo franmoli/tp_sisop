@@ -7,7 +7,12 @@ void receptor(){
 		switch (paquete->codigo_operacion)
         {
 			case RECEPCION_PAGINA:{
-				
+				t_pagina_swap swap = deserializar_pagina(paquete);
+				break;
+			}
+			default:{
+				log_error(logger_memoria, "Codigo de operacion desconocido");
+				break;
 			}
 		}
 		free(paquete);
