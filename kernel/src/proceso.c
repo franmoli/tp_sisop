@@ -74,10 +74,11 @@ void exec(t_proceso *self){
         if(list_size(self->task_list)){
             next_task = list_get(self->task_list, 0);
             t_paquete *paquete_recibido = NULL;
+
             switch (next_task->id){
                 case INIT_SEM:
                     //log_info(logger_kernel, "Iniciando semaforo: %s", next_task->nombre_semaforo);
-                    //iniciar_semaforo(next_task->nombre_semaforo, next_task->value);
+                    iniciar_semaforo(next_task->datos_tarea);
                     printf("Ejecuto la tarea init sem\n");
                     break;
                 case CLIENTE_DESCONECTADO:
@@ -87,6 +88,9 @@ void exec(t_proceso *self){
                 case SEM_POST:
                 case SEM_DESTROY:
                 case OP_ERROR:
+                    break;
+                case CALLIO:
+
                     break;
                 case MEMALLOC:
                 case MEMFREE:
@@ -104,7 +108,7 @@ void exec(t_proceso *self){
     }
 
     sleep(2);
-    bloquear(self);
+    //bloquear(self);
 }
 
 void bloquear(t_proceso *self){
@@ -147,19 +151,26 @@ void solicitar_semaforo(char *nombre_semaforo, int id){
     return ;
 }
 
-void iniciar_semaforo(char *nombre_semaforo, int valor){
+void iniciar_semaforo(t_semaforo *semaforo){
 
     //crear el struct del semaforo
-    t_semaforo *new_semaforo = malloc(sizeof(t_semaforo));
-    new_semaforo->value = valor;
-    new_semaforo->nombre_semaforo = string_new();
-    string_append(&(new_semaforo->nombre_semaforo), nombre_semaforo);
-    new_semaforo->solicitantes = list_create();
+    semaforo->solicitantes = list_create();
+    char *nombre_semaforo = semaforo->nombre_semaforo;
 
-    //agergar a lista de semaforos
-    list_add(lista_semaforos, new_semaforo);
+    bool esta_el_semaforo(void *semaforo_param){
+        t_semaforo *semaforo_aux = semaforo_param;
+        if(string_contains(semaforo_aux->nombre_semaforo, nombre_semaforo))
+            return true;
+        
+        return false;
+    }
+
+    //Si no existia el semaforo antes se agrega a las lista de semaforos
+    if(!list_any_satisfy(lista_semaforos, esta_el_semaforo))
+        list_add(lista_semaforos, semaforo);
 
 }
+
 
 void postear_semaforo(char *nombre_semaforo){
 

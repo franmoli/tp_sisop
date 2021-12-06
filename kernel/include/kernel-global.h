@@ -49,10 +49,7 @@ typedef struct {
     t_list *solicitantes;
 }t_semaforo;
 
-typedef struct {
-    char *nombre;
-    uint32_t value;
-}t_mate_sem;
+
 
 //Configuración
 t_config_kernel *config_kernel;

@@ -44,11 +44,12 @@ void atender_proceso (void* parametro ){
     carpincho->task_list = list_create();
     carpincho->socket_carpincho = socket_cliente;
     t_task *task_aux = NULL;
-    t_mate_sem *semaforo_recibido = NULL;
+    t_semaforo *semaforo_recibido = NULL;
 
     while(1) {
 
-		t_paquete *paquete = recibir_paquete(socket_cliente);
+		t_paquete *paquete = NULL;
+		paquete = recibir_paquete(socket_cliente);
         task_aux = malloc(sizeof(t_task));
 
         //Analizo el código de operación recibido y ejecuto acciones según corresponda
@@ -68,14 +69,13 @@ void atender_proceso (void* parametro ){
                 break;
             case INIT_SEM:
 
-                semaforo_recibido = malloc(sizeof(t_mate_sem));
-                semaforo_recibido->nombre = NULL;
-                deserializar(paquete, 4, U_INT, &semaforo_recibido->value, CHAR_PTR, &semaforo_recibido->nombre);
-
-                printf("Sem value %d | Sem name %s\n\n", semaforo_recibido->value, semaforo_recibido->nombre);
-                
+                semaforo_recibido = malloc(sizeof(t_semaforo));
+                semaforo_recibido->nombre_semaforo = NULL;
+                deserializar(paquete, 4, U_INT, &semaforo_recibido->value, CHAR_PTR, &semaforo_recibido->nombre_semaforo);
                 
                 task->id = INIT_SEM;
+                task->datos_tarea = semaforo_recibido;
+
                 list_add(carpincho->task_list, task);
 
                 enviar_confirmacion(socket_cliente);
@@ -103,6 +103,9 @@ void atender_proceso (void* parametro ){
                 task->id = MEMWRITE;
                 task->datos_tarea = paquete;
                 break;
+            case CALLIO:
+                
+                break;
             default:
                 log_error(logger_kernel, "Codigo de operacion desconocido");
                 exit(EXIT_FAILURE);
@@ -113,7 +116,7 @@ void atender_proceso (void* parametro ){
         //Libero la memoria ocupada por el paquete
 		//free(paquete->buffer->stream);
         //free(paquete->buffer);
-        free(paquete);
+        //free(paquete);
 
 	}
     return;
@@ -275,8 +278,6 @@ void enviar_confirmacion(int socket){
 
     enviar_paquete(paquete, socket);
 
-    free(paquete->buffer);
-    free(paquete);
-
+    
     return;
 }

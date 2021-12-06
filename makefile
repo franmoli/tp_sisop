@@ -10,7 +10,12 @@ kernel_c :
 kernel_r :
 	cd $(KERNEL_DIR) && \
 	./exec
+kernel_r_v :
+	cd $(KERNEL_DIR) && \
+	./vexec
 
 all : matelib_c kernel_c kernel_r
+
+vexec :	matelib_c kernel_c kernel_r_v
 
 compile : matelib_c kernel_c

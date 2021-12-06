@@ -43,12 +43,6 @@ typedef enum {
 t_paquete *serializar_mate_init(uint32_t carpincho_id);
 t_mateinit_serializado* deserializar_mate_init(t_paquete *paquete);
 
-t_paquete *serializar_mate_sem_init(uint32_t valor, char *nombre_sem);
-t_mate_sem *deserializar_mate_sem_init(t_paquete *paquete);
-t_paquete *serializar_mate_sem_resto(char *nombre_sem,op_code cod_op);
-t_mate_sem *deserializar_mate_sem_resto(t_paquete *paquete);
-t_paquete *serializar_mate_call_io(char *resource, void *msg);
-//t_mate_call_io *deserializar_mate_call_io(t_paquete *paquete);
 
 t_paquete *serializar_alloc(uint32_t size, uint32_t carpincho_id);
 t_malloc_serializado* deserializar_alloc(t_paquete *paquete);

@@ -172,11 +172,12 @@ void *debug_console(void *_ ){
 
 void print_semaforos(){
     int index = 0;
-    t_semaforo *aux;
+    t_semaforo *aux = NULL;
     printf("Printing semaphores %d:\n", list_size(lista_semaforos));
+
     while(index < list_size(lista_semaforos)){
         aux = list_get(lista_semaforos, index);
-        printf("Semaforo \"%s\" - Valor%d - Solicitantes %d\n",aux->nombre_semaforo, aux->value, list_size(aux->solicitantes));
+        printf("Semaforo \"%s\"  \n",aux->nombre_semaforo);
         printf("\n");
         index++;
     }
