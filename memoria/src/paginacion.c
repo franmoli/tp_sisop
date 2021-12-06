@@ -165,18 +165,6 @@ void escribirEnMemoria(int marco, int desplazamiento, int size, void* contenido)
 }
 
 void* traerMarcoDeMemoria(t_pagina* pagina){
-/*
-typedef struct{
-		uint32_t dir_comienzo; // NO DEBE SER UN PUNTERO
-		uint32_t dir_fin;
-        uint32_t tamanio; 
-        uint32_t carpincho_id;
-        uint32_t recorrido;
-		t_contenido contenido_pagina; //antes era un puntero
-        t_subcontenido *subcontenido; //PREV-NEXT-FREE
-	} t_contenidos_pagina;
-
-    */
 
     int offset = 0;
     int size = 0;
@@ -189,7 +177,7 @@ typedef struct{
         contenido = list_iterator_next(list_iterator);
         size = contenido->dir_fin - contenido->dir_comienzo;
 
-        if(contenido->contenido_pagina == HEAP){
+        if(contenido->contenido_pagina == HEAP || contenido->contenido_pagina == FOOTER){
 
             t_heap_metadata* heap = traerAllocIncompleto(pagina->marco_asignado,contenido->dir_comienzo,contenido->dir_fin);
             if(heap->prevAlloc != -1){
@@ -207,8 +195,8 @@ typedef struct{
 
         }else
         {
-            void* info = traerDeMemoria(pagina->marco_asignado,offset,size);
-            escribirEnMemoria(pagina->marco_asignado,offset,size,info);
+            void* contenido = traerDeMemoria(pagina->marco_asignado,offset,size);
+            memcpy(stream + offset, contenido,size);
             offset += size;
         }
     }
@@ -220,8 +208,9 @@ typedef struct{
 t_heap_metadata* traerAllocIncompleto(int marco,uint32_t dir_comienzo, uint32_t dir_final){
 
     t_heap_metadata* heap = malloc(sizeof(t_heap_metadata));
-    uint32_t direccion = marco * config_memoria->TAMANIO_PAGINA;
-    int offset = dir_comienzo % config_memoria->TAMANIO_PAGINA;
+    uint32_t inicio = tamanio_memoria;
+    uint32_t direccion = marco * config_memoria->TAMANIO_PAGINA + inicio;
+    int offset = (dir_comienzo - inicio) % config_memoria->TAMANIO_PAGINA;
     int size = dir_final - dir_comienzo;
 
     switch(size)
@@ -268,8 +257,9 @@ t_heap_metadata* traerAllocIncompleto(int marco,uint32_t dir_comienzo, uint32_t 
 
 void escribirMarcoEnMemoria(t_pagina* pagina, void* stream){
 
-    int offset = pagina->marco_asignado * config_memoria->TAMANIO_PAGINA;
+    int offset = 0;
     int size = 0;
+    void* cont;
 
     t_list_iterator *list_iterator = list_iterator_create(pagina->listado_de_contenido);
     t_contenidos_pagina *contenido;
@@ -278,13 +268,15 @@ void escribirMarcoEnMemoria(t_pagina* pagina, void* stream){
         contenido = list_iterator_next(list_iterator);
         size = contenido->dir_fin - contenido->dir_comienzo;
 
-        if(contenido->contenido_pagina == HEAP){
+        if(contenido->contenido_pagina == HEAP || contenido->contenido_pagina == FOOTER){
             escribirAllocIncompleto(pagina->marco_asignado,contenido->dir_comienzo,contenido->dir_fin,stream);
             offset += size;
         }else
         {
             //Ver si va bien
-            escribirEnMemoria(pagina->marco_asignado,offset,size,stream);
+            cont = malloc(size);
+            memcpy(cont,stream + offset, size + 1);
+            escribirEnMemoria(pagina->marco_asignado,offset,size,cont);
             offset += size;
         }
     }
@@ -294,37 +286,48 @@ void escribirMarcoEnMemoria(t_pagina* pagina, void* stream){
 void escribirAllocIncompleto(int marco,uint32_t dir_comienzo,uint32_t dir_fin,void *stream){
 
     int size = dir_fin - dir_comienzo;
-    uint32_t direccion = marco * config_memoria->TAMANIO_PAGINA;
-    int offset = dir_comienzo % config_memoria->TAMANIO_PAGINA;
+    uint32_t inicio = tamanio_memoria;
+    uint32_t direccion = marco * config_memoria->TAMANIO_PAGINA + inicio;
+    int offset = (dir_comienzo - inicio) % config_memoria->TAMANIO_PAGINA;
+    t_heap_metadata* heap = malloc(sizeof(t_heap_metadata));
 
     switch(size)
     {
         case 9:
-            memcpy(direccion + offset, &stream + offset, sizeof(uint32_t));
+            memcpy(&(heap->prevAlloc),stream + offset, sizeof(uint32_t));
+            memcpy(direccion + offset, &(heap->prevAlloc), sizeof(uint32_t));
             offset += sizeof(uint32_t);
-            memcpy(direccion + offset, &stream + offset, sizeof(uint32_t));
+            memcpy(&(heap->nextAlloc), stream + offset, sizeof(uint32_t));
+            memcpy(direccion + offset, &(heap->nextAlloc), sizeof(uint32_t));
             offset += sizeof(uint32_t);
-            memcpy(direccion + offset, &stream + offset, sizeof(bool));
+            memcpy(&(heap->isFree), stream + offset, sizeof(bool));
+            memcpy(direccion + offset, &(heap->isFree), sizeof(bool));
             offset += sizeof(bool);
             break;
         case 5:
-            memcpy(direccion + offset, &stream + offset, sizeof(uint32_t));
+            memcpy(&(heap->nextAlloc), stream + offset, sizeof(uint32_t));
+            memcpy(direccion + offset, &(heap->nextAlloc), sizeof(uint32_t));
             offset += sizeof(uint32_t);
-            memcpy(direccion + offset, &stream + offset, sizeof(bool));
+            memcpy(&(heap->isFree), stream + offset, sizeof(bool));
+            memcpy(direccion + offset, &(heap->isFree), sizeof(bool));
             offset += sizeof(bool);
             break;
         case 1:
-            memcpy(direccion + offset, &stream + offset, sizeof(bool));
+            memcpy(&(heap->isFree), stream + offset, sizeof(bool));
+            memcpy(direccion + offset, &(heap->isFree), sizeof(bool));
             offset += sizeof(bool);
             break;
         case 8:
-            memcpy(direccion + offset, &stream + offset, sizeof(uint32_t));
+            memcpy(&(heap->prevAlloc),stream + offset, sizeof(uint32_t));
+            memcpy(direccion + offset, &(heap->prevAlloc), sizeof(uint32_t));
             offset += sizeof(uint32_t);
-            memcpy(direccion + offset, &stream + offset, sizeof(uint32_t));
+            memcpy(&(heap->nextAlloc), stream + offset, sizeof(uint32_t));
+            memcpy(direccion + offset, &(heap->nextAlloc), sizeof(uint32_t));
             offset += sizeof(uint32_t);
             break;
         case 4:
-            memcpy(direccion + offset, &stream + offset, sizeof(uint32_t));
+            memcpy(&(heap->prevAlloc),stream + offset, sizeof(uint32_t));
+            memcpy(direccion + offset, &(heap->prevAlloc), sizeof(uint32_t));
             offset += sizeof(uint32_t);
             break;
     }
