@@ -101,6 +101,11 @@ typedef struct{
     t_list *marcos;
 }t_tabla_marcos;
 
+typedef struct{
+    t_pagina *pagina;
+    void *contenido;
+}t_envio_swap;
+
 t_config_memoria *config_memoria;
 t_log *logger_memoria;
 t_tabla_tlb* tabla_tlb;
