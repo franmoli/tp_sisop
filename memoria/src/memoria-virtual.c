@@ -61,7 +61,7 @@ int reemplazarLRU(int nro_pagina, int carpincho_id){
     paginaNueva->pid = carpincho_id;
     int numeroMarco = -1;
 
-    if(config_memoria->TIPO_ASIGNACION == "FIJA"){
+    if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "FIJA") == 0){
 
         //LRU CON FIJA
         t_tabla_paginas* tabla_paginas = buscarTablaPorPID(carpincho_id);
@@ -93,7 +93,7 @@ int reemplazarLRU(int nro_pagina, int carpincho_id){
 
 void actualizarLRU(int nro_pagina, int carpincho_id){
 
-    if(config_memoria->TIPO_ASIGNACION == "FIJA"){
+    if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "FIJA") == 0){
         //LRU CON FIJA
         t_tabla_paginas* tabla_paginas = buscarTablaPorPID(carpincho_id);
         t_reemplazo* pagina = malloc(sizeof(t_reemplazo));
@@ -152,7 +152,7 @@ int reemplazarClockM(int nro_pagina, int carpincho_id, int referido, int modific
     int index = 0;
 
 
-    if(config_memoria->TIPO_ASIGNACION == "FIJA"){
+    if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "FIJA") == 0){
         //CLock para asignacion fija
         t_tabla_paginas* tabla_paginas = buscarTablaPorPID(carpincho_id);
         t_list_iterator *list_iterator = list_iterator_create(tabla_paginas->Clock);
@@ -400,7 +400,7 @@ void actualizarModificado(uint32_t nro_pagina, uint32_t carpincho_id){
     int index = 0;
     
     
-    if(config_memoria->TIPO_ASIGNACION == "FIJA"){
+    if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "FIJA") == 0){
 
         t_tabla_paginas* tabla_paginas = buscarTablaPorPID(carpincho_id);
         t_list_iterator* list_iterator = list_iterator_create(tabla_paginas->Clock);
@@ -458,7 +458,7 @@ void actualizarReferido(uint32_t nro_pagina, uint32_t carpincho_id){
     int index = 0;
     
     
-    if(config_memoria->TIPO_ASIGNACION == "FIJA"){
+    if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "FIJA") == 0){
 
         t_tabla_paginas* tabla_paginas = buscarTablaPorPID(carpincho_id);
         t_list_iterator* list_iterator = list_iterator_create(tabla_paginas->Clock);
