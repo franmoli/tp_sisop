@@ -177,7 +177,7 @@ void print_semaforos(){
 
     while(index < list_size(lista_semaforos)){
         aux = list_get(lista_semaforos, index);
-        printf("Semaforo \"%s\"  \n",aux->nombre_semaforo);
+        printf("Semaforo \"%s\" - Value %d \n",aux->nombre_semaforo, aux->value);
         printf("\n");
         index++;
     }

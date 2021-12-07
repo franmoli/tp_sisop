@@ -94,4 +94,5 @@ int socket_cliente_memoria;
 void mover_proceso_de_lista(t_list *origen, t_list *destino, int index, int status);
 void avisar_cambio();
 
+
 #endif

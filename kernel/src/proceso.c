@@ -72,8 +72,9 @@ void exec(t_proceso *self){
     while(!bloquear_f){
         //Traer proxima operacion
         if(list_size(self->task_list)){
-            next_task = list_get(self->task_list, 0);
+            next_task = list_remove(self->task_list, 0);
             t_paquete *paquete_recibido = NULL;
+            t_semaforo *semaforo_aux = NULL;
 
             switch (next_task->id){
                 case INIT_SEM:
@@ -85,12 +86,17 @@ void exec(t_proceso *self){
                 case CLIENTE_TEST:
                 case NUEVO_CARPINCHO:
                 case SEM_WAIT:
+                    semaforo_aux = next_task->datos_tarea;
+                    printf("Por lo menos entro al wait\n");
+                    solicitar_semaforo(semaforo_aux->nombre_semaforo, self->socket_carpincho);
+
+                    break;
                 case SEM_POST:
                 case SEM_DESTROY:
                 case OP_ERROR:
                     break;
                 case CALLIO:
-
+                        
                     break;
                 case MEMALLOC:
                 case MEMFREE:
@@ -103,12 +109,12 @@ void exec(t_proceso *self){
 
             }
             
-            bloquear_f = true;
+            //bloquear_f = true;
         }
     }
 
     sleep(2);
-    //bloquear(self);
+    bloquear(self);
 }
 
 void bloquear(t_proceso *self){
@@ -128,16 +134,22 @@ void desbloquear(t_proceso *self){
 }
 
 void solicitar_semaforo(char *nombre_semaforo, int id){
+    //TODO: AGREGAR MUTEX DE VALUE O LO QUE SEA
     // traer de la lista el semaforo
+    printf("Solicitando semaforo %s - id %d\n", nombre_semaforo, id);
     t_semaforo *semaforo_solicitado = traer_semaforo(nombre_semaforo);
     
-    if(semaforo_solicitado == NULL) return; //TODO: ENVIAR ERROR AL CARPINCHO
+    if(semaforo_solicitado == NULL){
+        enviar_error(id);
+        return;
+    }
 
     if(semaforo_solicitado->value > 0){
 
         //si esta disponible restarle uno al value y enviar habilitacion para continuar
         semaforo_solicitado->value = semaforo_solicitado->value - 1;
-        enviar_sem_disponible(id);
+
+        enviar_confirmacion(id);
 
     }else{
 

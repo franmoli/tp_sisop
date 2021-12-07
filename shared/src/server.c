@@ -31,7 +31,8 @@ int iniciar_servidor(char *ip, char *puerto, t_log *logger) {
     	return socket_servidor;
 	}else{
 		log_error(logger, "Se produjo un error en la creacion del servidor\n");
-		exit(EXIT_FAILURE);
+		sleep(1);
+		return iniciar_servidor(ip, puerto, logger);
 	}
 }
 

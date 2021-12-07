@@ -16,4 +16,6 @@ void desbloquear(t_proceso *self);
 void iniciar_semaforo(t_semaforo *semaforo);
 void enviar_sem_disponible(int id);
 t_semaforo *traer_semaforo(char *nombre_solicitado);
+void enviar_error(int socket);
+void solicitar_semaforo(char *nombre_semaforo, int id);
 #endif

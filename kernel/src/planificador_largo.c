@@ -43,14 +43,14 @@ void atender_proceso (void* parametro ){
     t_proceso *carpincho = malloc(sizeof(t_proceso)); 
     carpincho->task_list = list_create();
     carpincho->socket_carpincho = socket_cliente;
-    t_task *task_aux = NULL;
+   // t_task *task_aux = NULL;
     t_semaforo *semaforo_recibido = NULL;
 
     while(1) {
 
 		t_paquete *paquete = NULL;
 		paquete = recibir_paquete(socket_cliente);
-        task_aux = malloc(sizeof(t_task));
+        //task_aux = malloc(sizeof(t_task));
 
         //Analizo el código de operación recibido y ejecuto acciones según corresponda
         printf("Paquete recibido %d\n", paquete->codigo_operacion);
@@ -80,6 +80,19 @@ void atender_proceso (void* parametro ){
 
                 enviar_confirmacion(socket_cliente);
                 
+                break;
+            case SEM_WAIT:
+
+                semaforo_recibido = malloc(sizeof(t_semaforo));
+                semaforo_recibido->nombre_semaforo = NULL;
+
+                deserializar(paquete, 2, CHAR_PTR, &semaforo_recibido->nombre_semaforo);
+                
+                task->id = SEM_WAIT;
+                task->datos_tarea = semaforo_recibido;
+
+                list_add(carpincho->task_list, task);
+
                 break;
             case CLIENTE_DESCONECTADO:
                 log_info(logger_kernel, "Desconectando cliente %d", socket_cliente);
@@ -134,6 +147,7 @@ t_proceso *nuevo_carpincho(int socket_cliente){
     nuevo_proceso->termino_rafaga = false;
     nuevo_proceso->block = false;
     nuevo_proceso->task_list = list_create();
+    nuevo_proceso->socket_carpincho = socket_cliente;
 
     pthread_t hilo_proceso;
     pthread_create(&hilo_proceso, NULL, proceso, (void*)nuevo_proceso);
@@ -275,6 +289,19 @@ void enviar_confirmacion(int socket){
     paquete->buffer->size = 0;
     paquete->buffer->stream = NULL;
     paquete->codigo_operacion = OP_CONFIRMADA;
+
+    enviar_paquete(paquete, socket);
+
+    
+    return;
+}
+
+void enviar_error(int socket){
+    t_paquete *paquete = malloc(sizeof(t_paquete));
+    paquete->buffer = malloc(sizeof(t_buffer));
+    paquete->buffer->size = 0;
+    paquete->buffer->stream = NULL;
+    paquete->codigo_operacion = OP_ERROR;
 
     enviar_paquete(paquete, socket);
 

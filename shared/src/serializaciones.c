@@ -1,84 +1,6 @@
 #include "../include/serializaciones.h"
 
 /**************************** Memoria <---> Swap ****************************/
-/* Mate sem init  */
-/*t_paquete *serializar_mate_sem_init(uint32_t valor, char *nombre_sem){
-    t_mate_sem *datos_sem = malloc(sizeof(t_mate_sem));
-    datos_sem->nombre = malloc(sizeof(char)*strlen(nombre_sem)+1);
-    datos_sem->nombre = nombre_sem;
-    datos_sem->value = valor;
-
-    t_paquete *paquete = malloc(sizeof(t_paquete));
-    t_buffer *buffer = malloc(sizeof(t_buffer));
-    u_int32_t stream_size = sizeof(uint32_t) + sizeof(char)*strlen(nombre_sem) + 1;
-    buffer->size = stream_size;
-
-    void *stream = malloc(buffer->size);
-
-    printf("estoy en el serializar, el nombre del semaforo es: %s\n",datos_sem->nombre);
-    
-    int offset = 0;
-
-    memcpy(stream + offset, &(datos_sem->nombre), sizeof(char)*strlen(nombre_sem)+1);
-    offset+= sizeof(char)*strlen(nombre_sem)+1;
-    memcpy(stream + offset, &(datos_sem->value), sizeof(uint32_t));
-
-    buffer->stream = stream;
-    paquete->buffer = buffer;
-    paquete->codigo_operacion = INIT_SEM;
-
-    return paquete;
-}*/
-
-/*t_mate_sem *deserializar_mate_sem_init(t_paquete *paquete){
-
-    t_mate_sem *datos_sem = malloc(sizeof(t_mate_sem));
-    datos_sem->nombre = malloc(paquete->buffer->size - sizeof(u_int32_t));
-    void *stream = paquete->buffer->stream;
-    printf("el tamanio del buffer del paquete recibido es: %d\n",paquete->buffer->size);
-
-    int offset = 0;
-    memcpy(&(datos_sem->nombre),stream + offset, paquete->buffer->size);
-    offset += paquete->buffer->size - sizeof(u_int32_t);    
-    memcpy(&(datos_sem->value),stream + offset, sizeof(uint32_t));
-   
-    return datos_sem;
-}*/
-
-/* Mate Sem Resto */
-/*t_paquete *serializar_mate_sem_resto(char *nombre_sem, op_code cod_op){
-    t_mate_sem *datos_sem = malloc(sizeof(t_mate_sem));
-    datos_sem->nombre = malloc(sizeof(char)*strlen(nombre_sem)+1);
-    datos_sem->nombre = nombre_sem;
-
-    t_paquete *paquete = malloc(sizeof(t_paquete));
-    t_buffer *buffer = malloc(sizeof(t_buffer));
-    buffer->size = sizeof(char)*strlen(nombre_sem)+1;
-
-    int offset = 0;
-    void *stream = malloc(buffer->size);
-
-    memcpy(stream + offset,&(datos_sem->nombre),buffer->size);
-
-    buffer->stream = stream;
-    paquete->buffer = buffer;
-    paquete->codigo_operacion = cod_op;
-
-    return paquete;
-}
-
-t_mate_sem *deserializar_mate_sem_resto(t_paquete *paquete){
-
-    t_mate_sem *datos_sem = malloc(sizeof(t_mate_sem));
-    datos_sem->nombre = malloc(paquete->buffer->size);
-    datos_sem->value = 0;
-    void *stream = paquete->buffer->stream;
-
-    int offset = 0;
-
-    memcpy(&(datos_sem->nombre),stream + offset, paquete->buffer->size);
-    return datos_sem;
-}*/
 
 t_paquete *serializar_mate_call_io(char *resource, void *msg){
 
@@ -107,15 +29,6 @@ t_paquete *serializar_mate_call_io(char *resource, void *msg){
     return paquete;
 }
 
-/*t_mate_call_io *deserializar_mate_call_io(t_paquete *paquete){
-    t_mate_call_io *datos = malloc(sizeof(t_mate_call_io));
-    void *stream = malloc(paquete->buffer->size);
-    stream = paquete->buffer->stream;
-
-    int offset = 0;
-
-    return datos;
-}*/
 
 /* Allocs */
 t_paquete *serializar_alloc(uint32_t size, uint32_t carpincho_id){
@@ -310,7 +223,6 @@ t_pagina_swap deserializar_pagina(void *stream) {
     return pagina;
 }
 
-
 t_paquete * serializar (int codigo_operacion, int arg_count, ...){
 
     //Declaraciones de variables
@@ -340,15 +252,13 @@ t_paquete * serializar (int codigo_operacion, int arg_count, ...){
 
         switch(tipo){
             case INT:
-                printf("Serializo int\n");
                 param_i = va_arg(valist, int);
                 added_size = sizeof(int);
 
                 serializar_single(&stream, &param_i, &size, added_size, &offset);
 
                 break;
-            case CHAR_PTR:
-                printf("Serializo char\n");            
+            case CHAR_PTR:       
                 param_s = va_arg(valist, char*);
                 int string_length = strlen(param_s) +1;
                 added_size = sizeof(char) * sizeof(char)*string_length;
@@ -468,19 +378,16 @@ void deserializar(t_paquete *paquete, int arg_count, ...){
         t_type tipo = va_arg(valist, t_type);
         switch(tipo){
             case INT:
-                printf("Deserializo int\n");
                 param = va_arg(valist, void*);
                 size = sizeof(int);
                 deserializar_single(stream, param, size, &offset);
 
                 break;
-            case CHAR_PTR:
-                printf("Deserializo char\n");     
+            case CHAR_PTR:  
                 param_char = va_arg(valist, char**);
                 //Primero traigo el tamanio del string
                 size = sizeof(int);
                 deserializar_single(stream, &size, size, &offset);
-                printf("El tamanio del string es %d\n", size);
                 //Con el tamanio del string asigno memoria y traigo variable
                 *param_char = realloc(*param_char, size);
                 deserializar_single(stream, *param_char, size, &offset);              
