@@ -10,6 +10,7 @@ void iniciar_planificador_corto(){
     pthread_t hilo_planificador;
     pthread_t hilo_terminar_rafaga;
     pthread_t hilo_liberar_multiprocesamiento_h;
+    pthread_t hilo_esperar_bloqueo;
     int *multiprocesamiento = malloc(sizeof(int));
     *multiprocesamiento = config_kernel->GRADO_MULTIPROCESAMIENTO;
 
@@ -30,6 +31,7 @@ void iniciar_planificador_corto(){
     pthread_create(&hilo_planificador, NULL, planificador, (void *)multiprocesamiento);
     pthread_create(&hilo_terminar_rafaga, NULL, esperar_salida_exec, (void *)multiprocesamiento);
     pthread_create(&hilo_liberar_multiprocesamiento_h, NULL, hilo_liberar_multiprocesamiento, (void *)multiprocesamiento);
+    pthread_create(&hilo_esperar_bloqueo, NULL, esperar_bloqueo, (void *)multiprocesamiento);
 }
 
 void *planificador_corto_plazo_sjf (void *multiprocesamiento_p){
@@ -215,12 +217,14 @@ void *esperar_bloqueo(void *multiprocesamiento_p){
     while(1){
 
         sem_wait(&solicitar_block);
+        printf("Se solicito un block\n");
+
         bool encontrado = false;
-        int tamanio_lista_blocked = list_size(lista_blocked);
+        int tamanio_lista_exec = list_size(lista_exec);
         int index = 0;
 
-        while(!encontrado && (index < tamanio_lista_blocked)){
-            t_proceso *aux = list_get(lista_blocked, index);
+        while(!encontrado && (index < tamanio_lista_exec)){
+            t_proceso *aux = list_get(lista_exec, index);
             
                 if(aux->block){
                     printf("Bloqueando %d", aux->id);

@@ -161,7 +161,20 @@ void *debug_console(void *_ ){
             print_task_lists();
         }
         if(string_contains(input, "exit")){
+            void cerrar_conexion(void *elemento){
+                t_proceso *carpincho = elemento;
+                close(carpincho->id);
+            }
+            list_iterate(lista_blocked, cerrar_conexion);
+            list_iterate(lista_ready, cerrar_conexion);
+            list_iterate(lista_exec, cerrar_conexion);
+            list_iterate(lista_new, cerrar_conexion);
+            list_iterate(lista_s_ready, cerrar_conexion);
+            list_iterate(lista_s_blocked, cerrar_conexion);
             exit(EXIT_SUCCESS);
+        }
+        if(string_contains(input, "list")){
+            print_lists();
         }
 
     }
@@ -172,12 +185,22 @@ void *debug_console(void *_ ){
 
 void print_semaforos(){
     int index = 0;
+    int index2 = 0;
     t_semaforo *aux = NULL;
+    int *solicitante = NULL;
     printf("Printing semaphores %d:\n", list_size(lista_semaforos));
 
     while(index < list_size(lista_semaforos)){
         aux = list_get(lista_semaforos, index);
-        printf("Semaforo \"%s\" - Value %d \n",aux->nombre_semaforo, aux->value);
+        printf("Semaforo \"%s\" - Value %d  - Solicitantes:\n",aux->nombre_semaforo, aux->value, list_size(aux->solicitantes));
+        
+        if(list_size(aux->solicitantes)){
+            while(index2 < list_size(aux->solicitantes)){
+                solicitante = list_get(aux->solicitantes, index2);
+                printf("Solicitante del semaforo :%d\n", *solicitante);
+                index2++;
+            }
+        }
         printf("\n");
         index++;
     }
@@ -239,4 +262,54 @@ void print_task_lists(){
         index++;
     }
     printf("Pass\n");
+}
+
+void print_lists(){
+    int index = 0;
+    t_proceso *aux = NULL;
+
+    printf("Printeando gente en blocked %d\n\n", list_size(lista_blocked));
+    while(index < list_size(lista_blocked)){
+        aux = list_get(lista_blocked, index);
+        printf("Carpincho en blocked %d\n", aux->id);
+        index++;
+    }
+
+    index = 0;
+
+    printf("Printeando gente en ready %d\n\n", list_size(lista_ready));
+    while(index < list_size(lista_ready)){
+        aux = list_get(lista_ready, index);
+        printf("Carpincho en ready %d\n", aux->id);
+        index++;
+    }
+
+    index = 0;
+
+    printf("Printeando gente en exec %d\n\n", list_size(lista_exec));
+    while(index < list_size(lista_exec)){
+        aux = list_get(lista_exec, index);
+        printf("Carpincho en exec %d\n", aux->id);
+        index++;
+    }
+
+    index = 0;
+
+    printf("Printeando gente en suspended block %d\n\n", list_size(lista_s_blocked));
+    while(index < list_size(lista_s_blocked)){
+        aux = list_get(lista_s_blocked, index);
+        printf("Carpincho en s_block %d\n", aux->id);
+        index++;
+    }
+
+    index = 0;
+
+    printf("Printeando gente en suspended ready %d\n\n", list_size(lista_s_ready));
+    while(index < list_size(lista_s_ready)){
+        aux = list_get(lista_s_ready, index);
+        printf("Carpincho en s_ready %d\n", aux->id);
+        index++;
+    }
+
+
 }

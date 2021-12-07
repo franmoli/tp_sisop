@@ -61,7 +61,6 @@ int mate_init(mate_instance_pointer *instance_pointer, char *config){
         exit(EXIT_FAILURE);
     }
     lib_ref->socket = socket_cliente;
-    printf("Socket cliente%d\n", socket_cliente);
     //Creo el paquete para enviar la señal a kernel o memoria.
     t_paquete *paquete = malloc(sizeof(t_paquete));
     t_buffer *buffer = malloc(sizeof(t_buffer));
@@ -76,7 +75,7 @@ int mate_init(mate_instance_pointer *instance_pointer, char *config){
     //Compruebo que la operacion fue exitosa
     t_paquete *paquete_recibido = recibir_paquete(lib_ref->socket);
 
-    if(paquete_recibido->codigo_operacion == NUEVO_CARPINCHO){
+    if(paquete_recibido->codigo_operacion == OP_CONFIRMADA){
         log_info(lib_ref->logger,"Acabo de instanciarme correctamente");
         return 0;
     }else{

@@ -94,6 +94,21 @@ void atender_proceso (void* parametro ){
                 list_add(carpincho->task_list, task);
 
                 break;
+
+            case SEM_POST:
+
+                semaforo_recibido = malloc(sizeof(t_semaforo));
+                semaforo_recibido->nombre_semaforo = NULL;
+
+                deserializar(paquete, 2, CHAR_PTR, &semaforo_recibido->nombre_semaforo);
+                
+                task->id = SEM_POST;
+                task->datos_tarea = semaforo_recibido;
+
+                list_add(carpincho->task_list, task);
+
+                break;
+                
             case CLIENTE_DESCONECTADO:
                 log_info(logger_kernel, "Desconectando cliente %d", socket_cliente);
                 close(socket_cliente);
@@ -117,7 +132,6 @@ void atender_proceso (void* parametro ){
                 task->datos_tarea = paquete;
                 break;
             case CALLIO:
-                
                 break;
             default:
                 log_error(logger_kernel, "Codigo de operacion desconocido");
@@ -167,7 +181,7 @@ t_proceso *nuevo_carpincho(int socket_cliente){
     //Enviar confirmacion a carpincho
      t_paquete *paquete = malloc(sizeof(t_paquete));
     t_buffer *buffer = malloc(sizeof(t_buffer));
-    paquete->codigo_operacion = NUEVO_CARPINCHO;
+    paquete->codigo_operacion = OP_CONFIRMADA;
     paquete->buffer = buffer;
     buffer->size = 0;
     enviar_paquete(paquete, socket_cliente);

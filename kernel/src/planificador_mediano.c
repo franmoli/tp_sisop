@@ -64,21 +64,8 @@ void *salida_de_block(void *_){
             t_proceso *aux = list_get(lista_s_blocked, index);
             
             if(aux->salida_block){
-
-                if(multiprogramacion_disponible){
-                    
-                    mover_proceso_de_lista(lista_s_blocked, lista_ready, 0, READY);
-
-                    sem_wait(&mutex_multiprogramacion);
-                    multiprogramacion_disponible = multiprogramacion_disponible - 1;
-                    sem_post(&mutex_multiprogramacion);
-                    
-                }else{
-
-                    sem_post(&pedir_salida_de_block);
-
-                }
-                    
+                
+                mover_proceso_de_lista(lista_s_blocked, lista_s_ready, 0, READY);
                 encontrado = true;
                 
             }

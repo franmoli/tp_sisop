@@ -10,6 +10,7 @@ kernel_c :
 kernel_r :
 	cd $(KERNEL_DIR) && \
 	./exec
+
 kernel_r_v :
 	cd $(KERNEL_DIR) && \
 	./vexec
