@@ -2,7 +2,7 @@
 
 /**************************** Memoria <---> Swap ****************************/
 /* Mate sem init  */
-t_paquete *serializar_mate_sem_init(uint32_t valor, char *nombre_sem){
+/*t_paquete *serializar_mate_sem_init(uint32_t valor, char *nombre_sem){
     t_mate_sem *datos_sem = malloc(sizeof(t_mate_sem));
     datos_sem->nombre = malloc(sizeof(char)*strlen(nombre_sem)+1);
     datos_sem->nombre = nombre_sem;
@@ -28,9 +28,9 @@ t_paquete *serializar_mate_sem_init(uint32_t valor, char *nombre_sem){
     paquete->codigo_operacion = INIT_SEM;
 
     return paquete;
-}
+}*/
 
-t_mate_sem *deserializar_mate_sem_init(t_paquete *paquete){
+/*t_mate_sem *deserializar_mate_sem_init(t_paquete *paquete){
 
     t_mate_sem *datos_sem = malloc(sizeof(t_mate_sem));
     datos_sem->nombre = malloc(paquete->buffer->size - sizeof(u_int32_t));
@@ -43,10 +43,10 @@ t_mate_sem *deserializar_mate_sem_init(t_paquete *paquete){
     memcpy(&(datos_sem->value),stream + offset, sizeof(uint32_t));
    
     return datos_sem;
-}
+}*/
 
 /* Mate Sem Resto */
-t_paquete *serializar_mate_sem_resto(char *nombre_sem, op_code cod_op){
+/*t_paquete *serializar_mate_sem_resto(char *nombre_sem, op_code cod_op){
     t_mate_sem *datos_sem = malloc(sizeof(t_mate_sem));
     datos_sem->nombre = malloc(sizeof(char)*strlen(nombre_sem)+1);
     datos_sem->nombre = nombre_sem;
@@ -78,7 +78,7 @@ t_mate_sem *deserializar_mate_sem_resto(t_paquete *paquete){
 
     memcpy(&(datos_sem->nombre),stream + offset, paquete->buffer->size);
     return datos_sem;
-}
+}*/
 
 t_paquete *serializar_mate_call_io(char *resource, void *msg){
 

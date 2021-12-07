@@ -59,8 +59,6 @@ int main(int argc, char **argv)
         if (socket_cliente_swap == -1) {
             log_info(logger_memoria, "Fallo en la conexion a swap");
         }
-        //PROGRAMA NORMAL
-        socket_server = iniciar_servidor(config_memoria->IP, string_itoa(config_memoria->PUERTO), logger_memoria);
 
         signal(SIGINT, imprimirMetricas);
         signal(SIGUSR1, generarDump);
@@ -81,103 +79,12 @@ int main(int argc, char **argv)
         paquete1 = serializar_alloc(3, carpincho_id);
         memAlloc(paquete1);
 
-       
 
         paquete1 = serializar_alloc(14, carpincho_id);
         freeAlloc(paquete1);
         paquete1 = serializar_alloc(46, carpincho_id);
         freeAlloc(paquete1);
-        //paquete1 = serializar_alloc(10);
-        //memAlloc(paquete1);
 
-        //paquete1 = serializar_alloc(134542270);
-        //freeAlloc(paquete1);
-
-        //mostrarPaginas();
-        //mostrarAllocs();
-        /*paquete1 = serializar_alloc(3);
-        memAlloc(paquete1);*/
-        //ree(paquete1);
-
-        /*t_paquete *paquete2 = serializar_consulta_swap(15);
-        t_swap_serializado* swap_deserializado = deserializar_swap(paquete2);
-        log_info(logger_memoria, "ID desde swap: %d",swap_deserializado->carpincho_id);
-        log_info(logger_memoria, "ID desde swap: %d",swap_deserializado->swap_free);*/
-
-    /* Mandar página a SWAP */
-    /*t_heap_metadata *heap_metadata = malloc(sizeof(t_heap_metadata));
-    heap_metadata->prevAlloc = 0;
-    heap_metadata->nextAlloc = 5;
-    heap_metadata->isFree = 1;
-
-    t_info_heap_swap *contenido_heap_1 = malloc(sizeof(t_info_heap_swap));
-    contenido_heap_1->contenido = heap_metadata;
-
-    t_info_heap_swap *contenido_heap_2 = malloc(sizeof(t_info_heap_swap));
-    contenido_heap_2->contenido = heap_metadata;
-
-    t_list *lista_contenidos_heap = list_create();
-    list_add(lista_contenidos_heap, contenido_heap_1);
-    list_add(lista_contenidos_heap, contenido_heap_2);
-
-    t_pagina_swap *pagina_prueba = malloc(sizeof(t_pagina_swap));
-    pagina_prueba->tipo_contenido = AMBOS;
-    pagina_prueba->pid = 180;
-    pagina_prueba->numero_pagina = 1;
-    pagina_prueba->contenido_heap_info = lista_contenidos_heap;
-
-    log_info(logger_memoria, "Se intentara enviar una pagina al modulo de SWAP para almacenarla en un archivo");
-    
-    void *pagina_serializada = serializar_pagina(*pagina_prueba);
-
-    t_buffer *buffer = malloc(sizeof(t_buffer));
-	buffer->size = bytes_pagina(*pagina_prueba);
-	buffer->stream = pagina_serializada;
-
-    t_paquete *paquete = malloc(sizeof(t_paquete));
-	paquete->codigo_operacion = SWAPSAVE;
-	paquete->buffer = buffer;
-
-    enviar_paquete(paquete, socket_cliente_swap);
-    free(buffer);
-
-     Recibir página de SWAP 
-    int numero_pagina = 1;
-
-    void *pedido_pagina_serializado = malloc(sizeof(int));
-    memcpy(pedido_pagina_serializado + 0, &numero_pagina, sizeof(int));
-
-    buffer = malloc(sizeof(t_buffer));
-    buffer->size = sizeof(int);
-    buffer->stream = pedido_pagina_serializado;
-
-    paquete = malloc(sizeof(t_paquete));
-    paquete->codigo_operacion = SWAPFREE;
-    paquete->buffer = buffer;
-
-    enviar_paquete(paquete, socket_cliente_swap);
-    free(buffer);
-
-    log_info(logger_memoria, "Esperando respuesta por parte de SWAP");
-    
-    t_paquete *paquete_recibido = recibir_paquete(socket_cliente_swap);
-    t_pagina_swap *pagina = malloc(sizeof(t_pagina_swap));
-    *pagina = deserializar_pagina(paquete_recibido->buffer->stream);
-
-    printf("\n\nPagina deserializada:\n");
-    printf("PID: %d\n", pagina->pid);
-    printf("Numero pagina: %d\n", pagina->numero_pagina);
-    for(int i=0; i<list_size(pagina->contenido_heap_info); i++) {
-        t_info_heap_swap *contenido_heap = list_get(pagina->contenido_heap_info, i);
-        printf("Contenido heap %d\n", i+1);
-        printf("\tPrevAlloc: %d\n", contenido_heap->contenido->prevAlloc);
-        printf("\tNextAlloc: %d\n", contenido_heap->contenido->nextAlloc);
-        printf("\tIsFree: %d\n", contenido_heap->contenido->isFree);
-    }
-    printf("\n\n");
-
-    log_info(logger_memoria, "Paquete recibido por parte de SWAP");
-*/
     while (1)
     {
         socket_client = esperar_cliente(socket_server, logger_memoria);
