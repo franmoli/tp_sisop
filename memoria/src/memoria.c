@@ -93,7 +93,7 @@ int main(int argc, char **argv)
         paquete1 = serializar_alloc(46, carpincho_id);
         freeAlloc(paquete1);
 
-        memdump();
+        //memdump();
 
     while (1)
     {
@@ -131,12 +131,20 @@ static void *ejecutar_operacion(int client)
         case MEMALLOC:
             log_info(logger_memoria, "recibi orden de memalloc del cliente %d", client);
             int dire_logica =memAlloc(paquete);
+            
             t_kernel_dire_logica_serializado* estructura = malloc(sizeof(t_kernel_dire_logica_serializado));
             estructura->direccion_logica = dire_logica;
             t_paquete* paquete = serializar_direccion_logica(estructura);
             enviarDatos(paquete, KERNEL);
             free(estructura);
+
             break;
+        case MEMFREE:
+            log_info(logger_memoria, "recibi orden de memfree del cliente %d", client);
+            freeAlloc(paquete);
+
+            break;
+
         case MEMWRITE:
             log_info(logger_memoria, "recibi orden de guardar en memoria del cliente %d", client);
             memAlloc(paquete);
