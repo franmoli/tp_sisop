@@ -215,6 +215,8 @@ void inicializarCarpincho(t_paquete *paquete)
     nuevaTabla->Clock = list_create();
     nuevaTabla->paginas_en_memoria = 0;
     nuevaTabla->paginas_totales_maximas = config_memoria->TAMANIO / config_memoria->TAMANIO_PAGINA;
+    nuevaTabla->hit = 0;
+    nuevaTabla->miss = 0;
     list_add(tabla_procesos, nuevaTabla);
 
     return;

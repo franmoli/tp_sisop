@@ -11,6 +11,10 @@ int buscarEnTLB(int numero_pagina_buscada, int id){
         t_tlb* primerElem = malloc(sizeof(primerElem));
         //Ver si logueo un miss
         sleep(config_memoria->RETARDO_FALLO_TLB);
+        tabla_tlb->miss_totales ++;
+        t_tabla_paginas *tabla = buscarTablaPorPID(primerElem->pid);
+        tabla->miss ++;
+
         marco = buscarMarcoEnMemoria(numero_pagina_buscada, id);
         log_info(logger_memoria, "Encontre el marco %d",marco);
         primerElem->pid = id;
@@ -29,6 +33,9 @@ int buscarEnTLB(int numero_pagina_buscada, int id){
             marco = tlb->numero_marco;
             sleep(config_memoria->RETARDO_ACIERTO_TLB);
             log_info(logger_memoria,"ACIERTO TLB");
+            tabla_tlb->hit_totales ++;
+            t_tabla_paginas *tabla = buscarTablaPorPID(primerElem->pid);
+            tabla->hit ++;
             if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_TLB, "LRU") == 0){
                 reordenarLRU(tlb->numero_pagina, id);
             }
@@ -43,6 +50,9 @@ int buscarEnTLB(int numero_pagina_buscada, int id){
 
     sleep(config_memoria->RETARDO_FALLO_TLB);
     log_info(logger_memoria,"FALLO TLB");
+    tabla_tlb->miss_totales ++;
+    t_tabla_paginas *tabla = buscarTablaPorPID(primerElem->pid);
+    tabla->miss ++;
 
     t_tlb* newElem = malloc(sizeof(t_tlb));
 
