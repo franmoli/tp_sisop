@@ -102,8 +102,11 @@ t_paquete* recibir_paquete(int socket_cliente) {
 	paquete->buffer = malloc(sizeof(t_buffer));
 
 	recv(socket_cliente, &(paquete->codigo_operacion), sizeof(uint32_t), MSG_WAITALL);
-	if(paquete->codigo_operacion == 0 || paquete->codigo_operacion < 0)
-		exit(EXIT_FAILURE);
+	if(paquete->codigo_operacion == 0 || paquete->codigo_operacion < 0){
+		close(socket_cliente);
+		printf("Cerrando el socket del cliente...\n");
+		//exit(EXIT_FAILURE);
+	}
 	recv(socket_cliente, &(paquete->buffer->size), sizeof(uint32_t), 0);
 	if(paquete->buffer->size){
 		paquete->buffer->stream = malloc(paquete->buffer->size);

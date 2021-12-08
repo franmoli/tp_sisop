@@ -78,7 +78,7 @@ void atender_proceso (void* parametro ){
 
                 list_add(carpincho->task_list, task);
 
-                enviar_confirmacion(socket_cliente);
+                //enviar_confirmacion(socket_cliente);
                 
                 break;
             case SEM_WAIT:
@@ -92,7 +92,7 @@ void atender_proceso (void* parametro ){
                 task->datos_tarea = semaforo_recibido;
 
                 list_add(carpincho->task_list, task);
-
+                printf("llegue a agregar a la lista del p_largo.c\n");
                 break;
 
             case SEM_POST:
@@ -111,7 +111,9 @@ void atender_proceso (void* parametro ){
                 
             case CLIENTE_DESCONECTADO:
                 log_info(logger_kernel, "Desconectando cliente %d", socket_cliente);
-                close(socket_cliente);
+                task->id = CLIENTE_DESCONECTADO;
+                list_add(carpincho->task_list,task);
+                //close(socket_carpincho);
                 return;
                 break;
                 
@@ -135,7 +137,10 @@ void atender_proceso (void* parametro ){
                 break;
             default:
                 log_error(logger_kernel, "Codigo de operacion desconocido");
-                exit(EXIT_FAILURE);
+                //exit(EXIT_FAILURE);
+                carpincho->salida_exit = true;
+                sem_post(&salida_a_exit);
+                return;
                 break;
             
         }
@@ -179,13 +184,12 @@ t_proceso *nuevo_carpincho(int socket_cliente){
     sem_post(&libre_para_inicializar_proceso);
 
     //Enviar confirmacion a carpincho
-     t_paquete *paquete = malloc(sizeof(t_paquete));
+    t_paquete *paquete = malloc(sizeof(t_paquete));
     t_buffer *buffer = malloc(sizeof(t_buffer));
     paquete->codigo_operacion = OP_CONFIRMADA;
     paquete->buffer = buffer;
     buffer->size = 0;
     enviar_paquete(paquete, socket_cliente);
-    //free(paquete);
     free(buffer);
     return nuevo_proceso;
 }
@@ -220,7 +224,7 @@ void *hilo_salida_a_exit(void *multiprogramacion_disponible_p){
         
         
         bool encontrado = false;
-        //int tamanio_lista_exec = list_size(lista_exec);
+        int tamanio_lista_exec = list_size(lista_exec);
         int tamanio_lista_blocked = list_size(lista_blocked);
         int tamanio_lista_ready = list_size(lista_ready);
         int index = 0;
@@ -229,21 +233,16 @@ void *hilo_salida_a_exit(void *multiprogramacion_disponible_p){
         //Busco en exec
         //printf("Exec: %d \n", list_size(lista_exec));        
         while(!encontrado && (index < list_size(lista_exec))){
-            //printf("Exec: %d \n", list_size(lista_exec));
+            printf("Entre en el 2do while de salida a exit: %d \n", list_size(lista_exec));
             t_proceso *aux = list_get(lista_exec, index);
             if(aux->salida_exit){
-                   // printf("Espera en exit - procesos\n");
-                    sem_wait(&mutex_cant_procesos);
-                    //printf("Pasó en exit\n");  
-                    //printf(".");                  
-                    sem_wait(&mutex_listas);
-                        aux = list_remove(lista_exec, index );
-                    sem_post(&mutex_listas);
-                    cantidad_de_procesos--;
-                    sem_post(&mutex_cant_procesos);
-                    //printf("Post-procesos-planif-exit\n");
-                 //printf("Saco proceso %d\n", aux->id);
-                 //printf(".");
+                sem_wait(&mutex_cant_procesos);
+                printf("Pasó el mutex_cant_procesos\n");  
+                sem_wait(&mutex_listas);
+                aux = list_remove(lista_exec, index );
+                sem_post(&mutex_listas);
+                cantidad_de_procesos--;
+                sem_post(&mutex_cant_procesos);   
                 encontrado = true;
             }
             index ++;

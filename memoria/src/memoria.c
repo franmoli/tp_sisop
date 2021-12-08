@@ -66,7 +66,7 @@ int main(int argc, char **argv)
         signal(SIGUSR1, generarDump);
         signal(SIGUSR2, limpiarTlb);
 
-        t_paquete *paquete = serializar_mate_init(1);
+ /*       t_paquete *paquete = serializar_mate_init(1);
         inicializarCarpincho(paquete);
         uint32_t carpincho_id = deserializar_mate_init(paquete)->carpincho_id;
        
@@ -94,7 +94,7 @@ int main(int argc, char **argv)
         freeAlloc(paquete1);
 
         //memdump();
-
+*/
     while (1)
     {
         socket_client = esperar_cliente(socket_server, logger_memoria);
@@ -110,7 +110,7 @@ int main(int argc, char **argv)
 
 static void *ejecutar_operacion(int client)
 {
-    pthread_t hilo_respuesta;
+    /*pthread_t hilo_respuesta;
     if(0 !=pthread_create(&hilo_respuesta, NULL, (void *)receptor, NULL)){
         log_error(logger_memoria, "ERROR AL CREAR EL HILO DE RESPUESTA MEMORIA");
         close(client);
@@ -118,7 +118,7 @@ static void *ejecutar_operacion(int client)
         return NULL;
     }
     pthread_join(hilo_respuesta,NULL);
-    while (1)
+    */while (1)
     {
         t_paquete *paquete = recibir_paquete(client);
 

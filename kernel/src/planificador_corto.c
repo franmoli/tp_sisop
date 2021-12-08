@@ -11,7 +11,6 @@ void iniciar_planificador_corto(){
     pthread_t hilo_terminar_rafaga;
     pthread_t hilo_liberar_multiprocesamiento_h;
     pthread_t hilo_esperar_bloqueo;
-    pthread_t hilo_esperar_salida_bloqueo;
     int *multiprocesamiento = malloc(sizeof(int));
     *multiprocesamiento = config_kernel->GRADO_MULTIPROCESAMIENTO;
 
@@ -33,7 +32,6 @@ void iniciar_planificador_corto(){
     pthread_create(&hilo_terminar_rafaga, NULL, esperar_salida_exec, (void *)multiprocesamiento);
     pthread_create(&hilo_liberar_multiprocesamiento_h, NULL, hilo_liberar_multiprocesamiento, (void *)multiprocesamiento);
     pthread_create(&hilo_esperar_bloqueo, NULL, esperar_bloqueo, (void *)multiprocesamiento);
-    pthread_create(&hilo_esperar_salida_bloqueo, NULL, esperar_salida_block,(void *)multiprocesamiento);
 }
 
 void *planificador_corto_plazo_sjf (void *multiprocesamiento_p){
@@ -52,7 +50,6 @@ void *planificador_corto_plazo_sjf (void *multiprocesamiento_p){
                 estimar(aux);
 
         }
-        
         if(*multiprocesamiento && list_size(lista_ready)){
             int index = -1;
             int estimacion_aux;
@@ -65,8 +62,10 @@ void *planificador_corto_plazo_sjf (void *multiprocesamiento_p){
                     index = i;
                 }
             }
-
+            
             //Se saca de ready y se pasa a exec
+            int *carpincho = list_get(lista_ready,index);
+            printf("Movi el proceso %d a ready\n",*carpincho);
             mover_proceso_de_lista(lista_ready, lista_exec, index, EXEC);
             sem_wait(&mutex_multiprocesamiento);
             *multiprocesamiento = *multiprocesamiento - 1;

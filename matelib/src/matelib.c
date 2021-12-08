@@ -73,6 +73,7 @@ int mate_init(mate_instance_pointer *instance_pointer, char *config){
 
 int mate_close(mate_instance_pointer *instance_pointer){
 
+    printf("Estoy en el inicio del mate_close\n");
     mate_instance *lib_ref = instance_pointer->group_info;
 
     log_info(lib_ref->logger,"Cerrando el MATE_INSTANCE");

@@ -15,12 +15,15 @@ void iniciar_planificador_mediano(){
 void *planificador_mediano_plazo(void *_){
     while(1){
         sem_wait(&cambio_de_listas);
+        printf("Entre en el planificador mediano plazo y pase el sem_cambio_de_listas\n");
         int tamanio_block = list_size(lista_blocked);
         int tamanio_ready = list_size(lista_ready);
         int tamanio_new = list_size(lista_new);
 
-        if(tamanio_block > 0 && tamanio_ready == 0 && tamanio_new > 0){
+        printf("tamanio blocked = %d -- tamanio ready = %d -- tamanio new = %d\n",tamanio_block,tamanio_ready,tamanio_new);
 
+        if(tamanio_block > 0 && tamanio_ready == 0 && tamanio_new > 0){
+            
             mover_proceso_de_lista(lista_blocked, lista_ready, tamanio_block - 1, READY);
 
             sem_wait(&mutex_multiprogramacion);
@@ -33,20 +36,20 @@ void *planificador_mediano_plazo(void *_){
 void *salida_de_block(void *_){
     
     while(1){
-        printf(".\n");
-        sem_wait(&pedir_salida_de_block);
-        
+        //sem_wait(&pedir_salida_de_block);
+        sem_wait(&salida_block);
+
         bool encontrado = false;
         int tamanio_lista_blocked = list_size(lista_blocked);
         int tamanio_lista_s_blocked = list_size(lista_s_blocked);
         int index = 0;
 
-
+        printf("Estoy en salida blocked\n tamanio blocked = %d\n",tamanio_lista_blocked);
         //Busco en block   
         while(!encontrado && (index < tamanio_lista_blocked)){
-
+            
             t_proceso *aux = list_get(lista_blocked, index);
-
+            printf("Estoy en salida de block dentro del while\n");
             if(aux->salida_block){
 
                 mover_proceso_de_lista(lista_blocked, lista_ready, 0, READY);

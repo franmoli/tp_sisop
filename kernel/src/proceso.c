@@ -17,13 +17,11 @@ void *proceso(void *self){
                     sleep(1);
                     break;
                 case EXEC:
-
                     reloj_i = clock();
                     printf("E - p: %d ", proceso_struct->id);
                     exec(proceso_struct);
                     proceso_struct->ejecucion_anterior = clock() - reloj_i;
                     proceso_struct->estimar = true;
-
                     
                     /*if(exec(aux)){
                         proceso_struct->salida_exit = true;
@@ -81,8 +79,13 @@ void exec(t_proceso *self){
                     semaforo_aux = next_task->datos_tarea;
                     log_info(logger_kernel, "Iniciando semaforo: %s", semaforo_aux->nombre_semaforo);
                     iniciar_semaforo(next_task->datos_tarea);
+                    enviar_confirmacion(self->socket_carpincho);
                     break;
                 case CLIENTE_DESCONECTADO:
+                    self->salida_exit = true;
+                    sem_post(&salida_a_exit);
+                    close(self->socket_carpincho);
+                    break;
                 case CLIENTE_TEST:
                 case NUEVO_CARPINCHO:
                 case MATEINIT:
@@ -92,7 +95,7 @@ void exec(t_proceso *self){
                 case RECEPCION_PAGINA:
                     break;
                 case SEM_WAIT:
-
+                    printf("Llegue al switch de proceso.c\n");
                     semaforo_aux = next_task->datos_tarea;
                     bloquear_f = solicitar_semaforo(semaforo_aux->nombre_semaforo, self->socket_carpincho);
                     break;
@@ -157,6 +160,8 @@ bool solicitar_semaforo(char *nombre_semaforo, int id){
         semaforo_solicitado->value = semaforo_solicitado->value - 1;
         list_add(semaforo_solicitado->solicitantes, aux);
 
+        printf("Solicite bloquear el semaforo %s\n",semaforo_solicitado->nombre_semaforo);
+
         //no esta disponible, bloquear
         return true;
     }
@@ -189,15 +194,12 @@ void postear_semaforo(char *nombre_semaforo){
     t_semaforo *semaforo_solicitado = traer_semaforo(nombre_semaforo);
     
     if(semaforo_solicitado == NULL) return; //TODO: ENVIAR ERROR AL CARPINCHO
-
-    printf("Se encontro el semaforo solicitado con value %d\n", semaforo_solicitado->value);
     
     if(semaforo_solicitado->value >= 0){        
         //si esta disponible sumarle uno a value
         semaforo_solicitado->value = semaforo_solicitado->value + 1;
 
     }else{
-        printf("Intenta entrar por acá\n");
         //si no esta disponible: sumarle uno a value - sacarlo de la lista de solicitantes - enviar habilitacion de continuar a ese proceso 
         //TODO: hacer un mutex para estas listas de semaforos
         int *aux;
@@ -266,5 +268,6 @@ void desbloquear(t_proceso *self){
     self->salida_block = true;
     sleep(1);
     sem_post(&salida_block);
+    //sem_post(&pedir_salida_de_block);
     return;
 }

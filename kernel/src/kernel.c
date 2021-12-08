@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
     //Iniciar planificador de corto plazo
     iniciar_planificador_corto();
     //Iniciar planificador de mediano plazo
-    //iniciar_planificador_mediano();
+    iniciar_planificador_mediano();
 
     //Iniciar consola para debug
     iniciar_debug_console();
@@ -124,11 +124,13 @@ void avisar_cambio(){
     for(int i = 0; i < cantidad_de_procesos; i++){
         sem_wait(&actualizacion_de_listas_1_recibido);
     }
+    printf("Pase el sem de actualizacion\n");
     //Habilito que vuelvan a esperar una vez ya resuelto todo lo que tengan que hacer con su nuevo estado
     for(int i = 0; i < cantidad_de_procesos; i++){
         sem_post(&actualizacion_de_listas_2);
     }
     //Habilito planificadores
+    sem_post(&cambio_de_listas);
     sem_post(&cambio_de_listas);
     sem_post(&mutex_cant_procesos);
     sleep(0.5);
@@ -267,6 +269,15 @@ void print_task_lists(){
 void print_lists(){
     int index = 0;
     t_proceso *aux = NULL;
+
+    printf("Printeando gente en new %d\n\n", list_size(lista_new));
+    while(index < list_size(lista_new)){
+        aux = list_get(lista_new, index);
+        printf("Carpincho %d en new \n", aux->id);
+        index++;
+    }
+
+    index = 0;
 
     printf("Printeando gente en blocked %d\n\n", list_size(lista_blocked));
     while(index < list_size(lista_blocked)){
