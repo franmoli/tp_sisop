@@ -197,7 +197,7 @@ void metricas(){
     while (list_iterator_has_next(list_iterator))
     {
         tablas = list_iterator_next(list_iterator);
-        log_info("CARPINCHO: %d HITS POR CARPINCHO: %d \n MISS POR CARPINCHO: %d \n", tablas->pid, tablas->hit, tablas->miss);
+        log_info("CARPINCHO: %d HITS POR CARPINCHO: %d MISS POR CARPINCHO: %d \n", tablas->pid, tablas->hit, tablas->miss);
     }
 }
 
