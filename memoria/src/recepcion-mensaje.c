@@ -3,7 +3,8 @@
 void receptor(){
 	while(1){
 		t_paquete* paquete;
-
+		pthread_mutex_unlock(&mutex_envio_pagina);
+		paquete = recibir_paquete(socket_server);
 		switch (paquete->codigo_operacion)
         {
 			case RECEPCION_PAGINA:{
