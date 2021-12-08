@@ -62,6 +62,8 @@ typedef struct{
     int ultimo_Clock;
     int paginas_totales_maximas;
     int paginas_en_memoria;
+    uint32_t hit;
+    uint32_t miss;
 }t_tabla_paginas;
 
 typedef struct{
