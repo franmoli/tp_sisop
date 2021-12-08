@@ -380,6 +380,10 @@ void memAlloc(t_paquete *paquete)
             
             int nropagina_alloc =getPaginaByDireccionLogica(nextAnterior);
             t_pagina *pagina_alloc_actual = list_get(tabla_paginas->paginas,nropagina_alloc);
+            
+            if(pagina_alloc_actual->bit_presencia == false){
+                //SWAPP
+            }
             int direccion = inicio + data->nextAlloc+ config_memoria->TAMANIO_PAGINA * pagina_alloc_actual->marco_asignado;
             
             //t_contenidos_pagina *contenido_actual = getContenidoPaginaByTipoAndSize(pagina_Disponible->listado_de_contenido,CONTENIDO,data->nextAlloc);

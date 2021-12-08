@@ -85,7 +85,7 @@ int main(int argc, char **argv)
         paquete1 = serializar_alloc(46, carpincho_id);
         freeAlloc(paquete1);
 
-        //memdump();
+        memdump();
 
     while (1)
     {

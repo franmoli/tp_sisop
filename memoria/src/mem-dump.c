@@ -19,8 +19,10 @@ int createFile(char *path)
 void memdump()
 {
     char *path_folder_dump = string_new();
-    char *timestamp = temporal_get_string_time("Dump_%y%m%d%H%M%S.dmp");
-    string_append_with_format(&path_folder_dump, "%s", timestamp);
+    char *timestamp = temporal_get_string_time( "Dump_%y%m%d%H%M%S.dmp");
+    char* pathIntermedio = string_new();
+    string_append_with_format(&pathIntermedio, "%s/%s", config_memoria->PATH_DUMP_TLB,timestamp);
+    string_append_with_format(&path_folder_dump, "%s", pathIntermedio);
 
     createFile(path_folder_dump);
     int fd = open(path_folder_dump, O_RDWR | (O_APPEND | O_CREAT), S_IRUSR | S_IWUSR);
