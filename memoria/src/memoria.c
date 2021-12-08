@@ -183,9 +183,22 @@ void generarDump()
 }
 void imprimirMetricas()
 {
-    //memdump();
+    metricas();
     log_info(logger_memoria, "SEÑAL RECIBIDA");
     exit(EXIT_SUCCESS);
+}
+
+void metricas(){
+    char *texto = string_new();
+    t_list_iterator *list_iterator = list_iterator_create(tabla_procesos);
+    t_tabla_paginas *tablas;
+
+    log_info("HITS TOTALES: %d \n MISS TOTALES: %d \n", tabla_tlb->hit_totales, tabla_tlb->miss_totales);
+    while (list_iterator_has_next(list_iterator))
+    {
+        tablas = list_iterator_next(list_iterator);
+        log_info("HITS POR CARPINCHO: %d \n HITS POR CARPINCHO: %d \n", tabla_tlb->hit_totales, tabla_tlb->miss_totales);
+    }
 }
 
 void inicializarCarpincho(t_paquete *paquete)
