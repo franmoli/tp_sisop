@@ -47,11 +47,31 @@ char *dumpPaginacion()
     t_tlb *tlb;
     int i = 0;
     char* estado;
-    while (list_iterator_has_next(list_iterator))
-    {
-        string_append_with_format(&texto, "Entrada:%d	Estado:%s	Carpincho: %d	Pagina: %d	Marco: %d \n",i, estado, tlb->pid,tlb->numero_pagina, tlb->numero_marco);
-        i++;
+    if(list_size(tabla_tlb) == config_memoria->CANTIDAD_ENTRADAS_TLB){
+        while (list_iterator_has_next(list_iterator))
+        {
+            tlb = list_iterator_next(list_iterator);
+            estado ="Ocupado";
+            string_append_with_format(&texto, "Entrada:%d	Estado:%s	Carpincho: %d	Pagina: %d	Marco: %d \n",i, estado, tlb->pid,tlb->numero_pagina, tlb->numero_marco);
+            i++;
+        }
     }
+    else{
+        int restantes = config_memoria->CANTIDAD_ENTRADAS_TLB - i;
+        while (list_iterator_has_next(list_iterator))
+        {
+            tlb = list_iterator_next(list_iterator);
+            estado ="Ocupado";
+            string_append_with_format(&texto, "Entrada:%d	Estado:%s	Carpincho: %d	Pagina: %d	Marco: %d \n",i, estado, tlb->pid,tlb->numero_pagina, tlb->numero_marco);
+            i++;
+        }
+        int p = i;
+        for(int k = 0; k < restantes; k++){
+            string_append_with_format(&texto, "Entrada:%d	Estado:Libre	Carpincho: -	Pagina: -	Marco: - \n",p);
+            p++;
+        }
+    }
+    
     return texto;
 }
 char* cargarTexto(t_list *paginas, int carpincho_id){

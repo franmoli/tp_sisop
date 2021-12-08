@@ -1,0 +1,12 @@
+Dump: 08/12/21 15:42:10Entrada:0	Estado:Libre	Carpincho: -	Pagina: -	Marco: - 
+Entrada:1	Estado:Libre	Carpincho: -	Pagina: -	Marco: - 
+Entrada:2	Estado:Libre	Carpincho: -	Pagina: -	Marco: - 
+Entrada:3	Estado:Libre	Carpincho: -	Pagina: -	Marco: - 
+Entrada:4	Estado:Libre	Carpincho: -	Pagina: -	Marco: - 
+Entrada:5	Estado:Libre	Carpincho: -	Pagina: -	Marco: - 
+Entrada:6	Estado:Libre	Carpincho: -	Pagina: -	Marco: - 
+Entrada:7	Estado:Libre	Carpincho: -	Pagina: -	Marco: - 
+Entrada:8	Estado:Libre	Carpincho: -	Pagina: -	Marco: - 
+Entrada:9	Estado:Libre	Carpincho: -	Pagina: -	Marco: - 
+Entrada:10	Estado:Libre	Carpincho: -	Pagina: -	Marco: - 
+Entrada:11	Estado:Libre	Carpincho: -	Pagina: -	Marco: - 
