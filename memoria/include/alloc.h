@@ -10,7 +10,7 @@
 t_heap_metadata* traerAllocDeMemoria(uint32_t);
 void guardarAlloc(t_heap_metadata* data, uint32_t direccion);
 
-void memAlloc(t_paquete *paquete);
+int memAlloc(t_paquete *paquete);
 void freeAlloc(t_paquete *paquete);
 
 bool direccionValida(uint32_t direccion, uint32_t carpincho_id);

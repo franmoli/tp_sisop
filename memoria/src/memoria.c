@@ -73,14 +73,20 @@ int main(int argc, char **argv)
        
         //CASO PRUEBA DE MEMALLOC
         t_paquete *paquete1 = serializar_alloc(5, carpincho_id);
-        memAlloc(paquete1);
+        int a = memAlloc(paquete1);
 
         paquete1 = serializar_alloc(23, carpincho_id);
-        memAlloc(paquete1);
+        int b = memAlloc(paquete1);
 
         paquete1 = serializar_alloc(3, carpincho_id);
-        memAlloc(paquete1);
+        int c = memAlloc(paquete1);
 
+        
+        t_kernel_dire_logica_serializado* estructura = malloc(sizeof(t_kernel_dire_logica_serializado));
+        estructura->direccion_logica = a;
+        t_paquete* paquete_enviado = serializar_direccion_logica(estructura);
+        free(estructura);
+        estructura = deserializar_direccion_logica(paquete_enviado);
 
         paquete1 = serializar_alloc(14, carpincho_id);
         freeAlloc(paquete1);
@@ -123,8 +129,13 @@ static void *ejecutar_operacion(int client)
             log_info(logger_memoria, "Mensaje de prueba recibido correctamente por el cliente %d", client);
             break;
         case MEMALLOC:
-            log_info(logger_memoria, "recibi orden de almacenar memoria del cliente %d", client);
-            memAlloc(paquete);
+            log_info(logger_memoria, "recibi orden de memalloc del cliente %d", client);
+            int dire_logica =memAlloc(paquete);
+            t_kernel_dire_logica_serializado* estructura = malloc(sizeof(t_kernel_dire_logica_serializado));
+            estructura->direccion_logica = dire_logica;
+            t_paquete* paquete = serializar_direccion_logica(estructura);
+            enviarDatos(paquete, KERNEL);
+            free(estructura);
             break;
         case MEMWRITE:
             log_info(logger_memoria, "recibi orden de guardar en memoria del cliente %d", client);

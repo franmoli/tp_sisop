@@ -286,7 +286,7 @@ void guardarAlloc(t_heap_metadata *data, uint32_t direccion)
     memcpy(direccion + offset, &data->isFree, sizeof(uint8_t));
 }
 
-void memAlloc(t_paquete *paquete)
+int memAlloc(t_paquete *paquete)
 {
 
     t_malloc_serializado *mallocDeserializado = deserializar_alloc(paquete);

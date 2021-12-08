@@ -19,6 +19,11 @@ typedef enum {
     RESTO_ALLOC = 8,
 } t_contenido;
 
+typedef enum {
+	KERNEL = 0,
+    SWAMP = 1,
+    MATELIB = 2,
+} t_destino;
 typedef struct {
     uint32_t prevAlloc;
     uint32_t nextAlloc;

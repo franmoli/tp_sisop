@@ -7,6 +7,8 @@
 #include <signal.h>
 #include "recepcion-mensaje.h"
 #include "mem-dump.h"
+#include "enviar-datos.h"
+
 static void *ejecutar_operacion(int client);
 void imprimirMetricas();
 void limpiarTlb();
