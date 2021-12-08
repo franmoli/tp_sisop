@@ -43,13 +43,14 @@ char *dumpPaginacion()
 
     
 
-    t_list_iterator *list_iterator = list_iterator_create(tabla_procesos);
-    t_tabla_paginas *tablas;
+    t_list_iterator *list_iterator = list_iterator_create(tabla_tlb);
+    t_tlb *tlb;
+    int i = 0;
     while (list_iterator_has_next(list_iterator))
     {
-        tablas = list_iterator_next(list_iterator);
-        texto = cargarTexto(tablas->paginas,tablas->pid);
-
+        tlb = list_iterator_next(list_iterator);
+        string_append_with_format(&texto, "Entrada:%d	Estado:%s	Carpincho: %d	Pagina: %d	Marco: %d \n",i, estado, tlb->pid,tlb->numero_pagina, tlb->numero_marco);
+        i++;
     }
     return texto;
 }
