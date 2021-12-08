@@ -46,9 +46,9 @@ char *dumpPaginacion()
     t_list_iterator *list_iterator = list_iterator_create(tabla_tlb);
     t_tlb *tlb;
     int i = 0;
+    char* estado;
     while (list_iterator_has_next(list_iterator))
     {
-        tlb = list_iterator_next(list_iterator);
         string_append_with_format(&texto, "Entrada:%d	Estado:%s	Carpincho: %d	Pagina: %d	Marco: %d \n",i, estado, tlb->pid,tlb->numero_pagina, tlb->numero_marco);
         i++;
     }
