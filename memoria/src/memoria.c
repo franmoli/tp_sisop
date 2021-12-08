@@ -132,12 +132,8 @@ static void *ejecutar_operacion(int client)
             log_info(logger_memoria, "recibi orden de memalloc del cliente %d", client);
             int dire_logica =memAlloc(paquete);
             
-            t_kernel_dire_logica_serializado* estructura = malloc(sizeof(t_kernel_dire_logica_serializado));
-            estructura->direccion_logica = dire_logica;
-            t_paquete* paquete = serializar_direccion_logica(estructura);
+            t_paquete* paquete = serializar(MEMALLOC,2,INT,dire_logica);
             enviarDatos(paquete, KERNEL);
-            free(estructura);
-
             break;
         case MEMFREE:
             log_info(logger_memoria, "recibi orden de memfree del cliente %d", client);
