@@ -96,6 +96,8 @@ typedef struct{
 
 typedef struct{
     t_list *tlb;
+    uint32_t hit_totales;
+    uint32_t miss_totales;
 }t_tabla_tlb;
 
 typedef struct{

@@ -26,6 +26,8 @@ int main(int argc, char **argv)
 
         tabla_tlb = malloc(sizeof(t_tabla_tlb));
         tabla_tlb->tlb = list_create();
+        tabla_tlb->hit_totales = 0;
+        tabla_tlb->miss_totales = 0;
 
         tlb_LRU = list_create();
         tlb_FIFO = queue_create();
@@ -85,7 +87,7 @@ int main(int argc, char **argv)
         paquete1 = serializar_alloc(46, carpincho_id);
         freeAlloc(paquete1);
 
-        memdump();
+        //memdump();
 
     while (1)
     {
