@@ -10,6 +10,7 @@ int buscarEnTLB(int numero_pagina_buscada, int id){
             
         t_tlb* primerElem = malloc(sizeof(primerElem));
         //Ver si logueo un miss
+        log_info(logger_memoria,"TLB MISS: PID: %d PAGINA: %d",numero_pagina_buscada,id);
         sleep(config_memoria->RETARDO_FALLO_TLB);
         tabla_tlb->miss_totales ++;
         t_tabla_paginas *tabla = buscarTablaPorPID(id);
@@ -31,8 +32,8 @@ int buscarEnTLB(int numero_pagina_buscada, int id){
         if (tlb->numero_pagina == numero_pagina_buscada && tlb->pid == id)
         {
             marco = tlb->numero_marco;
+            log_info(logger_memoria,"TLB HIT: PID: %d PAGINA: %d MARCO: %d",tlb->pid,tlb->numero_pagina,tlb->numero_marco);
             sleep(config_memoria->RETARDO_ACIERTO_TLB);
-            log_info(logger_memoria,"ACIERTO TLB");
             tabla_tlb->hit_totales ++;
             t_tabla_paginas *tabla = buscarTablaPorPID(id);
             tabla->hit ++;
@@ -48,8 +49,8 @@ int buscarEnTLB(int numero_pagina_buscada, int id){
     //MISS
     marco = buscarMarcoEnMemoria(numero_pagina_buscada, id);
 
+    log_info(logger_memoria,"TLB MISS: PID: %d PAGINA: %d",numero_pagina_buscada,id);
     sleep(config_memoria->RETARDO_FALLO_TLB);
-    log_info(logger_memoria,"FALLO TLB");
     tabla_tlb->miss_totales ++;
     t_tabla_paginas *tabla = buscarTablaPorPID(id);
     tabla->miss ++;
