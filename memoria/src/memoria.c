@@ -85,6 +85,8 @@ int main(int argc, char **argv)
         paquete1 = serializar_alloc(46, carpincho_id);
         freeAlloc(paquete1);
 
+        //memdump();
+
     while (1)
     {
         socket_client = esperar_cliente(socket_server, logger_memoria);
@@ -155,6 +157,7 @@ void recibirSignal(int signal)
 {
     if (signal == SIGINT)
     {
+        //memdump();
         imprimirMetricas();
     }
     if (signal == SIGUSR1)
@@ -174,9 +177,11 @@ void limpiarTlb()
 }
 void generarDump()
 {
+   memdump();
 }
 void imprimirMetricas()
 {
+    //memdump();
     log_info(logger_memoria, "SEÑAL RECIBIDA");
     exit(EXIT_SUCCESS);
 }

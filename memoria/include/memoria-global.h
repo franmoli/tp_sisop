@@ -5,6 +5,7 @@
 #include "server.h"
 #include "serializaciones.h"
 #include <commons/collections/queue.h>
+#include <semaphore.h>
 
 typedef enum {
 	CONTENIDO = 0,
@@ -162,4 +163,5 @@ int bytes_info_heap(t_info_heap_swap info);
 void* serializar_pagina(t_pagina_swap pagina);
 t_pagina_swap deserializar_pagina(void *stream);
 
+pthread_mutex_t mutex_envio_pagina;
 #endif
