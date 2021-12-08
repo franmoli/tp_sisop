@@ -6,25 +6,6 @@ int buscarEnTLB(int numero_pagina_buscada, int id){
 
     int marco = -1;
 
-    if(list_size(tabla_tlb->tlb) == 0){
-            
-        t_tlb* primerElem = malloc(sizeof(primerElem));
-        //Ver si logueo un miss
-        log_info(logger_memoria,"TLB MISS: PID: %d PAGINA: %d",numero_pagina_buscada,id);
-        sleep(config_memoria->RETARDO_FALLO_TLB);
-        tabla_tlb->miss_totales ++;
-        t_tabla_paginas *tabla = buscarTablaPorPID(id);
-        tabla->miss ++;
-
-        marco = buscarMarcoEnMemoria(numero_pagina_buscada, id);
-        log_info(logger_memoria, "Encontre el marco %d",marco);
-        primerElem->pid = id;
-        primerElem->numero_marco = marco;
-        primerElem->numero_pagina = numero_pagina_buscada;
-        list_add(tabla_tlb->tlb,primerElem);
-        return primerElem->numero_marco;
-    }
-
     t_list_iterator *list_iterator = list_iterator_create(tabla_tlb->tlb);
     while (list_iterator_has_next(list_iterator))
     {
@@ -46,34 +27,30 @@ int buscarEnTLB(int numero_pagina_buscada, int id){
         }
     }
 
-    //MISS
-    marco = buscarMarcoEnMemoria(numero_pagina_buscada, id);
-
-    log_info(logger_memoria,"TLB MISS: PID: %d PAGINA: %d",numero_pagina_buscada,id);
+    log_info(logger_memoria,"TLB MISS: PID: %d PAGINA: %d",id,numero_pagina_buscada);
     sleep(config_memoria->RETARDO_FALLO_TLB);
-    tabla_tlb->miss_totales ++;
-    t_tabla_paginas *tabla = buscarTablaPorPID(id);
-    tabla->miss ++;
+    return -1;
+
+}
+
+void agregarTLB(int pagina, int marco, int id){
 
     t_tlb* newElem = malloc(sizeof(t_tlb));
-
     newElem->pid = id;
-    newElem->numero_pagina = numero_pagina_buscada;
     newElem->numero_marco = marco;
+    newElem->numero_pagina = pagina;
 
     if(list_size(tabla_tlb->tlb) < config_memoria->CANTIDAD_ENTRADAS_TLB){
-
         list_add(tabla_tlb->tlb,newElem);
-        return newElem->numero_marco;
+    }else
+    {
+        t_tlb* old = list_get(tabla_tlb->tlb,0);
+        log_info(logger_memoria,"Reemplazo TLB - VICTIMA - PID: %d PAGINA: %d MARCO: %d NUEVO - PID: %d PAGINA: %d MARCO: %d ",old->pid,old->numero_pagina,old->numero_marco,newElem->pid,newElem->numero_pagina,newElem->numero_marco);
+        list_remove(tabla_tlb->tlb,0);
+        list_add(tabla_tlb->tlb,newElem);
     }
 
-    //TLB completo tengo que reemplazar
-    t_tlb* old = list_get(tabla_tlb->tlb,0);
-    log_info(logger_memoria,"Reemplazo TLB - VICTIMA - PID: %d PAGINA: %d MARCO: %d NUEVO - PID: %d PAGINA: %d MARCO: %d ",old->pid,old->numero_pagina,old->numero_marco,newElem->pid,newElem->numero_pagina,newElem->numero_marco);
-    list_remove(tabla_tlb->tlb,0);
-    list_add(tabla_tlb->tlb,newElem);
-
-    return marco;
+    return;
 
 }
 
