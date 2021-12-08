@@ -17,6 +17,10 @@ typedef struct {
 	uint32_t carpincho_id;
 } t_malloc_serializado;
 
+typedef struct{
+	uint32_t direccion_logica;
+} t_kernel_dire_logica_serializado;
+
 typedef struct {
 	uint32_t carpincho_id;
 } t_mateinit_serializado;
@@ -49,6 +53,9 @@ t_malloc_serializado* deserializar_alloc(t_paquete *paquete);
 
 t_paquete *serializar_consulta_swap(uint32_t carpincho_id);
 t_swap_serializado* deserializar_swap(t_paquete *paquete);
+
+t_paquete *serializar_direccion_logica(t_kernel_dire_logica_serializado* direccion_logica);
+t_kernel_dire_logica_serializado *deserializar_direccion_logica(t_paquete* paquete);
 
 //Utilizacion: serializar(Codigo de operacion , cant de argumentos (2 * cantidad de datos a serializar) , datos a serializar)
 //             datos a serializar = (TIPO DE DATO (segun enum t_type) , DATO .....)

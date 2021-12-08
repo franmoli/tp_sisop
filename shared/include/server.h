@@ -29,7 +29,8 @@ typedef enum {
     SWAPSAVE = 15,
     CALLIO = 16,
     OP_CONFIRMADA = 17,
-    RECEPCION_PAGINA = 18
+    RECEPCION_PAGINA = 18,
+    DIRECCION_LOGICA = 19,
 } op_code;
 
 typedef struct {

@@ -68,6 +68,8 @@ int buscarEnTLB(int numero_pagina_buscada, int id){
     }
 
     //TLB completo tengo que reemplazar
+    t_tlb* old = list_get(tabla_tlb->tlb,0);
+    log_info(logger_memoria,"Reemplazo TLB - VICTIMA - PID: %d PAGINA: %d MARCO: %d NUEVO - PID: %d PAGINA: %d MARCO: %d ",old->pid,old->numero_pagina,old->numero_marco,newElem->pid,newElem->numero_pagina,newElem->numero_marco);
     list_remove(tabla_tlb->tlb,0);
     list_add(tabla_tlb->tlb,newElem);
 

@@ -415,5 +415,25 @@ void deserializar(t_paquete *paquete, int arg_count, ...){
                 break;
         }
     }
-    
+}
+
+t_paquete *serializar_direccion_logica(t_kernel_dire_logica_serializado* direccion_logica){
+    t_paquete *paquete = malloc(sizeof(t_paquete));
+    t_buffer *new_buffer = malloc(sizeof(t_buffer));
+    new_buffer->size = sizeof(uint32_t);
+    int offset = 0;
+    void *stream = malloc(new_buffer->size);
+    memcpy(stream + offset, &(direccion_logica->direccion_logica), sizeof(uint32_t));
+
+    new_buffer->stream = stream;
+    paquete->buffer = new_buffer;
+    paquete->codigo_operacion = DIRECCION_LOGICA;
+    return paquete;
+}
+t_kernel_dire_logica_serializado *deserializar_direccion_logica(t_paquete* paquete){
+    t_kernel_dire_logica_serializado* direccion_logica = malloc(sizeof(t_kernel_dire_logica_serializado));
+    void *stream = paquete->buffer->stream;
+    int offset = 0;
+    memcpy(&(direccion_logica->direccion_logica), stream + offset, sizeof(uint32_t));
+    return direccion_logica;
 }

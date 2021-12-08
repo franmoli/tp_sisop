@@ -336,7 +336,7 @@ void escribirAllocIncompleto(int marco,uint32_t dir_comienzo,uint32_t dir_fin,vo
 
 int getMarco(t_tabla_paginas* tabla_paginas){
     int numeroMarco = -1;
-    if(config_memoria->TIPO_ASIGNACION != "FIJA"){
+    if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "DINAMICA") == 0){
         t_list_iterator *list_iterator = list_iterator_create(tabla_marcos_memoria->marcos);
         bool marcoDisponible = false;
         while (list_iterator_has_next(list_iterator) && !marcoDisponible)
@@ -361,7 +361,6 @@ int getMarco(t_tabla_paginas* tabla_paginas){
 
     }
 
-    //numeroMarco = buscarDisponibilidadSwap(int carpincho_id);
     return numeroMarco;
 
 }
@@ -446,8 +445,7 @@ int buscarMarcoEnMemoria(int numero_pagina_buscada, int id)
         }
     }
 
-    //No encontre la pagina
-    //Voy a swap
+    return -1;
 }
 
 int solicitarPaginaNueva(uint32_t carpincho_id)
