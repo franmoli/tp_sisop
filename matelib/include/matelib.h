@@ -15,17 +15,10 @@ int socket_cliente;
 
 typedef char *mate_sem_name;
 
-typedef struct mate_inner_structure
-{
-    void *memory;
-    int32_t cod_op;
-} mate_inner_structure;
-
 typedef struct mate_instance
 {
     int socket;
     int32_t id;
-    mate_inner_structure *info_carpincho;
     t_config_matelib *config;
     void *group_info;
     t_log *logger;
@@ -38,6 +31,12 @@ typedef struct mate_instance_pointer{
 typedef char *mate_io_resource;
 
 typedef int32_t mate_pointer;
+
+enum mate_errors {
+    MATE_FREE_FAULT = -5,
+    MATE_READ_FAULT = -6,
+    MATE_WRITE_FAULT = -7
+};
 
 // TODO: Docstrings
 

@@ -40,7 +40,7 @@ void *proceso(void *self){
                     }*/
                     break;
                 case BLOCKED:
-                    printf("B - p: %d ", proceso_struct->id);
+                    printf("B - p: %d \n", proceso_struct->id);
                     break;
                 default:
                     printf("Estoy en default y no hago nada %d - %d\n", proceso_struct->id, proceso_struct->status);
@@ -101,7 +101,7 @@ void exec(t_proceso *self){
                     semaforo_aux = next_task->datos_tarea;
                     printf("Posteando semadoro %s\n", semaforo_aux->nombre_semaforo);
                     postear_semaforo(semaforo_aux->nombre_semaforo);
-                    //enviar_confirmacion(self->socket_carpincho);
+                    enviar_confirmacion(self->socket_carpincho);
                     break;
 
                 case SEM_DESTROY:
@@ -127,22 +127,6 @@ void exec(t_proceso *self){
 
     sleep(2);
     bloquear(self);
-}
-
-void bloquear(t_proceso *self){
-    printf("Bloqueando proceso: %d\n", self->id);
-    self->block = true;
-    sleep(1);
-    sem_post(&solicitar_block);
-    return;
-}
-
-void desbloquear(t_proceso *self){
-    printf("Desbloquear proceso: %d", self->id);
-    self->salida_block = true;
-    sleep(1);
-    sem_post(&salida_block);
-    return;
 }
 
 bool solicitar_semaforo(char *nombre_semaforo, int id){
@@ -208,9 +192,7 @@ void postear_semaforo(char *nombre_semaforo){
 
     printf("Se encontro el semaforo solicitado con value %d\n", semaforo_solicitado->value);
     
-// TODO: ACÁ ROMPE ESTA PORONGA
-    if(semaforo_solicitado->value >= 0){
-        printf("Intenta entrar por el lado que no debería %d\n", semaforo_solicitado->value);        
+    if(semaforo_solicitado->value >= 0){        
         //si esta disponible sumarle uno a value
         semaforo_solicitado->value = semaforo_solicitado->value + 1;
 
@@ -269,4 +251,20 @@ t_semaforo *traer_semaforo(char *nombre_solicitado){
 
     return semaforo_solicitado;
 
+}
+
+void bloquear(t_proceso *self){
+    printf("Bloqueando proceso: %d\n", self->id);
+    self->block = true;
+    sleep(1);
+    sem_post(&solicitar_block);
+    return;
+}
+
+void desbloquear(t_proceso *self){
+    printf("Desbloquear proceso: %d\n", self->id);
+    self->salida_block = true;
+    sleep(1);
+    sem_post(&salida_block);
+    return;
 }

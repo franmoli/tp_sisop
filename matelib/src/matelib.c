@@ -29,8 +29,6 @@ int mate_init(mate_instance_pointer *instance_pointer, char *config){
     
     lib_ref->id             = obtenerIDRandom();
     lib_ref->config         = config_matelib;
-    
-    lib_ref->info_carpincho = malloc(sizeof(mate_inner_structure));
 
     sprintf(string,"./cfg/%d",lib_ref->id);
     strcat(string,".cfg");
@@ -39,15 +37,6 @@ int mate_init(mate_instance_pointer *instance_pointer, char *config){
     lib_ref->logger = log_create(string,"MATELIB",true,LOG_LEVEL_DEBUG);
     
     free(string);
-
-
-    //test borrar
-    /*t_paquete *test_p = serializar(1, 4, INT, 3, CHAR_PTR, "PRUEBA");
-    int test_i = 0;
-    char *test_c = NULL;
-    deserializar(test_p, 4, INT, &test_i, CHAR_PTR, &test_c);
-    printf("\n\n Cosas deserializadas int %d, str %s\n\n", test_i, test_c);
-    */
 
     //Conexion con kernel y en caso que no exista, conexion con memoria
     socket_cliente = crear_conexion(config_matelib->IP_KERNEL, config_matelib->PUERTO_KERNEL);
@@ -70,8 +59,6 @@ int mate_init(mate_instance_pointer *instance_pointer, char *config){
     
     enviar_paquete(paquete, lib_ref->socket);
 
-    free(buffer);
-
     //Compruebo que la operacion fue exitosa
     t_paquete *paquete_recibido = recibir_paquete(lib_ref->socket);
 
@@ -80,13 +67,15 @@ int mate_init(mate_instance_pointer *instance_pointer, char *config){
         return 0;
     }else{
         log_error(lib_ref->logger,"No me instancie correctamente");
-        return 1;
+        return -1;
     }
 }
 
 int mate_close(mate_instance_pointer *instance_pointer){
 
     mate_instance *lib_ref = instance_pointer->group_info;
+
+    log_info(lib_ref->logger,"Cerrando el MATE_INSTANCE");
 
     t_paquete *paquete = malloc(sizeof(t_paquete));
     t_buffer *buffer = malloc(sizeof(t_buffer));
@@ -95,14 +84,9 @@ int mate_close(mate_instance_pointer *instance_pointer){
     buffer->size = 0;
 
     enviar_paquete(paquete, socket_cliente);
-    free(buffer);
     close(lib_ref->socket);
-    
-    //free(lib_ref->group_info);
-    //printf("Group info freed\n");
-    //free(lib_ref->info_carpincho);
-    //free(lib_ref);    
-    
+    log_info(lib_ref->logger,"Se cerro el MATE_INSTANCE");
+    free(lib_ref->logger);
     return 0;
 }
 
@@ -162,7 +146,7 @@ int mate_sem_post(mate_instance_pointer *instance_pointer, mate_sem_name sem){
         log_info(lib_ref->logger,"La funcion SEM_POST se ejecuto exitosamente");
         return 0;
     }else{
-        log_error(lib_ref->logger,"La funcion SEM_POST se ejecuto correctamente");
+        log_error(lib_ref->logger,"La funcion SEM_POST no se ejecuto correctamente");
         return -1;
     }
 }
@@ -193,7 +177,7 @@ int mate_call_io(mate_instance_pointer *instance_pointer, mate_io_resource io, v
     t_paquete *paquete = serializar(CALLIO,4,CHAR_PTR,io,CHAR_PTR,msg);
     enviar_paquete(paquete,lib_ref->socket);
 
-    log_info(lib_ref->logger,"Se llamo a la funcion mate_call_io");
+    log_info(lib_ref->logger,"Se llamo a la io %s",io);
 
 //  HACER VERIFICACION CON EL RECIBIR PAQUETE
 

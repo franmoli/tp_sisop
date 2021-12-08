@@ -271,7 +271,7 @@ void print_lists(){
     printf("Printeando gente en blocked %d\n\n", list_size(lista_blocked));
     while(index < list_size(lista_blocked)){
         aux = list_get(lista_blocked, index);
-        printf("Carpincho en blocked %d\n", aux->id);
+        printf("Carpincho %d en blocked \n", aux->id);
         index++;
     }
 
@@ -280,7 +280,7 @@ void print_lists(){
     printf("Printeando gente en ready %d\n\n", list_size(lista_ready));
     while(index < list_size(lista_ready)){
         aux = list_get(lista_ready, index);
-        printf("Carpincho en ready %d\n", aux->id);
+        printf("Carpincho %d en ready \n", aux->id);
         index++;
     }
 
@@ -289,7 +289,7 @@ void print_lists(){
     printf("Printeando gente en exec %d\n\n", list_size(lista_exec));
     while(index < list_size(lista_exec)){
         aux = list_get(lista_exec, index);
-        printf("Carpincho en exec %d\n", aux->id);
+        printf("Carpincho %d en exec \n", aux->id);
         index++;
     }
 
@@ -298,7 +298,7 @@ void print_lists(){
     printf("Printeando gente en suspended block %d\n\n", list_size(lista_s_blocked));
     while(index < list_size(lista_s_blocked)){
         aux = list_get(lista_s_blocked, index);
-        printf("Carpincho en s_block %d\n", aux->id);
+        printf("Carpincho %d en s_block \n", aux->id);
         index++;
     }
 
@@ -307,7 +307,7 @@ void print_lists(){
     printf("Printeando gente en suspended ready %d\n\n", list_size(lista_s_ready));
     while(index < list_size(lista_s_ready)){
         aux = list_get(lista_s_ready, index);
-        printf("Carpincho en s_ready %d\n", aux->id);
+        printf("Carpincho %d en s_ready \n", aux->id);
         index++;
     }
 

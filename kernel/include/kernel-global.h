@@ -45,7 +45,7 @@ typedef struct {
 
 typedef struct {
     char *nombre_semaforo;
-    uint32_t value;
+    int value;
     t_list *solicitantes;
 }t_semaforo;
 
