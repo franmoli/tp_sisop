@@ -50,7 +50,7 @@ typedef struct{
 }t_clock;
 
 typedef struct{
-    t_list* paginas;
+    t_list* Clock;
     int ultimo;
 }t_lista_clock;
 

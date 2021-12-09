@@ -138,261 +138,288 @@ void actualizarLRU(t_pagina* pagina){
     }
 }
 
-int reemplazarClockM(int nro_pagina, int carpincho_id, int referido, int modificado) {
+int reemplazarClockM(t_pagina* pagina){
 
-    t_clock* paginaNueva = malloc(sizeof(t_clock));
-    t_clock* pagina = malloc(sizeof(t_clock));
-    t_clock* modificar = malloc(sizeof(t_clock));
-    t_clock *ultimoClock = malloc(sizeof(t_clock));
-    paginaNueva->numero_pagina = nro_pagina;
-    paginaNueva->pid = carpincho_id;
-    paginaNueva->bit_referido = referido;       //Definir referido
-    paginaNueva->bit_modificado = modificado;   //Definir modificado
-    int numeroMarco = -1;
-    int inicioLista = reemplazo_CLOCK->ultimo;
     int index = 0;
+    int numeroMarco = -1;
 
 
-    if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "FIJA") == 0){
-        //CLock para asignacion fija
-        t_tabla_paginas* tabla_paginas = buscarTablaPorPID(carpincho_id);
-        t_list_iterator *list_iterator = list_iterator_create(tabla_paginas->Clock);
+    if(strcmp(config_memoria->TIPO_ASIGNACION, "FIJA") == 0){
 
-        while(numeroMarco = -1){
-
-            while(list_iterator_has_next(list_iterator))
-            {
-                pagina = list_iterator_next(list_iterator);
-                ultimoClock = list_get(tabla_paginas->Clock,tabla_paginas->ultimo_Clock);
-                while(pagina->pid != ultimoClock->pid && pagina->numero_pagina != ultimoClock->numero_pagina){
-                    pagina = list_iterator_next(list_iterator);
-                    index = index + 1;
-                }
-                //Me ubico en el ultimo clock para empezar a recorrer
-                if(pagina->bit_referido == 0 && pagina->bit_modificado == 0){
-                    t_clock *clockOld = list_replace(tabla_paginas->Clock,tabla_paginas->ultimo_Clock,paginaNueva);
-                    t_pagina* paginaVieja = getPaginaByNumero(clockOld->numero_pagina,clockOld->pid);
-                    numeroMarco = paginaVieja->marco_asignado;
-                    reemplazo_CLOCK->ultimo = index + 1;
-
-                    list_iterator_destroy(list_iterator);
-                    return numeroMarco;
-                }
-                index++;
-            }
-
-            list_iterator_destroy(list_iterator);
-
-            //Termine de iterar la lista -> vuelvo a empezar hasta ultimo
-
-            list_iterator = list_iterator_create(tabla_paginas->Clock);
-            pagina = list_iterator_next(list_iterator);
-            while(pagina->pid != ultimoClock->pid && pagina->numero_pagina != ultimoClock->numero_pagina){
-
-                if(pagina->bit_referido == 0 && pagina->bit_modificado == 0){
-                    t_clock *clockOld = list_replace(tabla_paginas->Clock,tabla_paginas->ultimo_Clock,paginaNueva);
-                    t_pagina* paginaVieja = getPaginaByNumero(clockOld->numero_pagina,clockOld->pid);
-                    numeroMarco = paginaVieja->marco_asignado;
-                    reemplazo_CLOCK->ultimo = index + 1;
-
-                    list_iterator_destroy(list_iterator);
-                    return numeroMarco;
-                }
-
-                pagina = list_iterator_next(list_iterator);
-                index++;
-
-            }
-
-            list_iterator_destroy(list_iterator);
-            index = 0;
-
-            //Di primera vuelta y no pude agarrar a nadie
-            list_iterator = list_iterator_create(tabla_paginas->Clock);
-
-            while(list_iterator_has_next(list_iterator))
-            {
-                pagina = list_iterator_next(list_iterator);
-                ultimoClock = list_get(tabla_paginas->Clock,tabla_paginas->ultimo_Clock);
-                while(pagina->pid != ultimoClock->pid && pagina->numero_pagina != ultimoClock->numero_pagina){
-                    pagina = list_iterator_next(list_iterator);
-                    index++;
-                }
-                //Me ubico en el ultimo clock para empezar a recorrer
-                if(pagina->bit_referido == 0){
-                    t_clock *clockOld = list_replace(tabla_paginas->Clock,tabla_paginas->ultimo_Clock,paginaNueva);
-                    t_pagina* paginaVieja = getPaginaByNumero(clockOld->numero_pagina,clockOld->pid);
-                    numeroMarco = paginaVieja->marco_asignado;
-                    reemplazo_CLOCK->ultimo = index + 1;
-
-                    list_iterator_destroy(list_iterator);
-                    return numeroMarco;
-                }
-
-                modificar = list_get(tabla_paginas->Clock,index);
-                modificar->bit_referido = 0;
-                modificar = list_replace(tabla_paginas->Clock,index,modificar);
-
-                index++;
-            }
-
-            list_iterator_destroy(list_iterator);
-            index = 0;
-
-            list_iterator = list_iterator_create(tabla_paginas->Clock);
-            pagina = list_iterator_next(list_iterator);
-            while(pagina->pid != ultimoClock->pid && pagina->numero_pagina != ultimoClock->numero_pagina){
-
-                if(pagina->bit_referido == 0){
-                    t_clock *clockOld = list_replace(tabla_paginas->Clock,tabla_paginas->ultimo_Clock,paginaNueva);
-                    t_pagina* paginaVieja = getPaginaByNumero(clockOld->numero_pagina,clockOld->pid);
-                    numeroMarco = paginaVieja->marco_asignado;
-                    reemplazo_CLOCK->ultimo = index + 1;
-
-                    list_iterator_destroy(list_iterator);
-                    return numeroMarco;
-                }
-
-                modificar = list_get(tabla_paginas->Clock,index);
-                modificar->bit_referido = 0;
-                modificar = list_replace(tabla_paginas->Clock,index,modificar);
-
-                pagina = list_iterator_next(list_iterator);
-                index++;
-
-            }
-
-            index = 0;
-            list_iterator_destroy(list_iterator);
-
-        }
-
-    }else
-    {
-        
-        //Clock para asignacion dinamica -> Supongo que ya estan todas las paginas en la lista
-        t_clock* pagina = malloc(sizeof(t_clock));
-        t_list_iterator *list_iterator = list_iterator_create(reemplazo_CLOCK->paginas);
-        index = reemplazo_CLOCK->ultimo;
         while(numeroMarco == -1){
-        while (list_iterator_has_next(list_iterator))
-        {
-            pagina = list_iterator_next(list_iterator);
-            ultimoClock = list_get(reemplazo_CLOCK->paginas,reemplazo_CLOCK->ultimo);
-            while(pagina->pid != ultimoClock->pid && pagina->numero_pagina != ultimoClock->numero_pagina){
-                pagina = list_iterator_next(list_iterator);
-            }
-            //Primera vuelta
-            if(pagina->bit_referido == 0 && pagina->bit_modificado == 0){
-                t_clock *clockOld = list_replace(reemplazo_CLOCK->paginas,reemplazo_CLOCK->ultimo,paginaNueva);
-                t_pagina* paginaVieja = getPaginaByNumero(clockOld->numero_pagina,clockOld->pid);
-                numeroMarco = paginaVieja->marco_asignado;
-                reemplazo_CLOCK->ultimo = index + 1;
 
-                list_iterator_destroy(list_iterator);
-                return numeroMarco;
-            }
-            index++;
-        }
+            //CLOCK M con fija -> tabla de paginas tiene el clock, las paginas tienen uso y modificado
 
-        index = 0;
-        list_iterator_destroy(list_iterator);
+            t_tabla_paginas* tabla_paginas = buscarTablaPorPID(pagina->carpincho_id);
 
-        //Llegue al final de la lista
-        //Tengo que volver a empezar en lista hasta que llegue a ultimo y ahi termino primera vuelta
-        t_list_iterator *list_iterator = list_iterator_create(reemplazo_CLOCK->paginas);
+            t_list_iterator *list_iterator = list_iterator_create(tabla_paginas->Clock);
+            t_pagina* page = malloc(sizeof(t_pagina));
 
-        while (list_iterator_has_next(list_iterator))
-        {
-            pagina = list_iterator_next(list_iterator);
-            ultimoClock = list_get(reemplazo_CLOCK->paginas,reemplazo_CLOCK->ultimo);
+            while(list_iterator_has_next(list_iterator)){
 
-            //Primera vuelta
-            if(pagina->bit_referido == 0 && pagina->bit_modificado == 0){
-                t_clock *clockOld = list_replace(reemplazo_CLOCK->paginas,reemplazo_CLOCK->ultimo,paginaNueva);
-                t_pagina* paginaVieja = getPaginaByNumero(clockOld->numero_pagina,clockOld->pid);
-                numeroMarco = paginaVieja->marco_asignado;
-                reemplazo_CLOCK->ultimo = index + 1;
-
-                list_iterator_destroy(list_iterator);
-                return numeroMarco;
-            }
-
-            if(pagina->pid == ultimoClock->pid && pagina->numero_pagina == ultimoClock->numero_pagina){
-                while (list_iterator_has_next(list_iterator)){
-                    pagina = list_iterator_next(list_iterator);
+                page = list_iterator_next(list_iterator);
+            
+                while(index < tabla_paginas->ultimo_Clock){
+                    page = list_iterator_next(list_iterator);
+                    index ++;
                 }
-            }
 
-            index++;
-        }
+                if(page->bit_presencia == 1){
 
-        index = 0;
-        list_iterator_destroy(list_iterator);
+                    if(page->bit_modificado == 0 && page->bit_uso == 0){
 
-        //Termine primera vuelta, ahora segunda vuelta es cambiando el bit de uso
-        list_iterator = list_iterator_create(reemplazo_CLOCK->paginas);
-        while (list_iterator_has_next(list_iterator))
-        {
-            pagina = list_iterator_next(list_iterator);
-            ultimoClock = list_get(reemplazo_CLOCK->paginas,reemplazo_CLOCK->ultimo);
-            while(pagina->pid != ultimoClock->pid && pagina->numero_pagina != ultimoClock->numero_pagina){
-                pagina = list_iterator_next(list_iterator);
-            }
-            //Primera vuelta
-            if(pagina->bit_referido == 0){
-                t_clock *clockOld = list_replace(reemplazo_CLOCK->paginas,reemplazo_CLOCK->ultimo,paginaNueva);
-                t_pagina* paginaVieja = getPaginaByNumero(clockOld->numero_pagina,clockOld->pid);
-                numeroMarco = paginaVieja->marco_asignado;
-                reemplazo_CLOCK->ultimo = index + 1;
+                    //Ver de cambiar esto despues de swapear
+                    page->bit_presencia = 0;
+                    pagina->bit_presencia = 1;
+                    pagina->marco_asignado = page->marco_asignado;
+                    list_replace(tabla_paginas->Clock,index,pagina);
+                    tabla_paginas->ultimo_Clock = index + 1;
+                    numeroMarco = pagina->marco_asignado;
+                    list_iterator_destroy(list_iterator);
+                    //Devuelvo el marco debido a que con eso despues de llamar a swap hago el cambio en la lista
+                    return pagina->marco_asignado;
+                    }
 
-                list_iterator_destroy(list_iterator);
-                return numeroMarco;
-            }
-            pagina->bit_referido = 0;
-            pagina = list_replace(reemplazo_CLOCK->paginas,index,pagina);
-
-
-            index++;
-        }
-
-        //Termino primera parte de la segunda vuelta
-        index = 0;
-        list_iterator_destroy(list_iterator);
-
-        list_iterator = list_iterator_create(reemplazo_CLOCK->paginas);
-
-        while (list_iterator_has_next(list_iterator))
-        {
-            pagina = list_iterator_next(list_iterator);
-            ultimoClock = list_get(reemplazo_CLOCK->paginas,reemplazo_CLOCK->ultimo);
-
-            //Primera vuelta
-            if(pagina->bit_referido == 0){
-                t_clock *clockOld = list_replace(reemplazo_CLOCK->paginas,reemplazo_CLOCK->ultimo,paginaNueva);
-                t_pagina* paginaVieja = getPaginaByNumero(clockOld->numero_pagina,clockOld->pid);
-                numeroMarco = paginaVieja->marco_asignado;
-                reemplazo_CLOCK->ultimo = index + 1;
-
-                list_iterator_destroy(list_iterator);
-                return numeroMarco;
-            }
-
-            pagina->bit_referido = 0;
-            pagina = list_replace(reemplazo_CLOCK->paginas,index,pagina);
-
-            if(pagina->pid == ultimoClock->pid && pagina->numero_pagina == ultimoClock->numero_pagina){
-                while (list_iterator_has_next(list_iterator)){
-                    pagina = list_iterator_next(list_iterator);
                 }
+
+                index++;
+
             }
 
-            index++;
+            // Termine la primera media vuelta, ahora hago lo mismo hasta ultimo
+
+            index = 0;
+            list_iterator_destroy(list_iterator);
+
+            list_iterator = list_iterator_create(tabla_paginas->Clock);
+
+            while(list_iterator_has_next(list_iterator)){
+
+                page = list_iterator_next(list_iterator);
+
+                while(index < tabla_paginas->ultimo_Clock){
+                    if(page->bit_presencia == 1){
+
+                        if(page->bit_modificado == 0 && page->bit_uso == 0){
+
+                        //Ver de cambiar esto despues de swapear
+                        page->bit_presencia = 0;
+                        pagina->bit_presencia = 1;
+                        pagina->marco_asignado = page->marco_asignado;
+                        list_replace(tabla_paginas->Clock,index,pagina);
+                        tabla_paginas->ultimo_Clock = index + 1;
+                        numeroMarco = pagina->marco_asignado;
+                        list_iterator_destroy(list_iterator);
+                        //Devuelvo el marco debido a que con eso despues de llamar a swap hago el cambio en la lista
+                        return pagina->marco_asignado; 
+                        }
+                    }
+                    page = list_iterator_next(list_iterator);
+                    index ++;
+                }
+
+
+                //Arranco segunda vuelta
+
+                if(page->bit_presencia == 1){
+
+                    if(page->bit_modificado == 1 && page->bit_uso == 0){
+
+                    //Ver de cambiar esto despues de swapear
+                    page->bit_presencia = 0;
+                    pagina->bit_presencia = 1;
+                    pagina->marco_asignado = page->marco_asignado;
+                    list_replace(tabla_paginas->Clock,index,pagina);
+                    tabla_paginas->ultimo_Clock = index + 1;
+                    numeroMarco = pagina->marco_asignado;
+                    list_iterator_destroy(list_iterator);
+                    //Devuelvo el marco debido a que con eso despues de llamar a swap hago el cambio en la lista
+                    return pagina->marco_asignado; 
+                    }
+                }
+
+                page->bit_uso = 0;
+
+                index ++;
+
+            }
+
+            index = 0;
+            list_iterator_destroy(list_iterator);
+
+            list_iterator = list_iterator_create(tabla_paginas->Clock);
+
+            while(list_iterator_has_next(list_iterator)){
+
+                page = list_iterator_next(list_iterator);
+
+                while(index < tabla_paginas->ultimo_Clock){
+                    if(page->bit_presencia == 1){
+
+                        if(page->bit_modificado == 1 && page->bit_uso == 0){
+
+                        //Ver de cambiar esto despues de swapear
+                        page->bit_presencia = 0;
+                        pagina->bit_presencia = 1;
+                        pagina->marco_asignado = page->marco_asignado;
+                        list_replace(tabla_paginas->Clock,index,pagina);
+                        tabla_paginas->ultimo_Clock = index + 1;
+                        numeroMarco = pagina->marco_asignado;
+                        list_iterator_destroy(list_iterator);
+                        //Devuelvo el marco debido a que con eso despues de llamar a swap hago el cambio en la lista
+                        return pagina->marco_asignado; 
+                        }
+                    }
+                    page->bit_uso = 0;
+                    page = list_iterator_next(list_iterator);
+                    index ++;
+                }
+
+            }
+
+            index = 0;
+            list_iterator_destroy(list_iterator);
+
         }
 
+    }else 
+    {
+
+        while(numeroMarco == -1){
+
+            //CLOCK M con fija -> tabla de paginas tiene el clock, las paginas tienen uso y modificado
+
+            t_list_iterator *list_iterator = list_iterator_create(reemplazo_CLOCK->Clock);
+            t_pagina* page = malloc(sizeof(t_pagina));
+
+            while(list_iterator_has_next(list_iterator)){
+
+                page = list_iterator_next(list_iterator);
+            
+                while(index < reemplazo_CLOCK->ultimo){
+                    page = list_iterator_next(list_iterator);
+                    index ++;
+                }
+
+                if(page->bit_presencia == 1){
+
+                    if(page->bit_modificado == 0 && page->bit_uso == 0){
+
+                    //Ver de cambiar esto despues de swapear
+                    page->bit_presencia = 0;
+                    pagina->bit_presencia = 1;
+                    pagina->marco_asignado = page->marco_asignado;
+                    list_replace(reemplazo_CLOCK->Clock,index,pagina);
+                    reemplazo_CLOCK->ultimo = index + 1;
+                    numeroMarco = pagina->marco_asignado;
+                    list_iterator_destroy(list_iterator);
+                    //Devuelvo el marco debido a que con eso despues de llamar a swap hago el cambio en la lista
+                    return pagina->marco_asignado;
+                    }
+
+                }
+
+                index++;
+
+            }
+
+            // Termine la primera media vuelta, ahora hago lo mismo hasta ultimo
+
+            index = 0;
+            list_iterator_destroy(list_iterator);
+
+            list_iterator = list_iterator_create(reemplazo_CLOCK->Clock);
+
+            while(list_iterator_has_next(list_iterator)){
+
+                page = list_iterator_next(list_iterator);
+
+                while(index < reemplazo_CLOCK->ultimo){
+                    if(page->bit_presencia == 1){
+
+                        if(page->bit_modificado == 0 && page->bit_uso == 0){
+
+                        //Ver de cambiar esto despues de swapear
+                        page->bit_presencia = 0;
+                        pagina->bit_presencia = 1;
+                        pagina->marco_asignado = page->marco_asignado;
+                        list_replace(reemplazo_CLOCK->Clock,index,pagina);
+                        reemplazo_CLOCK->ultimo = index + 1;
+                        numeroMarco = pagina->marco_asignado;
+                        list_iterator_destroy(list_iterator);
+                        //Devuelvo el marco debido a que con eso despues de llamar a swap hago el cambio en la lista
+                        return pagina->marco_asignado; 
+                        }
+                    }
+                    page = list_iterator_next(list_iterator);
+                    index ++;
+                }
+
+
+                //Arranco segunda vuelta
+
+                if(page->bit_presencia == 1){
+
+                    if(page->bit_modificado == 1 && page->bit_uso == 0){
+
+                    //Ver de cambiar esto despues de swapear
+                    page->bit_presencia = 0;
+                    pagina->bit_presencia = 1;
+                    pagina->marco_asignado = page->marco_asignado;
+                    list_replace(reemplazo_CLOCK->Clock,index,pagina);
+                    reemplazo_CLOCK->ultimo = index + 1;
+                    numeroMarco = pagina->marco_asignado;
+                    list_iterator_destroy(list_iterator);
+                    //Devuelvo el marco debido a que con eso despues de llamar a swap hago el cambio en la lista
+                    return pagina->marco_asignado; 
+                    }
+                }
+
+                page->bit_uso = 0;
+
+                index ++;
+
+            }
+
+            index = 0;
+            list_iterator_destroy(list_iterator);
+
+            list_iterator = list_iterator_create(reemplazo_CLOCK->Clock);
+
+            while(list_iterator_has_next(list_iterator)){
+
+                page = list_iterator_next(list_iterator);
+
+                while(index < reemplazo_CLOCK->ultimo){
+                    if(page->bit_presencia == 1){
+
+                        if(page->bit_modificado == 1 && page->bit_uso == 0){
+
+                        //Ver de cambiar esto despues de swapear
+                        page->bit_presencia = 0;
+                        pagina->bit_presencia = 1;
+                        pagina->marco_asignado = page->marco_asignado;
+                        list_replace(reemplazo_CLOCK->Clock,index,pagina);
+                        reemplazo_CLOCK->ultimo = index + 1;
+                        numeroMarco = pagina->marco_asignado;
+                        list_iterator_destroy(list_iterator);
+                        //Devuelvo el marco debido a que con eso despues de llamar a swap hago el cambio en la lista
+                        return pagina->marco_asignado; 
+                        }
+                    }
+                    page->bit_uso = 0;
+                    page = list_iterator_next(list_iterator);
+                    index ++;
+                }
+
+            }
+
+            index = 0;
+            list_iterator_destroy(list_iterator);
         }
 
     }
+
 }
 
 void actualizarModificado(uint32_t nro_pagina, uint32_t carpincho_id){
