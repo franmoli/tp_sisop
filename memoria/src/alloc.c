@@ -308,7 +308,7 @@ int memAlloc(t_paquete *paquete)
         t_contenidos_pagina *contenido = list_get(pagina->listado_de_contenido, 0);
         t_heap_metadata *header = traerAllocDeMemoria(contenido->dir_comienzo);
         direccion_logica_enviar = contenido->dir_comienzo;
-        agregarPagina(pagina, header, contenido->dir_comienzo - inicio, sizeof(t_heap_metadata), true,0);
+        direccion_logica_enviar = agregarPagina(pagina, header, contenido->dir_comienzo - inicio, sizeof(t_heap_metadata), true,0);
         return direccion_logica_enviar;
     }
     else
@@ -463,7 +463,10 @@ int agregarPagina(t_pagina *pagina, t_heap_metadata *data, uint32_t nextAnterior
                 pagina->cantidad_contenidos += 1;
                 pagina->tamanio_ocupado += size;
                 agregado = true;
-                return inicio + pagina->numero_pagina * config_memoria->TAMANIO_PAGINA + nextAnterior;
+
+                int pagina_anterior = getPaginaByDireccionLogica(data->prevAlloc);
+                pagina = list_get(tabla_paginas->paginas,pagina_anterior);
+                return inicio + pagina->numero_pagina * config_memoria->TAMANIO_PAGINA + data->prevAlloc;
             }
             else
             {
@@ -517,6 +520,7 @@ int agregarPagina(t_pagina *pagina, t_heap_metadata *data, uint32_t nextAnterior
             //ocupo el restante y pido otra
             int restante = size - (config_memoria->TAMANIO_PAGINA - pagina->tamanio_ocupado);
             if(ultimo){
+                //ARREGLAR QUE ESTA MAL, FALTA RETURN
                 asignarFooterSeparado(pagina,data,size,nextAnterior);
                 return;
             }
@@ -589,7 +593,11 @@ int agregarPagina(t_pagina *pagina, t_heap_metadata *data, uint32_t nextAnterior
             pagina->cantidad_contenidos += 1;
             pagina->tamanio_ocupado += size;
             agregado = true;
-            return inicio + pagina_anterior->numero_pagina * config_memoria->TAMANIO_PAGINA + nextAnterior - sizeof(t_heap_metadata);
+
+            int pagina_anterior_numero = getPaginaByDireccionLogica(data->prevAlloc);
+            pagina = list_get(tabla_paginas->paginas,pagina_anterior_numero);
+            return inicio + pagina->numero_pagina * config_memoria->TAMANIO_PAGINA + data->prevAlloc;
+            //return inicio + pagina_anterior->numero_pagina * config_memoria->TAMANIO_PAGINA + nextAnterior - sizeof(t_heap_metadata);
         }
         pagina = list_get(tabla_paginas->paginas, numero_pagina);
         data->isFree = true;
