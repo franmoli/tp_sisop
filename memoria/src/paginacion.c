@@ -461,7 +461,7 @@ int solicitarPaginaNueva(uint32_t carpincho_id)
     }
     if(marco == -1){
         log_info(logger_memoria, "Tengo que ir a swap");
-        reemplazarPagina(list_size(tabla_paginas->paginas),tabla_paginas->pid);
+        //reemplazarPagina(list_size(tabla_paginas->paginas),tabla_paginas->pid);
     }
     int numero_pagina = 0;
     if (list_size(tabla_paginas->paginas) > 0)
