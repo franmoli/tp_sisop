@@ -63,6 +63,8 @@ t_list *lista_blocked;
 t_list *lista_s_blocked;
 t_list *lista_s_ready;
 t_list *lista_semaforos;
+t_list *lista_exit;
+
 //Semaforos
 sem_t mutex_listas;
 sem_t proceso_finalizo_o_suspended;
@@ -81,6 +83,8 @@ sem_t liberar_multiprocesamiento;
 sem_t salida_a_exit_recibida;
 sem_t salida_de_exec_recibida;
 sem_t cambio_de_listas;
+sem_t cambio_de_listas_largo;
+sem_t cambio_de_listas_mediano;
 sem_t pedir_salida_de_block;
 sem_t solicitar_block;
 

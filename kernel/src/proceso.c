@@ -5,43 +5,31 @@ void *proceso(void *self){
     t_proceso *proceso_struct = self;
     sem_wait(&proceso_inicializado);
     int prev_status = -1;
-    int reloj_i = 0;
+    
+    pthread_t hilo_ejecucion;
 
     while(1){
         sem_wait(&actualizacion_de_listas_1);
         if(prev_status != proceso_struct->status){
             switch (proceso_struct->status){
                 case NEW:
-                    printf("N - p: %d ", proceso_struct->id);
+                    //printf("New - p: %d ", proceso_struct->id);
                     new();
                     sleep(1);
                     break;
                 case EXEC:
-                    reloj_i = clock();
-                    printf("E - p: %d ", proceso_struct->id);
-                    exec(proceso_struct);
-                    proceso_struct->ejecucion_anterior = clock() - reloj_i;
-                    proceso_struct->estimar = true;
-                    
-                    /*if(exec(aux)){
-                        proceso_struct->salida_exit = true;
-                        printf("salida a exit \n");
-                        sem_post(&salida_a_exit);
-                        //sem_wait(&salida_a_exit_recibida);
-                        
-                    }else{
-                        proceso_struct->termino_rafaga = true;
-                        //TODO: proceso calcular ejecucion real Y y setear para estimar
-                        printf("Salida a ready\n");
-                        sem_post(&salida_exec);
-                        //sem_wait(&salida_de_exec_recibida);
-                    }*/
+                    pthread_create(&hilo_ejecucion, NULL, exec, (void *)proceso_struct);
                     break;
                 case BLOCKED:
-                    printf("B - p: %d \n", proceso_struct->id);
+                    //printf("Block - p: %d \n", proceso_struct->id);
                     break;
+                case EXIT:
+                    sem_post(&actualizacion_de_listas_1_recibido);
+                    sem_wait(&actualizacion_de_listas_2);
+                    return;
                 default:
-                    printf("Estoy en default y no hago nada %d - %d\n", proceso_struct->id, proceso_struct->status);
+                    break;
+                    //printf("Estoy en default y no hago nada %d - %d\n", proceso_struct->id, proceso_struct->status);
             }
             prev_status = proceso_struct->status;
         }
@@ -61,12 +49,11 @@ void new(){
 
 void exec(t_proceso *self){
 
-    //Enviar exec disponible
-    //El exec disponible se resolveria mandando el operacion recibida, asi solo se va a enviar cuando este en exec y empiece a procesar las solicitudes enviadas
-
     t_task *next_task = NULL;
     bool bloquear_f = false;
-
+    int reloj_i = 0;
+    reloj_i = clock();
+    enviar_confirmacion(self->socket_carpincho);
     while(!bloquear_f){
         //Traer proxima operacion
         if(list_size(self->task_list)){
@@ -82,10 +69,7 @@ void exec(t_proceso *self){
                     enviar_confirmacion(self->socket_carpincho);
                     break;
                 case CLIENTE_DESCONECTADO:
-                    self->salida_exit = true;
-                    sem_post(&salida_a_exit);
-                    close(self->socket_carpincho);
-                    break;
+                    return;
                 case CLIENTE_TEST:
                 case NUEVO_CARPINCHO:
                 case MATEINIT:
@@ -95,14 +79,13 @@ void exec(t_proceso *self){
                 case RECEPCION_PAGINA:
                     break;
                 case SEM_WAIT:
-                    printf("Llegue al switch de proceso.c\n");
                     semaforo_aux = next_task->datos_tarea;
                     bloquear_f = solicitar_semaforo(semaforo_aux->nombre_semaforo, self->socket_carpincho);
                     break;
 
                 case SEM_POST:
                     semaforo_aux = next_task->datos_tarea;
-                    printf("Posteando semadoro %s\n", semaforo_aux->nombre_semaforo);
+                    printf("Posteando semaforo %s\n", semaforo_aux->nombre_semaforo);
                     postear_semaforo(semaforo_aux->nombre_semaforo);
                     enviar_confirmacion(self->socket_carpincho);
                     break;
@@ -124,17 +107,22 @@ void exec(t_proceso *self){
 
             }
             
-            //bloquear_f = true;
         }
     }
 
+    //Solo por debug, borrar despues
     sleep(2);
+
+    self->ejecucion_anterior = clock() - reloj_i;
+    self->estimar = true;
+
     bloquear(self);
 }
 
 bool solicitar_semaforo(char *nombre_semaforo, int id){
     //TODO: AGREGAR MUTEX DE VALUE O LO QUE SEA
     // traer de la lista el semaforo
+    printf("Se solicito el semadoro %s\n", nombre_semaforo);
     t_semaforo *semaforo_solicitado = traer_semaforo(nombre_semaforo);
     
     if(semaforo_solicitado == NULL){
@@ -146,7 +134,6 @@ bool solicitar_semaforo(char *nombre_semaforo, int id){
 
         //si esta disponible restarle uno al value y enviar habilitacion para continuar
         semaforo_solicitado->value = semaforo_solicitado->value - 1;
-
         enviar_confirmacion(id);
 
         //Esta disponible, no bloquear
@@ -159,8 +146,6 @@ bool solicitar_semaforo(char *nombre_semaforo, int id){
 
         semaforo_solicitado->value = semaforo_solicitado->value - 1;
         list_add(semaforo_solicitado->solicitantes, aux);
-
-        printf("Solicite bloquear el semaforo %s\n",semaforo_solicitado->nombre_semaforo);
 
         //no esta disponible, bloquear
         return true;
@@ -205,7 +190,6 @@ void postear_semaforo(char *nombre_semaforo){
         int *aux;
         semaforo_solicitado->value = semaforo_solicitado->value + 1;
         aux = list_remove(semaforo_solicitado->solicitantes, 0);
-        printf("Intentando desbloquear %d\n", *aux);
 
         desbloquear(traer_proceso_bloqueado(*aux));
 
@@ -267,6 +251,8 @@ void desbloquear(t_proceso *self){
     printf("Desbloquear proceso: %d\n", self->id);
     self->salida_block = true;
     sleep(1);
+    if(self->status == BLOCKED)
+        enviar_confirmacion(self->id);
     sem_post(&salida_block);
     //sem_post(&pedir_salida_de_block);
     return;

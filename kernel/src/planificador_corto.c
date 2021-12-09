@@ -65,10 +65,9 @@ void *planificador_corto_plazo_sjf (void *multiprocesamiento_p){
             
             //Se saca de ready y se pasa a exec
             int *carpincho = list_get(lista_ready,index);
-            printf("Movi el proceso %d a ready\n",*carpincho);
             mover_proceso_de_lista(lista_ready, lista_exec, index, EXEC);
             sem_wait(&mutex_multiprocesamiento);
-            *multiprocesamiento = *multiprocesamiento - 1;
+            *multiprocesamiento = *multiprocesamiento - 1;         
             sem_post(&mutex_multiprocesamiento);
 
         }
@@ -175,27 +174,7 @@ void *esperar_salida_exec(void *multiprocesamiento_p){
     }
 }
 
-void *esperar_salida_block(void *multiprocesamiento_p){
 
-    while(1){
-
-        sem_wait(&salida_block);
-
-        bool encontrado = false;
-        int tamanio_lista_blocked = list_size(lista_blocked);
-        int index = 0;
-        printf("Estoy en el hilo de salida block, procesos en blocked = %d\n",tamanio_lista_blocked);
-        while(!encontrado && (index < tamanio_lista_blocked)){
-            t_proceso *aux = list_get(lista_blocked, index);
-            if(/*aux->termino_rafaga*/ aux->salida_block){
-                printf("saco por block\n");
-                    mover_proceso_de_lista(lista_blocked, lista_ready, index, READY);
-                encontrado = true;
-            }
-            index ++;
-        }
-    }
-}
 
 void *hilo_liberar_multiprocesamiento(void *multiprocesamiento_p){
     int *multiprocesamiento = multiprocesamiento_p;
@@ -218,7 +197,6 @@ void *esperar_bloqueo(void *multiprocesamiento_p){
     while(1){
 
         sem_wait(&solicitar_block);
-        printf("Se solicito un block\n");
 
         bool encontrado = false;
         int tamanio_lista_exec = list_size(lista_exec);

@@ -14,5 +14,6 @@ t_proceso *nuevo_carpincho(int socket_cliente);
 void *planificador_largo_plazo(void *_);
 void *hilo_salida_a_exit(void *multiprogramacion_disponible_p);
 void print_semaforos();
+bool pedido_exit(void *elemento);
 
 #endif

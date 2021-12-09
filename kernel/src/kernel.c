@@ -15,7 +15,6 @@ int main(int argc, char **argv) {
 
     //Iniciar semaforos de uso general
     iniciar_semaforos_generales();
-    
     multiprogramacion_disponible = config_kernel->GRADO_MULTIPROGRAMACION;
 
     //Iniciar listas de procesos
@@ -67,6 +66,7 @@ void iniciar_listas(){
     lista_s_blocked = list_create();
     lista_s_ready = list_create();
     lista_semaforos = list_create();
+    lista_exit = list_create();
 
     sem_init(&mutex_listas, 0, 1);
     
@@ -93,6 +93,8 @@ void iniciar_semaforos_generales(){
     sem_init(&salida_de_exec_recibida, 0, 0);
     sem_init(&salida_a_exit_recibida, 0, 0);
     sem_init(&cambio_de_listas, 0, 0);
+    sem_init(&cambio_de_listas_largo, 0, 0);
+    sem_init(&cambio_de_listas_mediano, 0, 0);
     sem_init(&pedir_salida_de_block, 0, 0);
     sem_init(&solicitar_block, 0, 0);
     return;
@@ -120,20 +122,22 @@ void avisar_cambio(){
     for(int i = 0; i < cantidad_de_procesos; i++){
         sem_post(&actualizacion_de_listas_1);
     }
+
     //Espero que todos los procesos hayan recibido el aviso y ejecutado
     for(int i = 0; i < cantidad_de_procesos; i++){
         sem_wait(&actualizacion_de_listas_1_recibido);
     }
-    printf("Pase el sem de actualizacion\n");
+
     //Habilito que vuelvan a esperar una vez ya resuelto todo lo que tengan que hacer con su nuevo estado
     for(int i = 0; i < cantidad_de_procesos; i++){
         sem_post(&actualizacion_de_listas_2);
     }
+
     //Habilito planificadores
-    sem_post(&cambio_de_listas);
-    sem_post(&cambio_de_listas);
-    sem_post(&mutex_cant_procesos);
+    sem_post(&cambio_de_listas_largo);
     sleep(0.5);
+    sem_post(&cambio_de_listas_mediano);
+    sem_post(&mutex_cant_procesos);
 }
 
 void iniciar_debug_console(){
@@ -177,6 +181,12 @@ void *debug_console(void *_ ){
         }
         if(string_contains(input, "list")){
             print_lists();
+        }
+        if(string_contains(input, "multiprog")){
+            printf("Multiprogramacion disponible %d\n", multiprogramacion_disponible);
+        }
+        if(string_contains(input, "process")){
+            printf("Procesos activos %d\n", cantidad_de_procesos);
         }
 
     }
@@ -270,13 +280,13 @@ void print_lists(){
     int index = 0;
     t_proceso *aux = NULL;
 
-    printf("Printeando gente en new %d\n\n", list_size(lista_new));
+    printf("Printeando gente en new %d\n", list_size(lista_new));
     while(index < list_size(lista_new)){
         aux = list_get(lista_new, index);
         printf("Carpincho %d en new \n", aux->id);
         index++;
     }
-
+    printf("\n");
     index = 0;
 
     printf("Printeando gente en blocked %d\n\n", list_size(lista_blocked));
@@ -286,6 +296,7 @@ void print_lists(){
         index++;
     }
 
+    printf("\n");
     index = 0;
 
     printf("Printeando gente en ready %d\n\n", list_size(lista_ready));
@@ -295,6 +306,7 @@ void print_lists(){
         index++;
     }
 
+    printf("\n");
     index = 0;
 
     printf("Printeando gente en exec %d\n\n", list_size(lista_exec));
@@ -304,6 +316,7 @@ void print_lists(){
         index++;
     }
 
+    printf("\n");
     index = 0;
 
     printf("Printeando gente en suspended block %d\n\n", list_size(lista_s_blocked));
@@ -313,6 +326,7 @@ void print_lists(){
         index++;
     }
 
+    printf("\n");
     index = 0;
 
     printf("Printeando gente en suspended ready %d\n\n", list_size(lista_s_ready));
@@ -322,5 +336,16 @@ void print_lists(){
         index++;
     }
 
+    printf("\n");
+    index = 0;
+
+    printf("Printeando gente en exit %d\n\n", list_size(lista_exit));
+    while(index < list_size(lista_exit)){
+        aux = list_get(lista_exit, index);
+        printf("Carpincho %d en exit \n", aux->id);
+        index++;
+    }
+
+    printf("\n");
 
 }
