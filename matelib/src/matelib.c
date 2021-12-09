@@ -180,7 +180,16 @@ int mate_call_io(mate_instance_pointer *instance_pointer, mate_io_resource io, v
 
     log_info(lib_ref->logger,"Se llamo a la io %s",io);
 
-//  HACER VERIFICACION CON EL RECIBIR PAQUETE
+    //Esperar señal de ejecucion
+    t_paquete *paquete_recibido = recibir_paquete(lib_ref->socket);
+
+    if(paquete_recibido->codigo_operacion == OP_CONFIRMADA){
+        log_info(lib_ref->logger,"La funcion CALL_IO se ejecuto exitosamente");
+        return 0;
+    }else{
+        log_error(lib_ref->logger,"La funcion CALL_IO no se ejecuto correctamente");
+        return -1;
+    }
 
     return 0;
 }

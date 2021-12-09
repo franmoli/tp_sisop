@@ -45,6 +45,7 @@ void atender_proceso (void* parametro ){
     carpincho->socket_carpincho = socket_cliente;
    // t_task *task_aux = NULL;
     t_semaforo *semaforo_recibido = NULL;
+    t_io *io_recibida = NULL;
 
     while(1) {
 
@@ -128,16 +129,31 @@ void atender_proceso (void* parametro ){
             case MEMFREE:
                 task->id = MEMFREE;
                 task->datos_tarea = paquete;
+                list_add(carpincho->task_list, task);
                 break;
             case MEMREAD:
                 task->id = MEMREAD;
                 task->datos_tarea = paquete;
+                list_add(carpincho->task_list, task);
                 break;
             case MEMWRITE:
                 task->id = MEMWRITE;
                 task->datos_tarea = paquete;
+                list_add(carpincho->task_list, task);
                 break;
             case CALLIO:
+                task->id = CALLIO;
+                io_recibida = malloc(sizeof(t_io));
+                io_recibida->nombre = NULL;
+                io_recibida->mensaje = NULL;
+                io_recibida->proceso_solicitante = NULL;
+                io_recibida->duracion = 0;
+                deserializar(paquete, 4, CHAR_PTR, &io_recibida->nombre, CHAR_PTR, &io_recibida->mensaje);
+
+                task->datos_tarea = io_recibida;
+                printf("Io recibida %s\n", io_recibida->nombre);
+                list_add(carpincho->task_list, task);
+                
                 break;
             default:
                 log_error(logger_kernel, "Codigo de operacion desconocido");

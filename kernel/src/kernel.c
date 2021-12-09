@@ -95,6 +95,7 @@ void iniciar_semaforos_generales(){
     sem_init(&cambio_de_listas, 0, 0);
     sem_init(&cambio_de_listas_largo, 0, 0);
     sem_init(&cambio_de_listas_mediano, 0, 0);
+    sem_init(&cambio_de_listas_corto, 0, 0);
     sem_init(&pedir_salida_de_block, 0, 0);
     sem_init(&solicitar_block, 0, 0);
     return;
@@ -137,6 +138,9 @@ void avisar_cambio(){
     sem_post(&cambio_de_listas_largo);
     sleep(0.5);
     sem_post(&cambio_de_listas_mediano);
+    sleep(0.5);
+    sem_post(&cambio_de_listas_corto);
+
     sem_post(&mutex_cant_procesos);
 }
 
