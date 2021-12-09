@@ -6,6 +6,7 @@
 #include <semaphore.h>
 #include <commons/log.h>
 #include <time.h>
+#include <stdlib.h>
 //#include "matelib.h"
 #include "server.h"
 #include "config_utils.h"
@@ -49,6 +50,13 @@ typedef struct {
     t_list *solicitantes;
 }t_semaforo;
 
+typedef struct {
+    char *nombre;
+    char *mensaje;
+    int duracion;
+    t_proceso *proceso_solicitante;
+}t_io;
+
 
 
 //Configuración
@@ -85,6 +93,7 @@ sem_t salida_de_exec_recibida;
 sem_t cambio_de_listas;
 sem_t cambio_de_listas_largo;
 sem_t cambio_de_listas_mediano;
+sem_t cambio_de_listas_corto;
 sem_t pedir_salida_de_block;
 sem_t solicitar_block;
 

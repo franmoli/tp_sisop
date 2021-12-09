@@ -41,7 +41,7 @@ void *planificador_corto_plazo_sjf (void *multiprocesamiento_p){
     int *multiprocesamiento = multiprocesamiento_p;
 
     while(1){
-
+        sem_wait(&cambio_de_listas_corto);
         //calcular estimaciones
         for(int i = 0; i < list_size(lista_ready); i++){
 

@@ -54,12 +54,18 @@ void exec(t_proceso *self){
     int reloj_i = 0;
     reloj_i = clock();
     enviar_confirmacion(self->socket_carpincho);
+
     while(!bloquear_f){
         //Traer proxima operacion
         if(list_size(self->task_list)){
             next_task = list_remove(self->task_list, 0);
             t_paquete *paquete_recibido = NULL;
             t_semaforo *semaforo_aux = NULL;
+            t_io *io_recibida = NULL;
+            int index = 0;
+            char *io_device = NULL;
+            pthread_t hilo_desbloquear_en;
+            
 
             switch (next_task->id){
                 case INIT_SEM:
@@ -94,7 +100,23 @@ void exec(t_proceso *self){
                 case OP_ERROR:
                     break;
                 case CALLIO:
-                        
+                    printf("Ejecutando la io\n");
+                    io_recibida = next_task->datos_tarea;
+
+                    while(index < list_size(config_kernel->DISPOSITIVOS_IO)){
+                        io_device = list_get(config_kernel->DISPOSITIVOS_IO,index);
+                        if(!strcmp(io_recibida->nombre, io_device)){
+                            break;
+                        }
+                        index++;
+                    }
+                    io_recibida->proceso_solicitante = self;
+                    //strtol(list_get(config_kernel->DURACIONES_IO, index), NULL, 10);
+                    io_recibida->duracion = atoi(list_get(config_kernel->DURACIONES_IO, index));
+                    pthread_create(&hilo_desbloquear_en, NULL, desbloquear_en, (void *)io_recibida);
+                    index = 0;
+                    bloquear_f = true;
+
                     break;
                 case MEMALLOC:
                 case MEMFREE:
@@ -256,4 +278,15 @@ void desbloquear(t_proceso *self){
     sem_post(&salida_block);
     //sem_post(&pedir_salida_de_block);
     return;
+}
+
+
+void *desbloquear_en(void *param){
+    t_io *io_recibida = param;
+    log_info(logger_kernel, "Solicitando el dispositivo %s", io_recibida->nombre);
+    sleep(io_recibida->duracion);
+    log_info(logger_kernel, "IO ejecutada %s", io_recibida->mensaje);
+    printf("Desbloqueando X salida de io\n");
+    desbloquear(io_recibida->proceso_solicitante);
+    return NULL;
 }
