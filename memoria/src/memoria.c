@@ -75,15 +75,7 @@ int main(int argc, char **argv)
 
 static void *ejecutar_operacion(int client)
 {
-    /*pthread_t hilo_respuesta;
-    if(0 !=pthread_create(&hilo_respuesta, NULL, (void *)receptor, NULL)){
-        log_error(logger_memoria, "ERROR AL CREAR EL HILO DE RESPUESTA MEMORIA");
-        close(client);
-        log_info(logger_memoria, "Se desconecto el cliente [%d]", client);
-        return NULL;
-    }
-    pthread_join(hilo_respuesta,NULL);
-    */while (1)
+    while (1)
     {
         t_paquete *paquete = recibir_paquete(client);
 
@@ -97,9 +89,10 @@ static void *ejecutar_operacion(int client)
             log_info(logger_memoria, "recibi orden de memalloc del cliente %d", client);
             int dire_logica =memAlloc(paquete);
             
-            t_paquete* paquete = serializar(MEMALLOC,2,INT,dire_logica);
+            t_paquete* paquete_enviar = serializar(MEMALLOC,2,INT,dire_logica);
+            //dire_logica = deserializar(paquete);
             log_info(logger_memoria,"Enviando paquete con direccion logica");
-            enviar_paquete(paquete,socket_client);
+            enviar_paquete(paquete_enviar,socket_client);
             log_info(logger_memoria,"Paquete enviado");
             break;
         case MEMFREE:
@@ -129,9 +122,6 @@ static void *ejecutar_operacion(int client)
         free(paquete->buffer->stream);
         free(paquete->buffer);
         free(paquete);
-
-        //Salgo del ciclo
-        break;
     }
     close(client);
     log_info(logger_memoria, "Se desconecto el cliente [%d]", client);

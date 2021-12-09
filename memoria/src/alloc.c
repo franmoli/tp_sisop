@@ -381,15 +381,22 @@ int memAlloc(t_paquete *paquete)
                     guardarAlloc(data, nextAnterior + sizeof(t_heap_metadata) + size);
                 }
             }
+
+            if(nextAnterior == tamanio_memoria){
+                nextAnterior = 0;
+            }
+            int nropagina_alloc =getPaginaByDireccionLogica(nextAnterior);
+            t_pagina *pagina_alloc_anterior = list_get(tabla_paginas->paginas,nropagina_alloc);
+
             nextAnterior = data->nextAlloc;
             
-            int nropagina_alloc =getPaginaByDireccionLogica(nextAnterior);
+            nropagina_alloc =getPaginaByDireccionLogica(nextAnterior);
             t_pagina *pagina_alloc_actual = list_get(tabla_paginas->paginas,nropagina_alloc);
             
             if(pagina_alloc_actual->bit_presencia == false){
                 //SWAPP
             }
-            int direccion = inicio + data->nextAlloc+ config_memoria->TAMANIO_PAGINA * pagina_alloc_actual->marco_asignado;
+            int direccion = inicio + data->nextAlloc+ config_memoria->TAMANIO_PAGINA * pagina_alloc_anterior->marco_asignado;
             
             //t_contenidos_pagina *contenido_actual = getContenidoPaginaByTipoAndSize(pagina_Disponible->listado_de_contenido,CONTENIDO,data->nextAlloc);
             data = traerAllocDeMemoria(direccion);
