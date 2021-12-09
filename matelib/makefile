@@ -31,7 +31,7 @@ SHARED_OBJ = $(patsubst $(SHARED_SRCDIR)/%.c,$(SHARED_ODIR)/%.o,$(SHARED_SRC))
 $(PROCESS_NAME): $(OBJ) $(SHARED_OBJ)
 	$(CC) -Wl,-soname,lib$@.so $^ $(CFLAGS) $(LIBS) -o lib$@.so
 	sudo cp lib$@.so /usr/include/lib$@.so
-	sudo cp lib$@.so /usr/include/lib/lib$@.so
+	
 	sudo cp lib$@.so /usr/bin/lib$@.so
 	sudo cp lib$@.so /usr/lib/lib$@.so
 

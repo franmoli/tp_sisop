@@ -17,13 +17,6 @@ int main(int argc, char **argv)
         log_info(logger_memoria, "Fallo en la conexion a swap");
     }
 
-    
-        /*tabla_paginas = malloc(sizeof(t_tabla_paginas));
-        tabla_paginas->paginas = list_create();
-        tabla_paginas->paginas_en_memoria = 0;
-        tabla_paginas->Lru = list_create();
-        tabla_paginas->Clock = list_create();*/
-
         tabla_tlb = malloc(sizeof(t_tabla_tlb));
         tabla_tlb->tlb = list_create();
         tabla_tlb->hit_totales = 0;
@@ -47,9 +40,9 @@ int main(int argc, char **argv)
 
         tabla_procesos = list_create();
 
-        //tabla_paginas->paginas_totales_maximas =config_memoria->TAMANIO / config_memoria->TAMANIO_PAGINA;
         int i = 0;
-        while (i < config_memoria->CANTIDAD_ENTRADAS_TLB)
+        uint32_t cant_marcos = config_memoria->TAMANIO / config_memoria->TAMANIO_PAGINA;;
+        while (i < cant_marcos)
         {
             t_marco *tlb = malloc(sizeof(t_marco));
             tlb->numero_marco = i;
@@ -66,40 +59,12 @@ int main(int argc, char **argv)
         signal(SIGUSR1, generarDump);
         signal(SIGUSR2, limpiarTlb);
 
- /*       t_paquete *paquete = serializar_mate_init(1);
-        inicializarCarpincho(paquete);
-        uint32_t carpincho_id = deserializar_mate_init(paquete)->carpincho_id;
-       
-       
-        //CASO PRUEBA DE MEMALLOC
-        t_paquete *paquete1 = serializar_alloc(5, carpincho_id);
-        int a = memAlloc(paquete1);
-
-        paquete1 = serializar_alloc(23, carpincho_id);
-        int b = memAlloc(paquete1);
-
-        paquete1 = serializar_alloc(3, carpincho_id);
-        int c = memAlloc(paquete1);
-
-        
-        t_kernel_dire_logica_serializado* estructura = malloc(sizeof(t_kernel_dire_logica_serializado));
-        estructura->direccion_logica = a;
-        t_paquete* paquete_enviado = serializar_direccion_logica(estructura);
-        free(estructura);
-        estructura = deserializar_direccion_logica(paquete_enviado);
-
-        paquete1 = serializar_alloc(14, carpincho_id);
-        freeAlloc(paquete1);
-        paquete1 = serializar_alloc(46, carpincho_id);
-        freeAlloc(paquete1);
-
-        //memdump();
-*/
     while (1)
     {
         socket_client = esperar_cliente(socket_server, logger_memoria);
         if (socket_client != -1)
         {
+            inicializarCarpincho(socket_client);
             pthread_create(&hilo_client, NULL, (void *)ejecutar_operacion, (void *)socket_client);
         }
     }
@@ -133,7 +98,9 @@ static void *ejecutar_operacion(int client)
             int dire_logica =memAlloc(paquete);
             
             t_paquete* paquete = serializar(MEMALLOC,2,INT,dire_logica);
-            enviarDatos(paquete, KERNEL);
+            log_info(logger_memoria,"Enviando paquete con direccion logica");
+            enviar_paquete(paquete,socket_client);
+            log_info(logger_memoria,"Paquete enviado");
             break;
         case MEMFREE:
             log_info(logger_memoria, "recibi orden de memfree del cliente %d", client);
@@ -151,7 +118,7 @@ static void *ejecutar_operacion(int client)
             break;
         case MATEINIT:
             log_info(logger_memoria, "recibi un nuevo carpincho para inicializar del cliente %d", client);
-            inicializarCarpincho(paquete);
+            //inicializarCarpincho(paquete);
             break;
         default:
             log_error(logger_memoria, "Codigo de operacion desconocido");
@@ -216,11 +183,11 @@ void metricas(){
     }
 }
 
-void inicializarCarpincho(t_paquete *paquete)
+void inicializarCarpincho(int socket_cliente)
 {
 
-    t_mateinit_serializado *mateInit_deserializado = deserializar_mate_init(paquete);
-    uint32_t id = mateInit_deserializado->carpincho_id;
+    //t_mateinit_serializado *mateInit_deserializado = deserializar_mate_init(paquete);
+    uint32_t id = socket_cliente;
 
     t_tabla_paginas *nuevaTabla = malloc(sizeof(t_tabla_paginas));
 

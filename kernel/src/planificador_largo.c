@@ -120,8 +120,10 @@ void atender_proceso (void* parametro ){
                 return;
                 
             case MEMALLOC:
+            
                 task->id = MEMALLOC;
                 task->datos_tarea = paquete;
+                list_add(carpincho->task_list, task);
                 break;
             case MEMFREE:
                 task->id = MEMFREE;

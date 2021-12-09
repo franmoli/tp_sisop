@@ -355,7 +355,8 @@ int getMarco(t_tabla_paginas* tabla_paginas){
     {
         if(tabla_paginas->paginas_en_memoria <=config_memoria->MARCOS_POR_CARPINCHO){
             //Asigno una nueva pagina al marco correspondiente
-            numeroMarco = tabla_paginas->pid * config_memoria->MARCOS_POR_CARPINCHO + tabla_paginas->paginas_en_memoria;
+            int numero = getIndexByPid(tabla_paginas->pid);
+            numeroMarco =  numero * config_memoria->MARCOS_POR_CARPINCHO + tabla_paginas->paginas_en_memoria;
             return numeroMarco;
         }
 
@@ -364,7 +365,18 @@ int getMarco(t_tabla_paginas* tabla_paginas){
     return numeroMarco;
 
 }
-
+int getIndexByPid(int pid){
+    t_list_iterator *list_iterator = list_iterator_create(tabla_procesos);
+    int i = 0;
+     while (list_iterator_has_next(list_iterator))
+        {
+            t_tabla_paginas* tabla = list_iterator_next(list_iterator);
+            if(tabla->pid == pid){
+                return i;
+            }
+            i++;
+        }
+}
 int getMarcoParaPagina(t_tabla_paginas* tabla_paginas){
     
     if(strcmp(config_memoria->TIPO_ASIGNACION, "FIJA") == 0){

@@ -15,6 +15,7 @@ t_contenidos_pagina *getLastHeaderContenidoByPagina(t_pagina* pagina);
 t_tabla_paginas* buscarTablaPorPID(int id);
 t_pagina *getPaginaByNumero(int nro_pagina, int carpincho_id);
 
+int getIndexByPid(int pid);
 
 //MARCOS
 int getMarco(t_tabla_paginas* tabla_paginas);

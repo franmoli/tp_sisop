@@ -100,6 +100,7 @@ void exec(t_proceso *self){
                 case MEMFREE:
                 case MEMREAD:
                 case MEMWRITE:
+                    log_info(logger_kernel,"enviando paquete");
                     enviar_paquete(next_task->datos_tarea,socket_cliente_memoria);
                     paquete_recibido = recibir_paquete(socket_cliente_memoria);
                     enviar_paquete(paquete_recibido,self->socket_carpincho);
