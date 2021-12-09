@@ -102,8 +102,8 @@ static void *ejecutar_operacion(int client)
             break;
 
         case MEMWRITE:
-            log_info(logger_memoria, "recibi orden de guardar en memoria del cliente %d", client);
-            memAlloc(paquete);
+            log_info(logger_memoria, "recibi orden de memwrite del cliente %d", client);
+            memWrite(paquete);
             break;
         case MEMREAD:
             log_info(logger_memoria, "recibi orden de leer memoria del cliente %d", client);

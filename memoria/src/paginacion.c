@@ -127,7 +127,11 @@ void memWrite(t_paquete *paquete)
         3d- Si estaba en tlb sumo metrica HIT
       4- Obtenido el marco, junto con el desplazamiento voy a memoria y escribo la info
     */
-
+   /*int32_t origin;
+   int size = 0;
+   char* dest = NULL; 
+*/
+   //deserializar(paquete,6,INT,&origin,CHAR_PTR,&dest,INT,&size);
    t_malloc_serializado* info = deserializar_alloc(paquete);
    uint32_t dir_logica = info->size_reservar;
    uint32_t carpincho_id = info->carpincho_id;
