@@ -95,50 +95,47 @@ int reemplazarLRU(t_pagina* pagina){
     }
 }
 
-void actualizarLRU(int nro_pagina, int carpincho_id){
+void actualizarLRU(t_pagina* pagina){
 
-    if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "FIJA") == 0){
-        //LRU CON FIJA
-        t_tabla_paginas* tabla_paginas = buscarTablaPorPID(carpincho_id);
-        t_reemplazo* pagina = malloc(sizeof(t_reemplazo));
-        t_list_iterator *list_iterator = list_iterator_create(tabla_paginas->Lru);
-        int index = 0;
+    pagina->bit_uso = 1;
+    int index = 0;
 
-        while (list_iterator_has_next(list_iterator))
-        {
-            pagina = list_iterator_next(list_iterator);
-            if(pagina->numero_pagina == nro_pagina){
-                list_remove(tabla_paginas->Lru,index);
-                list_add(tabla_paginas->Lru,pagina);
+    if(strcmp(config_memoria->TIPO_ASIGNACION, "FIJA") == 0){
+
+        t_tabla_paginas *tabla = buscarTablaPorPID(pagina->carpincho_id);
+        t_list_iterator *list_iterator = list_iterator_create(tabla->Lru);
+        t_pagina *pag = malloc(sizeof(t_pagina));
+
+        while (list_iterator_has_next(list_iterator)){
+
+            pag = list_iterator_next(list_iterator);
+            if(pag->numero_pagina == pagina->numero_pagina){
+                list_remove(tabla->Lru,index);
+                list_add(tabla->Lru, pagina);
                 list_iterator_destroy(list_iterator);
                 return;
             }
             index++;
         }
-        return;
 
-        
     }else
     {
-        //LRU CON GLOBAL
-        t_reemplazo* pagina = malloc(sizeof(t_reemplazo));
         t_list_iterator *list_iterator = list_iterator_create(reemplazo_LRU);
-        int index = 0;
+        t_pagina *pag = malloc(sizeof(t_pagina));
 
-        while (list_iterator_has_next(list_iterator))
-        {
-            pagina = list_iterator_next(list_iterator);
-            if(pagina->pid == carpincho_id && pagina->numero_pagina == nro_pagina){
+        while (list_iterator_has_next(list_iterator)){
+
+            pag = list_iterator_next(list_iterator);
+            if(pag->numero_pagina == pagina->numero_pagina){
                 list_remove(reemplazo_LRU,index);
-                list_add(reemplazo_LRU,pagina);
+                list_add(reemplazo_LRU, pagina);
                 list_iterator_destroy(list_iterator);
                 return;
             }
             index++;
         }
-        return;
-    }
 
+    }
 }
 
 int reemplazarClockM(int nro_pagina, int carpincho_id, int referido, int modificado) {
