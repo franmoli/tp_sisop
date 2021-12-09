@@ -4,6 +4,13 @@
     Inicialización de archivos de SWAP
 */
 void crear_archivos_swap() {
+    //Chequeo la existencia del directorio de archivos: si no existe, lo creo
+    struct stat st = {0};
+    if(stat("/files", &st) == -1) {
+        mkdir("files", 0700);
+    }
+
+    //Creación de archivos
     for(int i=0; i<list_size(config_swap->ARCHIVOS_SWAP); i++) {
         //Creo un archivo
         char *path = list_get(config_swap->ARCHIVOS_SWAP, i);
