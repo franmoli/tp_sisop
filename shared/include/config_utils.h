@@ -21,6 +21,7 @@ typedef struct {
     int RETARDO_CPU;
     int ESTIMACION_INICIAL;
     int ALFA;
+    int TIEMPO_DEADLOCK;
 } t_config_kernel;
 
 typedef struct {

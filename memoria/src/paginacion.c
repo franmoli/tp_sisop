@@ -105,14 +105,12 @@ void *memRead(t_paquete *paquete)
 
 }
 
-void* traerDeMemoria(int marco, int desplazamiento, int size)
+char* traerDeMemoria(int marco, int desplazamiento, int size)
 {
-    void* contenido = malloc(size);
+    char* contenido = malloc(size);
     uint32_t dir_fisica = tamanio_memoria + marco * config_memoria->TAMANIO_PAGINA + desplazamiento;
-    uint32_t offset = 0;
 
-    memcpy(&contenido, dir_fisica, size);
-    offset += size;
+    memcpy(contenido, dir_fisica, size);
 
     return contenido;
 }
@@ -127,7 +125,11 @@ void memWrite(t_paquete *paquete)
         3d- Si estaba en tlb sumo metrica HIT
       4- Obtenido el marco, junto con el desplazamiento voy a memoria y escribo la info
     */
-
+   /*int32_t origin;
+   int size = 0;
+   char* dest = NULL; 
+*/
+   //deserializar(paquete,6,INT,&origin,CHAR_PTR,&dest,INT,&size);
    t_malloc_serializado* info = deserializar_alloc(paquete);
    uint32_t dir_logica = info->size_reservar;
    uint32_t carpincho_id = info->carpincho_id;
@@ -355,7 +357,8 @@ int getMarco(t_tabla_paginas* tabla_paginas){
     {
         if(tabla_paginas->paginas_en_memoria <=config_memoria->MARCOS_POR_CARPINCHO){
             //Asigno una nueva pagina al marco correspondiente
-            numeroMarco = tabla_paginas->pid * config_memoria->MARCOS_POR_CARPINCHO + tabla_paginas->paginas_en_memoria;
+            int numero = getIndexByPid(tabla_paginas->pid);
+            numeroMarco =  numero * config_memoria->MARCOS_POR_CARPINCHO + tabla_paginas->paginas_en_memoria;
             return numeroMarco;
         }
 
@@ -364,7 +367,18 @@ int getMarco(t_tabla_paginas* tabla_paginas){
     return numeroMarco;
 
 }
-
+int getIndexByPid(int pid){
+    t_list_iterator *list_iterator = list_iterator_create(tabla_procesos);
+    int i = 0;
+     while (list_iterator_has_next(list_iterator))
+        {
+            t_tabla_paginas* tabla = list_iterator_next(list_iterator);
+            if(tabla->pid == pid){
+                return i;
+            }
+            i++;
+        }
+}
 int getMarcoParaPagina(t_tabla_paginas* tabla_paginas){
     
     if(strcmp(config_memoria->TIPO_ASIGNACION, "FIJA") == 0){
@@ -461,7 +475,7 @@ int solicitarPaginaNueva(uint32_t carpincho_id)
     }
     if(marco == -1){
         log_info(logger_memoria, "Tengo que ir a swap");
-        //reemplazarPagina(list_size(tabla_paginas->paginas),tabla_paginas->pid);
+        marco = reemplazarPagina(tabla_paginas);
     }
     int numero_pagina = 0;
     if (list_size(tabla_paginas->paginas) > 0)
@@ -484,6 +498,7 @@ int solicitarPaginaNueva(uint32_t carpincho_id)
     marcoAsignado->isFree = false;
     tabla_paginas->paginas_en_memoria += 1;
 
+    agregarAsignacion(pagina);
     return pagina->numero_pagina;
 }
 t_contenidos_pagina *getContenidoPaginaByTipo(t_contenidos_pagina *contenidos, t_contenido tipo)

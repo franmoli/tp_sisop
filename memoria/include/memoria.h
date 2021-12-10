@@ -14,7 +14,7 @@ void imprimirMetricas();
 void limpiarTlb();
 void generarDump();
 void recibirSignal(int signal);
-void inicializarCarpincho(t_paquete* paquete);
+void inicializarCarpincho(int socket_cliente);
 
 char* cargarTextoTLb(t_list *paginas, int carpincho_id);
 

@@ -18,7 +18,7 @@ sem_t semCarpincho3;
 
 void* carpincho1_func(void* config){
 
-	sem_wait(&semCarpincho1);
+	//sem_wait(&semCarpincho1);
 	mate_instance instanceC1;
 
 	printf("C1 - Llamo a mate_init\n");
@@ -28,39 +28,39 @@ void* carpincho1_func(void* config){
 	mate_pointer alloc0 = mate_memalloc(&instanceC1, 23);
 
 	printf("C1 - Libero al C2\n");
-	sem_post(&semCarpincho2);
+	//sem_post(&semCarpincho2);
 
 	printf("C1 - Freno a C1\n");
-	sem_wait(&semCarpincho1);
+	//sem_wait(&semCarpincho1);
 
 	printf("C1 - Reservo un alloc de 23 bytes\n");
 	mate_pointer alloc1 = mate_memalloc(&instanceC1, 23);
 
 	printf("C1 - Libero al C2\n");
-	sem_post(&semCarpincho2);
+	//sem_post(&semCarpincho2);
 
 	printf("C1 - Freno a C1\n");
-	sem_wait(&semCarpincho1);
+	//sem_wait(&semCarpincho1);
 
 	printf("C1 - Reservo un alloc de 23 bytes\n");
 	mate_pointer alloc2 = mate_memalloc(&instanceC1, 23);
 
 	printf("C1 - Libero al C2\n");
-	sem_post(&semCarpincho2);
+	//sem_post(&semCarpincho2);
 
 	printf("C1 - Freno a C1\n");
-	sem_wait(&semCarpincho1);
+	//sem_wait(&semCarpincho1);
 
 	printf("C1 - Reservo un alloc de 10 bytes\n");
 	mate_pointer alloc3 = mate_memalloc(&instanceC1, 10);
 
 	printf("C1 - Libero al C2\n");
-	sem_post(&semCarpincho2);
+	//sem_post(&semCarpincho2);
 
 	printf("C1 - Freno a C1\n");
-	sem_wait(&semCarpincho1);
+	//sem_wait(&semCarpincho1);
 
-	printf("C1 - Escribo en la página 3\n");
+	/*printf("C1 - Escribo en la página 3\n");
 	mate_memwrite(&instanceC1, "Hola", alloc3, 5);
 
 	printf("C1 - Escribo en la página 2\n");
@@ -70,7 +70,7 @@ void* carpincho1_func(void* config){
 	mate_memwrite(&instanceC1, "Hola", alloc1, 5);
 
 	printf("C1 - Escribo en la página 0\n");
-	mate_memwrite(&instanceC1, "Hola", alloc0, 5);
+	mate_memwrite(&instanceC1, "Hola", alloc0, 5);*/
 
 	printf("C1 - Libero al C2\n");
 	sem_post(&semCarpincho2);

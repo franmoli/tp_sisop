@@ -15,6 +15,7 @@ t_contenidos_pagina *getLastHeaderContenidoByPagina(t_pagina* pagina);
 t_tabla_paginas* buscarTablaPorPID(int id);
 t_pagina *getPaginaByNumero(int nro_pagina, int carpincho_id);
 
+int getIndexByPid(int pid);
 
 //MARCOS
 int getMarco(t_tabla_paginas* tabla_paginas);
@@ -32,7 +33,7 @@ void liberarPagina(t_pagina* pagina, uint32_t carpincho_id);
 
 //MEMREAD
 void *memRead(t_paquete *paquete);
-void* traerDeMemoria(int marco, int desplazamiento, int size);
+char* traerDeMemoria(int marco, int desplazamiento, int size);
 //MEMWRITE
 void memWrite(t_paquete *paquete);
 void escribirEnMemoria(int marco, int desplazamiento, int size, void* contenido);

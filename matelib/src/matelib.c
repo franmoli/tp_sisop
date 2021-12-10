@@ -73,7 +73,6 @@ int mate_init(mate_instance_pointer *instance_pointer, char *config){
 
 int mate_close(mate_instance_pointer *instance_pointer){
 
-    printf("Estoy en el inicio del mate_close\n");
     mate_instance *lib_ref = instance_pointer->group_info;
 
     log_info(lib_ref->logger,"Cerrando el MATE_INSTANCE");
@@ -204,7 +203,7 @@ mate_pointer mate_memalloc(mate_instance_pointer *instance_pointer, int size){
     t_paquete *paquete = serializar(MEMALLOC,2,INT,size);
     enviar_paquete(paquete,lib_ref->socket);
 
-    t_paquete *paquete_recibido = recibir_paquete(lib_ref->socket);    
+    t_paquete *paquete_recibido = recibir_paquete(lib_ref->socket);
     if(paquete_recibido->codigo_operacion == MEMALLOC){
         deserializar(paquete_recibido,2,INT,&p);
         log_info(lib_ref->logger,"La funcion MEM_ALLOC se ejecuto correctamente");

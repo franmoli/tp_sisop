@@ -37,7 +37,7 @@ void *iniciar_servidor_kernel(void *_){
 
 //Atencion de nuevas operaciones
 void atender_proceso (void* parametro ){
-
+    
     bool inicializado = false;
     int socket_cliente = *(int*)parametro;
     t_proceso *carpincho = malloc(sizeof(t_proceso)); 
@@ -46,15 +46,15 @@ void atender_proceso (void* parametro ){
    // t_task *task_aux = NULL;
     t_semaforo *semaforo_recibido = NULL;
     t_io *io_recibida = NULL;
-
     while(1) {
 
 		t_paquete *paquete = NULL;
+        printf("Llegue despues de recibir en atender proceso con el carpincho %d\n",socket_cliente);
 		paquete = recibir_paquete(socket_cliente);
         //task_aux = malloc(sizeof(t_task));
-
+        
         //Analizo el código de operación recibido y ejecuto acciones según corresponda
-        //printf("Paquete recibido %d\n", paquete->codigo_operacion);
+        printf("Paquete recibido %d\n", paquete->codigo_operacion);
         t_task *task = malloc(sizeof(t_task));
 
         switch(paquete->codigo_operacion) {
@@ -121,6 +121,7 @@ void atender_proceso (void* parametro ){
                 return;
                 
             case MEMALLOC:
+            
                 task->id = MEMALLOC;
                 task->datos_tarea = paquete;
                 list_add(carpincho->task_list, task);

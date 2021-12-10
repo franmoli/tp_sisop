@@ -49,6 +49,7 @@ void new(){
 
 void exec(t_proceso *self){
 
+    log_info(logger_kernel,"Estoy ejecutando el proceso %d",self->id);
     t_task *next_task = NULL;
     bool bloquear_f = false;
     int reloj_i = 0;
@@ -122,6 +123,7 @@ void exec(t_proceso *self){
                 case MEMFREE:
                 case MEMREAD:
                 case MEMWRITE:
+                    log_info(logger_kernel,"enviando paquete");
                     enviar_paquete(next_task->datos_tarea,socket_cliente_memoria);
                     paquete_recibido = recibir_paquete(socket_cliente_memoria);
                     enviar_paquete(paquete_recibido,self->socket_carpincho);
@@ -288,8 +290,6 @@ void desbloquear(t_proceso *self){
     //printf("Desbloquear proceso: %d\n", self->id);
     self->salida_block = true;
     sleep(1);
-    if(self->status == BLOCKED)
-        enviar_confirmacion(self->id);
     sem_post(&salida_block);
     //sem_post(&pedir_salida_de_block);
     return;
