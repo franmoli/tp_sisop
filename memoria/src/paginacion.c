@@ -464,12 +464,15 @@ int solicitarPaginaNueva(uint32_t carpincho_id)
 {
 
     t_tabla_paginas *tabla_paginas = buscarTablaPorPID(carpincho_id);
+    bool trajeDeMemoria = false;
 
     //Para agregar la pagina nueva primero tengo que ver si puedo agregarla si es asignacion fija o dinamica
     int marco = getMarco(tabla_paginas);   
     if(marco < -1){
         log_error(logger_memoria,"No se pudo asignar un marco");
         return;
+    }if (marco > -1){
+        trajeDeMemoria = true;
     }
     if(marco == -1){
         log_info(logger_memoria, "Tengo que ir a swap");
@@ -496,7 +499,17 @@ int solicitarPaginaNueva(uint32_t carpincho_id)
     marcoAsignado->isFree = false;
     tabla_paginas->paginas_en_memoria += 1;
 
-    agregarAsignacion(pagina);
+    if(trajeDeMemoria == true){
+        agregarAsignacion(pagina);
+    }else{
+        if (strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "LRU") == 0){
+            agregarAsignacion(pagina); 
+        }else{
+            //Resolver reemplazo Clock
+        }
+           
+    }
+    
     return pagina->numero_pagina;
 }
 t_contenidos_pagina *getContenidoPaginaByTipo(t_contenidos_pagina *contenidos, t_contenido tipo)
