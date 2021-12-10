@@ -151,8 +151,8 @@ typedef struct {
 } t_pagina_swap;
 
 typedef struct {
-	//uint32_t inicio;
-	//uint32_t fin;
+	uint32_t inicio;
+	uint32_t fin;
 	t_heap_metadata* contenido;
 } t_info_heap_swap;
 

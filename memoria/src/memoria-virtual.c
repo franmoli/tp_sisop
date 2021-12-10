@@ -79,26 +79,42 @@ int eliminarPrimerElementoLista(int carpincho_id){
 t_paquete* serializarPagina(t_pagina* pagina){
 
     t_paquete* paquete = malloc(sizeof(t_paquete));
-    t_contenidos_pagina* contenido = list_get(pagina->listado_de_contenido,0);
+    //t_contenidos_pagina* contenido = list_get(pagina->listado_de_contenido,0);
     uint32_t inicio = tamanio_memoria;
     t_pagina_swap *pagina_serializada = malloc(sizeof(t_pagina_swap));
     pagina_serializada->contenido_heap_info = list_create();
     pagina_serializada->contenido_carpincho_info = list_create();
+    pagina_serializada->pid = pagina->carpincho_id;
+    pagina_serializada->numero_pagina = pagina->numero_pagina;
 
-    if(contenido->contenido_pagina == RESTO_CONTENIDO || contenido->contenido_pagina == RESTO_CONTENIDO){
-        int offset = (contenido->dir_comienzo - inicio) % config_memoria->TAMANIO_PAGINA;
-        char* cont = traerDeMemoria(pagina->marco_asignado, offset, contenido->tamanio);
-        t_info_carpincho_swap* contenido_swap = malloc(sizeof(t_info_carpincho_swap));
-        contenido_swap->size = contenido->tamanio;
-        contenido_swap->inicio = contenido->dir_comienzo;
-        contenido_swap->fin = contenido->dir_fin;
-        contenido_swap->contenido = cont;
-        list_add(pagina_serializada->contenido_carpincho_info,contenido_swap);
-    }else
-    {
-        t_heap_metadata* heap = traerAllocIncompleto(pagina->marco_asignado,contenido->dir_comienzo,contenido->dir_fin);
+    t_list_iterator *list_iterator = list_iterator_create(pagina->listado_de_contenido);
+
+    while(list_iterator_has_next(list_iterator)){
+
+        t_contenidos_pagina* contenido = list_iterator_next(list_iterator);
+
+        if(contenido->contenido_pagina == RESTO_CONTENIDO || contenido->contenido_pagina == CONTENIDO){
+            int offset = (contenido->dir_comienzo - inicio) % config_memoria->TAMANIO_PAGINA;
+            char* cont = traerDeMemoria(pagina->marco_asignado, offset, contenido->tamanio);
+            t_info_carpincho_swap* contenido_swap = malloc(sizeof(t_info_carpincho_swap));
+            contenido_swap->size = contenido->tamanio;
+            contenido_swap->inicio = contenido->dir_comienzo;
+            contenido_swap->fin = contenido->dir_fin;
+            contenido_swap->contenido = cont;
+            list_add(pagina_serializada->contenido_carpincho_info,contenido_swap);
+        }else
+        {
+            t_heap_metadata* heap = traerAllocIncompleto(pagina->marco_asignado,contenido->dir_comienzo,contenido->dir_fin);
+            t_info_heap_swap* heap_swap = malloc(sizeof(t_info_heap_swap));
+            heap_swap->inicio = contenido->dir_comienzo;
+            heap_swap->fin = contenido->dir_fin;
+            heap_swap->contenido = heap;
+            list_add(pagina_serializada->contenido_heap_info,heap_swap);
+        }
 
     }
+
+    list_iterator_destroy(list_iterator);
 
     return paquete;
 
