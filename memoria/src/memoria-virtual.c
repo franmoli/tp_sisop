@@ -76,16 +76,16 @@ int eliminarPrimerElementoLista(int carpincho_id){
     return marco;
 }
 
-t_paquete* serializarPagina(t_pagina* pagina){
+int enviarPaginaSwap(t_pagina* pagina){
 
     //t_contenidos_pagina* contenido = list_get(pagina->listado_de_contenido,0);
     uint32_t inicio = tamanio_memoria;
-    t_pagina_swap *pagina_serializada = malloc(sizeof(t_pagina_swap));
-    pagina_serializada->tipo_contenido = AMBOS;
-    pagina_serializada->contenido_heap_info = list_create();
-    pagina_serializada->contenido_carpincho_info = list_create();
-    pagina_serializada->pid = pagina->carpincho_id;
-    pagina_serializada->numero_pagina = pagina->numero_pagina;
+    t_pagina_swap *pagina_swap = malloc(sizeof(t_pagina_swap));
+    pagina_swap->tipo_contenido = AMBOS;
+    pagina_swap->contenido_heap_info = list_create();
+    pagina_swap->contenido_carpincho_info = list_create();
+    pagina_swap->pid = pagina->carpincho_id;
+    pagina_swap->numero_pagina = pagina->numero_pagina;
 
     t_list_iterator *list_iterator = list_iterator_create(pagina->listado_de_contenido);
 
@@ -101,7 +101,7 @@ t_paquete* serializarPagina(t_pagina* pagina){
             contenido_swap->inicio = contenido->dir_comienzo;
             contenido_swap->fin = contenido->dir_fin;
             contenido_swap->contenido = cont;
-            list_add(pagina_serializada->contenido_carpincho_info,contenido_swap);
+            list_add(pagina_swap->contenido_carpincho_info,contenido_swap);
         }else
         {
             t_heap_metadata* heap = traerAllocIncompleto(pagina->marco_asignado,contenido->dir_comienzo,contenido->dir_fin);
@@ -109,22 +109,31 @@ t_paquete* serializarPagina(t_pagina* pagina){
             heap_swap->inicio = contenido->dir_comienzo;
             heap_swap->fin = contenido->dir_fin;
             heap_swap->contenido = heap;
-            list_add(pagina_serializada->contenido_heap_info,heap_swap);
+            list_add(pagina_swap->contenido_heap_info,heap_swap);
         }
 
     }
 
-    void *pagina_serial = serializar_pagina(pagina_serializada);
-    t_buffer *buffer = malloc(sizeof(t_buffer));
-	buffer->size = bytes_pagina(pagina_serializada);
-	buffer->stream = pagina_serial;
-    t_paquete *paquete = malloc(sizeof(t_paquete));
-	paquete->codigo_operacion = SWAPSAVE;
-	paquete->buffer = buffer;
+    t_paquete *paquete;
+    //t_buffer *new_buffer = malloc(sizeof(t_buffer));
+    paquete = serializar(SWAPSAVE,12,INT,pagina_swap->tipo_contenido,INT,pagina_swap->pid,INT,pagina_swap->numero_pagina
+                ,LIST,SWAP_PAGINA_HEAP,(pagina_swap->contenido_heap_info),LIST,SWAP_PAGINA_CONTENIDO,(pagina_swap->contenido_carpincho_info));
+    //void *pagina_serial = serializar_pagina(pagina_swap);
+    
 
-    list_iterator_destroy(list_iterator);
-
-    return paquete;
+    deserializar(paquete,10,INT,&(pagina_swap->tipo_contenido),INT,&(pagina_swap->pid),INT,&(pagina_swap->numero_pagina)
+                ,LIST,&(pagina_swap->contenido_heap_info),LIST,&(pagina_swap->contenido_carpincho_info));
+    
+    enviar_paquete(paquete, socket_cliente_swap);
+    
+    paquete = recibir_paquete(socket_cliente_swap);
+    if(paquete->codigo_operacion== OP_CONFIRMADA){
+        //PUDO GUARDAR
+    }
+    else{
+        //NO PUDO GUARDAR
+    }
+    return 1;
 
 }
 
@@ -132,7 +141,7 @@ int reemplazarLRU(t_tabla_paginas* tabla){
     if(strcmp(config_memoria->TIPO_ASIGNACION, "FIJA") == 0){
 
         t_pagina* old = list_get(tabla->Lru,0);
-        t_paquete* paquete = serializarPagina(old);
+        enviarPaginaSwap(old);
 
         /*
         t_tabla_paginas* tabla = buscarTablaPorPID(pagina->carpincho_id);

@@ -7,6 +7,7 @@ void iniciar_deadlock() {
 
 void* algoritmo_deteccion(void *_) {
     while(1) {
+        log_info(logger_kernel, "Esperando ejecución de algoritmo de deteccion de deadlock");
         sleep(config_kernel->TIEMPO_DEADLOCK);
         
         int index = 0;
@@ -17,11 +18,13 @@ void* algoritmo_deteccion(void *_) {
             t_semaforo *sem_aux = list_get(lista_semaforos, index);
             t_list *lista_procesos_en_deadlock = list_create();
 
+            log_info(logger_kernel, "Semaforo %s (value: %d - cantidad de solicitantes: %d): listo para analizar presencia de deadlock", sem_aux->nombre_semaforo, sem_aux->value, list_size(sem_aux->solicitantes));
+
             if(sem_aux->value > 0 && list_size(sem_aux->solicitantes)){
+                log_info(logger_kernel, "Encuentro solicitantes en el semaforo");
 
                 //Checkeo para todos los solicitantes de este semaforo si estan bien
-                while(index2 < list_size(sem_aux->solicitantes) && !deadlock){
-
+                /*while(index2 < list_size(sem_aux->solicitantes) && !deadlock){
                     int *solicitante = list_get(sem_aux->solicitantes, index2);
 
                     //bloqueado esperando recurso, agrego como posible deadlock
@@ -35,9 +38,11 @@ void* algoritmo_deteccion(void *_) {
                     if(index2 == list_size(sem_aux->solicitantes) && !deadlock){
                         list_remove(lista_procesos_en_deadlock, 0);
                     }
-                }
-
+                }*/
+                index2++;
             }
+
+            index++;
         }
     }
 }

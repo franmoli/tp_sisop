@@ -6,7 +6,6 @@ int main(int argc, char **argv) {
     logger_kernel = log_create("./cfg/kernel.log", "KERNEL", true, LOG_LEVEL_INFO);
     log_info(logger_kernel, "Programa inicializado correctamente ");
 
-
     //Se carga la configuración
     log_info(logger_kernel, "Iniciando carga del archivo de configuración");
     config_file = leer_config_file("./cfg/kernel.cfg");
@@ -26,6 +25,9 @@ int main(int argc, char **argv) {
     iniciar_planificador_corto();
     //Iniciar planificador de mediano plazo
     iniciar_planificador_mediano();
+    
+    //Iniciar el análisis de deadlock
+    iniciar_deadlock();
 
     //Iniciar consola para debug
     iniciar_debug_console();

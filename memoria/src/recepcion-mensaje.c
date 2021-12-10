@@ -8,7 +8,7 @@ void receptor(){
 		switch (paquete->codigo_operacion)
         {
 			case RECEPCION_PAGINA:{
-				t_pagina_swap swap = deserializar_pagina(paquete);
+				//t_pagina_swap swap = deserializar_pagina(paquete);
 				break;
 			}
 			default:{
