@@ -299,7 +299,7 @@ void desbloquear(t_proceso *self){
 void *desbloquear_en(void *param){
     t_io *io_recibida = param;
     log_info(logger_kernel, "Solicitando el dispositivo %s", io_recibida->nombre);
-    sleep(io_recibida->duracion);
+    sleep(io_recibida->duracion/1000);
     log_info(logger_kernel, "IO ejecutada %s", io_recibida->mensaje);
     //printf("Desbloqueando X salida de io\n");
     desbloquear(io_recibida->proceso_solicitante);

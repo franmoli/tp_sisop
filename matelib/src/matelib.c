@@ -252,7 +252,7 @@ int mate_memwrite(mate_instance_pointer *instance_pointer, void *origin, mate_po
 
     mate_instance *lib_ref = instance_pointer->group_info;
 
-    t_paquete *paquete = serializar(MEMREAD,6,CHAR_PTR,origin,INT,dest,INT,size);
+    t_paquete *paquete = serializar(MEMWRITE,6,CHAR_PTR,origin,INT,dest,INT,size);
     enviar_paquete(paquete,lib_ref->socket);
 
     t_paquete *paquete_recibido = recibir_paquete(lib_ref->socket);    

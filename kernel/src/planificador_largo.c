@@ -49,7 +49,6 @@ void atender_proceso (void* parametro ){
     while(1) {
 
 		t_paquete *paquete = NULL;
-        printf("Llegue despues de recibir en atender proceso con el carpincho %d\n",socket_cliente);
 		paquete = recibir_paquete(socket_cliente);
         //task_aux = malloc(sizeof(t_task));
         
@@ -306,7 +305,6 @@ void enviar_confirmacion(int socket){
 
     enviar_paquete(paquete, socket);
 
-    
     return;
 }
 
