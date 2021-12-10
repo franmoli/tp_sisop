@@ -88,12 +88,20 @@ static void *ejecutar_operacion(int client)
         case MEMALLOC:
             log_info(logger_memoria, "recibi orden de memalloc del cliente %d", client);
             int dire_logica =memAlloc(paquete);
-            
-            t_paquete* paquete_enviar = serializar(MEMALLOC,2,INT,dire_logica);
-            //dire_logica = deserializar(paquete);
-            log_info(logger_memoria,"Enviando paquete con direccion logica");
-            enviar_paquete(paquete_enviar,socket_client);
-            log_info(logger_memoria,"Paquete enviado");
+            if(dire_logica <0){
+                //NO HAY MEMORIA Y SWAP NO PUDO GUARDAR
+                t_paquete* paquete_enviar = serializar(MEMALLOC,2,INT,dire_logica);
+                log_info(logger_memoria,"No hay memoria suficiente ni en swap. No se pudo guardar lo pedido.");
+                enviar_paquete(paquete_enviar,socket_client);
+            }
+            else{
+                //DIRECCION_LOGICA VALIDA
+                t_paquete* paquete_enviar = serializar(MEMALLOC,2,INT,dire_logica);
+                log_info(logger_memoria,"Enviando paquete con direccion logica");
+                enviar_paquete(paquete_enviar,socket_client);
+                log_info(logger_memoria,"Paquete enviado");
+            }
+           
             break;
         case MEMFREE:
             log_info(logger_memoria, "recibi orden de memfree del cliente %d", client);

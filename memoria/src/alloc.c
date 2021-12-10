@@ -301,7 +301,7 @@ int memAlloc(t_paquete *paquete)
     {
         int numero_pagina = solicitarPaginaNueva(carpincho_id);
         if(numero_pagina < 0){
-            return 0;
+            return -1;
         }
         t_pagina *pagina = list_get(tabla_paginas->paginas, numero_pagina);
         crearPrimerHeader(pagina, size);
@@ -562,7 +562,7 @@ int agregarPagina(t_pagina *pagina, t_heap_metadata *data, uint32_t nextAnterior
 
                 int numero_pagina = solicitarPaginaNueva(pagina->carpincho_id);
                 if(numero_pagina < 0){
-                    return 0;
+                    return -1;
                 }
                 pagina = list_get(tabla_paginas->paginas, numero_pagina);
                 t_contenidos_pagina *contenido_nuevo = malloc(sizeof(t_contenidos_pagina));
@@ -584,7 +584,7 @@ int agregarPagina(t_pagina *pagina, t_heap_metadata *data, uint32_t nextAnterior
         
         int numero_pagina = solicitarPaginaNueva(pagina->carpincho_id);
         if(numero_pagina < 0){
-            return 0;
+            return -1;
         }
         uint32_t dir_comienzo = pagina->marco_asignado * config_memoria->TAMANIO_PAGINA +nextAnterior;
 
@@ -651,7 +651,7 @@ t_pagina* asignarFooterSeparadoSubContenido(t_contenido subcontenido, t_pagina* 
     if(!pagina->tamanio_ocupado + sizeof(uint32_t) <= config_memoria->TAMANIO_PAGINA){
         int nro_pagina_nueva = solicitarPaginaNueva(pagina->carpincho_id);
         if(nro_pagina_nueva < 0){
-            return 0;
+            return -1;
         }
         pagina = list_get(tabla_paginas->paginas, nro_pagina_nueva);
     }

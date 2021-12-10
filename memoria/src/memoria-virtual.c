@@ -110,22 +110,27 @@ int enviarPaginaSwap(t_pagina* pagina){
     enviar_paquete(paquete, socket_cliente_swap);
     
     paquete = recibir_paquete(socket_cliente_swap);
-    if(paquete->codigo_operacion== OP_CONFIRMADA){
+    if(paquete->codigo_operacion== PAGINA_GUARDADA){
         //PUDO GUARDAR
     }
     else{
-        //NO PUDO GUARDAR
+        return -1;
     }
     return 1;
 
 }
 
 int reemplazarLRU(t_tabla_paginas* tabla){
+    int marco = -1;
     if(strcmp(config_memoria->TIPO_ASIGNACION, "FIJA") == 0){
 
         t_pagina* old = list_get(tabla->Lru,0);
-        enviarPaginaSwap(old);
+        marco = enviarPaginaSwap(old);
 
+        if(marco <0){
+            return -1;
+        }
+        
         /*
         t_tabla_paginas* tabla = buscarTablaPorPID(pagina->carpincho_id);
         t_pagina* old = list_get(tabla->Lru,0);
