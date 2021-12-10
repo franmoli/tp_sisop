@@ -2,7 +2,6 @@
 #define MEMORIA_VIRTUAL_H
 
 #include "memoria-global.h"
-#include "serializaciones.h"
 
 
 //t_pagina* reemplazarPagina(t_pagina* paginaAgregar, int carpincho_id);
@@ -19,6 +18,6 @@ void actualizarReferido(uint32_t nro_pagina, uint32_t carpincho_id);
 void actualizarLRU(t_pagina* pagina);
 
 void agregarAsignacion(t_pagina* pagina);
-t_paquete* serializarPagina(t_pagina* pagina);
+int enviarPaginaSwap(t_pagina* pagina);
 
 #endif

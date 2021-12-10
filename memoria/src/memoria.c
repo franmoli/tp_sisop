@@ -113,6 +113,17 @@ static void *ejecutar_operacion(int client)
             log_info(logger_memoria, "recibi un nuevo carpincho para inicializar del cliente %d", client);
             //inicializarCarpincho(paquete);
             break;
+        
+        case NUEVO_CARPINCHO:
+            log_info(logger_memoria,"MATELIB ENVIO A MEMORIA UN AVISO");
+            t_paquete *paquete = malloc(sizeof(t_paquete));
+            paquete->buffer = malloc(sizeof(t_buffer));
+            paquete->buffer->size = 0;
+            paquete->buffer->stream = NULL;
+            paquete->codigo_operacion = OP_CONFIRMADA;
+
+            enviar_paquete(paquete, socket_client);
+            break;
         default:
             log_error(logger_memoria, "Codigo de operacion desconocido");
             break;

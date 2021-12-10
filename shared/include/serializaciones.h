@@ -41,7 +41,9 @@ typedef enum {
     UINT32 = 3,
     BOOL = 4,
     LIST = 5,
-	U_INT = 6
+	U_INT = 6,
+	SWAP_PAGINA_HEAP = 7,
+	SWAP_PAGINA_CONTENIDO = 8
 }t_type;
 
 /* Conexión de MEMORIA con SWAP */
@@ -52,14 +54,14 @@ typedef struct {
 } __attribute__((packed))
 t_heap_swap;
 
-enum info_contenido {
+typedef enum{
 	AMBOS = 0, 
 	CARPINCHO = 1,
 	HEAP = 2
-}; 
+} info_contenido; 
 
 typedef struct {
-    enum info_contenido tipo_contenido;
+    info_contenido tipo_contenido;
 	uint32_t pid;
 	uint32_t numero_pagina;
 	t_list* contenido_heap_info;
@@ -100,7 +102,7 @@ void serializar_single (void **stream, void *elem, int *stream_size, int elem_si
 
 
 //Utilizacion: deserializar(paquete, TIPO DE DATO(segun el enum t_type), &DATO BUSCADO) para strings se pasa con & ej: char *string_objetivo; deserializar(paquete, CHAR_PTR, &string_objetivo)
-void deserializar(t_paquete *paquete, int arg_count, ...);
+int deserializar(t_paquete *paquete, int arg_count, ...);
 void deserializar_single (void *stream, void *elem, int size, int *offset);
 
 void* serializar_pagina(t_pagina_swap* pagina);
@@ -110,5 +112,7 @@ t_pagina_swap* deserializar_pagina(void *stream);
 int bytes_pagina(t_pagina_swap* pagina);
 int bytes_info_heap(t_info_heap_swap info);
 //int bytes_info_carpincho(t_carpincho info);
+
+t_paquete* serializar_pagina_swap(t_pagina_swap* pagina);
 
 #endif

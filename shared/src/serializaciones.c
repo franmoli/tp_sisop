@@ -133,6 +133,12 @@ int bytes_pagina(t_pagina_swap* pagina) {
 		size += bytes_info_heap(*contenido);
 	}
 
+    size += sizeof(pagina->contenido_carpincho_info->elements_count);
+    for(int i=0; i<list_size(pagina->contenido_carpincho_info); i++) {
+		t_info_heap_swap *contenido = list_get(pagina->contenido_carpincho_info, i);
+		size += bytes_info_heap(*contenido);
+	}
+
     return size;
 }
 
@@ -147,6 +153,7 @@ int bytes_info_heap(t_info_heap_swap info) {
     return size;
 }
 //--------------------------------------------------------------------------------------------
+
 void* serializar_pagina(t_pagina_swap* pagina) {
     int bytes = bytes_pagina(pagina);
     void *stream = malloc(bytes);
@@ -291,8 +298,12 @@ t_paquete * serializar (int codigo_operacion, int arg_count, ...){
     t_type tipo_de_lista = INT;
     void *list_elem = NULL;
 
+    t_info_heap_swap* contenido_lista_swap = NULL;
+    t_info_carpincho_swap* contenido_carpincho_lista_swap = NULL;
+
     va_list valist;
     va_start(valist, arg_count);
+    int lista_size = 0;
 
     for (int i = 0; i < arg_count; i += 2) {
         //Primer parametro es el tipo de dato que se quiere serializar
@@ -331,11 +342,15 @@ t_paquete * serializar (int codigo_operacion, int arg_count, ...){
 
                 break;
             case LIST:
+                tipo_de_lista = va_arg(valist, t_type); 
                 param_l = va_arg(valist, t_list*);
                 //Se trae el tipo de lista y se incrementa i por el va_arg extra
-                tipo_de_lista = va_arg(valist, t_type); 
                 i++;
 
+                lista_size =list_size(param_l);
+                
+                serializar_single(&stream,&lista_size,&size ,sizeof(int),  &offset);
+                
                 for(int j = 0; j < list_size(param_l); j++){
 
                     //Traigo un elemento de la lista y lo serializo recursivamente
@@ -354,6 +369,16 @@ t_paquete * serializar (int codigo_operacion, int arg_count, ...){
                 serializar_single(&stream, &param_un_i, &size, added_size, &offset);
 
                 break;
+            case SWAP_PAGINA_HEAP:
+                contenido_lista_swap = va_arg(valist, t_info_heap_swap*);
+                added_size = sizeof(t_info_heap_swap);
+                serializar_single(&stream, &contenido_lista_swap, &size, added_size, &offset);
+                break;
+            case SWAP_PAGINA_CONTENIDO:
+                contenido_carpincho_lista_swap = va_arg(valist, t_info_carpincho_swap*);
+                added_size = sizeof(t_info_carpincho_swap);
+                serializar_single(&stream, &contenido_carpincho_lista_swap, &size, added_size, &offset);
+            break;
         }
     }
     
@@ -411,7 +436,7 @@ void deserializar_single (void *stream, void *elem, int size, int *offset){
     return;
 }
 
-void deserializar(t_paquete *paquete, int arg_count, ...){
+int deserializar(t_paquete *paquete, int arg_count, ...){
 
     int size = 0;
     void *param = NULL;
@@ -420,7 +445,17 @@ void deserializar(t_paquete *paquete, int arg_count, ...){
     char **param_char = NULL;
     va_list valist;
     va_start(valist, arg_count);
+    
+    t_paquete *paquete_aux= NULL;
 
+    t_info_heap_swap **param_heap_swap = NULL;
+    t_info_carpincho_swap ** param_heap_swap_carpincho = NULL;
+    t_list *param_l = NULL; 
+    t_type tipo_de_lista = INT;
+    void *list_elem = NULL;
+    int added_size = 0;
+    
+    
     for (int i = 0; i < arg_count; i += 2){
         //Primer parametro es el tipo de dato que se quiere deserializar
         t_type tipo = va_arg(valist, t_type);
@@ -460,9 +495,46 @@ void deserializar(t_paquete *paquete, int arg_count, ...){
 
                 break;
             case LIST:
+                //SUERTE AGUS.
+                tipo_de_lista = va_arg(valist, t_type); 
+                param_l = va_arg(valist, t_list*);
+                //Se trae el tipo de lista y se incrementa i por el va_arg extra
+                i++;
+                int tamanio_lista;
+                deserializar_single(stream, tamanio_lista, sizeof(int), &offset);
+                
+                for(int j = 0; j < tamanio_lista; j++){
+                    paquete_aux = malloc(sizeof(t_paquete));
+                    paquete_aux->buffer = malloc(sizeof(t_buffer));
+                    paquete_aux->buffer->stream = stream + offset;
+                    list_elem = NULL;
+                    //Traigo un elemento de la lista y lo serializo recursivamente
+                    offset += deserializar(paquete_aux,2,tipo_de_lista,list_elem);
+                    list_add(param_l,list_elem);
+                }
+                break;
+            
+            case SWAP_PAGINA_HEAP:
+                param_heap_swap = va_arg(valist, t_info_heap_swap**);
+                //Primero traigo el tamanio del string
+                size = sizeof(t_info_heap_swap);
+                //Con el tamanio del string asigno memoria y traigo variable
+                *param_heap_swap = realloc(*param_heap_swap, size);
+                deserializar_single(stream, *param_heap_swap, size, &offset);   
+                
+                break;
+            case SWAP_PAGINA_CONTENIDO:
+                param_heap_swap_carpincho = va_arg(valist, t_info_carpincho_swap**);
+                //Primero traigo el tamanio del string
+                size = sizeof(t_info_carpincho_swap);
+                //Con el tamanio del string asigno memoria y traigo variable
+                *param_heap_swap_carpincho = realloc(*param_heap_swap_carpincho, size);
+                deserializar_single(stream, *param_heap_swap_carpincho, size, &offset);   
+
                 break;
         }
     }
+    return offset;
 }
 
 t_paquete *serializar_direccion_logica(t_kernel_dire_logica_serializado* direccion_logica){
@@ -484,4 +556,18 @@ t_kernel_dire_logica_serializado *deserializar_direccion_logica(t_paquete* paque
     int offset = 0;
     memcpy(&(direccion_logica->direccion_logica), stream + offset, sizeof(uint32_t));
     return direccion_logica;
+}
+
+t_paquete* serializar_pagina_swap(t_pagina_swap* pagina_swap){
+    t_paquete *paquete = malloc(sizeof(t_paquete));
+    t_buffer *new_buffer = malloc(sizeof(t_buffer));
+    new_buffer->size = sizeof(uint32_t) * 2 + sizeof(info_contenido)
+                        +list_size(pagina_swap->contenido_carpincho_info) * (sizeof(uint32_t) * 2 + sizeof(int));
+    void *stream = malloc(new_buffer->size);
+    int offset = 0;
+
+    new_buffer->stream = stream;
+    paquete->buffer = new_buffer;
+    paquete->codigo_operacion = SWAPSAVE;
+    return paquete;
 }

@@ -305,7 +305,7 @@ void enviar_confirmacion(int socket){
     paquete->codigo_operacion = OP_CONFIRMADA;
 
     enviar_paquete(paquete, socket);
-
+nviar_paquete(paquete, socket);
     
     return;
 }
