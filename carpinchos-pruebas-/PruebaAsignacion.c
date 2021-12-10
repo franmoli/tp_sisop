@@ -60,7 +60,7 @@ void* carpincho1_func(void* config){
 	//printf("C1 - Freno a C1\n");
 	//sem_wait(&semCarpincho1);
 
-	printf("C1 - Escribo en la página 3\n");
+	/*printf("C1 - Escribo en la página 3\n");
 	mate_memwrite(&instanceC1, "Hola", alloc3, 5);
 
 	printf("C1 - Escribo en la página 2\n");
@@ -70,7 +70,7 @@ void* carpincho1_func(void* config){
 	mate_memwrite(&instanceC1, "Hola", alloc1, 5);
 
 	printf("C1 - Escribo en la página 0\n");
-	mate_memwrite(&instanceC1, "Hola", alloc0, 5);
+	mate_memwrite(&instanceC1, "Hola", alloc0, 5);*/
 
 	//printf("C1 - Libero al C2\n");
 	//sem_post(&semCarpincho2);
