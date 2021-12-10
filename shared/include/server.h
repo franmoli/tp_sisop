@@ -31,6 +31,8 @@ typedef enum {
     OP_CONFIRMADA = 17,
     RECEPCION_PAGINA = 18,
     DIRECCION_LOGICA = 19,
+    PAGINA_GUARDADA = 20,
+    PAGINA_NO_GUARDADA = 21,
 } op_code;
 
 typedef struct {

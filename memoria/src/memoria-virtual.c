@@ -1,22 +1,5 @@
 #include "memoria-virtual.h"
 
-/*
-t_pagina* reemplazarPagina(t_pagina* paginaAgregar, int carpincho_id){
-
-    t_tabla_paginas* tabla_paginas = buscarTablaPorPID(carpincho_id);
-    if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "CLOCK-M") == 0){
-        //SWAP CLOCK
-    }
-    else{
-        //SWAP LRU
-        log_info(logger_memoria,"AGREGADO A TABLA LRU PAGINA: %d", paginaAgregar->numero_pagina);
-        int marco = eliminarPrimerElementoLista(carpincho_id);
-        paginaAgregar->marco_asignado = marco;
-        list_add(tabla_paginas->Lru,paginaAgregar);
-    }
-    return NULL;
-}*/
-
 void agregarAsignacion(t_pagina* pagina){
     if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "CLOCK-M") == 0){
 
