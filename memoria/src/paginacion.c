@@ -500,6 +500,7 @@ int solicitarPaginaNueva(uint32_t carpincho_id)
     marcoAsignado->isFree = false;
     tabla_paginas->paginas_en_memoria += 1;
 
+    agregarAsignacion(pagina);
     return pagina->numero_pagina;
 }
 t_contenidos_pagina *getContenidoPaginaByTipo(t_contenidos_pagina *contenidos, t_contenido tipo)
