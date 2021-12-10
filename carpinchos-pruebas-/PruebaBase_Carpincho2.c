@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
 
     //mate_memread(&instance, saludoRef, saludo, strlen(saludo));
 
-    //printf(saludo);
+    printf(saludo);
 
     mate_sem_post(&instance, SEMAFORO_SALUDO);
 

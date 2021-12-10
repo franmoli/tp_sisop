@@ -119,6 +119,7 @@ void mover_proceso_de_lista(t_list *origen, t_list *destino, int index, int stat
 
 void avisar_cambio(){
     sem_wait(&mutex_cant_procesos);
+    log_info(logger_kernel,"Avise de un cambio de listas");
     //Aviso que hubo un cambio de listas
     for(int i = 0; i < cantidad_de_procesos; i++){
         sem_post(&actualizacion_de_listas_1);

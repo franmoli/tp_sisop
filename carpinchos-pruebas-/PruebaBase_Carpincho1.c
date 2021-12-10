@@ -34,14 +34,12 @@ int main(int argc, char *argv[]) {
 
     //mate_pointer saludoRef = mate_memalloc(&instance, strlen(saludo));
 
-    mate_call_io(&instance, (mate_io_resource) "laguna", "Carpincho 1 se va a IO");
-
     //mate_memwrite(&instance, saludo, saludoRef, strlen(saludo));
-    //printf("inicio sem saludo \n");
-    //mate_sem_init(&instance, SEMAFORO_SALUDO, 0);
+    printf("inicio sem saludo \n");
+    mate_sem_init(&instance, SEMAFORO_SALUDO, 0);
 
-    //printf("wait sem saludo \n");
-    //mate_sem_wait(&instance, SEMAFORO_SALUDO);
+    printf("wait sem saludo \n");
+    mate_sem_wait(&instance, SEMAFORO_SALUDO);
 
     //mate_memread(&instance, saludoRef, saludo, strlen(saludo));
 
