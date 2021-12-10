@@ -109,10 +109,8 @@ char* traerDeMemoria(int marco, int desplazamiento, int size)
 {
     char* contenido = malloc(size);
     uint32_t dir_fisica = tamanio_memoria + marco * config_memoria->TAMANIO_PAGINA + desplazamiento;
-    uint32_t offset = 0;
 
-    memcpy(&contenido, dir_fisica, size);
-    offset += size;
+    memcpy(contenido, dir_fisica, size);
 
     return contenido;
 }

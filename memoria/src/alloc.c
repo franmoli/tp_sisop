@@ -424,7 +424,17 @@ void crearPrimerHeader(t_pagina *pagina, uint32_t size)
     contenido_contenido->tamanio = size;
     list_add(pagina->listado_de_contenido, contenido_contenido);
 
+    char* contenido_vacio = malloc(size);
+    contenido_vacio= string_new();
+    int i = 0;
+    while(i < size){
+        string_append(&contenido_vacio,"A");
+        i++;
+    }
+    memcpy(contenido_contenido->dir_comienzo, contenido_vacio, strlen(contenido_vacio)+1);
     guardarAlloc(data, contenido->dir_comienzo);
+    
+    free(contenido_vacio);
     free(data);
 }
 
