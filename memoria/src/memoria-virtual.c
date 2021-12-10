@@ -78,10 +78,10 @@ int eliminarPrimerElementoLista(int carpincho_id){
 
 t_paquete* serializarPagina(t_pagina* pagina){
 
-    t_paquete* paquete = malloc(sizeof(t_paquete));
     //t_contenidos_pagina* contenido = list_get(pagina->listado_de_contenido,0);
     uint32_t inicio = tamanio_memoria;
     t_pagina_swap *pagina_serializada = malloc(sizeof(t_pagina_swap));
+    pagina_serializada->tipo_contenido = AMBOS;
     pagina_serializada->contenido_heap_info = list_create();
     pagina_serializada->contenido_carpincho_info = list_create();
     pagina_serializada->pid = pagina->carpincho_id;
@@ -113,6 +113,14 @@ t_paquete* serializarPagina(t_pagina* pagina){
         }
 
     }
+
+    void *pagina_serial = serializar_pagina(*pagina_serializada);
+    t_buffer *buffer = malloc(sizeof(t_buffer));
+	buffer->size = bytes_pagina(*pagina_serializada);
+	buffer->stream = pagina_serial;
+    t_paquete *paquete = malloc(sizeof(t_paquete));
+	paquete->codigo_operacion = SWAPSAVE;
+	paquete->buffer = buffer;
 
     list_iterator_destroy(list_iterator);
 

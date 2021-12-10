@@ -171,12 +171,33 @@ void* serializar_pagina(t_pagina_swap pagina) {
     for(int i=0; i<list_size(pagina.contenido_heap_info); i++) {
         t_info_heap_swap *contenido = list_get(pagina.contenido_heap_info, i);
 
+        memcpy(stream + offset, &(contenido->inicio), sizeof(uint32_t));
+	    offset += sizeof(uint32_t);
+        memcpy(stream + offset, &(contenido->fin), sizeof(uint32_t));
+	    offset += sizeof(uint32_t);
         memcpy(stream + offset, &(contenido->contenido->prevAlloc), sizeof(uint32_t));
 	    offset += sizeof(uint32_t);
         memcpy(stream + offset, &(contenido->contenido->nextAlloc), sizeof(uint32_t));
 	    offset += sizeof(uint32_t);
         memcpy(stream + offset, &(contenido->contenido->isFree), sizeof(uint8_t));
 	    offset += sizeof(uint8_t);
+    }
+
+    //Contenido Carpincho
+    memcpy(stream + offset, &(pagina.contenido_carpincho_info->elements_count), sizeof(uint32_t));
+	offset += sizeof(uint32_t);
+    
+    for(int i=0; i<list_size(pagina.contenido_carpincho_info); i++) {
+        t_info_carpincho_swap *contenido = list_get(pagina.contenido_carpincho_info, i);
+
+        memcpy(stream + offset, &(contenido->size), sizeof(int));
+	    offset += sizeof(int);
+        memcpy(stream + offset, &(contenido->inicio), sizeof(uint32_t));
+	    offset += sizeof(uint32_t);
+        memcpy(stream + offset, &(contenido->fin), sizeof(uint32_t));
+	    offset += sizeof(uint32_t);
+        memcpy(stream + offset, &(contenido->contenido), sizeof(contenido->size));
+	    offset += sizeof(contenido->size);
     }
 
     return stream;
@@ -208,6 +229,10 @@ t_pagina_swap deserializar_pagina(void *stream) {
         t_info_heap_swap *contenido_heap = malloc(sizeof(t_info_heap_swap));
         t_heap_metadata *heap_metadata = malloc(sizeof(t_heap_metadata));
         
+        memcpy(&((*contenido_heap).inicio), stream + offset, sizeof(uint32_t));
+	    offset += sizeof(uint32_t);
+        memcpy(&((*contenido_heap).fin), stream + offset, sizeof(uint32_t));
+	    offset += sizeof(uint32_t);
         memcpy(&((*heap_metadata).prevAlloc), stream + offset, sizeof(uint32_t));
 	    offset += sizeof(uint32_t);
         memcpy(&((*heap_metadata).nextAlloc), stream + offset, sizeof(uint32_t));
@@ -220,6 +245,29 @@ t_pagina_swap deserializar_pagina(void *stream) {
     }
 
     pagina.contenido_heap_info = contenidos_heap;
+
+    //Contenido heap
+    cantidad_elementos = 0;
+    memcpy(&cantidad_elementos, stream + offset, sizeof(uint32_t));
+	offset += sizeof(uint32_t);
+
+    t_list *contenidos_carpincho = list_create();
+    for(int i=0; i<cantidad_elementos; i++) {
+        t_info_carpincho_swap *contenido_carpincho = malloc(sizeof(t_info_carpincho_swap));
+        
+        memcpy(&((*contenido_carpincho).size), stream + offset, sizeof(int));
+	    offset += sizeof(int);
+        memcpy(&((*contenido_carpincho).inicio), stream + offset, sizeof(uint32_t));
+	    offset += sizeof(uint32_t);
+        memcpy(&((*contenido_carpincho).fin), stream + offset, sizeof(uint32_t));
+	    offset += sizeof(uint32_t);
+        memcpy(&((*contenido_carpincho).contenido), stream + offset, sizeof(contenido_carpincho->size));
+	    offset += sizeof(contenido_carpincho->size);
+
+        list_add(contenidos_carpincho, contenido_carpincho);
+    }
+
+    pagina.contenido_carpincho_info = contenidos_carpincho;
     return pagina;
 }
 
