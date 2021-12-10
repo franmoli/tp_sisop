@@ -138,23 +138,21 @@ int reemplazarLRU(t_tabla_paginas* tabla){
             return old->marco_asignado;
         }
         
-        /*
-        t_tabla_paginas* tabla = buscarTablaPorPID(pagina->carpincho_id);
-        t_pagina* old = list_get(tabla->Lru,0);
-        //Serializar pagina
-        //Enviar a swap
-        pagina->marco_asignado = old->marco_asignado;
-        list_remove(tabla->Lru,0);
-        list_add(tabla->Lru,pagina);
-        return pagina->marco_asignado;*/
     }else
-    {   /*
+    {   
         t_pagina* old = list_get(reemplazo_LRU,0);
-        pagina->marco_asignado = old->marco_asignado;
-        list_remove(reemplazo_LRU,0);
-        list_add(reemplazo_LRU,pagina);
-        return pagina->marco_asignado;*/
-        return -1;
+        marco = enviarPaginaSwap(old);
+
+        if(marco <0){
+            return -1;
+        }else
+        {
+            old->bit_presencia = 0;
+            t_tabla_paginas* tabla_old = buscarTablaPorPID(old->carpincho_id);
+            tabla_old->paginas_en_memoria -= 1;
+            list_remove(reemplazo_LRU,0);
+            return old->marco_asignado;
+        }
     }
 }
 
