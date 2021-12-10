@@ -112,11 +112,12 @@ int enviarPaginaSwap(t_pagina* pagina){
     paquete = recibir_paquete(socket_cliente_swap);
     if(paquete->codigo_operacion== PAGINA_GUARDADA){
         //PUDO GUARDAR
+        return 1;
     }
     else{
         return -1;
     }
-    return 1;
+    return 0;
 
 }
 
@@ -129,6 +130,12 @@ int reemplazarLRU(t_tabla_paginas* tabla){
 
         if(marco <0){
             return -1;
+        }else
+        {
+            old->bit_presencia = 0;
+            tabla->paginas_en_memoria -= 1;
+            list_remove(tabla->Lru,0);
+            return old->marco_asignado;
         }
         
         /*
