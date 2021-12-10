@@ -125,7 +125,14 @@ int enviarPaginaSwap(t_pagina* pagina){
                 ,LIST,&(pagina_swap->contenido_heap_info),LIST,&(pagina_swap->contenido_carpincho_info));
     
     enviar_paquete(paquete, socket_cliente_swap);
-
+    
+    paquete = recibir_paquete(socket_cliente_swap);
+    if(paquete->codigo_operacion== OP_CONFIRMADA){
+        //PUDO GUARDAR
+    }
+    else{
+        //NO PUDO GUARDAR
+    }
     return 1;
 
 }
