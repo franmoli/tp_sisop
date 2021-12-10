@@ -105,9 +105,9 @@ void *memRead(t_paquete *paquete)
 
 }
 
-void* traerDeMemoria(int marco, int desplazamiento, int size)
+char* traerDeMemoria(int marco, int desplazamiento, int size)
 {
-    void* contenido = malloc(size);
+    char* contenido = malloc(size);
     uint32_t dir_fisica = tamanio_memoria + marco * config_memoria->TAMANIO_PAGINA + desplazamiento;
     uint32_t offset = 0;
 
@@ -477,7 +477,7 @@ int solicitarPaginaNueva(uint32_t carpincho_id)
     }
     if(marco == -1){
         log_info(logger_memoria, "Tengo que ir a swap");
-        //reemplazarPagina(list_size(tabla_paginas->paginas),tabla_paginas->pid);
+        marco = reemplazarPagina(tabla_paginas);
     }
     int numero_pagina = 0;
     if (list_size(tabla_paginas->paginas) > 0)

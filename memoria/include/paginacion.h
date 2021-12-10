@@ -33,7 +33,7 @@ void liberarPagina(t_pagina* pagina, uint32_t carpincho_id);
 
 //MEMREAD
 void *memRead(t_paquete *paquete);
-void* traerDeMemoria(int marco, int desplazamiento, int size);
+char* traerDeMemoria(int marco, int desplazamiento, int size);
 //MEMWRITE
 void memWrite(t_paquete *paquete);
 void escribirEnMemoria(int marco, int desplazamiento, int size, void* contenido);

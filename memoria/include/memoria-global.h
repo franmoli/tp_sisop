@@ -147,7 +147,7 @@ typedef struct {
 	uint32_t pid;
 	uint32_t numero_pagina;
 	t_list* contenido_heap_info;
-	//t_list* contenido_carpincho_info;
+	t_list* contenido_carpincho_info;
 } t_pagina_swap;
 
 typedef struct {
@@ -157,10 +157,10 @@ typedef struct {
 } t_info_heap_swap;
 
 typedef struct {
-	uint32_t size_proximo_contenido;
+	int size;
 	uint32_t inicio;
 	uint32_t fin;
-	//t_carpincho* carpincho;
+	char* contenido;
 } t_info_carpincho_swap;
 
 //Funciones para el calculo de bytes

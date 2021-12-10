@@ -40,14 +40,13 @@ void agregarAsignacion(t_pagina* pagina){
     return;
 }
 
-int reemplazarPagina(t_pagina* pagina){
-    t_tabla_paginas* tabla_paginas = buscarTablaPorPID(pagina->carpincho_id);
+int reemplazarPagina(t_tabla_paginas* tabla){
     if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "CLOCK-M") == 0){
         //SWAP CLOCK
     }
     else{
         //SWAP LRU
-        int marco = reemplazarLRU(pagina);
+        int marco = reemplazarLRU(tabla);
         return marco;
     }
 }
@@ -77,21 +76,57 @@ int eliminarPrimerElementoLista(int carpincho_id){
     return marco;
 }
 
-int reemplazarLRU(t_pagina* pagina){
+t_paquete* serializarPagina(t_pagina* pagina){
+
+    t_paquete* paquete = malloc(sizeof(t_paquete));
+    t_contenidos_pagina* contenido = list_get(pagina->listado_de_contenido,0);
+    uint32_t inicio = tamanio_memoria;
+    t_pagina_swap *pagina_serializada = malloc(sizeof(t_pagina_swap));
+    pagina_serializada->contenido_heap_info = list_create();
+    pagina_serializada->contenido_carpincho_info = list_create();
+
+    if(contenido->contenido_pagina == RESTO_CONTENIDO || contenido->contenido_pagina == RESTO_CONTENIDO){
+        int offset = (contenido->dir_comienzo - inicio) % config_memoria->TAMANIO_PAGINA;
+        char* cont = traerDeMemoria(pagina->marco_asignado, offset, contenido->tamanio);
+        t_info_carpincho_swap* contenido_swap = malloc(sizeof(t_info_carpincho_swap));
+        contenido_swap->size = contenido->tamanio;
+        contenido_swap->inicio = contenido->dir_comienzo;
+        contenido_swap->fin = contenido->dir_fin;
+        contenido_swap->contenido = cont;
+        list_add(pagina_serializada->contenido_carpincho_info,contenido_swap);
+    }else
+    {
+        t_heap_metadata* heap = traerAllocIncompleto(pagina->marco_asignado,contenido->dir_comienzo,contenido->dir_fin);
+
+    }
+
+    return paquete;
+
+}
+
+int reemplazarLRU(t_tabla_paginas* tabla){
     if(strcmp(config_memoria->TIPO_ASIGNACION, "FIJA") == 0){
+
+        t_pagina* old = list_get(tabla->Lru,0);
+        t_paquete* paquete = serializarPagina(old);
+
+        /*
         t_tabla_paginas* tabla = buscarTablaPorPID(pagina->carpincho_id);
         t_pagina* old = list_get(tabla->Lru,0);
+        //Serializar pagina
+        //Enviar a swap
         pagina->marco_asignado = old->marco_asignado;
         list_remove(tabla->Lru,0);
         list_add(tabla->Lru,pagina);
-        return pagina->marco_asignado;
+        return pagina->marco_asignado;*/
     }else
-    {
+    {   /*
         t_pagina* old = list_get(reemplazo_LRU,0);
         pagina->marco_asignado = old->marco_asignado;
         list_remove(reemplazo_LRU,0);
         list_add(reemplazo_LRU,pagina);
-        return pagina->marco_asignado;
+        return pagina->marco_asignado;*/
+        return -1;
     }
 }
 
