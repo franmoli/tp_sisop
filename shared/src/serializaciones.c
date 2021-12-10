@@ -119,17 +119,17 @@ t_swap_serializado* deserializar_swap(t_paquete *paquete){
 }
 
 //--------------------------------------------------------------------------------------------
-int bytes_pagina(t_pagina_swap pagina) {
+int bytes_pagina(t_pagina_swap* pagina) {
     int size = 0;
 
-    size += sizeof(pagina.tipo_contenido);
-    size += sizeof(pagina.pid);
-    size += sizeof(pagina.numero_pagina);
+    size += sizeof(pagina->tipo_contenido);
+    size += sizeof(pagina->pid);
+    size += sizeof(pagina->numero_pagina);
 
     //Contenidos heap
-    size += sizeof(pagina.contenido_heap_info->elements_count);
-    for(int i=0; i<list_size(pagina.contenido_heap_info); i++) {
-		t_info_heap_swap *contenido = list_get(pagina.contenido_heap_info, i);
+    size += sizeof(pagina->contenido_heap_info->elements_count);
+    for(int i=0; i<list_size(pagina->contenido_heap_info); i++) {
+		t_info_heap_swap *contenido = list_get(pagina->contenido_heap_info, i);
 		size += bytes_info_heap(*contenido);
 	}
 
@@ -147,29 +147,29 @@ int bytes_info_heap(t_info_heap_swap info) {
     return size;
 }
 //--------------------------------------------------------------------------------------------
-void* serializar_pagina(t_pagina_swap pagina) {
+void* serializar_pagina(t_pagina_swap* pagina) {
     int bytes = bytes_pagina(pagina);
     void *stream = malloc(bytes);
     int offset = 0;
 
     //Tipo de contenido
-    memcpy(stream + offset, &(pagina.tipo_contenido), sizeof(int));
+    memcpy(stream + offset, &(pagina->tipo_contenido), sizeof(int));
 	offset += sizeof(int);
 
     //PID
-    memcpy(stream + offset, &(pagina.pid), sizeof(uint32_t));
+    memcpy(stream + offset, &(pagina->pid), sizeof(uint32_t));
 	offset += sizeof(uint32_t);
 
     //Número de pagina
-    memcpy(stream + offset, &(pagina.numero_pagina), sizeof(uint32_t));
+    memcpy(stream + offset, &(pagina->numero_pagina), sizeof(uint32_t));
 	offset += sizeof(uint32_t);
 
     //Contenido heap
-    memcpy(stream + offset, &(pagina.contenido_heap_info->elements_count), sizeof(uint32_t));
+    memcpy(stream + offset, &(pagina->contenido_heap_info->elements_count), sizeof(uint32_t));
 	offset += sizeof(uint32_t);
     
-    for(int i=0; i<list_size(pagina.contenido_heap_info); i++) {
-        t_info_heap_swap *contenido = list_get(pagina.contenido_heap_info, i);
+    for(int i=0; i<list_size(pagina->contenido_heap_info); i++) {
+        t_info_heap_swap *contenido = list_get(pagina->contenido_heap_info, i);
 
         memcpy(stream + offset, &(contenido->inicio), sizeof(uint32_t));
 	    offset += sizeof(uint32_t);
@@ -184,11 +184,11 @@ void* serializar_pagina(t_pagina_swap pagina) {
     }
 
     //Contenido Carpincho
-    memcpy(stream + offset, &(pagina.contenido_carpincho_info->elements_count), sizeof(uint32_t));
+    memcpy(stream + offset, &(pagina->contenido_carpincho_info->elements_count), sizeof(uint32_t));
 	offset += sizeof(uint32_t);
     
-    for(int i=0; i<list_size(pagina.contenido_carpincho_info); i++) {
-        t_info_carpincho_swap *contenido = list_get(pagina.contenido_carpincho_info, i);
+    for(int i=0; i<list_size(pagina->contenido_carpincho_info); i++) {
+        t_info_carpincho_swap *contenido = list_get(pagina->contenido_carpincho_info, i);
 
         memcpy(stream + offset, &(contenido->size), sizeof(int));
 	    offset += sizeof(int);
@@ -203,20 +203,20 @@ void* serializar_pagina(t_pagina_swap pagina) {
     return stream;
 }
 
-t_pagina_swap deserializar_pagina(void *stream) {
-    t_pagina_swap pagina;
+t_pagina_swap* deserializar_pagina(void *stream) {
+    t_pagina_swap* pagina = malloc(sizeof(t_pagina_swap));
     int offset = 0;
 
     //Tipo de contenido
-    memcpy(&pagina.tipo_contenido, stream + offset, sizeof(int));
+    memcpy(&pagina->tipo_contenido, stream + offset, sizeof(int));
 	offset += sizeof(int);
 
     //PID
-    memcpy(&pagina.pid, stream + offset, sizeof(uint32_t));
+    memcpy(&pagina->pid, stream + offset, sizeof(uint32_t));
 	offset += sizeof(uint32_t);
 
     //Número de página
-    memcpy(&pagina.numero_pagina, stream + offset, sizeof(uint32_t));
+    memcpy(&pagina->numero_pagina, stream + offset, sizeof(uint32_t));
 	offset += sizeof(uint32_t);
 
     //Contenido heap
@@ -244,7 +244,7 @@ t_pagina_swap deserializar_pagina(void *stream) {
         list_add(contenidos_heap, contenido_heap);
     }
 
-    pagina.contenido_heap_info = contenidos_heap;
+    pagina->contenido_heap_info = contenidos_heap;
 
     //Contenido heap
     cantidad_elementos = 0;
@@ -267,7 +267,7 @@ t_pagina_swap deserializar_pagina(void *stream) {
         list_add(contenidos_carpincho, contenido_carpincho);
     }
 
-    pagina.contenido_carpincho_info = contenidos_carpincho;
+    pagina->contenido_carpincho_info = contenidos_carpincho;
     return pagina;
 }
 

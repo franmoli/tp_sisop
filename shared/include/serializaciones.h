@@ -103,11 +103,11 @@ void serializar_single (void **stream, void *elem, int *stream_size, int elem_si
 void deserializar(t_paquete *paquete, int arg_count, ...);
 void deserializar_single (void *stream, void *elem, int size, int *offset);
 
-void* serializar_pagina(t_pagina_swap pagina);
-t_pagina_swap deserializar_pagina(void *stream);
+void* serializar_pagina(t_pagina_swap* pagina);
+t_pagina_swap* deserializar_pagina(void *stream);
 
 //Funciones para el calculo de bytes
-int bytes_pagina(t_pagina_swap pagina);
+int bytes_pagina(t_pagina_swap* pagina);
 int bytes_info_heap(t_info_heap_swap info);
 //int bytes_info_carpincho(t_carpincho info);
 
