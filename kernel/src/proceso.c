@@ -309,7 +309,7 @@ void *desbloquear_en(void *param){
 void devolver_recurso(int id){
     bool lo_encontre(void *elemento){
         t_recurso_asignado *recurso = elemento;
-        if(recurso->id == id)
+        if(recurso->id_asignado == id)
             return true;
         
         return false;

@@ -51,7 +51,7 @@ bool recurso_retenido(int solicitante, char *semaforo_solicitado, t_list *lista_
     //ver si al semaforo solicitado lo esta reteniendo alguien que no sea el solicitante
     bool encontre_asignado(void *elemento){
         t_recurso_asignado *recurso = elemento;
-        if(!strcmp(semaforo_solicitado, recurso->nombre_semaforo) && solicitante != recurso->id_asignado)
+        if(!strcmp(semaforo_solicitado, recurso->nombre_recurso) && solicitante != recurso->id_asignado)
             return true;
         
         return false;
@@ -80,12 +80,12 @@ bool recurso_retenido(int solicitante, char *semaforo_solicitado, t_list *lista_
                 while(index2 < list_size(lista_recursos_asignados)){
                     t_recurso_asignado *recurso_aux = list_get(lista_recursos_asignados, index2);
 
-                    if(!strcmp(recurso_aux->nombre_semaforo, recurso_que_lo_bloquea) && *id_aux == recurso_aux->id_asignado){
+                    if(!strcmp(recurso_aux->nombre_recurso, recurso_que_lo_bloquea) && *id_aux == recurso_aux->id_asignado){
                         recurso_asignado_a_alguien_en_lista = true;
                         break;
                     }
 
-                    index2++
+                    index2++;
                 }
                 index++;
             }
@@ -99,7 +99,7 @@ bool recurso_retenido(int solicitante, char *semaforo_solicitado, t_list *lista_
                 list_add(lista_procesos_en_deadlock, solicitante);
 
                 //se repite la operacion con el siguiente proceso en posible deadlock
-                return recurso_retenido(asignado_aux->id_asignado, recurso_que_lo_bloquea, lista_procesos_en_deadlock)
+                return recurso_retenido(asignado_aux->id_asignado, recurso_que_lo_bloquea, lista_procesos_en_deadlock);
             }
 
             //Esta bloqueado por otro que no es de la lista - recursividad con el nuevo
@@ -135,7 +135,7 @@ bool proceso_bloqueado(int id){
             return false;
         }
 
-        id_encontrado = list_find(aux->solicitantes, encontre_el_solicitante);
+        id_encontrado = list_find(sem_aux->solicitantes, encontre_el_solicitante);
         
         //Se encontro al proceso en la lista de solicitantes de un semaforo entonces está bloqueado
         if(id_encontrado != NULL){
@@ -164,7 +164,7 @@ char *proceso_bloqueado_por_sem(int id){
             return false;
         }
 
-        id_encontrado = list_find(aux->solicitantes, encontre_el_solicitante);
+        id_encontrado = list_find(sem_aux->solicitantes, encontre_el_solicitante);
         
         //Devuelvo el nombre del semáforo que bloqueó al id
         if(id_encontrado != NULL){
