@@ -453,7 +453,6 @@ int deserializar(t_paquete *paquete, int arg_count, ...){
     t_list *param_l = NULL; 
     t_type tipo_de_lista = INT;
     void *list_elem = NULL;
-    int added_size = 0;
     
     
     for (int i = 0; i < arg_count; i += 2){
@@ -501,7 +500,7 @@ int deserializar(t_paquete *paquete, int arg_count, ...){
                 //Se trae el tipo de lista y se incrementa i por el va_arg extra
                 i++;
                 int tamanio_lista;
-                deserializar_single(stream, tamanio_lista, sizeof(int), &offset);
+                deserializar_single(stream, &tamanio_lista, sizeof(int), &offset);
                 
                 for(int j = 0; j < tamanio_lista; j++){
                     paquete_aux = malloc(sizeof(t_paquete));
@@ -564,7 +563,6 @@ t_paquete* serializar_pagina_swap(t_pagina_swap* pagina_swap){
     new_buffer->size = sizeof(uint32_t) * 2 + sizeof(info_contenido)
                         +list_size(pagina_swap->contenido_carpincho_info) * (sizeof(uint32_t) * 2 + sizeof(int));
     void *stream = malloc(new_buffer->size);
-    int offset = 0;
 
     new_buffer->stream = stream;
     paquete->buffer = new_buffer;
