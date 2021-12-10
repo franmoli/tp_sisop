@@ -24,6 +24,7 @@ void *proceso(void *self){
                     //printf("Block - p: %d \n", proceso_struct->id);
                     break;
                 case EXIT:
+                    //liberar semaforos tomados por este
                     sem_post(&actualizacion_de_listas_1_recibido);
                     sem_wait(&actualizacion_de_listas_2);
                     return;

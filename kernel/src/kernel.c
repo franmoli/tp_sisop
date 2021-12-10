@@ -36,7 +36,10 @@ int main(int argc, char **argv) {
     if(socket_cliente_memoria == -1){
         log_error(logger_kernel, "Fallo en la conexion a memoria");
     }
+
+    //bloquear con algo
     while(1);
+
     //Fin del programa
     liberar_memoria_y_finalizar(config_kernel, logger_kernel, config_file);
     return 0;

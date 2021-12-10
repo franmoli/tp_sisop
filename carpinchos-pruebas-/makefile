@@ -37,12 +37,9 @@ run: clean build $(CARPINCHOS)
 run2: clean build $(CARPINCHOS)
 	./build/PruebaBase_Carpincho2 cfg/matelib.cfg
 
-<<<<<<< HEAD
-=======
 run3: clean build $(CARPINCHOS)
 	./build/PruebaAsignacion cfg/matelib.cfg
 
->>>>>>> 62ab2ffb47b49ad45b8181173380490e7178de89
 run4: clean build $(CARPINCHOS)
 	./build/PruebaPlanificacion cfg/matelib.cfg
 
