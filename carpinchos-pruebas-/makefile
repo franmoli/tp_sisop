@@ -43,6 +43,9 @@ run3: clean build $(CARPINCHOS)
 run4: clean build $(CARPINCHOS)
 	./build/PruebaPlanificacion cfg/matelib.cfg
 
+runDL: clean build $(CARPINCHOS)
+	./build/PruebaDeadlock cfg/matelib.cfg
+
 vrun: clean build $(CARPINCHOS)
 	valgrind ./build/PruebaBase_Carpincho1 cfg/matelib.cfg
 
