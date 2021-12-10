@@ -111,7 +111,13 @@ static void *ejecutar_operacion(int client)
 
         case MEMWRITE:
             log_info(logger_memoria, "recibi orden de memwrite del cliente %d", client);
-            memWrite(paquete);
+            int resultado = memWrite(paquete);
+            if(resultado< 0){
+                //NO SE PUDO ESCRIBIR
+            }
+            else{
+                //SI SE PUDO ESCRIBIR
+            }
             break;
         case MEMREAD:
             log_info(logger_memoria, "recibi orden de leer memoria del cliente %d", client);

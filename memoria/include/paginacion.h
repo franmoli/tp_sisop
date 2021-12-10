@@ -35,8 +35,8 @@ void liberarPagina(t_pagina* pagina, uint32_t carpincho_id);
 void *memRead(t_paquete *paquete);
 char* traerDeMemoria(int marco, int desplazamiento, int size);
 //MEMWRITE
-void memWrite(t_paquete *paquete);
-void escribirEnMemoria(int marco, int desplazamiento, int size, void* contenido);
+int memWrite(t_paquete *paquete);
+void escribirEnMemoria(int marco, int desplazamiento, int size, char* contenido);
 
 void* traerMarcoDeMemoria(t_pagina* pagina);
 t_heap_metadata* traerAllocIncompleto(int marco,uint32_t dir_comienzo, uint32_t dir_final);
