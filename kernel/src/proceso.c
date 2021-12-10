@@ -92,7 +92,7 @@ void exec(t_proceso *self){
                 case SEM_POST:
                     semaforo_aux = next_task->datos_tarea;
                     printf("Posteando semaforo %s\n", semaforo_aux->nombre_semaforo);
-                    postear_semaforo(semaforo_aux->nombre_semaforo);
+                    postear_semaforo(semaforo_aux->nombre_semaforo, self->id);
                     enviar_confirmacion(self->socket_carpincho);
                     break;
 
@@ -158,6 +158,12 @@ bool solicitar_semaforo(char *nombre_semaforo, int id){
         semaforo_solicitado->value = semaforo_solicitado->value - 1;
         enviar_confirmacion(id);
 
+        // sumar a lista de recursos asignados 
+        t_recurso_asignado *recurso_asignado = malloc(sizeof(t_recurso_asignado));
+        recurso_asignado->nombre_recurso = nombre_semaforo;
+        recurso_asignado->id_asignado = id;
+        list_add(lista_recursos_asignados, recurso_asignado);
+
         //Esta disponible, no bloquear
         return false;
     }else{
@@ -195,7 +201,7 @@ void iniciar_semaforo(t_semaforo *semaforo){
 
 }
 
-void postear_semaforo(char *nombre_semaforo){
+void postear_semaforo(char *nombre_semaforo, int id_del_chabon_que_postea ){
 
     // traer de la lista el semaforo
     t_semaforo *semaforo_solicitado = traer_semaforo(nombre_semaforo);
@@ -213,9 +219,18 @@ void postear_semaforo(char *nombre_semaforo){
         semaforo_solicitado->value = semaforo_solicitado->value + 1;
         aux = list_remove(semaforo_solicitado->solicitantes, 0);
 
+        //sumar a lista de recursos asignados
+        t_recurso_asignado *recurso_asignado = malloc(sizeof(t_recurso_asignado));
+        recurso_asignado->nombre_recurso = nombre_semaforo;
+        recurso_asignado->id_asignado = *aux;
+        list_add(lista_recursos_asignados, recurso_asignado);        
+
         desbloquear(traer_proceso_bloqueado(*aux));
 
     }
+    
+    devolver_recurso(id_del_chabon_que_postea);
+
 }
 
 t_proceso *traer_proceso_bloqueado(int id){
@@ -262,7 +277,7 @@ t_semaforo *traer_semaforo(char *nombre_solicitado){
 }
 
 void bloquear(t_proceso *self){
-    printf("Bloqueando proceso: %d\n", self->id);
+    //printf("Bloqueando proceso: %d\n", self->id);
     self->block = true;
     sleep(1);
     sem_post(&solicitar_block);
@@ -270,7 +285,7 @@ void bloquear(t_proceso *self){
 }
 
 void desbloquear(t_proceso *self){
-    printf("Desbloquear proceso: %d\n", self->id);
+    //printf("Desbloquear proceso: %d\n", self->id);
     self->salida_block = true;
     sleep(1);
     if(self->status == BLOCKED)
@@ -280,13 +295,25 @@ void desbloquear(t_proceso *self){
     return;
 }
 
-
 void *desbloquear_en(void *param){
     t_io *io_recibida = param;
     log_info(logger_kernel, "Solicitando el dispositivo %s", io_recibida->nombre);
     sleep(io_recibida->duracion);
     log_info(logger_kernel, "IO ejecutada %s", io_recibida->mensaje);
-    printf("Desbloqueando X salida de io\n");
+    //printf("Desbloqueando X salida de io\n");
     desbloquear(io_recibida->proceso_solicitante);
     return NULL;
+}
+
+void devolver_recurso(int id){
+    bool lo_encontre(void *elemento){
+        t_recurso_asignado *recurso = elemento;
+        if(recurso->id == id)
+            return true;
+        
+        return false;
+    }
+    list_remove_by_condition(lista_recursos_asignados, lo_encontre);
+
+    return;
 }

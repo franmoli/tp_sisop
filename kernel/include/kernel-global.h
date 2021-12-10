@@ -57,6 +57,11 @@ typedef struct {
     t_proceso *proceso_solicitante;
 }t_io;
 
+typedef struct {
+    char *nombre_recurso;
+    int id_asignado;
+}t_recurso_asignado;
+
 
 
 //Configuración
@@ -72,6 +77,7 @@ t_list *lista_s_blocked;
 t_list *lista_s_ready;
 t_list *lista_semaforos;
 t_list *lista_exit;
+t_list *lista_recursos_asignados;
 
 //Semaforos
 sem_t mutex_listas;

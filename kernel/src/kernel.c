@@ -67,6 +67,7 @@ void iniciar_listas(){
     lista_s_ready = list_create();
     lista_semaforos = list_create();
     lista_exit = list_create();
+    lista_recursos_asignados = list_create();
 
     sem_init(&mutex_listas, 0, 1);
     
