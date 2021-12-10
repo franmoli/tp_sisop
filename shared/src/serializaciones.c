@@ -227,7 +227,7 @@ t_pagina_swap deserializar_pagina(void *stream) {
     t_list *contenidos_heap = list_create();
     for(int i=0; i<cantidad_elementos; i++) {
         t_info_heap_swap *contenido_heap = malloc(sizeof(t_info_heap_swap));
-        t_heap_metadata *heap_metadata = malloc(sizeof(t_heap_metadata));
+        t_heap_swap *heap_metadata = malloc(sizeof(t_heap_swap));
         
         memcpy(&((*contenido_heap).inicio), stream + offset, sizeof(uint32_t));
 	    offset += sizeof(uint32_t);

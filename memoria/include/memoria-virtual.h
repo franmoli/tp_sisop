@@ -2,6 +2,7 @@
 #define MEMORIA_VIRTUAL_H
 
 #include "memoria-global.h"
+#include "serializaciones.h"
 
 
 //t_pagina* reemplazarPagina(t_pagina* paginaAgregar, int carpincho_id);
