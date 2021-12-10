@@ -564,7 +564,8 @@ int agregarPagina(t_pagina *pagina, t_heap_metadata *data, uint32_t nextAnterior
 
                 list_add(pagina->listado_de_contenido,contenido_nuevo);
                 pagina->cantidad_contenidos += 1;
-                return agregarPagina(pagina, data, restante, restante + sizeof(t_heap_metadata), true,index_alloc);
+                pagina->tamanio_ocupado+= restante;
+                return agregarPagina(pagina, data, nextAnterior, sizeof(t_heap_metadata), true,index_alloc);
             }
         }
     }
