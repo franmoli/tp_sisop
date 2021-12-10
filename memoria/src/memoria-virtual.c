@@ -116,7 +116,7 @@ t_paquete* serializarPagina(t_pagina* pagina){
 
     void *pagina_serial = serializar_pagina(pagina_serializada);
     t_buffer *buffer = malloc(sizeof(t_buffer));
-	buffer->size = bytes_pagina(*pagina_serializada);
+	buffer->size = bytes_pagina(pagina_serializada);
 	buffer->stream = pagina_serial;
     t_paquete *paquete = malloc(sizeof(t_paquete));
 	paquete->codigo_operacion = SWAPSAVE;
