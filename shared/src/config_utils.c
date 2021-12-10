@@ -47,6 +47,7 @@ t_config_kernel *generar_config_kernel(t_config *config) {
     config_kernel->ALFA = config_get_int_value(config, "ALFA");
     config_kernel->DISPOSITIVOS_IO = io_devices;
     config_kernel->DURACIONES_IO = io_durations;
+    config_kernel->TIEMPO_DEADLOCK = config_get_int_value(config, "TIEMPO_DEADLOCK");
 
     // libero memoria utilizada en el formateo
     free(io_devices_unformatted);
