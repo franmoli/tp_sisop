@@ -33,6 +33,7 @@ typedef enum {
     DIRECCION_LOGICA = 19,
     PAGINA_GUARDADA = 20,
     PAGINA_NO_GUARDADA = 21,
+    DIRECCION_LOGICA_INVALIDA = 22,
 } op_code;
 
 typedef struct {
