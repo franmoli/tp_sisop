@@ -125,35 +125,33 @@ void memWrite(t_paquete *paquete)
         3d- Si estaba en tlb sumo metrica HIT
       4- Obtenido el marco, junto con el desplazamiento voy a memoria y escribo la info
     */
-   /*int32_t origin;
+   char*  origin= NULL;
    int size = 0;
-   char* dest = NULL; 
-*/
-   //deserializar(paquete,6,INT,&origin,CHAR_PTR,&dest,INT,&size);
-   t_malloc_serializado* info = deserializar_alloc(paquete);
-   uint32_t dir_logica = info->size_reservar;
-   uint32_t carpincho_id = info->carpincho_id;
+   int32_t dest ; 
+
+   deserializar(paquete,6,CHAR_PTR,&origin,INT,&dest,INT,&size);
    void* contenido = "holaholaholaholaholaola";
-   if(dir_logica == 105){
+   
+   /*if(dir_logica == 105){
        contenido = "holaholaholaol";
    }
 
    int pagina = dir_logica / config_memoria->TAMANIO_PAGINA;
-   int desplazamiento = dir_logica % config_memoria->TAMANIO_PAGINA;
-
+   int desplazamiento = dir_logica % config_memoria->TAMANIO_PAGINA;*/
+    int inicio = tamanio_memoria;
    // Paso 3
     int marco = -1;
 
-    marco = buscarEnTLB(pagina,carpincho_id);
+   // marco = buscarEnTLB(pagina,carpincho_id);
 
     //Si retorna -1 falta swap
 
    // Paso 4
    // Como se que tanto tengo que traer de memoria, creo que deberia ver el heap de ese alloc y traer esa cantidad en el contenido
 
-   int size = 4;
+   size = 4;
 
-   escribirEnMemoria(marco,desplazamiento, size, contenido);
+   //escribirEnMemoria(marco,desplazamiento, size, contenido);
    log_info(logger_memoria,"Escribi contenido");
 }
 
