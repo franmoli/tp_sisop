@@ -142,7 +142,8 @@ static void *ejecutar_operacion(int client)
             break;
         case MEMREAD:
             log_info(logger_memoria, "recibi orden de leer memoria del cliente %d", client);
-            t_heap_metadata *data = memRead(paquete);
+            char *data = memRead(paquete);
+            //ENVIAR PAQUETE A KERNEL
             break;
         case MATEINIT:
             log_info(logger_memoria, "recibi un nuevo carpincho para inicializar del cliente %d", client);
