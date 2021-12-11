@@ -100,9 +100,9 @@ void enviar_paquete(t_paquete *paquete, int socket_cliente) {
 t_paquete* recibir_paquete(int socket_cliente) {
 	t_paquete* paquete = malloc(sizeof(t_paquete));
 	paquete->buffer = malloc(sizeof(t_buffer));
-	//printf("TUMAMATUMAMATUMAMA1\n");
+	printf("(recibir paquete)Espero recibir de %d \n",socket_cliente);
 	recv(socket_cliente, &(paquete->codigo_operacion), sizeof(uint32_t), 0);
-	//printf("TUMAMATUMAMATUMAMA2\n");
+	printf("(recibir paquete)Recibi de %d\n",socket_cliente);
 	if(paquete->codigo_operacion <= 0 || paquete->codigo_operacion > 100){
 		printf("El cliente se desconectó forzosamente...\n");
 		paquete->codigo_operacion = CLIENTE_DESCONECTADO;

@@ -28,6 +28,7 @@ void* carpincho1_func(void* config){
 	printf("C1 - Hace una llamada a IO\n");
 	mate_call_io(&instance, "PILETA", "Vamos a usar la pileta...");
 
+    mate_close(&instance);
 
 	return 0;
 }
@@ -48,6 +49,7 @@ void* carpincho2_func(void* config){
 	printf("C2 - Hace una llamada a IO\n");
 	mate_call_io(&instance, "PILETA", "Vamos a usar la pileta...");
 
+    mate_close(&instance);
 
 	return 0;
 }
@@ -68,6 +70,7 @@ void* carpincho3_func(void* config){
 	printf("C3 - Hace una llamada a IO\n");
 	mate_call_io(&instance, "PILETA", "Vamos a usar la pileta...");
 
+    mate_close(&instance);
 
 	return 0;
 }
@@ -88,6 +91,7 @@ void* carpincho4_func(void* config){
 	printf("C4 - Hace una llamada a IO\n");
 	mate_call_io(&instance, "PILETA", "Vamos a usar la pileta...");
 
+    mate_close(&instance);
 
 	return 0;
 }
@@ -109,7 +113,7 @@ int main(int argc, char *argv[]) {
 	sleep(1);
 	pthread_create(&carpincho3, NULL, carpincho3_func, argv[1]);
 	sleep(1);
-	pthread_create(&carpincho3, NULL, carpincho4_func, argv[1]);
+	pthread_create(&carpincho4, NULL, carpincho4_func, argv[1]);
 
 	pthread_join(carpincho4, NULL);
 	pthread_join(carpincho3, NULL);
