@@ -103,6 +103,13 @@ char *memRead(t_paquete *paquete)
 
    char * contenido = traerDeMemoria(pagina->marco_asignado,desplazamiento, size);
 
+    if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "LRU") == 0){
+        actualizarLRU(pagina);
+    }else
+    {
+        pagina->bit_uso = 1;
+    }
+
    return contenido;
 
 }
@@ -142,6 +149,14 @@ int memWrite(t_paquete *paquete)
    int desplazamiento = (direccion_logica-inicio) % config_memoria->TAMANIO_PAGINA;
 
    escribirEnMemoria(pagina->marco_asignado,desplazamiento, size, contenido_escribir);
+
+   if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "LRU") == 0){
+        actualizarLRU(pagina);
+    }else
+    {
+        pagina->bit_modificado = 1;
+    }
+
    return 1;
 }
 
