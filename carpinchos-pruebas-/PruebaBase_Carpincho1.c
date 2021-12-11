@@ -25,26 +25,24 @@ int main(int argc, char *argv[]) {
 	printf("MAIN - Utilizando el archivo de config: %s\n", config);
 
 	mate_instance instance;
-    
+
 	mate_init(&instance, (char*)config);
 
-    
-    
-    char* saludo = "No, ¡hola humedal!\n";
+    char saludo[] = "No, ¡hola humedal!\n";
 
-    //mate_pointer saludoRef = mate_memalloc(&instance, strlen(saludo));
+    mate_pointer saludoRef = mate_memalloc(&instance, strlen(saludo));
 
-    //mate_memwrite(&instance, saludo, saludoRef, strlen(saludo));
-    printf("inicio sem saludo \n");
+    mate_memwrite(&instance, saludo, saludoRef, strlen(saludo));
+
     mate_sem_init(&instance, SEMAFORO_SALUDO, 0);
 
-    printf("wait sem saludo \n");
     mate_sem_wait(&instance, SEMAFORO_SALUDO);
 
-    //mate_memread(&instance, saludoRef, saludo, strlen(saludo));
+    mate_memread(&instance, saludoRef, saludo, strlen(saludo));
 
     printf(saludo);
 
     mate_close(&instance);
+
 	return EXIT_SUCCESS;
 }

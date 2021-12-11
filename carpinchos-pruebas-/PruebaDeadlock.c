@@ -9,7 +9,7 @@ void* carpincho1_func(void* config){
     mate_instance instance;
 
     mate_init(&instance, config);
- 
+
     printf("C1 - Toma SEM1\n");
     mate_sem_wait(&instance, "SEM1");
     sleep(3);

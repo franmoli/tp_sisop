@@ -62,7 +62,7 @@ t_contenidos_pagina *getLastHeaderContenidoByPagina(t_pagina *pagina)
 //////////////////////////////////////////////////////////////////////////////
 
 // Mem Read: Dada una direccion de memoria busco el contenido que se encuentra alli
-void *memRead(t_paquete *paquete)
+char *memRead(t_paquete *paquete)
 {
 
     /*1- Deserializo el paquete -> carpincho_id, direccion_logica
@@ -79,52 +79,6 @@ void *memRead(t_paquete *paquete)
 } t_malloc_serializado;
     */
 
-   t_malloc_serializado* info = deserializar_alloc(paquete);
-   uint32_t dir_logica = info->size_reservar;
-   uint32_t carpincho_id = info->carpincho_id;
-
-   int pagina = dir_logica / config_memoria->TAMANIO_PAGINA;
-   int desplazamiento = dir_logica % config_memoria->TAMANIO_PAGINA;
-
-   log_info(logger_memoria,"Voy a tlb");
-    int marco = -1;
-
-    marco = buscarEnTLB(pagina,carpincho_id);
-
-    log_info(logger_memoria,"Me traje el marco %d",marco);
-
-    //Si retorna -1 falta swap
-
-   // Paso 4
-   // Como se que tanto tengo que traer de memoria, creo que deberia ver el heap de ese alloc y traer esa cantidad en el contenido
-   int size = 4;
-
-   void* contenido = traerDeMemoria(marco,desplazamiento, size);
-   log_info(logger_memoria,"Traje contenido");
-   return contenido;
-
-}
-
-char* traerDeMemoria(int marco, int desplazamiento, int size)
-{
-    char* contenido = malloc(size);
-    uint32_t dir_fisica = tamanio_memoria + marco * config_memoria->TAMANIO_PAGINA + desplazamiento;
-
-    memcpy(contenido, dir_fisica, size);
-
-    return contenido;
-}
-
-int memWrite(t_paquete *paquete)
-{
-    /*1- Deserializo paquete -> carpincho_id, direccion_logica, contenido_a_escribir
-      2- Con la dir logica calculo pagina y desplazamiento
-      3- Con la pagina y el pid busco en la tlb
-        3b- Si ocurre un miss sumo metrica y voy a memoria
-        3c- Si no esta en memoria voy a swap y cambio bits (modificado)
-        3d- Si estaba en tlb sumo metrica HIT
-      4- Obtenido el marco, junto con el desplazamiento voy a memoria y escribo la info
-    */
    char*  contenido_escribir= NULL;
    int size = 0;
    int32_t direccion_logica ; 
@@ -142,19 +96,74 @@ int memWrite(t_paquete *paquete)
    t_pagina* pagina = list_get(tabla_paginas->paginas,numero_pagina);
    if(pagina->bit_presencia == 0){
        //TRAER DE SWAP
+       //getMarcoParaPagina(tabla_paginas);
    }
     
-   // Paso 3
-    int marco = -1;
+   int desplazamiento = (direccion_logica-inicio) % config_memoria->TAMANIO_PAGINA;
+
+   char * contenido = traerDeMemoria(pagina->marco_asignado,desplazamiento, size);
+
+    if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "LRU") == 0){
+        actualizarLRU(pagina);
+    }else
+    {
+        pagina->bit_uso = 1;
+    }
+
+   return contenido;
+
+}
+
+char* traerDeMemoria(int marco, int desplazamiento, int size)
+{
+    char* contenido = malloc(size);
+    uint32_t dir_fisica = tamanio_memoria + marco * config_memoria->TAMANIO_PAGINA + desplazamiento;
+
+    memcpy(contenido, dir_fisica, size);
+
+    return contenido;
+}
+
+int memWrite(t_paquete *paquete)
+{
+   char*  contenido_escribir= NULL;
+   int size = 0;
+   int32_t direccion_logica ; 
+
+   deserializar(paquete,6,CHAR_PTR,&contenido_escribir,INT,&direccion_logica,INT,&size);
+   
+   int inicio = tamanio_memoria;
+   int numero_pagina = (direccion_logica - inicio) / config_memoria->TAMANIO_PAGINA;
+   t_tabla_paginas* tabla_paginas = buscarTablaPorPID(socket_client);
+
+   if(numero_pagina > list_size(tabla_paginas)){
+       return -1;
+   }
+
+   t_pagina* pagina = list_get(tabla_paginas->paginas,numero_pagina);
+   if(pagina->bit_presencia == 0){
+       //TRAER DE SWAP
+       //getMarcoParaPagina(tabla_paginas);
+   }
+    
    int desplazamiento = (direccion_logica-inicio) % config_memoria->TAMANIO_PAGINA;
 
    escribirEnMemoria(pagina->marco_asignado,desplazamiento, size, contenido_escribir);
-   log_info(logger_memoria,"Escribi contenido");
+
+   if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "LRU") == 0){
+        actualizarLRU(pagina);
+    }else
+    {
+        pagina->bit_modificado = 1;
+    }
+
+   return 1;
 }
 
 void escribirEnMemoria(int marco, int desplazamiento, int size, char* contenido)
 {
-    uint32_t dir_fisica = tamanio_memoria + marco * config_memoria->TAMANIO_PAGINA + desplazamiento;
+    uint32_t inicio = tamanio_memoria;
+    uint32_t dir_fisica = inicio + marco * config_memoria->TAMANIO_PAGINA + desplazamiento;
     uint32_t offset = 0;
     log_info(logger_memoria,"Escribiendo en la direccion %d el contenido: %s.\n",dir_fisica,contenido);
     memcpy(dir_fisica,&contenido, size);
@@ -559,4 +568,8 @@ void liberarPagina(t_pagina* pagina, uint32_t carpincho_id){
 
     list_remove(tabla_paginas->paginas,pagina->numero_pagina);
     tabla_paginas->paginas_en_memoria-=1;
+}
+
+t_pagina*  traerPaginaAMemoria(t_pagina* pagina_alloc_actual){
+    return pagina_alloc_actual;
 }

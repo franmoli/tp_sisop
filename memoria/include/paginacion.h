@@ -7,9 +7,7 @@
 #include "tlb.h"
 #include "memoria-virtual.h"
 
-int getPaginaByDireccionLogica(uint32_t direccion);
-int getPaginaByDireccionFisica(uint32_t direccion);
-int getPrimeraPaginaDisponible(int size, t_tabla_paginas *tabla_paginas);
+
 t_contenidos_pagina *getLastContenidoByPagina(t_pagina* pagina);
 t_contenidos_pagina *getLastHeaderContenidoByPagina(t_pagina* pagina);
 t_tabla_paginas* buscarTablaPorPID(int id);
@@ -32,7 +30,7 @@ t_contenidos_pagina *getContenidoPaginaByTipoAndSize(t_contenidos_pagina *conten
 void liberarPagina(t_pagina* pagina, uint32_t carpincho_id);
 
 //MEMREAD
-void *memRead(t_paquete *paquete);
+char *memRead(t_paquete *paquete);
 char* traerDeMemoria(int marco, int desplazamiento, int size);
 //MEMWRITE
 int memWrite(t_paquete *paquete);
@@ -43,4 +41,9 @@ t_heap_metadata* traerAllocIncompleto(int marco,uint32_t dir_comienzo, uint32_t 
 void escribirMarcoEnMemoria(t_pagina* pagina, void* stream);
 void escribirAllocIncompleto(int marco,uint32_t dir_comienzo,uint32_t dir_fin,void *stream);
 
+//GENERALES
+t_pagina* traerPaginaAMemoria(t_pagina* pagina_alloc_actual);
+int getPaginaByDireccionLogica(uint32_t direccion);
+int getPaginaByDireccionFisica(uint32_t direccion);
+int getPrimeraPaginaDisponible(int size, t_tabla_paginas *tabla_paginas);
 #endif
