@@ -661,3 +661,25 @@ t_pagina* traerPaginaAMemoria(t_pagina* pagina_alloc_actual){
 
     return pagina_alloc_actual;
 }
+
+int getPosicionEnTablaDeProcesos(t_tabla_paginas* tabla){
+
+    int index = 0;
+
+    t_list_iterator* list_iterator = list_iterator_create(tabla_procesos);
+
+    while(list_iterator_has_next(list_iterator)){
+
+        t_tabla_paginas* tablaIterada = list_iterator_next(list_iterator);
+        if(tabla->pid == tablaIterada->pid){
+            list_iterator_destroy(list_iterator);
+            return index;
+        }
+        index++;
+    }
+
+    list_iterator_destroy(list_iterator);
+    //La tabla no esta cargada en memoria -> No va a pasar nunca creo
+    return -1;
+
+}

@@ -47,4 +47,5 @@ t_pagina* traerPaginaAMemoria(t_pagina* pagina_alloc_actual);
 int getPaginaByDireccionLogica(uint32_t direccion);
 int getPaginaByDireccionFisica(uint32_t direccion);
 int getPrimeraPaginaDisponible(int size, t_tabla_paginas *tabla_paginas);
+int getPosicionEnTablaDeProcesos(t_tabla_paginas* tabla);
 #endif
