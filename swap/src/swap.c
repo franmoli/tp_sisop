@@ -60,10 +60,10 @@ int ejecutar_operacion(int client) {
     //Analizo el código de operación recibido y ejecuto acciones según corresponda
     if(paquete->codigo_operacion == SWAPSAVE) {
         //Deserializo la página enviada por Memoria
-        t_pagina_swap *pagina = malloc(sizeof(t_pagina_swap));
-        pagina->contenido_heap_info = list_create();
-        pagina->contenido_carpincho_info = list_create();
-        deserializar(paquete,12,INT,&(pagina->tipo_contenido),INT,&(pagina->pid),INT,&(pagina->numero_pagina),LIST,SWAP_PAGINA_HEAP,(pagina->contenido_heap_info),LIST,SWAP_PAGINA_CONTENIDO,(pagina->contenido_carpincho_info));
+        t_pagina_swap *pagina = deserializar_pagina(paquete->buffer->stream);
+
+        t_info_carpincho_swap *contenido = list_get(pagina->contenido_carpincho_info, 0);
+        printf("\n\nLongitud contenido: %d\nContenido: %s\n\n", strlen(contenido->contenido), contenido->contenido);
 
         //Inserto la página en los archivos de swap
         int op_code = insertar_pagina_en_archivo(pagina);

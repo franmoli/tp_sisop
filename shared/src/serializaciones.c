@@ -271,7 +271,7 @@ t_pagina_swap* deserializar_pagina(void *stream) {
     }
     pagina->contenido_heap_info = contenidos_heap;
 
-    //Contenido heap
+    //Contenido carpincho
     int cantidad_contenidos_carpincho = 0;
     memcpy(&cantidad_contenidos_carpincho, stream + offset, sizeof(uint32_t));
 	offset += sizeof(uint32_t);

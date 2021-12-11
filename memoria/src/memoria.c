@@ -9,7 +9,7 @@ int main(int argc, char **argv)
     t_config *config = leer_config_file("./cfg/memoria.cfg");
     config_memoria = generarConfigMemoria(config);
     log_info(logger_memoria, "Configuración cargada correctamente");
-    tamanio_memoria = malloc(sizeof(config_memoria->TAMANIO));
+    tamanio_memoria = malloc(config_memoria->TAMANIO);
 
     socket_server = iniciar_servidor(config_memoria->IP, string_itoa(config_memoria->PUERTO), logger_memoria);
     socket_cliente_swap = crear_conexion(config_memoria->IP, "5002");

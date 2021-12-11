@@ -121,14 +121,17 @@ int enviarPaginaSwap(t_pagina* pagina){
 
     }
 
-    t_paquete *paquete;
-    //t_buffer *new_buffer = malloc(sizeof(t_buffer));
-    paquete = serializar(SWAPSAVE,12,INT,pagina_swap->tipo_contenido,INT,pagina_swap->pid,INT,pagina_swap->numero_pagina
-                ,LIST,SWAP_PAGINA_HEAP,(pagina_swap->contenido_heap_info),LIST,SWAP_PAGINA_CONTENIDO,(pagina_swap->contenido_carpincho_info));
-    //void *pagina_serial = serializar_pagina(pagina_swap);
-    
-    /*deserializar(paquete,12,INT,pagina_swap->tipo_contenido,INT,pagina_swap->pid,INT,pagina_swap->numero_pagina
-                ,LIST,SWAP_PAGINA_HEAP,(pagina_swap->contenido_heap_info),LIST,SWAP_PAGINA_CONTENIDO,(pagina_swap->contenido_carpincho_info));*/
+    t_info_carpincho_swap *contenido = list_get(pagina_swap->contenido_carpincho_info, 0);
+    void *pagina_serial = serializar_pagina(pagina_swap);
+
+    t_buffer *buffer = malloc(sizeof(t_buffer));
+    buffer->size = bytes_pagina(pagina_swap);
+    buffer->stream = pagina_serial;
+
+    t_paquete *paquete = malloc(sizeof(t_paquete));
+    paquete->codigo_operacion = SWAPSAVE;
+    paquete->buffer = buffer;
+
     enviar_paquete(paquete, socket_cliente_swap);
     
     t_paquete* paquete_recibir = recibir_paquete(socket_cliente_swap);

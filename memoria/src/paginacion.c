@@ -114,12 +114,12 @@ char *memRead(t_paquete *paquete)
 
 }
 
-char* traerDeMemoria(int marco, int desplazamiento, int size)
-{
-    char* contenido = malloc(size);
+char* traerDeMemoria(int marco, int desplazamiento, int size) {
+    char* contenido = malloc(sizeof(char) * (size + 1));
     uint32_t dir_fisica = tamanio_memoria + marco * config_memoria->TAMANIO_PAGINA + desplazamiento;
 
-    memcpy(contenido, dir_fisica, size);
+    memcpy(contenido, dir_fisica, sizeof(char) * (size + 1));
+    contenido = string_substring_until(contenido, size);
 
     return contenido;
 }
