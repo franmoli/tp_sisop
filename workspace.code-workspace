@@ -1,7 +1,13 @@
 {
 	"folders": [
 		{
+			"path": "carpinchos-pruebas-"
+		},
+		{
 			"path": "kernel"
+		},
+		{
+			"path": "matelib"
 		},
 		{
 			"path": "memoria"
@@ -12,11 +18,5 @@
 		{
 			"path": "swap"
 		}
-	],
-	"settings": {
-		"files.associations": {
-			"kernel.h": "c",
-			"memoria.h": "c"
-		}
-	}
+	]
 }

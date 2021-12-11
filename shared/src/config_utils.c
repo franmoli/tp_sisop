@@ -47,6 +47,7 @@ t_config_kernel *generar_config_kernel(t_config *config) {
     config_kernel->ALFA = config_get_int_value(config, "ALFA");
     config_kernel->DISPOSITIVOS_IO = io_devices;
     config_kernel->DURACIONES_IO = io_durations;
+    config_kernel->TIEMPO_DEADLOCK = config_get_int_value(config, "TIEMPO_DEADLOCK");
 
     // libero memoria utilizada en el formateo
     free(io_devices_unformatted);
@@ -63,7 +64,7 @@ t_config_kernel *generar_config_kernel(t_config *config) {
 t_config_memoria *generarConfigMemoria(t_config *config){
     t_config_memoria *config_memoria = malloc(sizeof(t_config_memoria));
     config_memoria->IP = config_get_string_value(config, "IP");
-    config_memoria->PUERTO = config_get_int_value(config, "PUERTO");
+    config_memoria->PUERTO = config_get_string_value(config, "PUERTO");
     config_memoria->TAMANIO = config_get_int_value(config, "TAMANIO");   
     config_memoria->ALGORITMO_REEMPLAZO_MMU = config_get_string_value(config, "ALGORITMO_REEMPLAZO_MMU");
     config_memoria->TIPO_ASIGNACION = config_get_string_value(config, "TIPO_ASIGNACION");
@@ -71,8 +72,9 @@ t_config_memoria *generarConfigMemoria(t_config *config){
     config_memoria->ALGORITMO_REEMPLAZO_TLB = config_get_string_value(config, "ALGORITMO_REEMPLAZO_TLB");
     config_memoria->RETARDO_ACIERTO_TLB = config_get_int_value(config, "RETARDO_ACIERTO_TLB");
     config_memoria->RETARDO_FALLO_TLB = config_get_int_value(config, "RETARDO_FALLO_TLB");
-    config_memoria->MARCOS_MAXIMOS = config_get_int_value(config, "MARCOS_MAXIMOS");
+    config_memoria->MARCOS_POR_CARPINCHO = config_get_int_value(config, "MARCOS_POR_CARPINCHO");
     config_memoria->TAMANIO_PAGINA = config_get_int_value(config, "TAMANIO_PAGINA");
+    config_memoria->PATH_DUMP_TLB = config_get_string_value(config, "PATH_DUMP_TLB");
     return config_memoria;
 }
 
@@ -83,12 +85,13 @@ t_config_swap *generar_config_swap(t_config *config) {
     t_list *file_paths = list_create();
     if(strlen(file_paths_unformatted) > 2) {
         char *file_paths_substring = string_substring(file_paths_unformatted, 1, strlen(file_paths_unformatted)-2);
-        char **file_paths_formatted = string_split(file_paths_substring, ", ");
+        char **file_paths_formatted = string_split(file_paths_substring, ",");
 
         int contador = 0;
         while(file_paths_formatted[contador] != NULL) {
+            string_trim(&file_paths_formatted[contador]);
             list_add(file_paths, file_paths_formatted[contador]);
-            contador += 2;
+            contador += 1;
         }
 
         free(file_paths_substring);
@@ -103,6 +106,7 @@ t_config_swap *generar_config_swap(t_config *config) {
     config_swap->MARCOS_MAXIMOS = config_get_int_value(config, "MARCOS_MAXIMOS");
     config_swap->RETARDO_SWAP = config_get_int_value(config, "RETARDO_SWAP");
     config_swap->ARCHIVOS_SWAP = file_paths;
+    config_swap->TIPO_ASIGNACION = config_get_string_value(config, "TIPO_ASIGNACION");
     
     return config_swap;
 }

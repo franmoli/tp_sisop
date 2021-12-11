@@ -2,8 +2,8 @@
 #define KERNEL_H
 // Acá se están todas las declaraciones de funciones y librerias necesitadas Exclusivamente por kernel.c
 
-#include "kernel-global.h"
 #include "server.h"
+#include "kernel-global.h"
 #include "planificador_corto.h"
 #include "planificador_mediano.h"
 #include "planificador_largo.h"
@@ -13,6 +13,9 @@ void liberar_memoria_y_finalizar(t_config_kernel *config_kernel, t_log *logger_k
 void print_inicializacion (t_config_kernel *config_kernel);
 void iniciar_listas();
 void iniciar_semaforos_generales();
+void iniciar_debug_console();
+void *debug_console(void *_ );
+void print_task_lists();
 
 t_config *config_file;
 

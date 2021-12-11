@@ -21,20 +21,22 @@ typedef struct {
     int RETARDO_CPU;
     int ESTIMACION_INICIAL;
     int ALFA;
+    int TIEMPO_DEADLOCK;
 } t_config_kernel;
 
 typedef struct {
     char *IP;
     int TAMANIO;
-    int PUERTO;
+    char *PUERTO;
     char *ALGORITMO_REEMPLAZO_MMU;
     char *TIPO_ASIGNACION;
-    int MARCOS_MAXIMOS;
+    int MARCOS_POR_CARPINCHO;
     int CANTIDAD_ENTRADAS_TLB;
     char *ALGORITMO_REEMPLAZO_TLB;
     int RETARDO_ACIERTO_TLB;
     int RETARDO_FALLO_TLB;
     int TAMANIO_PAGINA;
+    char *PATH_DUMP_TLB;
 } t_config_memoria;
 
 typedef struct {
@@ -45,6 +47,7 @@ typedef struct {
     t_list *ARCHIVOS_SWAP;
     int MARCOS_MAXIMOS;
     int RETARDO_SWAP;
+    char *TIPO_ASIGNACION;
 } t_config_swap;
 
 typedef struct {

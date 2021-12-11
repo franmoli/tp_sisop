@@ -3,8 +3,6 @@
 void iniciar_planificador_largo(){
     //Iniciar servidor y empiezo a escuchar procesos
     printf("Inicio planificador LARGO \n");
-    int *multiprogramacion_disponible = malloc(sizeof(int));
-    *multiprogramacion_disponible = config_kernel->GRADO_MULTIPROGRAMACION;
 
     pthread_t hilo_servidor;
     pthread_create(&hilo_servidor, NULL, iniciar_servidor_kernel, (void *)NULL);
@@ -13,7 +11,7 @@ void iniciar_planificador_largo(){
     pthread_create(&hilo_planificador, NULL, planificador_largo_plazo, (void *)NULL);
 
     pthread_t hilo_exit;
-    pthread_create(&hilo_exit, NULL, hilo_salida_a_exit, (void *)multiprogramacion_disponible);
+    pthread_create(&hilo_exit, NULL, hilo_salida_a_exit, (void *)NULL);
 }
 
 
@@ -37,42 +35,146 @@ void *iniciar_servidor_kernel(void *_){
     return NULL;
 }
 
+//Atencion de nuevas operaciones
 void atender_proceso (void* parametro ){
+    
     bool inicializado = false;
     int socket_cliente = *(int*)parametro;
+    t_proceso *carpincho = malloc(sizeof(t_proceso)); 
+    carpincho->task_list = list_create();
+    carpincho->socket_carpincho = socket_cliente;
+   // t_task *task_aux = NULL;
+    t_semaforo *semaforo_recibido = NULL;
+    t_io *io_recibida = NULL;
     while(1) {
-		t_paquete *paquete = recibir_paquete(socket_cliente);
+
+		t_paquete *paquete = NULL;
+		paquete = recibir_paquete(socket_cliente);
+        //task_aux = malloc(sizeof(t_task));
         
         //Analizo el código de operación recibido y ejecuto acciones según corresponda
+        printf("Paquete recibido %d\n", paquete->codigo_operacion);
+        t_task *task = malloc(sizeof(t_task));
+
         switch(paquete->codigo_operacion) {
             case CLIENTE_TEST:
                 log_info(logger_kernel, "Mensaje de prueba recibido correctamente por el cliente %d", socket_cliente);
                 break;
+
             case NUEVO_CARPINCHO:
                 if(!inicializado){
-                    nuevo_carpincho(socket_cliente);
+                    carpincho = nuevo_carpincho(socket_cliente);
                     inicializado = true;
                 }
                 break;
-            //TODO: case OPERACION_SARASA
-            // agregar a lista de operaciones del proceso     
+            case INIT_SEM:
+
+                semaforo_recibido = malloc(sizeof(t_semaforo));
+                semaforo_recibido->nombre_semaforo = NULL;
+                deserializar(paquete, 4, U_INT, &semaforo_recibido->value, CHAR_PTR, &semaforo_recibido->nombre_semaforo);
+                
+                task->id = INIT_SEM;
+                task->datos_tarea = semaforo_recibido;
+
+                list_add(carpincho->task_list, task);
+                
+                break;
+            case SEM_WAIT:
+
+                semaforo_recibido = malloc(sizeof(t_semaforo));
+                semaforo_recibido->nombre_semaforo = NULL;
+
+                deserializar(paquete, 2, CHAR_PTR, &semaforo_recibido->nombre_semaforo);
+                
+                task->id = SEM_WAIT;
+                task->datos_tarea = semaforo_recibido;
+
+                list_add(carpincho->task_list, task);
+                break;
+
+            case SEM_POST:
+
+                semaforo_recibido = malloc(sizeof(t_semaforo));
+                semaforo_recibido->nombre_semaforo = NULL;
+
+                deserializar(paquete, 2, CHAR_PTR, &semaforo_recibido->nombre_semaforo);
+                
+                task->id = SEM_POST;
+                task->datos_tarea = semaforo_recibido;
+
+                list_add(carpincho->task_list, task);
+
+                break;
+                
+            case CLIENTE_DESCONECTADO:
+                log_info(logger_kernel, "Desconectando cliente %d", socket_cliente);
+                
+                //Agregar task de desconexion en caso que se encuentre en exec con prioridad máxima en caso que sea una desconexion forzosa
+                task->id = CLIENTE_DESCONECTADO;
+                list_add_in_index(carpincho->task_list, 0, task);
+
+                //Se se pide la salida a exit del proceso
+                carpincho->salida_exit = true;
+                sem_post(&salida_a_exit);
+
+                return;
+                
+            case MEMALLOC:
+            
+                task->id = MEMALLOC;
+                task->datos_tarea = paquete;
+                list_add(carpincho->task_list, task);
+                break;
+            case MEMFREE:
+                task->id = MEMFREE;
+                task->datos_tarea = paquete;
+                list_add(carpincho->task_list, task);
+                break;
+            case MEMREAD:
+                task->id = MEMREAD;
+                task->datos_tarea = paquete;
+                list_add(carpincho->task_list, task);
+                break;
+            case MEMWRITE:
+                task->id = MEMWRITE;
+                task->datos_tarea = paquete;
+                list_add(carpincho->task_list, task);
+                break;
+            case CALLIO:
+                task->id = CALLIO;
+                io_recibida = malloc(sizeof(t_io));
+                io_recibida->nombre = NULL;
+                io_recibida->mensaje = NULL;
+                io_recibida->proceso_solicitante = NULL;
+                io_recibida->duracion = 0;
+                deserializar(paquete, 4, CHAR_PTR, &io_recibida->nombre, CHAR_PTR, &io_recibida->mensaje);
+
+                task->datos_tarea = io_recibida;
+                printf("Io recibida %s\n", io_recibida->nombre);
+                list_add(carpincho->task_list, task);
+                
+                break;
             default:
                 log_error(logger_kernel, "Codigo de operacion desconocido");
+                //exit(EXIT_FAILURE);
+                carpincho->salida_exit = true;
+                sem_post(&salida_a_exit);
+                return;
                 break;
+            
         }
 
         //Libero la memoria ocupada por el paquete
-		free(paquete->buffer->stream);
-        free(paquete->buffer);
-        free(paquete);
+		//free(paquete->buffer->stream);
+        //free(paquete->buffer);
+        //free(paquete);
 
-        //Salgo del ciclo
-        break; 
 	}
     return;
 }
 
-void nuevo_carpincho(int socket_cliente){
+t_proceso *nuevo_carpincho(int socket_cliente){
+
     t_proceso *nuevo_proceso = malloc(sizeof(t_proceso));
 
     nuevo_proceso->id = socket_cliente;
@@ -82,6 +184,8 @@ void nuevo_carpincho(int socket_cliente){
     nuevo_proceso->estimar = false;
     nuevo_proceso->termino_rafaga = false;
     nuevo_proceso->block = false;
+    nuevo_proceso->task_list = list_create();
+    nuevo_proceso->socket_carpincho = socket_cliente;
 
     pthread_t hilo_proceso;
     pthread_create(&hilo_proceso, NULL, proceso, (void*)nuevo_proceso);
@@ -91,6 +195,7 @@ void nuevo_carpincho(int socket_cliente){
     sem_post(&mutex_listas);
     
     sem_wait(&mutex_cant_procesos);
+    printf("Nuevo carpincho\n");
     cantidad_de_procesos++;
     sem_post(&mutex_cant_procesos);
 
@@ -98,31 +203,27 @@ void nuevo_carpincho(int socket_cliente){
     avisar_cambio();
     sem_post(&libre_para_inicializar_proceso);
 
+   
+    return nuevo_proceso;
 }
 
 void *planificador_largo_plazo(void *_){
 
-    int *multiprogramacion_disponible = malloc(sizeof(int));
-    *multiprogramacion_disponible = config_kernel->GRADO_MULTIPROGRAMACION;
-
     while(1){
-        if(*multiprogramacion_disponible){
-            if(list_size(lista_new)){
+        sem_wait(&cambio_de_listas_largo);
+        if(multiprogramacion_disponible){
+            if(list_size(lista_s_ready)){
+                //Se saca de suspended y se pasa a ready
+                mover_proceso_de_lista(lista_s_ready, lista_ready, 0, READY);
+                multiprogramacion_disponible = multiprogramacion_disponible - 1;
+
+            }else if(list_size(lista_new)){
 
                 //Se saca de new y se pasa a ready
                 mover_proceso_de_lista(lista_new, lista_ready, 0, READY);
-
-                *multiprogramacion_disponible = *multiprogramacion_disponible - 1;
+                multiprogramacion_disponible = multiprogramacion_disponible - 1;
+                
             }
-        }else{
-
-            printf("me trabé planif largo listas:\n");
-            printf("Ready: %d\n", list_size(lista_ready));
-            printf("Block: %d\n", list_size(lista_blocked));
-            printf("Exec: %d\n", list_size(lista_exec));
-            printf(".");
-            sem_wait(&proceso_finalizo_o_suspended);
-            *multiprogramacion_disponible = *multiprogramacion_disponible + 1;
         }
     }
     return NULL;
@@ -130,85 +231,91 @@ void *planificador_largo_plazo(void *_){
 
 void *hilo_salida_a_exit(void *multiprogramacion_disponible_p){
 
-    int *multiprogramacion_disponible = multiprogramacion_disponible_p;
 
     while(1){
-        printf(".\n");
         sem_wait(&salida_a_exit);
         
-        //printf("Ready: %d\n", list_size(lista_ready));
-        //printf("Block: %d\n", list_size(lista_blocked));
-        //printf("Exec: %d\n", list_size(lista_exec));
+        
         bool encontrado = false;
-        //int tamanio_lista_exec = list_size(lista_exec);
+        int tamanio_lista_exec = list_size(lista_exec);
         int tamanio_lista_blocked = list_size(lista_blocked);
         int tamanio_lista_ready = list_size(lista_ready);
         int index = 0;
+        t_proceso *aux = NULL;
 
 
         //Busco en exec
-        printf("Exec: %d \n", list_size(lista_exec));        
-        while(!encontrado && (index < list_size(lista_exec))){
-            printf("Exec: %d \n", list_size(lista_exec));
-            t_proceso *aux = list_get(lista_exec, index);
-            if(aux->salida_exit){
-                    sem_wait(&mutex_cant_procesos);
-                    sem_wait(&mutex_listas);
-                        aux = list_remove(lista_exec, index );
-                    sem_post(&mutex_listas);
-                    cantidad_de_procesos--;
-                    sem_post(&mutex_cant_procesos);
-                
-                 printf("Saco proceso %d\n", aux->id);
-                encontrado = true;
-            }
-            index ++;
-        }
+        //printf("Exec: %d \n", list_size(lista_exec));
+        if(aux == NULL)
+            aux = list_remove_by_condition(lista_exec, pedido_exit);
 
-        index = 0;
-
-        //Busco en ready
-        while(!encontrado && (index < tamanio_lista_ready)){
-            t_proceso *aux = list_get(lista_ready, index);
-            if(aux->salida_exit){
-                
-                    sem_wait(&mutex_cant_procesos);
-                    sem_wait(&mutex_listas);
-                        aux = list_remove(lista_ready, index );
-                    sem_post(&mutex_listas);
-                    cantidad_de_procesos--;
-                    sem_post(&mutex_cant_procesos);
-                
-
-                printf("Saco proceso %d\n", aux->id);
-                encontrado = true;
-            }
-            index ++;
-        }
-
-        while(!encontrado && (index < tamanio_lista_blocked)){
-            t_proceso *aux = list_get(lista_blocked, index);
-            if(aux->salida_exit){
-               
-                sem_wait(&mutex_listas);
-                aux = list_remove(lista_blocked, index);
-                sem_post(&mutex_listas);
-                
-                printf("Saco proceso %d\n", aux->id);
-                encontrado = true;
-            }
-            index ++;
-        }
-
-        if(encontrado){
-            sem_wait(&mutex_multiprogramacion);
-            *multiprogramacion_disponible = *multiprogramacion_disponible + 1;
-            sem_post(&mutex_multiprogramacion);
-            sem_post(&proceso_finalizo_o_suspended);
+        //Si lo encontré en exec tengo que liberar el multiprocesamiento
+        if(aux != NULL)
             sem_post(&liberar_multiprocesamiento);
-            sem_post(&salida_a_exit_recibida);
-        }
+
+        if(aux == NULL)
+            aux = list_remove_by_condition(lista_new, pedido_exit);
+
+        if(aux == NULL)
+            aux = list_remove_by_condition(lista_ready, pedido_exit);
+
+        if(aux == NULL)
+            aux = list_remove_by_condition(lista_s_blocked, pedido_exit);
+        
+        if(aux == NULL)
+            aux = list_remove_by_condition(lista_s_ready, pedido_exit);
+        
+        if(aux == NULL)
+            aux = list_remove_by_condition(lista_blocked, pedido_exit);
+
+
+
+        list_add(lista_exit, aux);
+        aux->status = EXIT;
+        
+        sem_wait(&mutex_multiprogramacion);
+        multiprogramacion_disponible = multiprogramacion_disponible + 1;
+        sem_post(&mutex_multiprogramacion);
+
+        //Aviso a todos los procesos, asi finaliza el hilo correspondiente
+        avisar_cambio();
+
+        sem_wait(&mutex_cant_procesos);
+        cantidad_de_procesos = cantidad_de_procesos - 1;
+        sem_post(&mutex_cant_procesos);
         
     }
     return NULL;
+}
+
+bool pedido_exit(void *elemento){
+    t_proceso *proceso = elemento;
+    if(proceso->salida_exit)
+        return true;
+    
+    return false;
+}
+
+void enviar_confirmacion(int socket){
+    t_paquete *paquete = malloc(sizeof(t_paquete));
+    paquete->buffer = malloc(sizeof(t_buffer));
+    paquete->buffer->size = 0;
+    paquete->buffer->stream = NULL;
+    paquete->codigo_operacion = OP_CONFIRMADA;
+
+    enviar_paquete(paquete, socket);
+    return;
+}
+
+void enviar_error(int socket){
+    t_paquete *paquete = malloc(sizeof(t_paquete));
+    paquete->buffer = malloc(sizeof(t_buffer));
+    paquete->buffer->size = 0;
+    paquete->buffer->stream = NULL;
+    paquete->codigo_operacion = OP_ERROR;
+
+    enviar_paquete(paquete, socket);
+
+    
+    return;
 }
