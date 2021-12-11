@@ -111,7 +111,7 @@ t_pagina_swap* deserializar_pagina(void *stream);
 //Funciones para el calculo de bytes
 int bytes_pagina(t_pagina_swap* pagina);
 int bytes_info_heap(t_info_heap_swap info);
-//int bytes_info_carpincho(t_carpincho info);
+int bytes_info_carpincho(t_info_carpincho_swap info);
 
 t_paquete* serializar_pagina_swap(t_pagina_swap* pagina);
 
