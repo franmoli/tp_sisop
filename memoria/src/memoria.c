@@ -57,7 +57,7 @@ int main(int argc, char **argv)
 
     inicializarCarpincho(0);
     socket_client = 0;
-    t_paquete* paquete = serializar_alloc(5);
+    t_paquete* paquete = serializar_alloc(23);
     int dire_logica =memAlloc(paquete); 
 
     free(paquete->buffer->stream);
@@ -71,14 +71,14 @@ int main(int argc, char **argv)
     free(paquete->buffer);
     free(paquete);
     
-    /*paquete = serializar_alloc(23);
+    paquete = serializar_alloc(23);
     memAlloc(paquete); 
 
     free(paquete->buffer->stream);
     free(paquete->buffer);
     free(paquete);
 
-    paquete = serializar_alloc(dire_logica);
+    /*paquete = serializar_alloc(dire_logica);
     freeAlloc(paquete);
     free(paquete->buffer->stream);
     free(paquete->buffer);
