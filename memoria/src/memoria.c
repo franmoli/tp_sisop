@@ -55,7 +55,7 @@ int main(int argc, char **argv)
         signal(SIGUSR1, generarDump);
         signal(SIGUSR2, limpiarTlb);
 
-    inicializarCarpincho(0);
+    /*inicializarCarpincho(0);
     socket_client = 0;
     t_paquete* paquete = serializar_alloc(23);
     int dire_logica =memAlloc(paquete); 
@@ -97,15 +97,10 @@ int main(int argc, char **argv)
 
     free(paquete->buffer->stream);
     free(paquete->buffer);
-    free(paquete);
-
-    /*paquete = serializar_alloc(dire_logica);
-    freeAlloc(paquete);
-    free(paquete->buffer->stream);
-    free(paquete->buffer);
     free(paquete);*/
 
-    /*while (1)
+
+    while (1)
     {
         socket_client = esperar_cliente(socket_server, logger_memoria);
         if (socket_client != -1)
@@ -113,7 +108,7 @@ int main(int argc, char **argv)
             inicializarCarpincho(socket_client);
             pthread_create(&hilo_client, NULL, (void *)ejecutar_operacion, (void *)socket_client);
         }
-    }*/
+    }
     log_info(logger_memoria, "Programa finalizado con éxito");
     log_destroy(logger_memoria);
     liberar_config(config);
@@ -210,7 +205,7 @@ static void *ejecutar_operacion()
             enviar_paquete(paquete, socket_client);
             break;
         default:
-            log_error(logger_memoria, "Codigo de operacion desconocido");
+            log_error(logger_memoria, "Codigo de operacion desconocido. Codigo operacion recibida: %d",paquete->codigo_operacion);
             break;
         }
 
