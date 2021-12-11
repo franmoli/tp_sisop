@@ -75,6 +75,7 @@ int main(int argc, char **argv)
 
 static void *ejecutar_operacion(int client)
 {
+    int resultado;
     while (1)
     {
         t_paquete *paquete = recibir_paquete(client);
@@ -105,19 +106,31 @@ static void *ejecutar_operacion(int client)
             break;
         case MEMFREE:
             log_info(logger_memoria, "recibi orden de memfree del cliente %d", client);
-            freeAlloc(paquete);
+            resultado = freeAlloc(paquete);
+            if(resultado < 0){
+                //NO SE PUDO LIBERAR
+                t_paquete* paquete_enviar = serializar(DIRECCION_LOGICA_INVALIDA,2,INT,0);
+                log_info(logger_memoria,"No se pudo liberar la direccion logica de memoria solicitada.");
+                enviar_paquete(paquete_enviar,socket_client);
+            }
+            else{
+                //SI SE PUDO LIBERAR
+                t_paquete* paquete_enviar = serializar(MEMFREE,2,INT,0);
+                log_info(logger_memoria,"Enviando paquete");
+                enviar_paquete(paquete_enviar,socket_client);
+                log_info(logger_memoria,"Paquete enviado");
+            }
 
             break;
 
         case MEMWRITE:
             log_info(logger_memoria, "recibi orden de memwrite del cliente %d", client);
-            int resultado = memWrite(paquete);
+            resultado = memWrite(paquete);
             if(resultado< 0){
                 //NO SE PUDO ESCRIBIR
                 t_paquete* paquete_enviar = serializar(DIRECCION_LOGICA_INVALIDA,2,INT,0);
-                log_info(logger_memoria,"Enviando paquete con direccion logica");
+                log_info(logger_memoria,"No se pudo escribir en la direccion logica solicitada.");
                 enviar_paquete(paquete_enviar,socket_client);
-                log_info(logger_memoria,"Paquete enviado");
             }
             else{
                 //SI SE PUDO ESCRIBIR
@@ -133,7 +146,7 @@ static void *ejecutar_operacion(int client)
             break;
         case MATEINIT:
             log_info(logger_memoria, "recibi un nuevo carpincho para inicializar del cliente %d", client);
-            //inicializarCarpincho(paquete);
+            inicializarCarpincho(paquete);
             break;
         
         case NUEVO_CARPINCHO:

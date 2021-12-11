@@ -552,3 +552,7 @@ void liberarPagina(t_pagina* pagina, uint32_t carpincho_id){
     list_remove(tabla_paginas->paginas,pagina->numero_pagina);
     tabla_paginas->paginas_en_memoria-=1;
 }
+
+t_pagina*  traerPaginaAMemoria(t_pagina* pagina_alloc_actual){
+    return pagina_alloc_actual;
+}
