@@ -29,6 +29,7 @@ void exec_carpincho_1(char *config)
         mate_call_io(&self, (mate_io_resource) "pelopincho", "Carpincho 1 se va a IO");
     }
     imprimir_carpincho_n_hace_algo(1);
+    log_info(logger, "TERMINO Carpincho 1");
     mate_close(&self);
 }
 
@@ -44,6 +45,7 @@ void exec_carpincho_2(char *config)
         mate_call_io(&self, (mate_io_resource) "pelopincho", "Carpincho 2 se va a IO");
     }
     imprimir_carpincho_n_hace_algo(2);
+    log_info(logger, "TERMINO Carpincho 2");
     mate_close(&self);
 }
 
@@ -55,17 +57,10 @@ void exec_carpincho_3(char *config)
     for (int i = 0; i < 3; i++)
     {
         imprimir_carpincho_n_hace_algo(3);
-        imprimir_carpincho_n_hace_algo(3);
-        imprimir_carpincho_n_hace_algo(3);
-        imprimir_carpincho_n_hace_algo(3);
-        imprimir_carpincho_n_hace_algo(3);
         mate_call_io(&self, (mate_io_resource) "pelopincho", "Carpincho 3 se va a IO");
     }
     imprimir_carpincho_n_hace_algo(3);
-    imprimir_carpincho_n_hace_algo(3);
-    imprimir_carpincho_n_hace_algo(3);
-    imprimir_carpincho_n_hace_algo(3);
-    imprimir_carpincho_n_hace_algo(3);
+    log_info(logger, "TERMINO Carpincho 3");
     mate_close(&self);
 }
 
