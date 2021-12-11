@@ -117,14 +117,6 @@ char* traerDeMemoria(int marco, int desplazamiento, int size)
 
 int memWrite(t_paquete *paquete)
 {
-    /*1- Deserializo paquete -> carpincho_id, direccion_logica, contenido_a_escribir
-      2- Con la dir logica calculo pagina y desplazamiento
-      3- Con la pagina y el pid busco en la tlb
-        3b- Si ocurre un miss sumo metrica y voy a memoria
-        3c- Si no esta en memoria voy a swap y cambio bits (modificado)
-        3d- Si estaba en tlb sumo metrica HIT
-      4- Obtenido el marco, junto con el desplazamiento voy a memoria y escribo la info
-    */
    char*  contenido_escribir= NULL;
    int size = 0;
    int32_t direccion_logica ; 
@@ -142,19 +134,19 @@ int memWrite(t_paquete *paquete)
    t_pagina* pagina = list_get(tabla_paginas->paginas,numero_pagina);
    if(pagina->bit_presencia == 0){
        //TRAER DE SWAP
+       //getMarcoParaPagina(tabla_paginas);
    }
     
-   // Paso 3
-    int marco = -1;
    int desplazamiento = (direccion_logica-inicio) % config_memoria->TAMANIO_PAGINA;
 
    escribirEnMemoria(pagina->marco_asignado,desplazamiento, size, contenido_escribir);
-   log_info(logger_memoria,"Escribi contenido");
+   return 1;
 }
 
 void escribirEnMemoria(int marco, int desplazamiento, int size, char* contenido)
 {
-    uint32_t dir_fisica = tamanio_memoria + marco * config_memoria->TAMANIO_PAGINA + desplazamiento;
+    uint32_t inicio = tamanio_memoria;
+    uint32_t dir_fisica = inicio + marco * config_memoria->TAMANIO_PAGINA + desplazamiento;
     uint32_t offset = 0;
     log_info(logger_memoria,"Escribiendo en la direccion %d el contenido: %s.\n",dir_fisica,contenido);
     memcpy(dir_fisica,&contenido, size);

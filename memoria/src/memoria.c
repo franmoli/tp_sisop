@@ -114,9 +114,17 @@ static void *ejecutar_operacion(int client)
             int resultado = memWrite(paquete);
             if(resultado< 0){
                 //NO SE PUDO ESCRIBIR
+                t_paquete* paquete_enviar = serializar(DIRECCION_LOGICA_INVALIDA,2,INT,0);
+                log_info(logger_memoria,"Enviando paquete con direccion logica");
+                enviar_paquete(paquete_enviar,socket_client);
+                log_info(logger_memoria,"Paquete enviado");
             }
             else{
                 //SI SE PUDO ESCRIBIR
+                t_paquete* paquete_enviar = serializar(MEMWRITE,2,INT,0);
+                log_info(logger_memoria,"Enviando paquete");
+                enviar_paquete(paquete_enviar,socket_client);
+                log_info(logger_memoria,"Paquete enviado");
             }
             break;
         case MEMREAD:
