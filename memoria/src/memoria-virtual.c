@@ -104,8 +104,8 @@ int enviarPaginaSwap(t_pagina* pagina){
     //void *pagina_serial = serializar_pagina(pagina_swap);
     
 
-    deserializar(paquete,10,INT,&(pagina_swap->tipo_contenido),INT,&(pagina_swap->pid),INT,&(pagina_swap->numero_pagina)
-                ,LIST,&(pagina_swap->contenido_heap_info),LIST,&(pagina_swap->contenido_carpincho_info));
+    /*deserializar(paquete,10,INT,&(pagina_swap->tipo_contenido),INT,&(pagina_swap->pid),INT,&(pagina_swap->numero_pagina)
+                ,LIST,&(pagina_swap->contenido_heap_info),LIST,&(pagina_swap->contenido_carpincho_info));*/
     
     enviar_paquete(paquete, socket_cliente_swap);
     
