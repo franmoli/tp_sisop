@@ -61,7 +61,9 @@ int ejecutar_operacion(int client) {
     if(paquete->codigo_operacion == SWAPSAVE) {
         //Deserializo la página enviada por Memoria
         t_pagina_swap *pagina = malloc(sizeof(t_pagina_swap));
-        deserializar(paquete,10,INT,&(pagina->tipo_contenido),INT,&(pagina->pid),INT,&(pagina->numero_pagina),LIST,&(pagina->contenido_heap_info),LIST,&(pagina->contenido_carpincho_info));
+        pagina->contenido_heap_info = list_create();
+        pagina->contenido_carpincho_info = list_create();
+        deserializar(paquete,12,INT,&(pagina->tipo_contenido),INT,&(pagina->pid),INT,&(pagina->numero_pagina),LIST,SWAP_PAGINA_HEAP,(pagina->contenido_heap_info),LIST,SWAP_PAGINA_CONTENIDO,(pagina->contenido_carpincho_info));
 
         //Inserto la página en los archivos de swap
         int op_code = insertar_pagina_en_archivo(pagina);

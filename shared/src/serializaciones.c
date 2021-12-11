@@ -508,7 +508,7 @@ int deserializar(t_paquete *paquete, int arg_count, ...){
                     paquete_aux->buffer->stream = stream + offset;
                     list_elem = NULL;
                     //Traigo un elemento de la lista y lo serializo recursivamente
-                    offset += deserializar(paquete_aux,2,tipo_de_lista,list_elem);
+                    offset += deserializar(paquete_aux,2,tipo_de_lista,&list_elem);
                     list_add(param_l,list_elem);
                 }
                 break;
