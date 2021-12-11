@@ -74,6 +74,7 @@ int recibirPaginaSwap(t_pagina* pagina){
     paquete = recibir_paquete(socket_cliente_swap);
     if(paquete->codigo_operacion != RECEPCION_PAGINA){
         //NO PUDO DEVOLVERLA
+        free(paquete);
         return -1;
     }
 
@@ -82,6 +83,7 @@ int recibirPaginaSwap(t_pagina* pagina){
 
     //Escribir pagina en memoria
     escribirPaginaEnMemoria(pagina, pagina_swap);
+    free(paquete);
     return 0;
 }
 
