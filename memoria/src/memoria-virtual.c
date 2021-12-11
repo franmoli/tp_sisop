@@ -228,7 +228,9 @@ void replaceClock(t_pagina *pagina){
     if(strcmp(config_memoria->TIPO_ASIGNACION, "FIJA") == 0){
 
         t_tabla_paginas *tabla = buscarTablaPorPID(pagina->carpincho_id);
-        //ver que cuenta hacer aca para que agarre bien segun el marco
+        int posicion = getPosicionEnTablaDeProcesos(tabla);
+        int posClock = pagina->marco_asignado - (posicion * config_memoria->MARCOS_POR_CARPINCHO);
+        list_replace(tabla->Clock,pagina,posClock);
 
     }else
     {
