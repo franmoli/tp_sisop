@@ -43,7 +43,7 @@ void escribirAllocIncompleto(int marco,uint32_t dir_comienzo,uint32_t dir_fin,vo
 void escribirAllocEnMarco(int marco,uint32_t dir_comienzo,uint32_t dir_fin,t_heap_metadata* heap);
 
 //GENERALES
-t_pagina* traerPaginaAMemoria(t_pagina* pagina_alloc_actual);
+int traerPaginaAMemoria(t_pagina* pagina_alloc_actual);
 int getPaginaByDireccionLogica(uint32_t direccion);
 int getPaginaByDireccionFisica(uint32_t direccion);
 int getPrimeraPaginaDisponible(int size, t_tabla_paginas *tabla_paginas);
