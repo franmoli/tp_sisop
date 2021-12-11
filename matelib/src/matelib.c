@@ -82,8 +82,10 @@ int mate_close(mate_instance_pointer *instance_pointer){
     paquete->codigo_operacion = CLIENTE_DESCONECTADO;
     paquete->buffer = buffer;
     buffer->size = 0;
+    buffer->stream = NULL;
 
-    enviar_paquete(paquete, socket_cliente);
+    enviar_paquete(paquete, lib_ref->socket);
+    //printf("Cierro el socket %d\n", lib_ref->socket);
     close(lib_ref->socket);
     log_info(lib_ref->logger,"Carpincho %d: Se cerro el MATE_INSTANCE",lib_ref->socket);
     free(lib_ref->logger);
