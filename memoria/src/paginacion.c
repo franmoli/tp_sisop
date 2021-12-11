@@ -2,18 +2,15 @@
 
 int getPaginaByDireccionLogica(uint32_t direccion)
 {
-    log_info(logger_memoria, "Dire:%d", direccion);
-    log_info(logger_memoria, "config:%d", config_memoria->TAMANIO_PAGINA);
+    if(direccion < 0)
+        return 0;
+        
     return direccion / config_memoria->TAMANIO_PAGINA;
 }
 int getPaginaByDireccionFisica(uint32_t direccion)
 {
-    log_info(logger_memoria, "Dire:%d", direccion);
     uint32_t inicio = tamanio_memoria;
-    log_info(logger_memoria, "inicio:%d", inicio);
     uint32_t resta = direccion - inicio;
-    log_info(logger_memoria, "resta:%d", resta);
-    log_info(logger_memoria, "config:%d", config_memoria->TAMANIO_PAGINA);
     return resta / config_memoria->TAMANIO_PAGINA;
 }
 int getPrimeraPaginaDisponible(int size, t_tabla_paginas *tabla_paginas)
@@ -445,14 +442,17 @@ int getMarco(t_tabla_paginas* tabla_paginas){
 int getIndexByPid(int pid){
     t_list_iterator *list_iterator = list_iterator_create(tabla_procesos);
     int i = 0;
+    int indice = 0;
      while (list_iterator_has_next(list_iterator))
         {
             t_tabla_paginas* tabla = list_iterator_next(list_iterator);
             if(tabla->pid == pid){
-                return i;
+                indice = i;
             }
             i++;
         }
+    list_iterator_destroy(list_iterator);
+    return indice;
 }
 int getMarcoParaPagina(t_tabla_paginas* tabla_paginas){
     
@@ -540,7 +540,6 @@ int buscarMarcoEnMemoria(int numero_pagina_buscada, int id)
 int solicitarPaginaNueva(uint32_t carpincho_id)
 {
 
-    t_tabla_paginas *tabla_paginas = buscarTablaPorPID(carpincho_id);
     bool trajeDeMemoria = false;
 
     //Para agregar la pagina nueva primero tengo que ver si puedo agregarla si es asignacion fija o dinamica
@@ -554,6 +553,8 @@ int solicitarPaginaNueva(uint32_t carpincho_id)
     if(marco == -1){
         log_info(logger_memoria, "Tengo que ir a swap");
         marco = reemplazarPagina(tabla_paginas);
+        if(marco < 0)
+            return -1;
     }
     int numero_pagina = 0;
     if (list_size(tabla_paginas->paginas) > 0)

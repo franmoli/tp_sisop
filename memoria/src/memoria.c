@@ -10,8 +10,8 @@ int main(int argc, char **argv)
     config_memoria = generarConfigMemoria(config);
     log_info(logger_memoria, "Configuración cargada correctamente");
     tamanio_memoria = malloc(config_memoria->TAMANIO);
-
-    socket_server = iniciar_servidor(config_memoria->IP, string_itoa(config_memoria->PUERTO), logger_memoria);
+    socket_server = iniciar_servidor(config_memoria->IP, (config_memoria->PUERTO), logger_memoria);
+    
     socket_cliente_swap = crear_conexion(config_memoria->IP, "5002");
     if (socket_cliente_swap == -1) {
         log_info(logger_memoria, "Fallo en la conexion a swap");
@@ -54,7 +54,52 @@ int main(int argc, char **argv)
         signal(SIGINT, imprimirMetricas);
         signal(SIGUSR1, generarDump);
         signal(SIGUSR2, limpiarTlb);
-        
+
+    /*inicializarCarpincho(0);
+    socket_client = 0;
+    t_paquete* paquete = serializar_alloc(23);
+    int dire_logica =memAlloc(paquete); 
+
+    free(paquete->buffer->stream);
+    free(paquete->buffer);
+    free(paquete);
+
+    paquete = serializar_alloc(23);
+    dire_logica =memAlloc(paquete); 
+
+    free(paquete->buffer->stream);
+    free(paquete->buffer);
+    free(paquete);
+    
+    paquete = serializar_alloc(23);
+    memAlloc(paquete); 
+
+    free(paquete->buffer->stream);
+    free(paquete->buffer);
+    free(paquete);
+
+    paquete = serializar_alloc(23);
+    memAlloc(paquete); 
+
+    free(paquete->buffer->stream);
+    free(paquete->buffer);
+    free(paquete);
+
+    paquete = serializar_alloc(23);
+    memAlloc(paquete); 
+
+    free(paquete->buffer->stream);
+    free(paquete->buffer);
+    free(paquete);
+
+    paquete = serializar_alloc(23);
+    memAlloc(paquete); 
+
+    free(paquete->buffer->stream);
+    free(paquete->buffer);
+    free(paquete);*/
+
+
     while (1)
     {
         socket_client = esperar_cliente(socket_server, logger_memoria);
@@ -67,15 +112,15 @@ int main(int argc, char **argv)
     log_info(logger_memoria, "Programa finalizado con éxito");
     log_destroy(logger_memoria);
     liberar_config(config);
+    free(config_memoria);
 }
 
-static void *ejecutar_operacion(int client)
+static void *ejecutar_operacion()
 {
-    int resultado;
     while (1)
     {
         
-        t_paquete *paquete = recibir_paquete(client);
+        t_paquete *paquete = recibir_paquete(socket_client);
         
         
 
@@ -83,10 +128,10 @@ static void *ejecutar_operacion(int client)
         switch (paquete->codigo_operacion)
         {
         case CLIENTE_TEST:
-            log_info(logger_memoria, "Mensaje de prueba recibido correctamente por el cliente %d", client);
+            log_info(logger_memoria, "Mensaje de prueba recibido correctamente por el cliente %d", socket_client);
             break;
         case MEMALLOC:
-            log_info(logger_memoria, "recibi orden de memalloc del cliente %d", client);
+            log_info(logger_memoria, "recibi orden de memalloc del cliente %d", socket_client);
             int dire_logica =memAlloc(paquete);
             if(dire_logica <0){
                 //NO HAY MEMORIA Y SWAP NO PUDO GUARDAR
@@ -104,9 +149,9 @@ static void *ejecutar_operacion(int client)
            
             break;
         case MEMFREE:
-            log_info(logger_memoria, "recibi orden de memfree del cliente %d", client);
-            resultado = freeAlloc(paquete);
-            if(resultado < 0){
+            log_info(logger_memoria, "recibi orden de memfree del cliente %d", socket_client);
+            int resultado_free = freeAlloc(paquete);
+            if(resultado_free < 0){
                 //NO SE PUDO LIBERAR
                 t_paquete* paquete_enviar = serializar(DIRECCION_LOGICA_INVALIDA,2,INT,0);
                 log_info(logger_memoria,"No se pudo liberar la direccion logica de memoria solicitada.");
@@ -123,9 +168,9 @@ static void *ejecutar_operacion(int client)
             break;
 
         case MEMWRITE:
-            log_info(logger_memoria, "recibi orden de memwrite del cliente %d", client);
-            resultado = memWrite(paquete);
-            if(resultado< 0){
+            log_info(logger_memoria, "recibi orden de memwrite del cliente %d", socket_client);
+            int resultado_write = memWrite(paquete);
+            if(resultado_write< 0){
                 //NO SE PUDO ESCRIBIR
                 t_paquete* paquete_enviar = serializar(DIRECCION_LOGICA_INVALIDA,2,INT,0);
                 log_info(logger_memoria,"No se pudo escribir en la direccion logica solicitada.");
@@ -140,12 +185,12 @@ static void *ejecutar_operacion(int client)
             }
             break;
         case MEMREAD:
-            log_info(logger_memoria, "recibi orden de leer memoria del cliente %d", client);
+            log_info(logger_memoria, "recibi orden de leer memoria del cliente %d", socket_client);
             char *data = memRead(paquete);
             //ENVIAR PAQUETE A KERNEL
             break;
         case MATEINIT:
-            log_info(logger_memoria, "recibi un nuevo carpincho para inicializar del cliente %d", client);
+            log_info(logger_memoria, "recibi un nuevo carpincho para inicializar del cliente %d", socket_client);
             inicializarCarpincho(paquete);
             break;
         
@@ -160,7 +205,7 @@ static void *ejecutar_operacion(int client)
             enviar_paquete(paquete, socket_client);
             break;
         default:
-            log_error(logger_memoria, "Codigo de operacion desconocido");
+            log_error(logger_memoria, "Codigo de operacion desconocido. Codigo operacion recibida: %d",paquete->codigo_operacion);
             break;
         }
 
@@ -169,25 +214,9 @@ static void *ejecutar_operacion(int client)
         free(paquete->buffer);
         free(paquete);
     }
-    close(client);
-    log_info(logger_memoria, "Se desconecto el cliente [%d]", client);
+    close(socket_client);
+    log_info(logger_memoria, "Se desconecto el cliente [%d]", socket_client);
     return NULL;
-}
-void recibirSignal(int signal)
-{
-    if (signal == SIGINT)
-    {
-        //memdump();
-        imprimirMetricas();
-    }
-    if (signal == SIGUSR1)
-    {
-        generarDump();
-    }
-    if (signal == SIGUSR2)
-    {
-        limpiarTlb();
-    }
 }
 void limpiarTlb()
 {
@@ -236,6 +265,6 @@ void inicializarCarpincho(int socket_cliente)
     nuevaTabla->hit = 0;
     nuevaTabla->miss = 0;
     list_add(tabla_procesos, nuevaTabla);
-
+    tabla_paginas = nuevaTabla;
     return;
 }

@@ -123,6 +123,7 @@ int enviarPaginaSwap(t_pagina* pagina){
         }
 
     }
+    list_iterator_destroy(list_iterator);
 
     t_info_carpincho_swap *contenido = list_get(pagina_swap->contenido_carpincho_info, 0);
     void *pagina_serial = serializar_pagina(pagina_swap);
@@ -135,6 +136,9 @@ int enviarPaginaSwap(t_pagina* pagina){
     paquete->codigo_operacion = SWAPSAVE;
     paquete->buffer = buffer;
 
+    if(socket_cliente_swap < 0)
+        return -1;
+        
     enviar_paquete(paquete, socket_cliente_swap);
     
     t_paquete* paquete_recibir = recibir_paquete(socket_cliente_swap);
