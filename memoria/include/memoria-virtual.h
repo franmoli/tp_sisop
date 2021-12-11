@@ -11,7 +11,7 @@ void consultaSwap(int carpincho_id);
 
 //Reemplazo
 int reemplazarLRU(t_tabla_paginas* tabla);
-int reemplazarClockM(t_pagina* pagina);
+int reemplazarClockM(t_tabla_paginas* tabla);
 void actualizarModificado(uint32_t nro_pagina, uint32_t carpincho_id);
 void actualizarReferido(uint32_t nro_pagina, uint32_t carpincho_id);
 

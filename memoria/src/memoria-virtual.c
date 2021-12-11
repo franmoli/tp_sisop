@@ -24,12 +24,15 @@ void agregarAsignacion(t_pagina* pagina){
 }
 
 int reemplazarPagina(t_tabla_paginas* tabla){
+    int marco = -1;
     if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "CLOCK-M") == 0){
-        //SWAP CLOCK
+        //SWAP CLOCK 
+        marco = reemplazarClockM(tabla);
+        return marco;
     }
     else{
         //SWAP LRU
-        int marco = reemplazarLRU(tabla);
+        marco = reemplazarLRU(tabla);
         return marco;
     }
 }
@@ -239,12 +242,10 @@ void replaceClock(t_pagina *pagina){
 
 }
 
-int reemplazarClockM(t_pagina* pagina){
+int reemplazarClockM(t_tabla_paginas* tabla_paginas){
 
     int index = 0;
     int marco = -1;
-    t_tabla_paginas* tabla_paginas = buscarTablaPorPID(pagina->carpincho_id);
-
 
     if(strcmp(config_memoria->TIPO_ASIGNACION, "FIJA") == 0){
 
