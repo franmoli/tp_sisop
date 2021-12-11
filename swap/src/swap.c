@@ -61,10 +61,16 @@ int ejecutar_operacion(int client) {
     if(paquete->codigo_operacion == SWAPSAVE) {
         //Deserializo la página enviada por Memoria
         t_pagina_swap *pagina = malloc(sizeof(t_pagina_swap));
-        *pagina = deserializar_pagina(paquete->buffer->stream);
+        deserializar(paquete,10,INT,&(pagina->tipo_contenido),INT,&(pagina->pid),INT,&(pagina->numero_pagina),LIST,&(pagina->contenido_heap_info),LIST,&(pagina->contenido_carpincho_info));
 
         //Inserto la página en los archivos de swap
-        insertar_pagina_en_archivo(pagina);
+        int op_code = insertar_pagina_en_archivo(pagina);
+
+        //Envío respuesta de la operación a memoria
+        t_paquete *paquete_respuesta = malloc(sizeof(paquete));
+        paquete_respuesta->codigo_operacion = op_code ? PAGINA_GUARDADA:PAGINA_NO_GUARDADA;
+
+        enviar_paquete(paquete_respuesta, socket_client);
     } else if(paquete->codigo_operacion == SWAPFREE) {
         //Deserializo el pedido enviado por Memoria
         int pagina_solicitada;
@@ -74,16 +80,7 @@ int ejecutar_operacion(int client) {
         t_pagina_swap pagina = leer_pagina_de_archivo(pagina_solicitada);
 
         if(pagina.numero_pagina >= 0) {
-            void *pagina_serializada = serializar_pagina(pagina);
-
-            t_buffer *buffer = malloc(sizeof(t_buffer));
-            buffer->size = bytes_pagina(pagina);
-            buffer->stream = pagina_serializada;
-
-            t_paquete *paquete_respuesta = malloc(sizeof(t_paquete));
-            paquete_respuesta->codigo_operacion = SWAPFREE;
-            paquete_respuesta->buffer = buffer;
-
+            t_paquete *paquete_respuesta = serializar(SWAPSAVE,12,INT,pagina.tipo_contenido,INT,pagina.pid,INT,pagina.numero_pagina,LIST,SWAP_PAGINA_HEAP,(pagina.contenido_heap_info),LIST,SWAP_PAGINA_CONTENIDO,(pagina.contenido_carpincho_info));
             enviar_paquete(paquete_respuesta, socket_client);
         }
     } else {

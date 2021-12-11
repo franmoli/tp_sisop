@@ -91,7 +91,9 @@ int seleccionar_archivo_escritura(int proceso_a_guardar, int bytes_a_guardar) {
 /*
     Inserción de página en archivo de SWAP
 */
-void insertar_pagina_en_archivo(t_pagina_swap *pagina) {
+bool insertar_pagina_en_archivo(t_pagina_swap *pagina) {
+    bool operacion_concretada;
+
     //Selecciono el archivo
     int bytes_a_guardar = config_swap->TAMANIO_PAGINA;
     int posicion_archivo_obtenido = seleccionar_archivo_escritura(pagina->pid, bytes_a_guardar);
@@ -114,9 +116,9 @@ void insertar_pagina_en_archivo(t_pagina_swap *pagina) {
         }
         //Analizo el tipo de asignación
         if(strcmp(config_swap->TIPO_ASIGNACION, "GLOBAL") == 0) {
-            asignacion_global_de_pagina(posicion_archivo_obtenido, path_archivo, archivo, pagina);
+            operacion_concretada = asignacion_global_de_pagina(posicion_archivo_obtenido, path_archivo, archivo, pagina);
         } else if(strcmp(config_swap->TIPO_ASIGNACION, "FIJA") == 0) {
-            asignacion_fija_de_pagina(posicion_archivo_obtenido, path_archivo, archivo, pagina);
+            operacion_concretada = asignacion_fija_de_pagina(posicion_archivo_obtenido, path_archivo, archivo, pagina);
         }
 
         //Cierro el archivo y libero la memoria de la página
@@ -124,9 +126,13 @@ void insertar_pagina_en_archivo(t_pagina_swap *pagina) {
         free(pagina);
     } else if(posicion_archivo_obtenido == -2) {
         log_error(logger_swap, "No se ha podido guardar la pagina %d en el archivo dado que no hay espacio suficiente. No puede almacenarse en otros archivos dado que se encontraron paginas asociadas al mismo proceso (%d) en este archivo.", pagina->numero_pagina, pagina->pid);
+        operacion_concretada = 0;
     } else if(posicion_archivo_obtenido == -1) {
         log_error(logger_swap, "No se ha podido guardar la pagina %d en ningun archivo dado que no hay espacio suficiente", pagina->numero_pagina);
+        operacion_concretada = 0;
     }
+
+    return operacion_concretada;
 }
 
 /*
@@ -165,14 +171,23 @@ t_pagina_swap leer_pagina_de_archivo(int numero_pagina) {
         memcpy(&pagina_obtenida.numero_pagina, paginas_obtenidas + offset_actual, sizeof(uint32_t));
         offset_actual += sizeof(uint32_t);
 
+        /*t_list: contenido_heap*/
         int cantidad_contenidos_heap = 0;
         memcpy(&cantidad_contenidos_heap, paginas_obtenidas + offset_actual, sizeof(uint32_t));
         offset_actual += sizeof(uint32_t);
 
         t_list *contenidos_heap = list_create();
         for(int i=0; i<cantidad_contenidos_heap; i++) {
+            /*t_info_heap_swap*/
             t_info_heap_swap *contenido_heap = malloc(sizeof(t_info_heap_swap));
-            t_heap_metadata *heap_metadata = malloc(sizeof(t_heap_metadata));
+
+            memcpy(&contenido_heap->inicio, paginas_obtenidas + offset_actual, sizeof(uint32_t));
+            offset_actual += sizeof(uint32_t);
+            memcpy(&contenido_heap->fin, paginas_obtenidas + offset_actual, sizeof(uint32_t));
+            offset_actual += sizeof(uint32_t);
+
+            /*t_heap_metadata*/
+            t_heap_swap *heap_metadata = malloc(sizeof(t_heap_swap));
             
             memcpy(&((*heap_metadata).prevAlloc), paginas_obtenidas + offset_actual, sizeof(uint32_t));
             offset_actual += sizeof(uint32_t);
@@ -185,6 +200,33 @@ t_pagina_swap leer_pagina_de_archivo(int numero_pagina) {
             list_add(contenidos_heap, contenido_heap);
         }
         pagina_obtenida.contenido_heap_info = contenidos_heap;
+
+        /*t_list: contenido_carpincho*/
+        int cantidad_contenidos_carpincho = 0;
+        memcpy(&cantidad_contenidos_carpincho, paginas_obtenidas + offset_actual, sizeof(uint32_t));
+        offset_actual += sizeof(uint32_t);
+
+        t_list *contenidos_carpincho = list_create();
+        for(int i=0; i<cantidad_contenidos_carpincho; i++) {
+            /*t_info_carpincho_swap*/
+            t_info_carpincho_swap *contenido_carpincho = malloc(sizeof(t_info_carpincho_swap));
+
+            memcpy(&contenido_carpincho->size, paginas_obtenidas + offset_actual, sizeof(int));
+            offset_actual += sizeof(int);
+            memcpy(&contenido_carpincho->inicio, paginas_obtenidas + offset_actual, sizeof(uint32_t));
+            offset_actual += sizeof(uint32_t);
+            memcpy(&contenido_carpincho->fin, paginas_obtenidas + offset_actual, sizeof(uint32_t));
+            offset_actual += sizeof(uint32_t);
+
+            int strlen_contenido = 0;
+            memcpy(&strlen_contenido, paginas_obtenidas + offset_actual, sizeof(int));
+            offset_actual += sizeof(int);
+            memcpy(&contenido_carpincho->contenido, paginas_obtenidas + offset_actual, strlen_contenido + 1);
+            offset_actual += strlen_contenido + 1;
+
+            list_add(contenidos_carpincho, contenido_carpincho);
+        }
+        pagina_obtenida.contenido_carpincho_info = contenidos_carpincho;
 
         close(archivo);
         eliminar_pagina(numero_pagina);
