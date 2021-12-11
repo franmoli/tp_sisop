@@ -106,11 +106,10 @@ int enviarPaginaSwap(t_pagina* pagina){
 
     /*deserializar(paquete,10,INT,&(pagina_swap->tipo_contenido),INT,&(pagina_swap->pid),INT,&(pagina_swap->numero_pagina)
                 ,LIST,&(pagina_swap->contenido_heap_info),LIST,&(pagina_swap->contenido_carpincho_info));*/
-    
     enviar_paquete(paquete, socket_cliente_swap);
     
-    paquete = recibir_paquete(socket_cliente_swap);
-    if(paquete->codigo_operacion== PAGINA_GUARDADA){
+    t_paquete* paquete_recibir = recibir_paquete(socket_cliente_swap);
+    if(paquete_recibir->codigo_operacion== PAGINA_GUARDADA){
         //PUDO GUARDAR
         return 1;
     }
@@ -124,7 +123,6 @@ int enviarPaginaSwap(t_pagina* pagina){
 int reemplazarLRU(t_tabla_paginas* tabla){
     int marco = -1;
     if(strcmp(config_memoria->TIPO_ASIGNACION, "FIJA") == 0){
-
         t_pagina* old = list_get(tabla->Lru,0);
         marco = enviarPaginaSwap(old);
 

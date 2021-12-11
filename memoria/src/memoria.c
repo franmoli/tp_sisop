@@ -17,6 +17,8 @@ int main(int argc, char **argv)
         log_info(logger_memoria, "Fallo en la conexion a swap");
     }
 
+   
+
         tabla_tlb = malloc(sizeof(t_tabla_tlb));
         tabla_tlb->tlb = list_create();
         tabla_tlb->hit_totales = 0;
@@ -49,16 +51,10 @@ int main(int argc, char **argv)
             list_add(tabla_marcos_memoria->marcos, tlb);
             i++;
         }
-        //Conectar a swap
-        socket_cliente_swap = crear_conexion(config_memoria->IP, "5002");
-        if (socket_cliente_swap == -1) {
-            log_info(logger_memoria, "Fallo en la conexion a swap");
-        }
-
         signal(SIGINT, imprimirMetricas);
         signal(SIGUSR1, generarDump);
         signal(SIGUSR2, limpiarTlb);
-
+        
     while (1)
     {
         socket_client = esperar_cliente(socket_server, logger_memoria);
@@ -78,7 +74,10 @@ static void *ejecutar_operacion(int client)
     int resultado;
     while (1)
     {
+        
         t_paquete *paquete = recibir_paquete(client);
+        
+        
 
         //Analizo el código de operación recibido y ejecuto acciones según corresponda
         switch (paquete->codigo_operacion)
