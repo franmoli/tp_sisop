@@ -645,15 +645,32 @@ void liberarPagina(t_pagina* pagina, uint32_t carpincho_id){
 t_pagina* traerPaginaAMemoria(t_pagina* pagina_alloc_actual){
 
     t_tabla_paginas* tabla = buscarTablaPorPID(pagina_alloc_actual->carpincho_id);
-    int marco = reemplazarPagina(tabla);
-    pagina_alloc_actual->marco_asignado = marco;
-    int resultado = recibirPaginaSwap(pagina_alloc_actual);
-    if(resultado == -1){
-        //Swap no trajo nada
-        //return -1;
+
+    // Busco pagina que esta en swap, puede ser que haya liberado espacio y que ahora tenga un marco libre en memoria
+    int marco = -1;
+    int trajeDeMemoria = false;
+    marco = getMarco(tabla);
+    if(marco < -1){
+        log_error(logger_memoria,"No se pudo asignar un marco");
+        return;
+    }if (marco > -1){
+        trajeDeMemoria = true;
     }
+    if(marco == -1){
+        log_info(logger_memoria, "Tengo que ir a swap");
+        marco = reemplazarPagina(tabla_paginas);
+        if(marco < 0)
+            return -1;
+        pagina_alloc_actual->marco_asignado = marco;
+        int resultado = recibirPaginaSwap(pagina_alloc_actual);
+        if(resultado == -1){
+            //Swap no trajo nada
+            //return -1;
+        }
+    }
+
     pagina_alloc_actual->bit_presencia = 1;
-    if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "LRU") == 0){
+    if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "LRU") == 0 || trajeDeMemoria){
         agregarAsignacion(pagina_alloc_actual);
     }else
     {
