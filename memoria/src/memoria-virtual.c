@@ -242,16 +242,15 @@ void replaceClock(t_pagina *pagina){
 int reemplazarClockM(t_pagina* pagina){
 
     int index = 0;
-    int numeroMarco = -1;
+    int marco = -1;
+    t_tabla_paginas* tabla_paginas = buscarTablaPorPID(pagina->carpincho_id);
 
 
     if(strcmp(config_memoria->TIPO_ASIGNACION, "FIJA") == 0){
 
-        while(numeroMarco == -1){
+        while(marco == -1){
 
             //CLOCK M con fija -> tabla de paginas tiene el clock, las paginas tienen uso y modificado
-
-            t_tabla_paginas* tabla_paginas = buscarTablaPorPID(pagina->carpincho_id);
 
             t_list_iterator *list_iterator = list_iterator_create(tabla_paginas->Clock);
             t_pagina* page = malloc(sizeof(t_pagina));
@@ -269,16 +268,19 @@ int reemplazarClockM(t_pagina* pagina){
 
                     if(page->bit_modificado == 0 && page->bit_uso == 0){
 
-                    //Ver de cambiar esto despues de swapear
-                    page->bit_presencia = 0;
-                    pagina->bit_presencia = 1;
-                    pagina->marco_asignado = page->marco_asignado;
-                    list_replace(tabla_paginas->Clock,index,pagina);
-                    tabla_paginas->ultimo_Clock = index + 1;
-                    numeroMarco = pagina->marco_asignado;
-                    list_iterator_destroy(list_iterator);
-                    //Devuelvo el marco debido a que con eso despues de llamar a swap hago el cambio en la lista
-                    return pagina->marco_asignado;
+                        //Ver de cambiar esto despues de swapear
+                        marco = enviarPaginaSwap(page);
+                        if(marco <0){
+                            return -1;
+                        }else
+                        {
+                            page->bit_presencia = 0;
+                            tabla_paginas->paginas_en_memoria -= 1;
+                            tabla_paginas->ultimo_Clock = index + 1;
+                            list_iterator_destroy(list_iterator);
+                            return page->marco_asignado;
+                        }
+
                     }
 
                 }
@@ -303,16 +305,17 @@ int reemplazarClockM(t_pagina* pagina){
 
                         if(page->bit_modificado == 0 && page->bit_uso == 0){
 
-                        //Ver de cambiar esto despues de swapear
-                        page->bit_presencia = 0;
-                        pagina->bit_presencia = 1;
-                        pagina->marco_asignado = page->marco_asignado;
-                        list_replace(tabla_paginas->Clock,index,pagina);
-                        tabla_paginas->ultimo_Clock = index + 1;
-                        numeroMarco = pagina->marco_asignado;
-                        list_iterator_destroy(list_iterator);
-                        //Devuelvo el marco debido a que con eso despues de llamar a swap hago el cambio en la lista
-                        return pagina->marco_asignado; 
+                            marco = enviarPaginaSwap(page);
+                            if(marco <0){
+                                return -1;
+                            }else
+                            {
+                                page->bit_presencia = 0;
+                                tabla_paginas->paginas_en_memoria -= 1;
+                                tabla_paginas->ultimo_Clock = index + 1;
+                                list_iterator_destroy(list_iterator);
+                                return page->marco_asignado;
+                            }
                         }
                     }
                     page = list_iterator_next(list_iterator);
@@ -326,16 +329,18 @@ int reemplazarClockM(t_pagina* pagina){
 
                     if(page->bit_modificado == 1 && page->bit_uso == 0){
 
-                    //Ver de cambiar esto despues de swapear
-                    page->bit_presencia = 0;
-                    pagina->bit_presencia = 1;
-                    pagina->marco_asignado = page->marco_asignado;
-                    list_replace(tabla_paginas->Clock,index,pagina);
-                    tabla_paginas->ultimo_Clock = index + 1;
-                    numeroMarco = pagina->marco_asignado;
-                    list_iterator_destroy(list_iterator);
-                    //Devuelvo el marco debido a que con eso despues de llamar a swap hago el cambio en la lista
-                    return pagina->marco_asignado; 
+                        //Ver de cambiar esto despues de swapear
+                        marco = enviarPaginaSwap(page);
+                        if(marco <0){
+                            return -1;
+                        }else
+                        {
+                            page->bit_presencia = 0;
+                            tabla_paginas->paginas_en_memoria -= 1;
+                            tabla_paginas->ultimo_Clock = index + 1;
+                            list_iterator_destroy(list_iterator);
+                            return page->marco_asignado;
+                        } 
                     }
                 }
 
@@ -359,16 +364,18 @@ int reemplazarClockM(t_pagina* pagina){
 
                         if(page->bit_modificado == 1 && page->bit_uso == 0){
 
-                        //Ver de cambiar esto despues de swapear
-                        page->bit_presencia = 0;
-                        pagina->bit_presencia = 1;
-                        pagina->marco_asignado = page->marco_asignado;
-                        list_replace(tabla_paginas->Clock,index,pagina);
-                        tabla_paginas->ultimo_Clock = index + 1;
-                        numeroMarco = pagina->marco_asignado;
-                        list_iterator_destroy(list_iterator);
-                        //Devuelvo el marco debido a que con eso despues de llamar a swap hago el cambio en la lista
-                        return pagina->marco_asignado; 
+                            //Ver de cambiar esto despues de swapear
+                            marco = enviarPaginaSwap(page);
+                            if(marco <0){
+                                return -1;
+                            }else
+                            {
+                                page->bit_presencia = 0;
+                                tabla_paginas->paginas_en_memoria -= 1;
+                                tabla_paginas->ultimo_Clock = index + 1;
+                                list_iterator_destroy(list_iterator);
+                                return page->marco_asignado;
+                            }
                         }
                     }
                     page->bit_uso = 0;
@@ -386,7 +393,7 @@ int reemplazarClockM(t_pagina* pagina){
     }else 
     {
 
-        while(numeroMarco == -1){
+        while(marco == -1){
 
             //CLOCK M con fija -> tabla de paginas tiene el clock, las paginas tienen uso y modificado
 
@@ -406,16 +413,18 @@ int reemplazarClockM(t_pagina* pagina){
 
                     if(page->bit_modificado == 0 && page->bit_uso == 0){
 
-                    //Ver de cambiar esto despues de swapear
-                    page->bit_presencia = 0;
-                    pagina->bit_presencia = 1;
-                    pagina->marco_asignado = page->marco_asignado;
-                    list_replace(reemplazo_CLOCK->Clock,index,pagina);
-                    reemplazo_CLOCK->ultimo = index + 1;
-                    numeroMarco = pagina->marco_asignado;
-                    list_iterator_destroy(list_iterator);
-                    //Devuelvo el marco debido a que con eso despues de llamar a swap hago el cambio en la lista
-                    return pagina->marco_asignado;
+                        //Ver de cambiar esto despues de swapear
+                        marco = enviarPaginaSwap(page);
+                        if(marco <0){
+                            return -1;
+                        }else
+                        {
+                            page->bit_presencia = 0;
+                            tabla_paginas->paginas_en_memoria -= 1;
+                            reemplazo_CLOCK->ultimo = index + 1;
+                            list_iterator_destroy(list_iterator);
+                            return page->marco_asignado;
+                        }
                     }
 
                 }
@@ -440,16 +449,18 @@ int reemplazarClockM(t_pagina* pagina){
 
                         if(page->bit_modificado == 0 && page->bit_uso == 0){
 
-                        //Ver de cambiar esto despues de swapear
-                        page->bit_presencia = 0;
-                        pagina->bit_presencia = 1;
-                        pagina->marco_asignado = page->marco_asignado;
-                        list_replace(reemplazo_CLOCK->Clock,index,pagina);
-                        reemplazo_CLOCK->ultimo = index + 1;
-                        numeroMarco = pagina->marco_asignado;
-                        list_iterator_destroy(list_iterator);
-                        //Devuelvo el marco debido a que con eso despues de llamar a swap hago el cambio en la lista
-                        return pagina->marco_asignado; 
+                            //Ver de cambiar esto despues de swapear
+                            marco = enviarPaginaSwap(page);
+                            if(marco <0){
+                                return -1;
+                            }else
+                            {
+                                page->bit_presencia = 0;
+                                tabla_paginas->paginas_en_memoria -= 1;
+                                reemplazo_CLOCK->ultimo = index + 1;
+                                list_iterator_destroy(list_iterator);
+                                return page->marco_asignado;
+                            }
                         }
                     }
                     page = list_iterator_next(list_iterator);
@@ -463,16 +474,18 @@ int reemplazarClockM(t_pagina* pagina){
 
                     if(page->bit_modificado == 1 && page->bit_uso == 0){
 
-                    //Ver de cambiar esto despues de swapear
-                    page->bit_presencia = 0;
-                    pagina->bit_presencia = 1;
-                    pagina->marco_asignado = page->marco_asignado;
-                    list_replace(reemplazo_CLOCK->Clock,index,pagina);
-                    reemplazo_CLOCK->ultimo = index + 1;
-                    numeroMarco = pagina->marco_asignado;
-                    list_iterator_destroy(list_iterator);
-                    //Devuelvo el marco debido a que con eso despues de llamar a swap hago el cambio en la lista
-                    return pagina->marco_asignado; 
+                        //Ver de cambiar esto despues de swapear
+                        marco = enviarPaginaSwap(page);
+                        if(marco <0){
+                            return -1;
+                        }else
+                        {
+                            page->bit_presencia = 0;
+                            tabla_paginas->paginas_en_memoria -= 1;
+                            reemplazo_CLOCK->ultimo = index + 1;
+                            list_iterator_destroy(list_iterator);
+                            return page->marco_asignado;
+                        }
                     }
                 }
 
@@ -496,16 +509,18 @@ int reemplazarClockM(t_pagina* pagina){
 
                         if(page->bit_modificado == 1 && page->bit_uso == 0){
 
-                        //Ver de cambiar esto despues de swapear
-                        page->bit_presencia = 0;
-                        pagina->bit_presencia = 1;
-                        pagina->marco_asignado = page->marco_asignado;
-                        list_replace(reemplazo_CLOCK->Clock,index,pagina);
-                        reemplazo_CLOCK->ultimo = index + 1;
-                        numeroMarco = pagina->marco_asignado;
-                        list_iterator_destroy(list_iterator);
-                        //Devuelvo el marco debido a que con eso despues de llamar a swap hago el cambio en la lista
-                        return pagina->marco_asignado; 
+                            //Ver de cambiar esto despues de swapear
+                            marco = enviarPaginaSwap(page);
+                            if(marco <0){
+                                return -1;
+                            }else
+                            {
+                                page->bit_presencia = 0;
+                                tabla_paginas->paginas_en_memoria -= 1;
+                                reemplazo_CLOCK->ultimo = index + 1;
+                                list_iterator_destroy(list_iterator);
+                                return page->marco_asignado;
+                            }
                         }
                     }
                     page->bit_uso = 0;
