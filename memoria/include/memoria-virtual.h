@@ -20,4 +20,7 @@ void actualizarLRU(t_pagina* pagina);
 void agregarAsignacion(t_pagina* pagina);
 int enviarPaginaSwap(t_pagina* pagina);
 
+void replaceClock(t_pagina *pagina);
+int recibirPaginaSwap(t_pagina* pagina);
+
 #endif

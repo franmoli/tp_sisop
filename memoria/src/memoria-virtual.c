@@ -59,6 +59,30 @@ int eliminarPrimerElementoLista(int carpincho_id){
     return marco;
 }
 
+int recibirPaginaSwap(t_pagina* pagina){
+
+    t_paquete* paquete = malloc(sizeof(t_paquete));
+
+    paquete = serializar(SWAPFREE,4,INT,pagina->carpincho_id,INT,pagina->numero_pagina);
+
+    //Enviarlo el paquete y checkear que ande bien
+    enviar_paquete(paquete, socket_cliente_swap);
+    
+    paquete = recibir_paquete(socket_cliente_swap);
+    if(paquete->codigo_operacion != RECEPCION_PAGINA){
+        //NO PUDO DEVOLVERLA
+        return -1;
+    }
+
+    t_pagina_swap *pagina_swap = deserializar(paquete,10,INT,&(pagina_swap->tipo_contenido),INT,&(pagina_swap->pid),INT,&(pagina_swap->numero_pagina)
+                ,LIST,&(pagina_swap->contenido_heap_info),LIST,&(pagina_swap->contenido_carpincho_info));
+
+    //Escribir pagina en memoria
+    escribirPaginaEnMemoria(pagina, pagina_swap);
+    return 0;
+}
+
+
 int enviarPaginaSwap(t_pagina* pagina){
 
     //t_contenidos_pagina* contenido = list_get(pagina->listado_de_contenido,0);
@@ -194,6 +218,20 @@ void actualizarLRU(t_pagina* pagina){
         }
 
     }
+}
+
+void replaceClock(t_pagina *pagina){
+
+    if(strcmp(config_memoria->TIPO_ASIGNACION, "FIJA") == 0){
+
+        t_tabla_paginas *tabla = buscarTablaPorPID(pagina->carpincho_id);
+        //ver que cuenta hacer aca para que agarre bien segun el marco
+
+    }else
+    {
+        list_replace(reemplazo_CLOCK,pagina,pagina->marco_asignado);
+    }
+
 }
 
 int reemplazarClockM(t_pagina* pagina){
