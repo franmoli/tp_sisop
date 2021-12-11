@@ -25,5 +25,5 @@ void eliminarcontenidoBydireccion(uint32_t direccion,t_pagina *pagina);
 
 //GENERALES
 void eliminarPagina(t_pagina* pagina);
-void restarTamanioaPagina(t_heap_metadata* alloc);
+void restarTamanioaPagina(t_pagina* pagina_alloc_actual,t_heap_metadata* alloc,uint32_t direccion_logica_alloc_actual);
 #endif

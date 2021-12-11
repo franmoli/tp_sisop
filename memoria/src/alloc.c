@@ -40,6 +40,8 @@ int freeAlloc(t_paquete *paquete)
         resto_alloc_posterior =(alloc_actual->nextAlloc - inicio) % config_memoria->TAMANIO_PAGINA;
     
 
+    uint32_t next_anterior_alloc = inicio;
+
     int direccion_fisica_back = 0;
     int direccion_fisica_next = 0;
     bool entro_en_prev= false;
@@ -56,6 +58,8 @@ int freeAlloc(t_paquete *paquete)
         direccion_fisica_back = inicio + pagina_alloc_anterior->marco_asignado * config_memoria->TAMANIO_PAGINA + resto_alloc_anterior;
         t_heap_metadata *anterior_alloc = traerAllocDeMemoria(direccion_fisica_back);
         
+        next_anterior_alloc = anterior_alloc->nextAlloc;
+
         if(anterior_alloc->isFree){
             anterior_alloc->nextAlloc = alloc_actual->nextAlloc;
             if(alloc_actual->nextAlloc!=0){
@@ -113,10 +117,35 @@ int freeAlloc(t_paquete *paquete)
         free(posterior_alloc);
 
     }
+    restarTamanioaPagina(pagina_alloc_actual,alloc_actual, next_anterior_alloc);
     free(alloc_actual);
     return 1;
 }
-void restarTamanioaPagina(t_heap_metadata* alloc){
+void restarTamanioaPagina(t_pagina* pagina_alloc_actual,t_heap_metadata* alloc_actual,uint32_t next_anterior_alloc){
+    
+    uint32_t inicio = tamanio_memoria;
+    int nro_pagina_alloc_anterior= getPaginaByDireccionLogica(alloc_actual->prevAlloc-inicio);
+    if(nro_pagina_alloc_anterior>list_size(tabla_paginas->paginas))
+        return -1;
+
+    t_pagina *pagina_alloc_anterior = list_get(tabla_paginas->paginas, nro_pagina_alloc_anterior);
+    if(pagina_alloc_anterior->bit_presencia == 0)
+        pagina_alloc_anterior = traerPaginaAMemoria(pagina_alloc_anterior);
+    
+
+    int nro_pagina_alloc_posterior= getPaginaByDireccionLogica(alloc_actual->nextAlloc-inicio);
+    if(nro_pagina_alloc_posterior>list_size(tabla_paginas->paginas))
+        return -1;
+
+    t_pagina *pagina_alloc_posterior = list_get(tabla_paginas->paginas, nro_pagina_alloc_posterior);
+    if(pagina_alloc_posterior->bit_presencia == 0)
+        pagina_alloc_posterior = traerPaginaAMemoria(pagina_alloc_posterior);
+    
+
+    if(pagina_alloc_actual->numero_pagina == pagina_alloc_anterior->numero_pagina){
+        uint32_t tamanio_ocupado = alloc_actual->nextAlloc - next_anterior_alloc - sizeof(t_heap_metadata);
+        pagina_alloc_actual->tamanio_ocupado-= tamanio_ocupado;
+    }
 
 }
 void eliminarPagina(t_pagina* pagina){
