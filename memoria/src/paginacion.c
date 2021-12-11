@@ -540,7 +540,6 @@ int buscarMarcoEnMemoria(int numero_pagina_buscada, int id)
 int solicitarPaginaNueva(uint32_t carpincho_id)
 {
 
-    t_tabla_paginas *tabla_paginas = buscarTablaPorPID(carpincho_id);
     bool trajeDeMemoria = false;
 
     //Para agregar la pagina nueva primero tengo que ver si puedo agregarla si es asignacion fija o dinamica
@@ -554,6 +553,8 @@ int solicitarPaginaNueva(uint32_t carpincho_id)
     if(marco == -1){
         log_info(logger_memoria, "Tengo que ir a swap");
         marco = reemplazarPagina(tabla_paginas);
+        if(marco < 0)
+            return -1;
     }
     int numero_pagina = 0;
     if (list_size(tabla_paginas->paginas) > 0)

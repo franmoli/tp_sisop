@@ -266,6 +266,9 @@ int memAlloc(t_paquete *paquete)
     else
     {
         int paginaDisponible = getPrimeraPaginaDisponible(size, tabla_paginas);
+        if(paginaDisponible < 0 || paginaDisponible > list_size(tabla_paginas->paginas))
+            return -1;
+            
         t_pagina *pagina_Disponible = list_get(tabla_paginas->paginas, paginaDisponible);
         t_pagina *primera_pagina;
         if(pagina_Disponible !=0){
@@ -397,7 +400,6 @@ int agregarPagina(t_pagina *pagina, t_heap_metadata *data, uint32_t nextAnterior
 {
     bool agregado = false;
     uint32_t inicio = tamanio_memoria;
-    t_tabla_paginas *tabla_paginas = buscarTablaPorPID(pagina->carpincho_id);
  
     if (pagina->tamanio_ocupado < config_memoria->TAMANIO_PAGINA)
     {

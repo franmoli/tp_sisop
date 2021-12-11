@@ -78,6 +78,27 @@ int main(int argc, char **argv)
     free(paquete->buffer);
     free(paquete);
 
+    paquete = serializar_alloc(23);
+    memAlloc(paquete); 
+
+    free(paquete->buffer->stream);
+    free(paquete->buffer);
+    free(paquete);
+
+    paquete = serializar_alloc(23);
+    memAlloc(paquete); 
+
+    free(paquete->buffer->stream);
+    free(paquete->buffer);
+    free(paquete);
+
+    paquete = serializar_alloc(23);
+    memAlloc(paquete); 
+
+    free(paquete->buffer->stream);
+    free(paquete->buffer);
+    free(paquete);
+
     /*paquete = serializar_alloc(dire_logica);
     freeAlloc(paquete);
     free(paquete->buffer->stream);
