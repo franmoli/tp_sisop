@@ -8,7 +8,7 @@ void iniciar_deadlock() {
 void* algoritmo_deteccion(void *_) {
     while(1) {
         log_info(logger_kernel, "Esperando ejecución de algoritmo de deteccion de deadlock");
-        sleep(config_kernel->TIEMPO_DEADLOCK);
+        sleep(config_kernel->TIEMPO_DEADLOCK/1000);
         
         int index = 0;
         int index2 = 0;
@@ -152,7 +152,7 @@ bool proceso_bloqueado(int id){
     return false;
 }
 
-
+//Se puede usar la funcion de arriba, agregando un parametro para sacar el valor del semaforo por referencia
 char *proceso_bloqueado_por_sem(int id){
     int index = 0;
     t_semaforo *sem_aux = NULL;
