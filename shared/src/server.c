@@ -87,7 +87,7 @@ void *serializar_paquete(t_paquete *paquete, int *bytes) {
 /* Utilizar esta función para enviar un paquete */
 void enviar_paquete(t_paquete *paquete, int socket_cliente) {
 	int bytes = paquete->buffer->size + 2 * sizeof(int);
-	printf("Paquete a enviar: opcode %d | buffer size %d | dest %d\n", paquete->codigo_operacion, paquete->buffer->size, socket_cliente);
+	//printf("Paquete a enviar: opcode %d | buffer size %d | dest %d\n", paquete->codigo_operacion, paquete->buffer->size, socket_cliente);
 	void *a_enviar = serializar_paquete(paquete, &bytes);
 	int error = send(socket_cliente, a_enviar, bytes, 0);
 
@@ -104,9 +104,7 @@ t_paquete* recibir_paquete(int socket_cliente) {
 	t_paquete* paquete = malloc(sizeof(t_paquete));
 	paquete->buffer = malloc(sizeof(t_buffer));
 
-	printf("(recibir paquete)Espero recibir de %d \n",socket_cliente);
 	recv(socket_cliente, &(paquete->codigo_operacion), sizeof(uint32_t), MSG_WAITALL);
-	printf("(recibir paquete)Recibi de %d esto : %d\n",socket_cliente, paquete->codigo_operacion);
 	
 	if(paquete->codigo_operacion <= 0 || paquete->codigo_operacion > 100){
 		printf("El cliente se desconectó forzosamente...\n");

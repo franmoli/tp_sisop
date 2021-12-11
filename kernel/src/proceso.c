@@ -102,7 +102,6 @@ void exec(t_proceso *self){
                 case OP_ERROR:
                     break;
                 case CALLIO:
-                    printf("Ejecutando la io\n");
                     io_recibida = next_task->datos_tarea;
 
                     while(index < list_size(config_kernel->DISPOSITIVOS_IO)){
@@ -138,7 +137,7 @@ void exec(t_proceso *self){
     //Solo por debug, borrar despues
     sleep(2);
 
-    self->ejecucion_anterior = clock() - reloj_i;
+    self->ejecucion_anterior = ((clock() - reloj_i) / CLOCKS_PER_SEC) * 1000;
     self->estimar = true;
 
     bloquear(self);
@@ -147,7 +146,7 @@ void exec(t_proceso *self){
 bool solicitar_semaforo(char *nombre_semaforo, int id){
     //TODO: AGREGAR MUTEX DE VALUE O LO QUE SEA
     // traer de la lista el semaforo
-    printf("Se solicito el semadoro %s\n", nombre_semaforo);
+    printf("Se solicito el semaforo %s\n", nombre_semaforo);
     t_semaforo *semaforo_solicitado = traer_semaforo(nombre_semaforo);
     
     if(semaforo_solicitado == NULL){
@@ -298,7 +297,6 @@ void desbloquear(t_proceso *self){
 
 void *desbloquear_en(void *param){
     t_io *io_recibida = param;
-    log_info(logger_kernel, "Solicitando el dispositivo %s", io_recibida->nombre);
     sleep(io_recibida->duracion/1000);
     log_info(logger_kernel, "IO ejecutada %s", io_recibida->mensaje);
     //printf("Desbloqueando X salida de io\n");

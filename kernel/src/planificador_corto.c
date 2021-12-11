@@ -53,7 +53,7 @@ void *planificador_corto_plazo_sjf (void *multiprocesamiento_p){
         if(*multiprocesamiento && list_size(lista_ready)){
             int index = -1;
             int estimacion_aux;
-
+            printf("Comparando carpinchos de entre %d\n", list_size(lista_ready));
             //se busca la estimacion menor
             for(int i = 0; i < list_size(lista_ready); i++){
                 aux = list_get(lista_ready, i);
@@ -81,17 +81,19 @@ void *planificador_corto_plazo_hrrn (void *multiprocesamiento_p){
     t_proceso *aux;
     int *multiprocesamiento = multiprocesamiento_p;
 
-    //calcular estimaciones
-    for(int i = 0; i < list_size(lista_ready); i++){
-
-        aux = list_get(lista_ready, i);
-        if(aux->estimar)
-            estimar(aux);
-
-    }
 
     while(1){
         
+        sem_wait(&cambio_de_listas_corto);
+        //calcular estimaciones
+        for(int i = 0; i < list_size(lista_ready); i++){
+
+            aux = list_get(lista_ready, i);
+            if(aux->estimar)
+                estimar(aux);
+
+        }
+
         if(*multiprocesamiento && list_size(lista_ready)){
             int index = -1;
             int response_ratio = 0;
@@ -122,15 +124,17 @@ void *planificador_corto_plazo_hrrn (void *multiprocesamiento_p){
 }
 
 void estimar(t_proceso *proceso){
-    int alfa = config_kernel->ALFA;
+    float alfa = config_kernel->ALFA;
+    printf("Estimacion con la que vengo %d\n", proceso->estimacion);
     proceso->estimacion = (alfa * proceso->ejecucion_anterior) + (( 1 - alfa) * proceso->estimacion);
     proceso->estimar = false;
+    printf("Estimo que la proxima ejecucion del proceso %d: %d - ejecutó la vez pasada %d | | | alfa %f \n", proceso->id, proceso->estimacion, proceso->ejecucion_anterior, alfa);
     return;
 }
 
 int calcular_response_ratio(t_proceso *proceso){
 
-    int tiempo_transcurrido = clock() - proceso->entrada_a_ready;
+    int tiempo_transcurrido = ((clock() - proceso->entrada_a_ready)/ CLOCKS_PER_SEC) * 1000;
 
     return (tiempo_transcurrido + proceso->estimacion)/proceso->estimacion;
 

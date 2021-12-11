@@ -20,7 +20,7 @@ typedef struct {
     int GRADO_MULTIPROCESAMIENTO;
     int RETARDO_CPU;
     int ESTIMACION_INICIAL;
-    int ALFA;
+    float ALFA;
     int TIEMPO_DEADLOCK;
 } t_config_kernel;
 

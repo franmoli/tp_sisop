@@ -44,7 +44,7 @@ t_config_kernel *generar_config_kernel(t_config *config) {
     config_kernel->GRADO_MULTIPROCESAMIENTO = config_get_int_value(config, "GRADO_MULTIPROCESAMIENTO");
     config_kernel->GRADO_MULTIPROGRAMACION = config_get_int_value(config, "GRADO_MULTIPROGRAMACION");
     config_kernel->ESTIMACION_INICIAL = config_get_int_value(config, "ESTIMACION_INICIAL");
-    config_kernel->ALFA = config_get_int_value(config, "ALFA");
+    config_kernel->ALFA = strtof(config_get_string_value(config, "ALFA"), NULL);
     config_kernel->DISPOSITIVOS_IO = io_devices;
     config_kernel->DURACIONES_IO = io_durations;
     config_kernel->TIEMPO_DEADLOCK = config_get_int_value(config, "TIEMPO_DEADLOCK");

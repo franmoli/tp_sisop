@@ -150,7 +150,6 @@ void atender_proceso (void* parametro ){
                 deserializar(paquete, 4, CHAR_PTR, &io_recibida->nombre, CHAR_PTR, &io_recibida->mensaje);
 
                 task->datos_tarea = io_recibida;
-                printf("Io recibida %s\n", io_recibida->nombre);
                 list_add(carpincho->task_list, task);
                 
                 break;
