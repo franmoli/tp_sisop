@@ -62,7 +62,7 @@ t_contenidos_pagina *getLastHeaderContenidoByPagina(t_pagina *pagina)
 //////////////////////////////////////////////////////////////////////////////
 
 // Mem Read: Dada una direccion de memoria busco el contenido que se encuentra alli
-void *memRead(t_paquete *paquete)
+char *memRead(t_paquete *paquete)
 {
 
     /*1- Deserializo el paquete -> carpincho_id, direccion_logica
@@ -79,28 +79,30 @@ void *memRead(t_paquete *paquete)
 } t_malloc_serializado;
     */
 
-   t_malloc_serializado* info = deserializar_alloc(paquete);
-   uint32_t dir_logica = info->size_reservar;
-   uint32_t carpincho_id = info->carpincho_id;
+   char*  contenido_escribir= NULL;
+   int size = 0;
+   int32_t direccion_logica ; 
 
-   int pagina = dir_logica / config_memoria->TAMANIO_PAGINA;
-   int desplazamiento = dir_logica % config_memoria->TAMANIO_PAGINA;
+   deserializar(paquete,6,CHAR_PTR,&contenido_escribir,INT,&direccion_logica,INT,&size);
+   
+   int inicio = tamanio_memoria;
+   int numero_pagina = (direccion_logica - inicio) / config_memoria->TAMANIO_PAGINA;
+   t_tabla_paginas* tabla_paginas = buscarTablaPorPID(socket_client);
 
-   log_info(logger_memoria,"Voy a tlb");
-    int marco = -1;
+   if(numero_pagina > list_size(tabla_paginas)){
+       return -1;
+   }
 
-    marco = buscarEnTLB(pagina,carpincho_id);
+   t_pagina* pagina = list_get(tabla_paginas->paginas,numero_pagina);
+   if(pagina->bit_presencia == 0){
+       //TRAER DE SWAP
+       //getMarcoParaPagina(tabla_paginas);
+   }
+    
+   int desplazamiento = (direccion_logica-inicio) % config_memoria->TAMANIO_PAGINA;
 
-    log_info(logger_memoria,"Me traje el marco %d",marco);
+   char * contenido = traerDeMemoria(pagina->marco_asignado,desplazamiento, size);
 
-    //Si retorna -1 falta swap
-
-   // Paso 4
-   // Como se que tanto tengo que traer de memoria, creo que deberia ver el heap de ese alloc y traer esa cantidad en el contenido
-   int size = 4;
-
-   void* contenido = traerDeMemoria(marco,desplazamiento, size);
-   log_info(logger_memoria,"Traje contenido");
    return contenido;
 
 }

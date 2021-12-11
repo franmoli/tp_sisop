@@ -30,7 +30,7 @@ t_contenidos_pagina *getContenidoPaginaByTipoAndSize(t_contenidos_pagina *conten
 void liberarPagina(t_pagina* pagina, uint32_t carpincho_id);
 
 //MEMREAD
-void *memRead(t_paquete *paquete);
+char *memRead(t_paquete *paquete);
 char* traerDeMemoria(int marco, int desplazamiento, int size);
 //MEMWRITE
 int memWrite(t_paquete *paquete);
