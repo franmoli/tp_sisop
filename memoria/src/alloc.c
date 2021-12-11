@@ -42,6 +42,7 @@ int freeAlloc(t_paquete *paquete)
 
     int direccion_fisica_back = 0;
     int direccion_fisica_next = 0;
+    bool entro_en_prev= false;
     if(alloc_actual->prevAlloc!=0){
         int nro_pagina_alloc_anterior= getPaginaByDireccionLogica(alloc_actual->prevAlloc-inicio);
         
@@ -55,248 +56,63 @@ int freeAlloc(t_paquete *paquete)
         direccion_fisica_back = inicio + pagina_alloc_anterior->marco_asignado * config_memoria->TAMANIO_PAGINA + resto_alloc_anterior;
         t_heap_metadata *anterior_alloc = traerAllocDeMemoria(direccion_fisica_back);
         
-        anterior_alloc->nextAlloc = alloc_actual->nextAlloc;
-        if(alloc_actual->nextAlloc!=0){
-            int nro_pagina_alloc_posterior= getPaginaByDireccionLogica(alloc_actual->nextAlloc-inicio);
-            if(nro_pagina_alloc_posterior>list_size(tabla_paginas->paginas))
-                return -1;
+        if(anterior_alloc->isFree){
+            anterior_alloc->nextAlloc = alloc_actual->nextAlloc;
+            if(alloc_actual->nextAlloc!=0){
+                int nro_pagina_alloc_posterior= getPaginaByDireccionLogica(alloc_actual->nextAlloc-inicio);
+                if(nro_pagina_alloc_posterior>list_size(tabla_paginas->paginas))
+                    return -1;
 
-            t_pagina *pagina_alloc_posterior = list_get(tabla_paginas->paginas, nro_pagina_alloc_posterior);
-            if(pagina_alloc_posterior->bit_presencia == 0){
-                pagina_alloc_posterior = traerPaginaAMemoria(pagina_alloc_posterior);
+                t_pagina *pagina_alloc_posterior = list_get(tabla_paginas->paginas, nro_pagina_alloc_posterior);
+                if(pagina_alloc_posterior->bit_presencia == 0){
+                    pagina_alloc_posterior = traerPaginaAMemoria(pagina_alloc_posterior);
+                }
+                direccion_fisica_next= inicio + pagina_alloc_posterior->marco_asignado * config_memoria->TAMANIO_PAGINA + resto_alloc_posterior;
+                t_heap_metadata *posterior_alloc = traerAllocDeMemoria(direccion_fisica_next);
+                posterior_alloc->prevAlloc = alloc_actual->prevAlloc;
+                guardarAlloc(posterior_alloc,direccion_fisica_next);
+                free(posterior_alloc);
             }
-            direccion_fisica_next= inicio + pagina_alloc_posterior->marco_asignado * config_memoria->TAMANIO_PAGINA + resto_alloc_posterior;
-            t_heap_metadata *posterior_alloc = traerAllocDeMemoria(direccion_fisica_next);
-            posterior_alloc->prevAlloc = alloc_actual->prevAlloc;
-            guardarAlloc(posterior_alloc,direccion_fisica_next);
-            free(posterior_alloc);
+            guardarAlloc(anterior_alloc,direccion_fisica_back);
+            entro_en_prev = true;
         }
-        guardarAlloc(anterior_alloc,direccion_fisica_back);
         free(anterior_alloc);
-        
-        restarTamanioaPagina(alloc_actual);
-       
     }
-    
-    alloc_actual->isFree = true;
-   
-
-    //int direccion_fisica_next = 0;
-   /* t_pagina *pagina_alloc_siguiente= NULL;
-
-    t_heap_metadata *posterior= NULL;*/
-    //bool anterior_free = false;
-    //bool posterior_free = false;
-
-    /*if (direccion_fisica_back != 0)
-    { 
-       
-        if (anterior->isFree){
-            anterior_free = true;
-            if(next!=0){
-
-            }
-        }else{
-            anterior->nextAlloc = alloc_actual->nextAlloc;
-            guardarAlloc(anterior,direccion_fisica_back);
-            free(anterior);
-            restarTamanioaPagina(alloc_actual);
-        }
-    }*/
-   /* if (next != 0)
-    { //SI EXISTE PROXIMO
-        pagina_alloc_siguiente=malloc(sizeof(t_pagina));
-        int nropaginaAllocSiguiente = getPaginaByDireccionLogica(next-inicio);
-        pagina_alloc_siguiente = list_get(tabla_paginas->paginas, nropaginaAllocSiguiente);
-        if(pagina_alloc_siguiente->bit_presencia == 0){
-            pagina_alloc_siguiente = traerPaginaAMemoria(pagina_alloc_siguiente);
-        }
+    if(alloc_actual->nextAlloc!=0 && !entro_en_prev){
+        int nro_pagina_alloc_posterior= getPaginaByDireccionLogica(alloc_actual->nextAlloc-inicio);
         
-        resto = (next-inicio) % config_memoria->TAMANIO_PAGINA;
-        direccion_fisica_next = inicio +resto + pagina_alloc_siguiente->marco_asignado * config_memoria->TAMANIO_PAGINA;
-        posterior = traerAllocDeMemoria(direccion_fisica_next);
-        if (posterior->isFree)
-            posterior_free = true;
+        if(nro_pagina_alloc_posterior>list_size(tabla_paginas->paginas))
+            return -1;
+
+        t_pagina *pagina_alloc_posterior = list_get(tabla_paginas->paginas, nro_pagina_alloc_posterior);
+        if(pagina_alloc_posterior->bit_presencia == 0){
+            pagina_alloc_posterior = traerPaginaAMemoria(pagina_alloc_posterior);
+        }
+        direccion_fisica_next = inicio + pagina_alloc_posterior->marco_asignado * config_memoria->TAMANIO_PAGINA + resto_alloc_posterior;
+        t_heap_metadata *posterior_alloc = traerAllocDeMemoria(direccion_fisica_next);
+        if(posterior_alloc->isFree){
+            posterior_alloc->prevAlloc = alloc_actual->prevAlloc;
+            if(alloc_actual->prevAlloc!=0){
+                int nro_pagina_alloc_anterior= getPaginaByDireccionLogica(alloc_actual->prevAlloc-inicio);
+                if(nro_pagina_alloc_anterior>list_size(tabla_paginas->paginas))
+                    return -1;
+
+                t_pagina *pagina_alloc_anterior = list_get(tabla_paginas->paginas, nro_pagina_alloc_anterior);
+                if(pagina_alloc_anterior->bit_presencia == 0){
+                    pagina_alloc_anterior = traerPaginaAMemoria(pagina_alloc_anterior);
+                }
+                direccion_fisica_back= inicio + pagina_alloc_anterior->marco_asignado * config_memoria->TAMANIO_PAGINA + resto_alloc_anterior;
+                t_heap_metadata *anterior_alloc = traerAllocDeMemoria(direccion_fisica_back);
+
+                anterior_alloc->nextAlloc = alloc_actual->nextAlloc;
+                guardarAlloc(anterior_alloc,direccion_fisica_back);
+                free(anterior_alloc);
+            }
+            guardarAlloc(posterior_alloc,direccion_fisica_next);
+        }
+        free(posterior_alloc);
+
     }
-    bool alloc_fue_liberado = false;*/
-   /* if (anterior_free) //PROBADO
-    {
-        int tamanio_original_eliminar = next - sizeof(t_heap_metadata) - direccion;
-         if(pagina_alloc_anterior->numero_pagina == pagina_alloc_actual->numero_pagina){
-
-             if(next!=0){
-                //HAY PROXIMO NO VACIO
-                if(pagina_alloc_siguiente->numero_pagina == pagina_alloc_actual->numero_pagina){
-                    //ESTA TODO EN EL MISMO ALLOC
-                    int resta = next - sizeof(t_heap_metadata) - direccion;
-                    pagina_alloc_actual->tamanio_ocupado -= resta;
-                    pagina_alloc_actual->cantidad_contenidos-=1;
-                    int direccion_fisica = inicio + direccion+ config_memoria->TAMANIO_PAGINA * pagina_alloc_actual->marco_asignado;
-                    guardarAlloc(alloc,direccion_fisica);
-                    eliminarcontenidoBydireccion(direccion, pagina_alloc_actual);
-                    eliminarcontenidoBydireccion(direccion + sizeof(t_heap_metadata), pagina_alloc_actual);
-                }else{
-                    //NO ESTA TODO EN LA MISMA PAGINA
-                    int tamanio = config_memoria->TAMANIO_PAGINA - sizeof(t_heap_metadata) - direccion;
-                    pagina_alloc_actual->tamanio_ocupado-=tamanio;
-                    pagina_alloc_actual->cantidad_contenidos-=1;
-                    eliminarcontenidoBydireccion(direccion + sizeof(t_heap_metadata), pagina_alloc_actual);
-                    int resto = next - config_memoria->TAMANIO_PAGINA * pagina_alloc_siguiente->numero_pagina;
-                    pagina_alloc_siguiente->tamanio_ocupado-= resto;
-                    pagina_alloc_siguiente->cantidad_contenidos-=1;
-                    eliminarcontenidoBydireccion(0, pagina_alloc_siguiente);
-                }
-                anterior->nextAlloc = alloc->nextAlloc;
-                posterior->prevAlloc = alloc->prevAlloc;
-                guardarAlloc(anterior,back + inicio + config_memoria->TAMANIO_PAGINA * pagina_alloc_anterior->marco_asignado);
-                guardarAlloc(posterior,next + inicio + config_memoria->TAMANIO_PAGINA * pagina_alloc_siguiente->marco_asignado);
-                pagina_alloc_actual->tamanio_ocupado-= sizeof(t_heap_metadata);
-                pagina_alloc_actual->cantidad_contenidos-=1;
-                eliminarcontenidoBydireccion(direccion, pagina_alloc_actual);
-                free(alloc);
-                return;
-             }else{
-                //ESTOY ULTIMO ALLOC
-                pagina_alloc_actual->tamanio_ocupado-= tamanio_original_eliminar - sizeof(t_heap_metadata);
-                pagina_alloc_actual->cantidad_contenidos-=2;
-                anterior->nextAlloc = alloc->nextAlloc;
-
-                guardarAlloc(anterior,inicio + back + config_memoria->TAMANIO_PAGINA * pagina_alloc_actual->marco_asignado);
-                free(alloc);
-                eliminarcontenidoBydireccion(direccion, pagina_alloc_actual);
-             }
-            return;
-        }
-        
-        anterior->nextAlloc = alloc->nextAlloc;
-        if(next != NULL)
-            posterior->prevAlloc =alloc->prevAlloc;
-
-        guardarAlloc(anterior,direccion_fisica_back);
-        guardarAlloc(posterior,direccion_fisica_next);
-
-        pagina_alloc_actual->tamanio_ocupado-=tamanio_original_eliminar;
-        pagina_alloc_actual->cantidad_contenidos-=1;
-        eliminarcontenidoBydireccion(direccion +sizeof(t_heap_metadata), pagina_alloc_actual);
-        free(alloc);
-        alloc_fue_liberado = true;
-    }*/
-
-    /*if (posterior_free)
-    {
-        if(pagina_alloc_actual->numero_pagina == pagina_alloc_siguiente->numero_pagina){
-            if(alloc_fue_liberado){
-                anterior->nextAlloc = posterior->nextAlloc;
-                guardarAlloc(anterior,direccion_fisica_back);
-                eliminarcontenidoBydireccion(next,pagina_alloc_siguiente);
-                pagina_alloc_siguiente->tamanio_ocupado-=sizeof(t_heap_metadata);
-                pagina_alloc_siguiente->cantidad_contenidos-=1;
-
-                if(pagina_alloc_siguiente->tamanio_ocupado == 0)
-                    eliminarPagina(pagina_alloc_siguiente);
-
-
-                free(posterior);
-                free(anterior);
-                return;
-            }
-            else{
-                    if(back!= 0){ //HAY UNO ANTERIOR NO LIBRE
-                    
-                    alloc->isFree = true;
-                    alloc->nextAlloc = posterior->nextAlloc;
-        
-                    int resta = next - sizeof(t_heap_metadata) - direccion;
-                    pagina_alloc_actual->tamanio_ocupado -= resta;
-                    pagina_alloc_actual->cantidad_contenidos-=1;
-                    
-                    guardarAlloc(alloc,direccion_fisica_alloc);
-                    eliminarcontenidoBydireccion(posterior, pagina_alloc_actual);
-                    eliminarcontenidoBydireccion(direccion + sizeof(t_heap_metadata), pagina_alloc_actual);
-                    
-                    free(posterior);
-                    free(alloc);
-                    free(back);
-                    
-                    pagina_alloc_siguiente->cantidad_contenidos-=1;
-                    pagina_alloc_siguiente->tamanio_ocupado-=sizeof(t_heap_metadata);
-                    return;
-                }else{
-                    //SOY EL PRIMER ALLOC
-                    alloc->isFree = true;
-                    alloc->nextAlloc = posterior->nextAlloc;
-
-                    int resta = next - sizeof(t_heap_metadata) - direccion;
-                    pagina_alloc_actual->tamanio_ocupado -= resta;
-                    pagina_alloc_actual->cantidad_contenidos-=1;
-                    if(alloc->nextAlloc == alloc->prevAlloc){
-                        free(alloc);
-                        free(posterior);
-
-                        eliminarPagina(pagina_alloc_actual);
-                        return 1;
-                    }
-                    guardarAlloc(alloc,direccion_fisica_alloc);
-                    eliminarcontenidoBydireccion(posterior, pagina_alloc_actual);
-                    eliminarcontenidoBydireccion(direccion + sizeof(t_heap_metadata), pagina_alloc_actual);
-                    free(posterior);
-                    pagina_alloc_siguiente->cantidad_contenidos-=1;
-                    pagina_alloc_siguiente->tamanio_ocupado-=sizeof(t_heap_metadata);
-                }
-            }
-            return;
-        }
-        else{
-            
-            alloc->nextAlloc = posterior->nextAlloc;
-            guardarAlloc(alloc,direccion_fisica_alloc);
-            int tamanio = config_memoria->TAMANIO_PAGINA - sizeof(t_heap_metadata) - direccion;
-            pagina_alloc_actual->tamanio_ocupado-=tamanio;
-            pagina_alloc_actual->cantidad_contenidos-=1;
-
-            eliminarcontenidoBydireccion(direccion+ sizeof(t_heap_metadata), pagina_alloc_actual);
-            
-            int resto = next - config_memoria->TAMANIO_PAGINA * pagina_alloc_siguiente->numero_pagina;
-            pagina_alloc_siguiente->tamanio_ocupado-= resto;
-            pagina_alloc_siguiente->cantidad_contenidos-=1;
-            eliminarcontenidoBydireccion(0, pagina_alloc_siguiente);
-            
-            free(posterior);
-            pagina_alloc_siguiente->cantidad_contenidos-=1;
-            pagina_alloc_siguiente->tamanio_ocupado-=sizeof(t_heap_metadata);
-            
-            if(pagina_alloc_siguiente->cantidad_contenidos== 0 && pagina_alloc_siguiente->numero_pagina == list_size(tabla_paginas->paginas))
-                liberarPagina(pagina_alloc_actual,carpincho_id);
-            
-            return;
-        }
-       
-    }*/
-
-    /*int posiblepagina = next / config_memoria->TAMANIO_PAGINA;
-    if(posiblepagina == pagina_alloc_actual->numero_pagina){
-        //ESTA TODO EN EL MISMO ALLOC
-        int resta = next - sizeof(t_heap_metadata) - direccion;
-        pagina_alloc_actual->tamanio_ocupado -= resta;
-        alloc->isFree;
-        int direccion_fisica = inicio + direccion+ config_memoria->TAMANIO_PAGINA * pagina_alloc_actual->marco_asignado;
-        guardarAlloc(alloc,direccion_fisica);
-        eliminarcontenidoBydireccion(direccion + sizeof(t_heap_metadata), pagina_alloc_actual);
-    }else{
-        //NO ESTA TODO EN LA MISMA PAGINA
-        int tamanio = config_memoria->TAMANIO_PAGINA - sizeof(t_heap_metadata) - direccion;
-        pagina_alloc_actual->tamanio_ocupado-=tamanio;
-
-        pagina_alloc_actual->cantidad_contenidos-=1;
-
-        eliminarcontenidoBydireccion(direccion, pagina_alloc_actual);
-        int resto = next - config_memoria->TAMANIO_PAGINA * pagina_alloc_siguiente->numero_pagina;
-        pagina_alloc_siguiente->tamanio_ocupado-= resto;
-        pagina_alloc_siguiente->cantidad_contenidos-=1;
-        eliminarcontenidoBydireccion(0, pagina_alloc_siguiente);
-
-        guardarAlloc(alloc, inicio + direccion + config_memoria->TAMANIO_PAGINA * pagina_alloc_actual->marco_asignado);
-    }*/
     free(alloc_actual);
     return 1;
 }

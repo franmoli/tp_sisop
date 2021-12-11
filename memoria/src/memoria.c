@@ -61,10 +61,19 @@ int main(int argc, char **argv)
     t_paquete* paquete = serializar_alloc(5);
     int dire_logica =memAlloc(paquete); 
 
+    freeAlloc(paquete);
+    free(paquete->buffer->stream);
+    free(paquete->buffer);
+    free(paquete);
+
     paquete = serializar_alloc(23);
     dire_logica =memAlloc(paquete); 
 
-
+    freeAlloc(paquete);
+    free(paquete->buffer->stream);
+    free(paquete->buffer);
+    free(paquete);
+    
     paquete = serializar_alloc(dire_logica);
     freeAlloc(paquete);
     free(paquete->buffer->stream);
