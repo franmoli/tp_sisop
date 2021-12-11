@@ -64,7 +64,7 @@ t_config_kernel *generar_config_kernel(t_config *config) {
 t_config_memoria *generarConfigMemoria(t_config *config){
     t_config_memoria *config_memoria = malloc(sizeof(t_config_memoria));
     config_memoria->IP = config_get_string_value(config, "IP");
-    config_memoria->PUERTO = config_get_int_value(config, "PUERTO");
+    config_memoria->PUERTO = config_get_string_value(config, "PUERTO");
     config_memoria->TAMANIO = config_get_int_value(config, "TAMANIO");   
     config_memoria->ALGORITMO_REEMPLAZO_MMU = config_get_string_value(config, "ALGORITMO_REEMPLAZO_MMU");
     config_memoria->TIPO_ASIGNACION = config_get_string_value(config, "TIPO_ASIGNACION");

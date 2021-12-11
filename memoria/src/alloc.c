@@ -104,6 +104,7 @@ int freeAlloc(t_paquete *paquete)
         free(posterior_alloc);
 
     }
+    guardarAlloc(alloc_actual,direccion_fisica_alloc);
     restarTamanioaPagina(pagina_alloc_actual,alloc_actual, next_anterior_alloc);
     free(alloc_actual);
     return 1;
@@ -403,7 +404,6 @@ int agregarPagina(t_pagina *pagina, t_heap_metadata *data, uint32_t nextAnterior
                 data->nextAlloc = NULL;
                 data->isFree = true;
 
-                t_contenidos_pagina *contenido = malloc(sizeof(t_contenidos_pagina));
                 contenido->contenido_pagina = FOOTER;
 
                 uint32_t resto = (nextAnterior - inicio)%config_memoria->TAMANIO_PAGINA;

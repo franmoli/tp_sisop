@@ -10,8 +10,7 @@ int main(int argc, char **argv)
     config_memoria = generarConfigMemoria(config);
     log_info(logger_memoria, "Configuración cargada correctamente");
     tamanio_memoria = malloc(config_memoria->TAMANIO);
-
-    socket_server = iniciar_servidor(config_memoria->IP, string_itoa(config_memoria->PUERTO), logger_memoria);
+    socket_server = iniciar_servidor(config_memoria->IP, (config_memoria->PUERTO), logger_memoria);
     
     socket_cliente_swap = crear_conexion(config_memoria->IP, "5002");
     if (socket_cliente_swap == -1) {
@@ -61,7 +60,6 @@ int main(int argc, char **argv)
     t_paquete* paquete = serializar_alloc(5);
     int dire_logica =memAlloc(paquete); 
 
-    freeAlloc(paquete);
     free(paquete->buffer->stream);
     free(paquete->buffer);
     free(paquete);
@@ -69,16 +67,22 @@ int main(int argc, char **argv)
     paquete = serializar_alloc(23);
     dire_logica =memAlloc(paquete); 
 
-    freeAlloc(paquete);
     free(paquete->buffer->stream);
     free(paquete->buffer);
     free(paquete);
     
+    /*paquete = serializar_alloc(23);
+    memAlloc(paquete); 
+
+    free(paquete->buffer->stream);
+    free(paquete->buffer);
+    free(paquete);
+
     paquete = serializar_alloc(dire_logica);
     freeAlloc(paquete);
     free(paquete->buffer->stream);
     free(paquete->buffer);
-    free(paquete);
+    free(paquete);*/
 
     /*while (1)
     {
