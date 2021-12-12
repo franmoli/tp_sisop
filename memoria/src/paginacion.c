@@ -62,20 +62,6 @@ t_contenidos_pagina *getLastHeaderContenidoByPagina(t_pagina *pagina)
 char *memRead(t_paquete *paquete)
 {
 
-    /*1- Deserializo el paquete -> carpincho_id, direccion_logica
-      2- Con la dir logica calculo la pagina y el desplazamiento -> pagina = dir logica / tamaño_pagina ... deplazamiento = resto
-      3- Con la pagina y el pid busco en la tlb
-        3b- Si ocurre un miss sumo metrica y voy a memoria
-        3c- Si no esta en memoria voy a swap y cambio bits (referido)
-        3d- Si estaba en tlb sumo metrica HIT
-      4- Obtenido el marco, junto con el desplazamiento voy a memoria y busco la info
-
-      typedef struct {
-	uint32_t size_reservar; -> direccion logica
-	uint32_t carpincho_id;
-} t_malloc_serializado;
-    */
-
    char*  contenido_escribir= NULL;
    int size = 0;
    int32_t direccion_logica ; 
@@ -90,6 +76,8 @@ char *memRead(t_paquete *paquete)
    if(numero_pagina > list_size(tabla_paginas)){
        return -1;
    }
+
+    //Ver que el contenido esta completo en la pagina, si no esta hay que fijarse en las paginas siguientes que contengan si estan en memoria (bit presencia en 1)
 
    int marco = buscarEnTLB(numero_pagina,tabla_paginas->pid);
    if (marco == -1){
@@ -151,6 +139,8 @@ int memWrite(t_paquete *paquete)
    if(numero_pagina > list_size(tabla_paginas)){
        return -1;
    }
+
+   //Ver que el contenido esta completo en la pagina, si no esta hay que fijarse en las paginas siguientes que contengan si estan en memoria (bit presencia en 1)
    
    int marco = buscarEnTLB(numero_pagina,tabla_paginas->pid);
    if (marco == -1){
