@@ -74,6 +74,7 @@ int recibirPaginaSwap(t_pagina* pagina){
     paquete = recibir_paquete(socket_cliente_swap);
     if(paquete->codigo_operacion != RECEPCION_PAGINA){
         //NO PUDO DEVOLVERLA
+        free(paquete);
         return -1;
     }
 
@@ -82,11 +83,15 @@ int recibirPaginaSwap(t_pagina* pagina){
 
     //Escribir pagina en memoria
     escribirPaginaEnMemoria(pagina, pagina_swap);
+    free(paquete);
     return 0;
 }
 
 
 int enviarPaginaSwap(t_pagina* pagina){
+
+    //Borro la pagina de la tlb, no deberia hacerlo aca pero no queria ponerlo en todos lados
+    eliminarDeTLB(pagina->numero_pagina, pagina->carpincho_id);
 
     //t_contenidos_pagina* contenido = list_get(pagina->listado_de_contenido,0);
     uint32_t inicio = tamanio_memoria;
@@ -123,6 +128,7 @@ int enviarPaginaSwap(t_pagina* pagina){
         }
 
     }
+    list_iterator_destroy(list_iterator);
 
     t_info_carpincho_swap *contenido = list_get(pagina_swap->contenido_carpincho_info, 0);
     void *pagina_serial = serializar_pagina(pagina_swap);
@@ -135,6 +141,9 @@ int enviarPaginaSwap(t_pagina* pagina){
     paquete->codigo_operacion = SWAPSAVE;
     paquete->buffer = buffer;
 
+    if(socket_cliente_swap < 0)
+        return -1;
+        
     enviar_paquete(paquete, socket_cliente_swap);
     
     t_paquete* paquete_recibir = recibir_paquete(socket_cliente_swap);

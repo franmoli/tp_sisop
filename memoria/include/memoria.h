@@ -9,11 +9,10 @@
 #include "mem-dump.h"
 #include "enviar-datos.h"
 
-static void *ejecutar_operacion(int client);
+static void *ejecutar_operacion();
 void imprimirMetricas();
 void limpiarTlb();
 void generarDump();
-void recibirSignal(int signal);
 void inicializarCarpincho(int socket_cliente);
 
 char* cargarTextoTLb(t_list *paginas, int carpincho_id);

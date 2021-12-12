@@ -33,8 +33,8 @@ void* carpincho1_func(void* config){
 	printf("C1 - Freno a C1\n");
 	//sem_wait(&semCarpincho1);
 
-	printf("C1 - Reservo un alloc de 23 bytes\n");
-	mate_pointer alloc1 = mate_memalloc(&instanceC1, 23);
+	//printf("C1 - Reservo un alloc de 23 bytes\n");
+	//mate_pointer alloc1 = mate_memalloc(&instanceC1, 23);
 
 	printf("C1 - Libero al C2\n");
 	//sem_post(&semCarpincho2);
@@ -42,8 +42,8 @@ void* carpincho1_func(void* config){
 	printf("C1 - Freno a C1\n");
 	//sem_wait(&semCarpincho1);
 
-	printf("C1 - Reservo un alloc de 23 bytes\n");
-	mate_pointer alloc2 = mate_memalloc(&instanceC1, 23);
+	//printf("C1 - Reservo un alloc de 23 bytes\n");
+	//mate_pointer alloc2 = mate_memalloc(&instanceC1, 23);
 
 	printf("C1 - Libero al C2\n");
 	//sem_post(&semCarpincho2);
@@ -51,8 +51,8 @@ void* carpincho1_func(void* config){
 	printf("C1 - Freno a C1\n");
 	//sem_wait(&semCarpincho1);
 
-	printf("C1 - Reservo un alloc de 10 bytes\n");
-	mate_pointer alloc3 = mate_memalloc(&instanceC1, 10);
+	/*printf("C1 - Reservo un alloc de 10 bytes\n");
+	mate_pointer alloc3 = mate_memalloc(&instanceC1, 10);*/
 
 	printf("C1 - Libero al C2\n");
 	//sem_post(&semCarpincho2);
@@ -78,7 +78,7 @@ void* carpincho1_func(void* config){
 	printf("C1 - Freno a C1\n");
 	//sem_wait(&semCarpincho1);
 
-	printf("C1 - Reservo un alloc de 23 bytes-2\n");
+	/*printf("C1 - Reservo un alloc de 23 bytes-2\n");
 	mate_pointer alloc4 = mate_memalloc(&instanceC1, 23);
 
 	printf("C1 - Reservo un alloc de 23 bytes\n");
@@ -88,7 +88,7 @@ void* carpincho1_func(void* config){
 	mate_pointer alloc6 = mate_memalloc(&instanceC1, 23);
 
 	printf("C1 - Reservo un alloc de 23 bytes\n");
-	mate_pointer alloc7 = mate_memalloc(&instanceC1, 23);
+	mate_pointer alloc7 = mate_memalloc(&instanceC1, 23);*/
 
 	printf("C1 - Libero al C2 para que finalice\n");
 	//sem_post(&semCarpincho2);

@@ -2,18 +2,15 @@
 
 int getPaginaByDireccionLogica(uint32_t direccion)
 {
-    log_info(logger_memoria, "Dire:%d", direccion);
-    log_info(logger_memoria, "config:%d", config_memoria->TAMANIO_PAGINA);
+    if(direccion < 0)
+        return 0;
+        
     return direccion / config_memoria->TAMANIO_PAGINA;
 }
 int getPaginaByDireccionFisica(uint32_t direccion)
 {
-    log_info(logger_memoria, "Dire:%d", direccion);
     uint32_t inicio = tamanio_memoria;
-    log_info(logger_memoria, "inicio:%d", inicio);
     uint32_t resta = direccion - inicio;
-    log_info(logger_memoria, "resta:%d", resta);
-    log_info(logger_memoria, "config:%d", config_memoria->TAMANIO_PAGINA);
     return resta / config_memoria->TAMANIO_PAGINA;
 }
 int getPrimeraPaginaDisponible(int size, t_tabla_paginas *tabla_paginas)
@@ -65,20 +62,6 @@ t_contenidos_pagina *getLastHeaderContenidoByPagina(t_pagina *pagina)
 char *memRead(t_paquete *paquete)
 {
 
-    /*1- Deserializo el paquete -> carpincho_id, direccion_logica
-      2- Con la dir logica calculo la pagina y el desplazamiento -> pagina = dir logica / tamaño_pagina ... deplazamiento = resto
-      3- Con la pagina y el pid busco en la tlb
-        3b- Si ocurre un miss sumo metrica y voy a memoria
-        3c- Si no esta en memoria voy a swap y cambio bits (referido)
-        3d- Si estaba en tlb sumo metrica HIT
-      4- Obtenido el marco, junto con el desplazamiento voy a memoria y busco la info
-
-      typedef struct {
-	uint32_t size_reservar; -> direccion logica
-	uint32_t carpincho_id;
-} t_malloc_serializado;
-    */
-
    char*  contenido_escribir= NULL;
    int size = 0;
    int32_t direccion_logica ; 
@@ -88,21 +71,37 @@ char *memRead(t_paquete *paquete)
    int inicio = tamanio_memoria;
    int numero_pagina = (direccion_logica - inicio) / config_memoria->TAMANIO_PAGINA;
    t_tabla_paginas* tabla_paginas = buscarTablaPorPID(socket_client);
+   t_pagina* pagina = malloc(sizeof(t_pagina));
 
    if(numero_pagina > list_size(tabla_paginas)){
        return -1;
    }
 
-   t_pagina* pagina = list_get(tabla_paginas->paginas,numero_pagina);
-   if(pagina->bit_presencia == 0){
-       //TRAER DE SWAP
-       //getMarcoParaPagina(tabla_paginas);
+    //Ver que el contenido esta completo en la pagina, si no esta hay que fijarse en las paginas siguientes que contengan si estan en memoria (bit presencia en 1)
+
+   int marco = buscarEnTLB(numero_pagina,tabla_paginas->pid);
+   if (marco == -1){
+       pagina = list_get(tabla_paginas->paginas,numero_pagina);
+       if(pagina->bit_presencia != 0){
+            marco = buscarMarcoEnMemoria(numero_pagina,tabla_paginas->pid);
+       }else
+       {
+           //TRAER DE SWAP
+            marco = traerPaginaAMemoria(pagina);
+            if(marco == -1){
+                //No pude traer a memoria
+                return -1;
+            }
+       }
    }
+
+   agregarTLB(numero_pagina,marco,tabla_paginas->pid);
     
    int desplazamiento = (direccion_logica-inicio) % config_memoria->TAMANIO_PAGINA;
 
-   char * contenido = traerDeMemoria(pagina->marco_asignado,desplazamiento, size);
+   char * contenido = traerDeMemoria(marco,desplazamiento, size);
 
+    pagina = list_get(tabla_paginas->paginas,numero_pagina);
     if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "LRU") == 0){
         actualizarLRU(pagina);
     }else
@@ -135,22 +134,38 @@ int memWrite(t_paquete *paquete)
    int inicio = tamanio_memoria;
    int numero_pagina = (direccion_logica - inicio) / config_memoria->TAMANIO_PAGINA;
    t_tabla_paginas* tabla_paginas = buscarTablaPorPID(socket_client);
+   t_pagina* pagina = malloc(sizeof(t_pagina));
 
    if(numero_pagina > list_size(tabla_paginas)){
        return -1;
    }
 
-   t_pagina* pagina = list_get(tabla_paginas->paginas,numero_pagina);
-   if(pagina->bit_presencia == 0){
-       //TRAER DE SWAP
-       //getMarcoParaPagina(tabla_paginas);
+   //Ver que el contenido esta completo en la pagina, si no esta hay que fijarse en las paginas siguientes que contengan si estan en memoria (bit presencia en 1)
+   
+   int marco = buscarEnTLB(numero_pagina,tabla_paginas->pid);
+   if (marco == -1){
+       pagina = list_get(tabla_paginas->paginas,numero_pagina);
+       if(pagina->bit_presencia != 0){
+            marco = buscarMarcoEnMemoria(numero_pagina,tabla_paginas->pid);
+       }else
+       {
+           //TRAER DE SWAP
+            marco = traerPaginaAMemoria(pagina);
+            if(marco == -1){
+                //No pude traer a memoria
+                return -1;
+            }
+       }
    }
+
+   agregarTLB(numero_pagina,marco,tabla_paginas->pid);
     
    int desplazamiento = (direccion_logica-inicio) % config_memoria->TAMANIO_PAGINA;
 
    escribirEnMemoria(pagina->marco_asignado,desplazamiento, size, contenido_escribir);
 
-   if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "LRU") == 0){
+    pagina = list_get(tabla_paginas->paginas,numero_pagina);
+    if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "LRU") == 0){
         actualizarLRU(pagina);
     }else
     {
@@ -445,14 +460,17 @@ int getMarco(t_tabla_paginas* tabla_paginas){
 int getIndexByPid(int pid){
     t_list_iterator *list_iterator = list_iterator_create(tabla_procesos);
     int i = 0;
+    int indice = 0;
      while (list_iterator_has_next(list_iterator))
         {
             t_tabla_paginas* tabla = list_iterator_next(list_iterator);
             if(tabla->pid == pid){
-                return i;
+                indice = i;
             }
             i++;
         }
+    list_iterator_destroy(list_iterator);
+    return indice;
 }
 int getMarcoParaPagina(t_tabla_paginas* tabla_paginas){
     
@@ -540,7 +558,6 @@ int buscarMarcoEnMemoria(int numero_pagina_buscada, int id)
 int solicitarPaginaNueva(uint32_t carpincho_id)
 {
 
-    t_tabla_paginas *tabla_paginas = buscarTablaPorPID(carpincho_id);
     bool trajeDeMemoria = false;
 
     //Para agregar la pagina nueva primero tengo que ver si puedo agregarla si es asignacion fija o dinamica
@@ -554,6 +571,8 @@ int solicitarPaginaNueva(uint32_t carpincho_id)
     if(marco == -1){
         log_info(logger_memoria, "Tengo que ir a swap");
         marco = reemplazarPagina(tabla_paginas);
+        if(marco < 0)
+            return -1;
     }
     int numero_pagina = 0;
     if (list_size(tabla_paginas->paginas) > 0)
@@ -583,6 +602,7 @@ int solicitarPaginaNueva(uint32_t carpincho_id)
             agregarAsignacion(pagina); 
         }else{
             //Resolver reemplazo Clock
+            replaceClock(pagina);
         }
            
     }
@@ -641,25 +661,43 @@ void liberarPagina(t_pagina* pagina, uint32_t carpincho_id){
     tabla_paginas->paginas_en_memoria-=1;
 }
 
-t_pagina* traerPaginaAMemoria(t_pagina* pagina_alloc_actual){
+int traerPaginaAMemoria(t_pagina* pagina_alloc_actual){
 
     t_tabla_paginas* tabla = buscarTablaPorPID(pagina_alloc_actual->carpincho_id);
-    int marco = reemplazarPagina(tabla);
-    pagina_alloc_actual->marco_asignado = marco;
-    int resultado = recibirPaginaSwap(pagina_alloc_actual);
-    if(resultado == -1){
-        //Swap no trajo nada
-        //return -1;
+
+    // Busco pagina que esta en swap, puede ser que haya liberado espacio y que ahora tenga un marco libre en memoria
+    int marco = -1;
+    int trajeDeMemoria = false;
+    marco = getMarco(tabla);
+    if(marco < -1){
+        log_error(logger_memoria,"No se pudo asignar un marco");
+        return;
+    }if (marco > -1){
+        trajeDeMemoria = true;
     }
+    if(marco == -1){
+        log_info(logger_memoria, "Tengo que ir a swap");
+        marco = reemplazarPagina(tabla_paginas);
+        if(marco < 0)
+            return -1;
+        int resultado = recibirPaginaSwap(pagina_alloc_actual);
+        if(resultado == -1){
+            //Swap no trajo nada
+            //Capaz tengo que mandar devuelta la pagina anterior
+            return -1;
+        }
+    }
+
+    pagina_alloc_actual->marco_asignado = marco;
     pagina_alloc_actual->bit_presencia = 1;
-    if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "LRU") == 0){
+    if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "LRU") == 0 || trajeDeMemoria){
         agregarAsignacion(pagina_alloc_actual);
     }else
     {
         replaceClock(pagina_alloc_actual);
     }
 
-    return pagina_alloc_actual;
+    return pagina_alloc_actual->marco_asignado;
 }
 
 int getPosicionEnTablaDeProcesos(t_tabla_paginas* tabla){
