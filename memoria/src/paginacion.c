@@ -85,26 +85,36 @@ char *memRead(t_paquete *paquete)
    int inicio = tamanio_memoria;
    int numero_pagina = (direccion_logica - inicio) / config_memoria->TAMANIO_PAGINA;
    t_tabla_paginas* tabla_paginas = buscarTablaPorPID(socket_client);
+   t_pagina* pagina = malloc(sizeof(t_pagina));
 
    if(numero_pagina > list_size(tabla_paginas)){
        return -1;
    }
 
-   t_pagina* pagina = list_get(tabla_paginas->paginas,numero_pagina);
-   if(pagina->bit_presencia == 0){
-       //TRAER DE SWAP
-       int marco = traerPaginaAMemoria(pagina);
-       if(marco == -1){
-           //No pude traer a memoria
-           return -1;
+   int marco = buscarEnTLB(numero_pagina,tabla_paginas->pid);
+   if (marco == -1){
+       pagina = list_get(tabla_paginas->paginas,numero_pagina);
+       if(pagina->bit_presencia != 0){
+            marco = buscarMarcoEnMemoria(numero_pagina,tabla_paginas->pid);
+       }else
+       {
+           //TRAER DE SWAP
+            marco = traerPaginaAMemoria(pagina);
+            if(marco == -1){
+                //No pude traer a memoria
+                return -1;
+            }
        }
    }
+
+   agregarTLB(numero_pagina,marco,tabla_paginas->pid);
     
    int desplazamiento = (direccion_logica-inicio) % config_memoria->TAMANIO_PAGINA;
 
-   char * contenido = traerDeMemoria(pagina->marco_asignado,desplazamiento, size);
+   char * contenido = traerDeMemoria(marco,desplazamiento, size);
 
     if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "LRU") == 0){
+        pagina = list_get(tabla_paginas->paginas,numero_pagina);
         actualizarLRU(pagina);
     }else
     {
