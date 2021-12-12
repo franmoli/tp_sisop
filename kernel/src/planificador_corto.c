@@ -52,11 +52,11 @@ void *planificador_corto_plazo_sjf (void *multiprocesamiento_p){
         }
         if(*multiprocesamiento && list_size(lista_ready)){
             int index = -1;
-            int estimacion_aux;
-            printf("Comparando carpinchos de entre %d\n", list_size(lista_ready));
+            int estimacion_aux = 0;;
             //se busca la estimacion menor
             for(int i = 0; i < list_size(lista_ready); i++){
                 aux = list_get(lista_ready, i);
+                printf("Estimacion %d\n", aux->estimacion);
                 if(aux->estimacion < estimacion_aux || i == 0){
                     estimacion_aux = aux->estimacion;
                     index = i;

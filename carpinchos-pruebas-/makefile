@@ -31,7 +31,9 @@ build/%: %.c
 clean:
 	-$(RM) build
 
-run: clean build $(CARPINCHOS)
+run: rundl
+
+run1: clean build $(CARPINCHOS)
 	./build/PruebaBase_Carpincho1 cfg/matelib.cfg
 
 run2: clean build $(CARPINCHOS)
@@ -43,8 +45,15 @@ run3: clean build $(CARPINCHOS)
 run4: clean build $(CARPINCHOS)
 	./build/PruebaPlanificacion cfg/matelib.cfg
 
-runDL: clean build $(CARPINCHOS)
+run5: clean build $(CARPINCHOS)
+	./build/PruebaSuspension cfg/matelib.cfg
+
+run6: clean build $(CARPINCHOS)
 	./build/PruebaDeadlock cfg/matelib.cfg
+
+runDL: run6
+
+rundl: runDL
 
 vrun: clean build $(CARPINCHOS)
 	valgrind ./build/PruebaBase_Carpincho1 cfg/matelib.cfg

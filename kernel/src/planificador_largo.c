@@ -53,7 +53,7 @@ void atender_proceso (void* parametro ){
         //task_aux = malloc(sizeof(t_task));
         
         //Analizo el código de operación recibido y ejecuto acciones según corresponda
-        printf("Paquete recibido %d\n", paquete->codigo_operacion);
+        //printf("Paquete recibido %d\n", paquete->codigo_operacion);
         t_task *task = malloc(sizeof(t_task));
 
         switch(paquete->codigo_operacion) {
@@ -183,6 +183,8 @@ t_proceso *nuevo_carpincho(int socket_cliente){
     nuevo_proceso->estimar = false;
     nuevo_proceso->termino_rafaga = false;
     nuevo_proceso->block = false;
+    nuevo_proceso->salida_exit = false;
+    nuevo_proceso->salida_block = false;
     nuevo_proceso->task_list = list_create();
     nuevo_proceso->socket_carpincho = socket_cliente;
 
@@ -240,6 +242,7 @@ void *hilo_salida_a_exit(void *multiprogramacion_disponible_p){
         int tamanio_lista_blocked = list_size(lista_blocked);
         int tamanio_lista_ready = list_size(lista_ready);
         int index = 0;
+        t_recurso_asignado *recurso_asignado_aux = NULL;
         t_proceso *aux = NULL;
 
 
@@ -270,7 +273,24 @@ void *hilo_salida_a_exit(void *multiprogramacion_disponible_p){
 
 
         list_add(lista_exit, aux);
-        aux->status = EXIT;
+        aux->status = EXIT; 
+        log_info(logger_kernel, "Terminando con proceso %d", aux->id);
+
+        //Liberar recursos asignados
+        eliminar_solicitud_de_sem(aux->id);
+
+        while(index < list_size(lista_recursos_asignados)){
+            recurso_asignado_aux = list_get(lista_recursos_asignados, index);
+            if(recurso_asignado_aux->id_asignado == aux->id){
+                
+                list_remove(lista_recursos_asignados, index);
+                printf("Posteando semaforo %d\n", aux->id);
+                postear_semaforo(recurso_asignado_aux->nombre_recurso, aux->id);
+            }
+            index++;
+        }
+
+        
         
         sem_wait(&mutex_multiprogramacion);
         multiprogramacion_disponible = multiprogramacion_disponible + 1;
@@ -317,4 +337,24 @@ void enviar_error(int socket){
 
     
     return;
+}
+
+void eliminar_solicitud_de_sem(int id){
+    int index = 0;
+    int index2 = 0;
+    t_semaforo *aux = NULL;
+    int *aux_solicitante = NULL;
+
+    while(index < list_size(lista_semaforos)){
+        aux = list_get(lista_semaforos, index);
+        while(index2 < list_size(aux->solicitantes)){
+            aux_solicitante = list_get(aux->solicitantes, index2);
+            if(*aux_solicitante == id){
+                list_remove(aux->solicitantes, index2);
+                aux->value = aux->value + 1;
+            }
+            index2++;
+        }
+        index++;
+    }
 }

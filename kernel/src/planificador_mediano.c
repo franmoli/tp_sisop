@@ -22,6 +22,7 @@ void *planificador_mediano_plazo(void *_){
 
         if(tamanio_block > 0 && tamanio_ready == 0 && tamanio_new > 0){
             
+            
             mover_proceso_de_lista(lista_blocked, lista_s_blocked, tamanio_block - 1, S_BLOCKED);
             sem_wait(&mutex_multiprogramacion);
             multiprogramacion_disponible = multiprogramacion_disponible + 1;
@@ -47,8 +48,8 @@ void *salida_de_block(void *_){
             
             t_proceso *aux = list_get(lista_blocked, index);
             if(aux->salida_block){
-
-                mover_proceso_de_lista(lista_blocked, lista_ready, 0, READY);
+                printf("Mediano sacó de block al %d\n", aux->id);
+                mover_proceso_de_lista(lista_blocked, lista_ready, index, READY);
 
                 encontrado = true;
             }

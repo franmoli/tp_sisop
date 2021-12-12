@@ -16,6 +16,8 @@ void iniciar_semaforos_generales();
 void iniciar_debug_console();
 void *debug_console(void *_ );
 void print_task_lists();
+void print_sem_asignados();
+void print_lists();
 
 t_config *config_file;
 
