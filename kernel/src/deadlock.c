@@ -95,7 +95,6 @@ char *proceso_bloqueado_por_sem(int id){
     return NULL;
 }
 
-<<<<<<< HEAD
 void agregar_recursos_a_lista(int id, t_list *lista){
 
     bool encontrar_asignado_a_id(void *elemento){
@@ -122,10 +121,6 @@ void agregar_recursos_a_lista(int id, t_list *lista){
 
 void print_lista_recursos_en_dl(t_list *lista){
     
-=======
-//Se puede usar la funcion de arriba, agregando un parametro para sacar el valor del semaforo por referencia
-char *proceso_bloqueado_por_sem(int id){
->>>>>>> 89f6c4708869cc1d0f3a359339d0142a5baafbf1
     int index = 0;
     char *aux = NULL;
     while(index < list_size(lista)){
