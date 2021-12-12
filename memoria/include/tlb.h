@@ -12,4 +12,6 @@ void reordenarLRU(int numero_pagina_buscada, int id);
 
 void agregarTLB(int pagina, int marco, int id);
 
+void eliminarDeTLB(int numero_pagina,int carpincho_id);
+
 #endif

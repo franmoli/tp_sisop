@@ -90,6 +90,9 @@ int recibirPaginaSwap(t_pagina* pagina){
 
 int enviarPaginaSwap(t_pagina* pagina){
 
+    //Borro la pagina de la tlb, no deberia hacerlo aca pero no queria ponerlo en todos lados
+    eliminarDeTLB(pagina->numero_pagina, pagina->carpincho_id);
+
     //t_contenidos_pagina* contenido = list_get(pagina->listado_de_contenido,0);
     uint32_t inicio = tamanio_memoria;
     t_pagina_swap *pagina_swap = malloc(sizeof(t_pagina_swap));
