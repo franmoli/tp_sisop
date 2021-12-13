@@ -218,7 +218,7 @@ void* serializar_pagina(t_pagina_swap* pagina) {
         int strlen_contenido = strlen(contenido->contenido);
         memcpy(stream + offset, &(strlen_contenido), sizeof(int));
 	    offset += sizeof(int);
-        memcpy(stream + offset, &(contenido->contenido), strlen_contenido + 1);
+        memcpy(stream + offset, (contenido->contenido), strlen_contenido + 1);
 	    offset += strlen_contenido + 1;
     }
 
