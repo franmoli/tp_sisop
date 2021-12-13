@@ -152,11 +152,13 @@ char *memRead(t_paquete *paquete)
                 char* concateno = traerDeMemoria(marco,desplazamiento, config_memoria->TAMANIO_PAGINA);
                 memcpy(contenido + tamanio, concateno ,config_memoria->TAMANIO_PAGINA);
                 tamanio += config_memoria->TAMANIO_PAGINA;
+                free(concateno);
             }else
             {
                 char* concateno = traerDeMemoria(marco,desplazamiento, size - tamanio);
                 memcpy(contenido + tamanio, concateno ,size - tamanio);
                 tamanio += (size - tamanio);
+                free(concateno);
 
             }
 
@@ -179,12 +181,8 @@ char* traerDeMemoria(int marco, int desplazamiento, int size) {
     char* contenido = malloc(size);
     uint32_t dir_fisica = tamanio_memoria + marco * config_memoria->TAMANIO_PAGINA + desplazamiento;
     memcpy(contenido, dir_fisica, size);
-    if(size <0)
-        size = 0;
-
-    contenido = string_substring(contenido, 0,size);
-
-    return contenido;
+  
+    return string_substring(contenido, 0,size);
 }
 
 int memWrite(t_paquete *paquete)
@@ -194,7 +192,7 @@ int memWrite(t_paquete *paquete)
    int32_t direccion_logica ; 
 
    deserializar(paquete,6,CHAR_PTR,&contenido_escribir,INT,&direccion_logica,INT,&size);
-   
+   free(paquete);
    int inicio = tamanio_memoria;
    int numero_pagina = (direccion_logica - inicio) / config_memoria->TAMANIO_PAGINA;
    t_tabla_paginas* tabla_paginas = buscarTablaPorPID(socket_client);
@@ -203,7 +201,7 @@ int memWrite(t_paquete *paquete)
    if(numero_pagina > list_size(tabla_paginas)){
        return -1;
    }
-
+   free(contenido_escribir);
    //Ver que el contenido esta completo en la pagina, si no esta hay que fijarse en las paginas siguientes que contengan si estan en memoria (bit presencia en 1)
    
    int marco = buscarEnTLB(numero_pagina,tabla_paginas->pid);

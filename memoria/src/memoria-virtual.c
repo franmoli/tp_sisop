@@ -103,19 +103,17 @@ int enviarPaginaSwap(t_pagina* pagina){
     pagina_swap->numero_pagina = pagina->numero_pagina;
 
     t_list_iterator *list_iterator = list_iterator_create(pagina->listado_de_contenido);
-
     while(list_iterator_has_next(list_iterator)){
 
         t_contenidos_pagina* contenido = list_iterator_next(list_iterator);
 
         if(contenido->contenido_pagina == RESTO_CONTENIDO || contenido->contenido_pagina == CONTENIDO){
             int offset = (contenido->dir_comienzo - inicio) % config_memoria->TAMANIO_PAGINA;
-            char* cont = traerDeMemoria(pagina->marco_asignado, offset, contenido->tamanio);
             t_info_carpincho_swap* contenido_swap = malloc(sizeof(t_info_carpincho_swap));
             contenido_swap->size = contenido->tamanio;
             contenido_swap->inicio = contenido->dir_comienzo;
             contenido_swap->fin = contenido->dir_fin;
-            contenido_swap->contenido = cont;
+            contenido_swap->contenido = traerDeMemoria(pagina->marco_asignado, offset, contenido->tamanio);
             list_add(pagina_swap->contenido_carpincho_info,contenido_swap);
         }else
         {
@@ -126,11 +124,8 @@ int enviarPaginaSwap(t_pagina* pagina){
             heap_swap->contenido = heap;
             list_add(pagina_swap->contenido_heap_info,heap_swap);
         }
-
     }
     list_iterator_destroy(list_iterator);
-
-    t_info_carpincho_swap *contenido = list_get(pagina_swap->contenido_carpincho_info, 0);
     void *pagina_serial = serializar_pagina(pagina_swap);
 
     t_buffer *buffer = malloc(sizeof(t_buffer));
@@ -145,8 +140,29 @@ int enviarPaginaSwap(t_pagina* pagina){
         return -1;
         
     enviar_paquete(paquete, socket_cliente_swap);
+    //free(cont);
     free(pagina_serial);
     free(buffer);
+
+    list_iterator = list_iterator_create(pagina_swap->contenido_heap_info);
+    while(list_iterator_has_next(list_iterator))
+    {
+         t_info_heap_swap* heap_swap  = list_iterator_next(list_iterator);
+         free(heap_swap->contenido);
+         free(heap_swap);
+    }
+    list_iterator_destroy(list_iterator);
+    list_iterator = list_iterator_create(pagina_swap->contenido_carpincho_info);
+    while(list_iterator_has_next(list_iterator))
+    {
+         t_info_carpincho_swap* heap_swap  = list_iterator_next(list_iterator);
+         free(heap_swap->contenido);
+         free(heap_swap);
+    }
+    list_destroy(pagina_swap->contenido_heap_info);
+    list_destroy(pagina_swap->contenido_carpincho_info);
+    
+    list_iterator_destroy(list_iterator);
     free(pagina_swap);
 
     t_paquete* paquete_recibir = recibir_paquete(socket_cliente_swap);
