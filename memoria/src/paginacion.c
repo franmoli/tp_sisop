@@ -62,17 +62,15 @@ t_contenidos_pagina *getLastHeaderContenidoByPagina(t_pagina *pagina)
 char *memRead(t_paquete *paquete)
 {
 
-   char*  contenido_escribir= NULL;
-   int size = 0;
    int32_t direccion_logica ; 
 
-   deserializar(paquete,6,CHAR_PTR,&contenido_escribir,INT,&direccion_logica,INT,&size);
+   deserializar(paquete,2,INT,&direccion_logica);
    
    int inicio = tamanio_memoria;
    int numero_pagina = (direccion_logica - inicio) / config_memoria->TAMANIO_PAGINA;
+   int offset = (direccion_logica - inicio) % config_memoria->TAMANIO_PAGINA;
    t_tabla_paginas* tabla_paginas = buscarTablaPorPID(socket_client);
    t_pagina* pagina = malloc(sizeof(t_pagina));
-   char * contenido = malloc(size);
 
    if(numero_pagina > list_size(tabla_paginas)){
        return -1;
@@ -95,6 +93,11 @@ char *memRead(t_paquete *paquete)
             }
        }
    }
+
+   t_heap_metadata* heap = traerAllocDeMemoria(inicio + marco*config_memoria->TAMANIO_PAGINA + offset);
+   int size = heap->nextAlloc - direccion_logica - 9;
+   char * contenido = malloc(size);
+   free(heap);
 
    agregarTLB(numero_pagina,marco,tabla_paginas->pid);
     
