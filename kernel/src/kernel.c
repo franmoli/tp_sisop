@@ -111,7 +111,7 @@ void mover_proceso_de_lista(t_list *origen, t_list *destino, int index, int stat
     t_proceso *aux;
     sem_wait(&mutex_listas);
         aux = list_remove(origen, index);
-        printf("Moviendo proceso - %d | to: %d\n", aux->id , status);
+        //printf("Moviendo proceso - %d | to: %d\n", aux->id , status);
         if(status == READY)
             aux->entrada_a_ready = clock();
         aux->status =  status;
@@ -127,16 +127,18 @@ void avisar_cambio(){
     sem_wait(&mutex_cant_procesos);
     //log_info(logger_kernel,"Avise de un cambio de listas");
     //Aviso que hubo un cambio de listas
-    printf("Cantidad de procesos %d\n", cantidad_de_procesos);
+    //printf("Cantidad de procesos %d\n", cantidad_de_procesos);
     for(int i = 0; i < cantidad_de_procesos; i++){
+        //printf("Un post\n");
         sem_post(&actualizacion_de_listas_1);
     }
 
     //Espero que todos los procesos hayan recibido el aviso y ejecutado
     for(int i = 0; i < cantidad_de_procesos; i++){
+        //printf("Un wait\n");        
         sem_wait(&actualizacion_de_listas_1_recibido);
     }
-
+    //printf("Pasó todos los wait\n");
     //Habilito que vuelvan a esperar una vez ya resuelto todo lo que tengan que hacer con su nuevo estado
     for(int i = 0; i < cantidad_de_procesos; i++){
         sem_post(&actualizacion_de_listas_2);

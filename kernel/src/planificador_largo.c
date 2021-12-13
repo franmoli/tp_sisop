@@ -107,12 +107,7 @@ void atender_proceso (void* parametro ){
                 break;
                 
             case CLIENTE_DESCONECTADO:
-                log_info(logger_kernel, "Desconectando cliente %d", socket_cliente);
-                
-                //Agregar task de desconexion en caso que se encuentre en exec con prioridad máxima en caso que sea una desconexion forzosa
-                task->id = CLIENTE_DESCONECTADO;
-                list_add_in_index(carpincho->task_list, 0, task);
-
+                //log_info(logger_kernel, "Desconectando cliente %d", socket_cliente);
                 //Se se pide la salida a exit del proceso
                 carpincho->salida_exit = true;
                 sem_post(&salida_a_exit);
@@ -275,6 +270,11 @@ void *hilo_salida_a_exit(void *multiprogramacion_disponible_p){
         list_add(lista_exit, aux);
         aux->status = EXIT; 
         log_info(logger_kernel, "Terminando con proceso %d", aux->id);
+        
+        //Agregar task de desconexion en caso que se encuentre en exec con prioridad máxima en caso que sea una desconexion forzosa
+        t_task *task = malloc(sizeof(t_task));
+        task->id = CLIENTE_DESCONECTADO;
+        list_add_in_index(aux->task_list, 0, task);
 
         //Liberar recursos asignados
         eliminar_solicitud_de_sem(aux->id);
@@ -284,11 +284,11 @@ void *hilo_salida_a_exit(void *multiprogramacion_disponible_p){
             if(recurso_asignado_aux->id_asignado == aux->id){
                 
                 list_remove(lista_recursos_asignados, index);
-                printf("Posteando semaforo %d\n", aux->id);
                 postear_semaforo(recurso_asignado_aux->nombre_recurso, aux->id);
             }
             index++;
         }
+
 
         
         
@@ -296,13 +296,13 @@ void *hilo_salida_a_exit(void *multiprogramacion_disponible_p){
         multiprogramacion_disponible = multiprogramacion_disponible + 1;
         sem_post(&mutex_multiprogramacion);
 
-        //Aviso a todos los procesos, asi finaliza el hilo correspondiente
-        avisar_cambio();
 
         sem_wait(&mutex_cant_procesos);
         cantidad_de_procesos = cantidad_de_procesos - 1;
         sem_post(&mutex_cant_procesos);
         
+        //Aviso a todos los procesos, asi finaliza el hilo correspondiente
+        avisar_cambio();
     }
     return NULL;
 }

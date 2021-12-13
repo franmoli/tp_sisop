@@ -23,7 +23,6 @@ void iniciar_planificador_corto(){
         planificador = planificador_corto_plazo_hrrn;
 
     }else{
-
         log_error(logger_kernel, "Planificador no soportado/no reconocido");
         return;
     }
@@ -56,7 +55,6 @@ void *planificador_corto_plazo_sjf (void *multiprocesamiento_p){
             //se busca la estimacion menor
             for(int i = 0; i < list_size(lista_ready); i++){
                 aux = list_get(lista_ready, i);
-                printf("Estimacion %d\n", aux->estimacion);
                 if(aux->estimacion < estimacion_aux || i == 0){
                     estimacion_aux = aux->estimacion;
                     index = i;
@@ -125,10 +123,9 @@ void *planificador_corto_plazo_hrrn (void *multiprocesamiento_p){
 
 void estimar(t_proceso *proceso){
     float alfa = config_kernel->ALFA;
-    printf("Estimacion con la que vengo %d\n", proceso->estimacion);
     proceso->estimacion = (alfa * proceso->ejecucion_anterior) + (( 1 - alfa) * proceso->estimacion);
     proceso->estimar = false;
-    printf("Estimo que la proxima ejecucion del proceso %d: %d - ejecutó la vez pasada %d | | | alfa %f \n", proceso->id, proceso->estimacion, proceso->ejecucion_anterior, alfa);
+    //printf("Estimo que la proxima ejecucion del proceso %d: %d - ejecutó la vez pasada %d | | | alfa %f \n", proceso->id, proceso->estimacion, proceso->ejecucion_anterior, alfa);
     return;
 }
 

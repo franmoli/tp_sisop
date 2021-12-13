@@ -7,16 +7,9 @@ void iniciar_deadlock() {
 
 void* algoritmo_deteccion(void *_) {
     while(1) {
-<<<<<<< HEAD
-        sleep(config_kernel->TIEMPO_DEADLOCK / 1000);
-        log_info(logger_kernel, "Ejecutando algoritmo de deadlock");
-        //print_semaforos();
-        //print_sem_asignados();
-=======
-        log_info(logger_kernel, "Esperando ejecución de algoritmo de deteccion de deadlock");
         sleep(config_kernel->TIEMPO_DEADLOCK/1000);
+        log_info(logger_kernel, "Ejecutando algoritmo detecion de deadlock");
         
->>>>>>> 89f6c4708869cc1d0f3a359339d0142a5baafbf1
         int index = 0;
         int index2 = 0;
         int index3 = 0;
@@ -29,7 +22,7 @@ void* algoritmo_deteccion(void *_) {
             lista_recursos_en_deadlock = list_create();
             lista_de_procesos_en_deadlock = list_create();
 
-            log_info(logger_kernel, "Semaforo %s (value: %d - cantidad de solicitantes: %d - cantidad de r en dl: %d - cant de proc en dl: %d |: listo para analizar presencia de deadlock ", sem_aux->nombre_semaforo, sem_aux->value, list_size(sem_aux->solicitantes), list_size(lista_recursos_en_deadlock), list_size(lista_de_procesos_en_deadlock));
+            //log_info(logger_kernel, "Semaforo %s (value: %d - cantidad de solicitantes: %d - cantidad de r en dl: %d - cant de proc en dl: %d |: listo para analizar presencia de deadlock ", sem_aux->nombre_semaforo, sem_aux->value, list_size(sem_aux->solicitantes), list_size(lista_recursos_en_deadlock), list_size(lista_de_procesos_en_deadlock));
 
             if(sem_aux->value < 0 && list_size(sem_aux->solicitantes)){
                 //log_info(logger_kernel, "Encuentro %d solicitantes en el semaforo", list_size(sem_aux->solicitantes));
@@ -42,13 +35,10 @@ void* algoritmo_deteccion(void *_) {
                     //printf("Listo para ckeckear al solicitante %d\n", *solicitante);
 
                     deadlock = proceso_en_deadlock(*solicitante, lista_recursos_en_deadlock, sem_aux->nombre_semaforo, lista_de_procesos_en_deadlock);
-                    print_lista_procesos_en_dl(lista_de_procesos_en_deadlock);
                     if(deadlock){
-                        //print_semaforos();
-                        //print_sem_asignados();
-                        //print_lists();
+                        log_info(logger_kernel, "Deadlock encontrado");
+                        print_lista_procesos_en_dl(lista_de_procesos_en_deadlock);
                         liberar_recursos_en_deadlock(lista_de_procesos_en_deadlock);
-
                     }
 
                     index2++;
@@ -136,7 +126,7 @@ void print_lista_procesos_en_dl(t_list *lista){
     int *aux = NULL;
     while(index < list_size(lista)){
         aux = list_get(lista, index);
-        printf("Proceso en posible dl - %d \n", *aux);
+        printf("Proceso en deadlock - %d \n", *aux);
         index++;
     }
 }
@@ -159,11 +149,11 @@ t_list* quien_retiene_recurso(char *recurso, int id_solicitante){
 
 bool proceso_en_deadlock(int solicitante, t_list *lista_recursos_en_deadlock, char *nombre_semaforo, t_list *lista_de_procesos_en_deadlock){
     int index3 = 0;
-    printf("Procesos en deadlock %d | recursos en deadlock %d---------\n", list_size(lista_de_procesos_en_deadlock), list_size(lista_recursos_en_deadlock));
+    //printf("Procesos en deadlock %d | recursos en deadlock %d---------\n", list_size(lista_de_procesos_en_deadlock), list_size(lista_recursos_en_deadlock));
     agregar_recursos_a_lista(solicitante, lista_recursos_en_deadlock);
     //+++++++++++ 1 +++++++++++
 
-    print_lista_recursos_en_dl(lista_recursos_en_deadlock);
+    //print_lista_recursos_en_dl(lista_recursos_en_deadlock);
 
     //----------- 2 -----------
     t_list *gente_reteniendo_mi_recurso = quien_retiene_recurso(nombre_semaforo, solicitante);
@@ -180,7 +170,7 @@ bool proceso_en_deadlock(int solicitante, t_list *lista_recursos_en_deadlock, ch
         sem_que_lo_bloquea = proceso_bloqueado_por_sem(reteniendo_mi_recurso->id_asignado);
         //++++++++++++++ 4 +++++++++++++
 
-        printf("El proceso %d que retiene mi recurso esta bloqueado por el semaforo => %s\n", reteniendo_mi_recurso->id_asignado, sem_que_lo_bloquea);
+        //printf("El proceso %d que retiene mi recurso esta bloqueado por el semaforo => %s\n", reteniendo_mi_recurso->id_asignado, sem_que_lo_bloquea);
 
         if(sem_que_lo_bloquea != NULL){
 
@@ -204,12 +194,11 @@ bool proceso_en_deadlock(int solicitante, t_list *lista_recursos_en_deadlock, ch
 
             if(aux_encontrado_en_lista != NULL){
                 //-------------- 6 -------------
-                printf("Encontré un deadlock !!!!!!!!!----------------!!!!!!!\n");
                 return true;
                 //++++++++++++++ 6 +++++++++++++
             }else{
                 //-------------- 6 -------------
-                printf("El semaforo que bloquea al que ocupo mi recurso no esta en la lista\n");
+                //printf("El semaforo que bloquea al que ocupo mi recurso no esta en la lista\n");
                 return proceso_en_deadlock(reteniendo_mi_recurso->id_asignado, lista_recursos_en_deadlock, sem_que_lo_bloquea, lista_de_procesos_en_deadlock);
                 //++++++++++++++ 6 +++++++++++++
             }

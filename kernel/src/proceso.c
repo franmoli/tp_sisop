@@ -32,7 +32,6 @@ void *proceso(void *self){
                     log_info(logger_kernel, "Suspendo al proceso %d", proceso_struct->id);
                 default:
                     break;
-                    //printf("Estoy en default y no hago nada %d - %d\n", proceso_struct->id, proceso_struct->status);
             }
             prev_status = proceso_struct->status;
         }
@@ -52,7 +51,7 @@ void new(){
 
 void exec(t_proceso *self){
 
-    log_info(logger_kernel,"Estoy ejecutando el proceso %d",self->id);
+    log_info(logger_kernel,"Ejecutando el proceso %d",self->id);
     t_task *next_task = NULL;
     bool bloquear_f = false;
     int reloj_i = 0;
