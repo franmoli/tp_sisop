@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
 
     //Fin del programa
     close(socket_client);
-    borrar_archivos_swap();
+    close(socket_server);
     liberar_memoria_y_finalizar();
     return 1;
 }
@@ -61,15 +61,12 @@ int ejecutar_operacion(int client) {
     if(paquete->codigo_operacion == SWAPSAVE) {
         //Deserializo la página enviada por Memoria
         t_pagina_swap *pagina = deserializar_pagina(paquete->buffer->stream);
-
-        t_info_carpincho_swap *contenido = list_get(pagina->contenido_carpincho_info, 0);
-        printf("\n\nLongitud contenido: %d\nContenido: %s\n\n", strlen(contenido->contenido), contenido->contenido);
-
+        
         //Inserto la página en los archivos de swap
         int op_code = insertar_pagina_en_archivo(pagina);
 
         //Envío respuesta de la operación a memoria
-        t_paquete *paquete_respuesta = malloc(sizeof(paquete));
+        t_paquete* paquete_respuesta = serializar(PAGINA_NO_GUARDADA,2,INT,1);
         paquete_respuesta->codigo_operacion = op_code ? PAGINA_GUARDADA:PAGINA_NO_GUARDADA;
 
         enviar_paquete(paquete_respuesta, socket_client);
@@ -88,7 +85,6 @@ int ejecutar_operacion(int client) {
     } else {
         log_info(logger_swap, "Memoria se esta preparando para finalizar, apagando memoria virtual");
         
-        free(paquete->buffer->stream);
         free(paquete->buffer);
         free(paquete); 
         
@@ -105,11 +101,21 @@ int ejecutar_operacion(int client) {
 
 /* Liberado de memoria */
 void liberar_memoria_y_finalizar(){
-    config_destroy(config_file);
-    list_destroy_and_destroy_elements(config_swap->ARCHIVOS_SWAP, (void *) destruir_elementos_lista);
-    free(config_swap);
     log_info(logger_swap, "Programa finalizado con éxito");
+    
+    borrar_archivos_swap();
+    
+    config_destroy(config_file);
     log_destroy(logger_swap);
+    sem_destroy(&mutex_operacion);
+    
+    list_destroy_and_destroy_elements(config_swap->ARCHIVOS_SWAP, (void *) destruir_elementos_lista);
+    list_destroy_and_destroy_elements(lista_paginas_almacenadas, (void *) destruir_elementos_lista);
+    list_destroy_and_destroy_elements(archivos_abiertos, (void *) destruir_elementos_lista);
+    list_destroy_and_destroy_elements(tabla_marcos, (void *) destruir_elementos_lista);
+    list_destroy_and_destroy_elements(lista_mapeos, (void *) destruir_elementos_lista);
+    
+    free(config_swap);
 }
 
 void destruir_elementos_lista(void *elemento){
