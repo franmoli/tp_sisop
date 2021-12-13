@@ -72,6 +72,7 @@ char *memRead(t_paquete *paquete)
    int numero_pagina = (direccion_logica - inicio) / config_memoria->TAMANIO_PAGINA;
    t_tabla_paginas* tabla_paginas = buscarTablaPorPID(socket_client);
    t_pagina* pagina = malloc(sizeof(t_pagina));
+   char * contenido = malloc(size);
 
    if(numero_pagina > list_size(tabla_paginas)){
        return -1;
@@ -97,9 +98,15 @@ char *memRead(t_paquete *paquete)
 
    agregarTLB(numero_pagina,marco,tabla_paginas->pid);
     
-   int desplazamiento = (direccion_logica-inicio) % config_memoria->TAMANIO_PAGINA;
+   int desplazamiento = (direccion_logica-inicio) % config_memoria->TAMANIO_PAGINA  + sizeof(t_heap_metadata);
 
-   char * contenido = traerDeMemoria(marco,desplazamiento, size);
+   if(size <= (config_memoria->TAMANIO_PAGINA - desplazamiento)){
+        contenido = traerDeMemoria(marco,desplazamiento, size);
+   }else
+   {
+       contenido = traerDeMemoria(marco,desplazamiento, config_memoria->TAMANIO_PAGINA - desplazamiento);
+       
+   }
 
     pagina = list_get(tabla_paginas->paginas,numero_pagina);
     if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "LRU") == 0){
@@ -108,6 +115,58 @@ char *memRead(t_paquete *paquete)
     {
         pagina->bit_uso = 1;
     }
+
+   int tamanio = config_memoria->TAMANIO_PAGINA - desplazamiento;
+   desplazamiento = 0;
+   
+
+   //direccion_logica es inicio heap
+   int pag = numero_pagina + 1;
+
+   if (size > (config_memoria->TAMANIO_PAGINA - desplazamiento)){
+       // El tamaño es mayor a lo que me queda de pagina, tengo que traer mas paginas
+       while(tamanio < size){
+           marco = buscarEnTLB(pag ,tabla_paginas->pid);
+            if (marco == -1){
+                pagina = list_get(tabla_paginas->paginas,pag);
+                if(pagina->bit_presencia != 0){
+                        marco = buscarMarcoEnMemoria(pag,tabla_paginas->pid);
+                }else
+                {
+                    //TRAER DE SWAP
+                        marco = traerPaginaAMemoria(pagina);
+                        if(marco == -1){
+                            //No pude traer a memoria
+                            return -1;
+                        }
+                }    
+            }
+
+            agregarTLB(pag,marco,tabla_paginas->pid);
+            //Desplazamiento tiene que cambiar
+
+            if(size - tamanio >= config_memoria->TAMANIO_PAGINA){
+                char* concateno = traerDeMemoria(marco,desplazamiento, config_memoria->TAMANIO_PAGINA);
+                memcpy(contenido + tamanio, concateno ,config_memoria->TAMANIO_PAGINA);
+                tamanio += config_memoria->TAMANIO_PAGINA;
+            }else
+            {
+                char* concateno = traerDeMemoria(marco,desplazamiento, size - tamanio);
+                memcpy(contenido + tamanio, concateno ,size - tamanio);
+                tamanio += (size - tamanio);
+
+            }
+
+            pagina = list_get(tabla_paginas->paginas,pag);
+            if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "LRU") == 0){
+                actualizarLRU(pagina);
+            }else
+            {
+                pagina->bit_uso = 1;
+            }
+
+       }
+   }
 
    return contenido;
 
