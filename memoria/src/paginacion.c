@@ -97,6 +97,7 @@ char *memRead(t_paquete *paquete)
    t_heap_metadata* heap = traerAllocDeMemoria(inicio + marco*config_memoria->TAMANIO_PAGINA + offset);
    int size = heap->nextAlloc - direccion_logica - 9;
    char * contenido = malloc(size);
+   free(heap);
 
    agregarTLB(numero_pagina,marco,tabla_paginas->pid);
     
