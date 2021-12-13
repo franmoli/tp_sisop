@@ -145,13 +145,22 @@ int enviarPaginaSwap(t_pagina* pagina){
         return -1;
         
     enviar_paquete(paquete, socket_cliente_swap);
-    
+    free(pagina_serial);
+    free(buffer);
+    free(pagina_swap);
+
     t_paquete* paquete_recibir = recibir_paquete(socket_cliente_swap);
     if(paquete_recibir->codigo_operacion== PAGINA_GUARDADA){
         //PUDO GUARDAR
+        free(paquete_recibir->buffer->stream);
+        free(paquete_recibir->buffer);
+        free(paquete_recibir);
         return 1;
     }
     else{
+        free(paquete_recibir->buffer->stream);
+        free(paquete_recibir->buffer);
+        free(paquete_recibir);
         return -1;
     }
     return 0;
