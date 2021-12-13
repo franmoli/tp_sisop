@@ -287,7 +287,8 @@ t_pagina_swap* deserializar_pagina(void *stream) {
         int strlen_contenido = 0;
         memcpy(&strlen_contenido, stream + offset, sizeof(int));
 	    offset += sizeof(int);
-        memcpy(&contenido_carpincho->contenido, stream + offset, strlen_contenido + 1);
+        contenido_carpincho->contenido = malloc(strlen_contenido);
+        memcpy((contenido_carpincho->contenido), stream + offset, strlen_contenido + 1);
 	    offset += strlen_contenido + 1;
 
         list_add(contenidos_carpincho, contenido_carpincho);
