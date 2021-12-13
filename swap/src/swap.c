@@ -103,21 +103,28 @@ int ejecutar_operacion(int client) {
 void liberar_memoria_y_finalizar(){
     log_info(logger_swap, "Programa finalizado con éxito");
     
+    destruir_mapeos();
     borrar_archivos_swap();
     
     config_destroy(config_file);
     log_destroy(logger_swap);
     sem_destroy(&mutex_operacion);
     
-    list_destroy_and_destroy_elements(config_swap->ARCHIVOS_SWAP, (void *) destruir_elementos_lista);
-    list_destroy_and_destroy_elements(lista_paginas_almacenadas, (void *) destruir_elementos_lista);
-    list_destroy_and_destroy_elements(archivos_abiertos, (void *) destruir_elementos_lista);
-    list_destroy_and_destroy_elements(tabla_marcos, (void *) destruir_elementos_lista);
-    list_destroy_and_destroy_elements(lista_mapeos, (void *) destruir_elementos_lista);
+    list_destroy_and_destroy_elements(config_swap->ARCHIVOS_SWAP, (void *) destruir_elemento_lista);
+    list_destroy_and_destroy_elements(archivos_abiertos, (void *) destruir_elemento_lista);
+    list_destroy_and_destroy_elements(lista_paginas_almacenadas, (void *) destruir_elemento_lista);
+    list_destroy_and_destroy_elements(tabla_marcos, (void *) destruir_elemento_lista);
     
     free(config_swap);
 }
 
-void destruir_elementos_lista(void *elemento){
+void destruir_elemento_lista(void *elemento){
     free(elemento);
+}
+
+void destruir_mapeos(){
+    for(int i=0; i<list_size(lista_mapeos); i++) {
+        list_remove(lista_mapeos, i);
+    }
+    list_destroy(lista_mapeos);
 }

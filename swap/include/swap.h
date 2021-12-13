@@ -13,6 +13,7 @@ sem_t mutex_operacion;
 //Funciones
 int ejecutar_operacion(int client);
 void liberar_memoria_y_finalizar();
-void destruir_elementos_lista(void *elemento);
+void destruir_elemento_lista(void *elemento);
+void destruir_mapeos();
 
 #endif

@@ -6,7 +6,7 @@
 void crear_archivos_swap() {
     //Chequeo la existencia del directorio de archivos: si no existe, lo creo
     struct stat st = {0};
-    if(stat("/files", &st) == -1) {
+    if(stat("files", &st) == -1) {
         mkdir("files", 0700);
     }
 
