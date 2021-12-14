@@ -8,6 +8,7 @@ void iniciar_deadlock() {
 void* algoritmo_deteccion(void *_) {
     while(1) {
         sleep(config_kernel->TIEMPO_DEADLOCK/1000);
+        sem_wait(&mutex_recursos_asignados);
         log_info(logger_kernel, "Ejecutando algoritmo detecion de deadlock");
         
         int index = 0;
@@ -50,6 +51,7 @@ void* algoritmo_deteccion(void *_) {
         lista_recursos_en_deadlock = NULL;
         lista_de_procesos_en_deadlock = NULL;
         deadlock = false;
+        sem_post(&mutex_recursos_asignados);
     }
 }
 

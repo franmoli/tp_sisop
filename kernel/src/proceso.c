@@ -3,25 +3,21 @@
 void *proceso(void *self){
 
     t_proceso *proceso_struct = self;
-    sem_wait(&proceso_inicializado);
     int prev_status = -1;
     
     pthread_t hilo_ejecucion;
+
 
     while(1){
         sem_wait(&actualizacion_de_listas_1);
         if(prev_status != proceso_struct->status){
             switch (proceso_struct->status){
                 case NEW:
-                    //printf("New - p: %d ", proceso_struct->id);
-                    new();
-                    sleep(1);
                     break;
                 case EXEC:
                     pthread_create(&hilo_ejecucion, NULL, exec, (void *)proceso_struct);
                     break;
                 case BLOCKED:
-                    //printf("Block - p: %d \n", proceso_struct->id);
                     break;
                 case EXIT:
                     //liberar semaforos tomados por este
@@ -89,17 +85,28 @@ void exec(t_proceso *self){
                     break;
                 case SEM_WAIT:
                     semaforo_aux = next_task->datos_tarea;
+
                     sem_wait(&mutex_semaforos);
+                    sem_wait(&mutex_recursos_asignados);
+
                     bloquear_f = solicitar_semaforo(semaforo_aux->nombre_semaforo, self->socket_carpincho);
+
+                    sem_post(&mutex_recursos_asignados);
                     sem_post(&mutex_semaforos);
                     break;
 
                 case SEM_POST:
                     semaforo_aux = next_task->datos_tarea;
+
                     sem_wait(&mutex_semaforos);
+                    sem_wait(&mutex_recursos_asignados);
+
                     printf("Carpincho %d posteando semaforo %s\n", self->socket_carpincho, semaforo_aux->nombre_semaforo);
                     postear_semaforo(semaforo_aux->nombre_semaforo, self->id);
+
+                    sem_post(&mutex_recursos_asignados);
                     sem_post(&mutex_semaforos);
+
                     enviar_confirmacion(self->socket_carpincho);
                     break;
 
@@ -228,11 +235,13 @@ void postear_semaforo(char *nombre_semaforo, int id_del_chabon_que_postea ){
         int *aux;
         semaforo_solicitado->value = semaforo_solicitado->value + 1;
         aux = list_remove(semaforo_solicitado->solicitantes, 0);
+
         printf("Posteando al solicitante %d\n", *aux);
         //sumar a lista de recursos asignados
         t_recurso_asignado *recurso_asignado = malloc(sizeof(t_recurso_asignado));
         recurso_asignado->nombre_recurso = nombre_semaforo;
         recurso_asignado->id_asignado = *aux;
+
         list_add(lista_recursos_asignados, recurso_asignado);        
 
         //printf("Pass %d\n", *aux);
@@ -272,8 +281,6 @@ t_proceso *traer_proceso_bloqueado(int id){
         sleep(1);
     }
 
-
-
     print_lists();
     log_error(logger_kernel, "Error en traer bloqueado");
     exit(1);
@@ -303,17 +310,14 @@ t_semaforo *traer_semaforo(char *nombre_solicitado){
 void bloquear(t_proceso *self){
     printf("Bloqueando proceso: %d\n", self->id);
     self->block = true;
-    sleep(1);
     sem_post(&solicitar_block);
     return;
 }
 
 void desbloquear(t_proceso *self){
-    //printf("Desbloquear proceso: %d\n", self->id);
+    printf("Desbloquear proceso: %d\n", self->id);
     self->salida_block = true;
-    sleep(1);
     sem_post(&salida_block);
-    //sem_post(&pedir_salida_de_block);
     return;
 }
 

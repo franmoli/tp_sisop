@@ -11,10 +11,10 @@ void iniciar_planificador_mediano(){
     pthread_create(&hilo_salida_de_block, NULL, salida_de_block, (void *)NULL);
 }
 
-
 void *planificador_mediano_plazo(void *_){
     while(1){
         sem_wait(&cambio_de_listas_mediano);
+        
 
         int tamanio_block = list_size(lista_blocked);
         int tamanio_ready = list_size(lista_ready);
@@ -38,6 +38,7 @@ void *salida_de_block(void *_){
         //sem_wait(&pedir_salida_de_block);
         sem_wait(&salida_block);
         sem_wait(&mutex_listas);
+
         bool encontrado = false;
         int tamanio_lista_blocked = list_size(lista_blocked);
         int tamanio_lista_s_blocked = list_size(lista_s_blocked);
@@ -48,7 +49,7 @@ void *salida_de_block(void *_){
             
             t_proceso *aux = list_get(lista_blocked, index);
             if(aux->salida_block){
-                printf("Mediano sacó de block al %d\n", aux->id);
+                printf("salió de block el %d\n", aux->id);
                 mover_proceso_de_lista(lista_blocked, lista_ready, index, READY);
 
                 encontrado = true;
@@ -71,6 +72,7 @@ void *salida_de_block(void *_){
             }
             index ++;
         }
+
         sem_post(&mutex_listas);        
     }
     return NULL;

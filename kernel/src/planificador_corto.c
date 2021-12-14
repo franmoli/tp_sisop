@@ -8,8 +8,6 @@ void iniciar_planificador_corto(){
     printf("Inicio planificador CORTO \n");
     void *(*planificador)(void*);
     pthread_t hilo_planificador;
-    pthread_t hilo_terminar_rafaga;
-    pthread_t hilo_liberar_multiprocesamiento_h;
     pthread_t hilo_esperar_bloqueo;
     int *multiprocesamiento = malloc(sizeof(int));
     *multiprocesamiento = config_kernel->GRADO_MULTIPROCESAMIENTO;
@@ -28,19 +26,17 @@ void iniciar_planificador_corto(){
     }
      
     pthread_create(&hilo_planificador, NULL, planificador, (void *)multiprocesamiento);
-    pthread_create(&hilo_terminar_rafaga, NULL, esperar_salida_exec, (void *)multiprocesamiento);
-    pthread_create(&hilo_liberar_multiprocesamiento_h, NULL, hilo_liberar_multiprocesamiento, (void *)multiprocesamiento);
     pthread_create(&hilo_esperar_bloqueo, NULL, esperar_bloqueo, (void *)multiprocesamiento);
 }
 
-void *planificador_corto_plazo_sjf (void *multiprocesamiento_p){
+void *planificador_corto_plazo_sjf (void *_){
 
     
     t_proceso *aux;
-    int *multiprocesamiento = multiprocesamiento_p;
 
     while(1){
         sem_wait(&cambio_de_listas_corto);
+        sem_wait(&mutex_listas);
         //calcular estimaciones
         for(int i = 0; i < list_size(lista_ready); i++){
 
@@ -49,9 +45,9 @@ void *planificador_corto_plazo_sjf (void *multiprocesamiento_p){
                 estimar(aux);
 
         }
-        if(*multiprocesamiento && list_size(lista_ready)){
+        if(multiprocesamiento && list_size(lista_ready)){
             int index = -1;
-            int estimacion_aux = 0;;
+            int estimacion_aux = 0;
             //se busca la estimacion menor
             for(int i = 0; i < list_size(lista_ready); i++){
                 aux = list_get(lista_ready, i);
@@ -64,25 +60,25 @@ void *planificador_corto_plazo_sjf (void *multiprocesamiento_p){
             //Se saca de ready y se pasa a exec
             int *carpincho = list_get(lista_ready,index);
             mover_proceso_de_lista(lista_ready, lista_exec, index, EXEC);
-            sem_wait(&mutex_multiprocesamiento);
-            *multiprocesamiento = *multiprocesamiento - 1;         
-            sem_post(&mutex_multiprocesamiento);
 
+            
         }
-    }
+
+        sem_post(&mutex_listas);
+        }
 
 
     return NULL;
 }
 
-void *planificador_corto_plazo_hrrn (void *multiprocesamiento_p){
+void *planificador_corto_plazo_hrrn (void *_){
     t_proceso *aux;
-    int *multiprocesamiento = multiprocesamiento_p;
 
 
     while(1){
         
         sem_wait(&cambio_de_listas_corto);
+        sem_wait(&mutex_listas);
         //calcular estimaciones
         for(int i = 0; i < list_size(lista_ready); i++){
 
@@ -92,7 +88,7 @@ void *planificador_corto_plazo_hrrn (void *multiprocesamiento_p){
 
         }
 
-        if(*multiprocesamiento && list_size(lista_ready)){
+        if(multiprocesamiento && list_size(lista_ready)){
             int index = -1;
             int response_ratio = 0;
 
@@ -109,15 +105,13 @@ void *planificador_corto_plazo_hrrn (void *multiprocesamiento_p){
 
             //Se saca de ready y se pasa a exec
             mover_proceso_de_lista(lista_ready, lista_exec, index, EXEC);
-            sem_wait(&mutex_multiprocesamiento);
-            *multiprocesamiento = *multiprocesamiento - 1;
-            sem_post(&mutex_multiprocesamiento);
+            
 
         }
+        sem_post(&mutex_listas);
     }
 
 
-    return NULL;
     return NULL;
 }
 
@@ -129,7 +123,7 @@ void estimar(t_proceso *proceso){
     return;
 }
 
-int calcular_response_ratio(t_proceso *proceso){
+float calcular_response_ratio(t_proceso *proceso){
 
     int tiempo_transcurrido = ((clock() - proceso->entrada_a_ready)/ CLOCKS_PER_SEC) * 1000;
 
@@ -137,60 +131,6 @@ int calcular_response_ratio(t_proceso *proceso){
 
 }
 
-void *esperar_salida_exec(void *multiprocesamiento_p){
-
-    int *multiprocesamiento = multiprocesamiento_p;
-
-    while(1){
-
-        sem_wait(&salida_exec);
-        //printf("#recibida ready\n");
-        bool encontrado = false;
-        int tamanio_lista_exec = list_size(lista_exec);
-        int index = 0;
-
-        while(!encontrado && (index < tamanio_lista_exec)){
-            t_proceso *aux = list_get(lista_exec, index);
-            if(aux->termino_rafaga){
-                if(aux->block){
-                    mover_proceso_de_lista(lista_exec, lista_blocked, index, BLOCKED);
-                }else{
-                    //printf("Saco de exec %d\n", aux->id);
-                    mover_proceso_de_lista(lista_exec, lista_ready, index, READY);
-                }
-                encontrado = true;
-            }
-            index ++;
-        }
-        if(encontrado){
-            sem_wait(&mutex_multiprocesamiento);
-            *multiprocesamiento = *multiprocesamiento + 1;
-            sem_post(&mutex_multiprocesamiento);
-            index = 0;
-            sem_post(&salida_de_exec_recibida);
-        }
-        if(*multiprocesamiento == 0){
-            printf("ME quede sin multiprocesamiento\n");
-        }
-    }
-}
-
-
-
-void *hilo_liberar_multiprocesamiento(void *multiprocesamiento_p){
-    int *multiprocesamiento = multiprocesamiento_p;
-
-    while(1){
-
-        sem_wait(&liberar_multiprocesamiento);
-        
-        sem_wait(&mutex_multiprocesamiento);
-        *multiprocesamiento = *multiprocesamiento + 1;
-        sem_post(&mutex_multiprocesamiento);
-        
-    }
-    return NULL;
-}
 
 void *esperar_bloqueo(void *multiprocesamiento_p){
     int *multiprocesamiento = multiprocesamiento_p;
@@ -198,6 +138,7 @@ void *esperar_bloqueo(void *multiprocesamiento_p){
     while(1){
 
         sem_wait(&solicitar_block);
+        sem_wait(&mutex_listas);
 
         bool encontrado = false;
         int tamanio_lista_exec = list_size(lista_exec);
@@ -222,8 +163,6 @@ void *esperar_bloqueo(void *multiprocesamiento_p){
             index = 0;
 
         }
-        if(*multiprocesamiento == 0){
-            printf("ME quede sin multiprocesamiento\n");
-        }
+        sem_post(&mutex_listas);
     }
 }

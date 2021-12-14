@@ -169,7 +169,10 @@ void atender_proceso (void* parametro ){
 
 t_proceso *nuevo_carpincho(int socket_cliente){
 
+    sem_wait(&mutex_listas);
+
     t_proceso *nuevo_proceso = malloc(sizeof(t_proceso));
+    t_list *temp_list = list_create();
 
     nuevo_proceso->id = socket_cliente;
     nuevo_proceso->status = NEW;
@@ -183,23 +186,17 @@ t_proceso *nuevo_carpincho(int socket_cliente){
     nuevo_proceso->task_list = list_create();
     nuevo_proceso->socket_carpincho = socket_cliente;
 
+    list_add(temp_list, nuevo_proceso);
+
     pthread_t hilo_proceso;
     pthread_create(&hilo_proceso, NULL, proceso, (void*)nuevo_proceso);
-
-    sem_wait(&mutex_listas);
-    list_add(lista_new, nuevo_proceso);
-    sem_post(&mutex_listas);
     
-    sem_wait(&mutex_cant_procesos);
-    printf("Nuevo carpincho\n");
-    cantidad_de_procesos++;
-    sem_post(&mutex_cant_procesos);
+    mover_proceso_de_lista(temp_list, lista_new, 0, NEW);
 
-    sem_post(&proceso_inicializado);
-    avisar_cambio();
+    list_destroy(temp_list);
+
     sem_post(&libre_para_inicializar_proceso);
-
-   
+    sem_post(&mutex_listas);
     return nuevo_proceso;
 }
 
@@ -207,6 +204,9 @@ void *planificador_largo_plazo(void *_){
 
     while(1){
         sem_wait(&cambio_de_listas_largo);
+
+        sem_wait(&mutex_listas);
+
         if(multiprogramacion_disponible){
             if(list_size(lista_s_ready)){
                 //Se saca de suspended y se pasa a ready
@@ -221,6 +221,9 @@ void *planificador_largo_plazo(void *_){
                 
             }
         }
+
+        sem_post(&mutex_listas);
+
     }
     return NULL;
 }
@@ -230,8 +233,11 @@ void *hilo_salida_a_exit(void *multiprogramacion_disponible_p){
 
     while(1){
         sem_wait(&salida_a_exit);
-        
-        
+
+        sem_wait(&mutex_listas);
+        sem_wait(&mutex_recursos_asignados);
+        sem_wait(&mutex_semaforos);
+
         bool encontrado = false;
         int tamanio_lista_exec = list_size(lista_exec);
         int tamanio_lista_blocked = list_size(lista_blocked);
@@ -239,38 +245,57 @@ void *hilo_salida_a_exit(void *multiprogramacion_disponible_p){
         int index = 0;
         t_recurso_asignado *recurso_asignado_aux = NULL;
         t_proceso *aux = NULL;
+        t_list *origen_aux = NULL;
 
 
         //Busco en exec
         //printf("Exec: %d \n", list_size(lista_exec));
-        if(aux == NULL)
-            aux = list_remove_by_condition(lista_exec, pedido_exit);
+        if(aux == NULL){
+            aux = list_find(lista_exec, pedido_exit);
+            origen_aux = lista_exec;
+        }
 
         //Si lo encontré en exec tengo que liberar el multiprocesamiento
         if(aux != NULL)
-            sem_post(&liberar_multiprocesamiento);
+            multiprocesamiento++;
 
-        if(aux == NULL)
-            aux = list_remove_by_condition(lista_new, pedido_exit);
+        if(aux == NULL){
+            aux = list_find(lista_new, pedido_exit);
+            origen_aux = lista_new;
+        }
 
-        if(aux == NULL)
-            aux = list_remove_by_condition(lista_ready, pedido_exit);
+        if(aux == NULL){
+            aux = list_find(lista_ready, pedido_exit);
+            origen_aux = lista_ready;
+        }
 
-        if(aux == NULL)
-            aux = list_remove_by_condition(lista_s_blocked, pedido_exit);
+        if(aux == NULL){
+            aux = list_find(lista_s_blocked, pedido_exit);
+            origen_aux = lista_s_blocked;
+        }
         
-        if(aux == NULL)
-            aux = list_remove_by_condition(lista_s_ready, pedido_exit);
+        if(aux == NULL){
+            aux = list_find(lista_s_ready, pedido_exit);
+            origen_aux = lista_s_ready;
+        }
         
-        if(aux == NULL)
-            aux = list_remove_by_condition(lista_blocked, pedido_exit);
+        if(aux == NULL){
+            aux = list_find(lista_blocked, pedido_exit);
+            origen_aux = lista_blocked;
+        }
 
+        //Encuentro el index en el que está
+        while(index < list_size(origen_aux)){
+            if(aux == list_get(origen_aux, index))
+                break;
+            index++;
+        }
 
-
-        list_add(lista_exit, aux);
-        aux->status = EXIT; 
         log_info(logger_kernel, "Terminando con proceso %d", aux->id);
-        
+        mover_proceso_de_lista(origen_aux, lista_exit, index, EXIT);
+
+        index = 0;
+
         //Agregar task de desconexion en caso que se encuentre en exec con prioridad máxima en caso que sea una desconexion forzosa
         t_task *task = malloc(sizeof(t_task));
         task->id = CLIENTE_DESCONECTADO;
@@ -296,13 +321,12 @@ void *hilo_salida_a_exit(void *multiprogramacion_disponible_p){
         multiprogramacion_disponible = multiprogramacion_disponible + 1;
         sem_post(&mutex_multiprogramacion);
 
-
-        sem_wait(&mutex_cant_procesos);
-        cantidad_de_procesos = cantidad_de_procesos - 1;
-        sem_post(&mutex_cant_procesos);
         
         //Aviso a todos los procesos, asi finaliza el hilo correspondiente
         avisar_cambio();
+        sem_post(&mutex_listas);
+        sem_post(&mutex_recursos_asignados);
+        sem_post(&mutex_semaforos);
     }
     return NULL;
 }

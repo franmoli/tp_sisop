@@ -15,6 +15,7 @@ int main(int argc, char **argv) {
     //Iniciar semaforos de uso general
     iniciar_semaforos_generales();
     multiprogramacion_disponible = config_kernel->GRADO_MULTIPROGRAMACION;
+    multiprocesamiento = config_kernel->GRADO_MULTIPROCESAMIENTO;
 
     //Iniciar listas de procesos
     iniciar_listas();
@@ -105,21 +106,37 @@ void iniciar_semaforos_generales(){
     sem_init(&pedir_salida_de_block, 0, 0);
     sem_init(&solicitar_block, 0, 0);
     sem_init(&mutex_semaforos, 0, 1);
+    sem_init(&mutex_recursos_asignados, 0, 1);
     return;
 }
 
 void mover_proceso_de_lista(t_list *origen, t_list *destino, int index, int status){
+
     t_proceso *aux;
-    sem_wait(&mutex_listas);
-        aux = list_remove(origen, index);
-        sleep(1);
-        printf("Moviendo proceso - %d | to: %d\n", aux->id , status);
-        if(status == READY)
-            aux->entrada_a_ready = clock();
-        aux->status =  status;
-        aux->termino_rafaga = false;
-        list_add(destino, aux);
-    sem_post(&mutex_listas);
+
+    aux = list_remove(origen, index);
+    printf("Moviendo proceso - %d | to: %d\n", aux->id , status);
+
+    if(status == READY)
+        aux->entrada_a_ready = clock();
+    
+    if(status == EXIT)
+        cantidad_de_procesos--;
+
+    if(status == NEW)
+        cantidad_de_procesos++;
+
+    if(status == BLOCKED)
+        multiprocesamiento++;
+
+    if(status == EXEC)
+        multiprocesamiento--;
+
+    aux->status =  status;
+    aux->termino_rafaga = false;
+
+    list_add(destino, aux);
+
     printf("Avisando del cambio\n");
     avisar_cambio();
     printf("Cambio avisado\n");
@@ -128,7 +145,6 @@ void mover_proceso_de_lista(t_list *origen, t_list *destino, int index, int stat
 
 void avisar_cambio(){
     sem_wait(&mutex_cant_procesos);
-    //log_info(logger_kernel,"Avise de un cambio de listas");
     //Aviso que hubo un cambio de listas
     printf("Cantidad de procesos %d\n", cantidad_de_procesos);
     for(int i = 0; i < cantidad_de_procesos; i++){
@@ -148,10 +164,8 @@ void avisar_cambio(){
 
     //Habilito planificadores
     sem_post(&cambio_de_listas_largo);
-    sleep(0.5);
-    sem_post(&cambio_de_listas_mediano);
-    sleep(0.5);
     sem_post(&cambio_de_listas_corto);
+    sem_post(&cambio_de_listas_mediano);
 
     sem_post(&mutex_cant_procesos);
     printf("Pasó todos los wait\n");
