@@ -201,7 +201,7 @@ int memWrite(t_paquete *paquete)
    if(numero_pagina > list_size(tabla_paginas)){
        return -1;
    }
-   free(contenido_escribir);
+   
    //Ver que el contenido esta completo en la pagina, si no esta hay que fijarse en las paginas siguientes que contengan si estan en memoria (bit presencia en 1)
    
    int marco = buscarEnTLB(numero_pagina,tabla_paginas->pid);
@@ -233,6 +233,8 @@ int memWrite(t_paquete *paquete)
     {
         pagina->bit_modificado = 1;
     }
+
+    free(contenido_escribir);
 
    return 1;
 }
