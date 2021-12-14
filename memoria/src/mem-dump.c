@@ -43,11 +43,11 @@ char *dumpPaginacion()
 
     
 
-    t_list_iterator *list_iterator = list_iterator_create(tabla_tlb);
+    t_list_iterator *list_iterator = list_iterator_create(tabla_tlb->tlb);
     t_tlb *tlb;
     int i = 0;
     char* estado;
-    if(list_size(tabla_tlb) == config_memoria->CANTIDAD_ENTRADAS_TLB){
+    if(list_size(tabla_tlb->tlb) == config_memoria->CANTIDAD_ENTRADAS_TLB){
         while (list_iterator_has_next(list_iterator))
         {
             tlb = list_iterator_next(list_iterator);
