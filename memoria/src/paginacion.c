@@ -373,7 +373,7 @@ void escribirPaginaEnMemoria(t_pagina* pagina,t_pagina_swap* pagina_swap){
     int size = 0;
     uint32_t inicio = tamanio_memoria;
     uint32_t nextAnterior = tamanio_memoria;
-    /*t_list_iterator *list_iterator = list_iterator_create(pagina_swap->contenido_heap_info);
+    t_list_iterator *list_iterator = list_iterator_create(pagina_swap->contenido_heap_info);
     t_info_heap_swap *info;
     while (list_iterator_has_next(list_iterator))
     {
@@ -396,9 +396,9 @@ void escribirPaginaEnMemoria(t_pagina* pagina,t_pagina_swap* pagina_swap){
         }else{
             //TENGO QUE TRAERME EL NEXT ANTERIOR Y SACAR EL OFFSET 
         }
-    }*/
+    }
     tabla_paginas->paginas_en_memoria+=1;
-    t_list_iterator *list_iterator = list_iterator_create(pagina->listado_de_contenido);
+    /*t_list_iterator *list_iterator = list_iterator_create(pagina->listado_de_contenido);
     t_contenidos_pagina *contenido;
 
     while (list_iterator_has_next(list_iterator))
@@ -417,7 +417,7 @@ void escribirPaginaEnMemoria(t_pagina* pagina,t_pagina_swap* pagina_swap){
             list_remove(pagina_swap->contenido_carpincho_info,0);
             offset += size;
         }
-    }
+    }*/
     list_iterator_destroy(list_iterator);
     return;
 }
