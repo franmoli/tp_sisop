@@ -371,8 +371,36 @@ void escribirPaginaEnMemoria(t_pagina* pagina,t_pagina_swap* pagina_swap){
     int marco = pagina->marco_asignado;
     int offset = 0;
     int size = 0;
+    uint32_t inicio = tamanio_memoria;
+    uint32_t nextAnterior = tamanio_memoria;
+    t_list_iterator *list_iterator = list_iterator_create(pagina_swap->contenido_heap_info);
+    t_info_heap_swap *info;
+    while (list_iterator_has_next(list_iterator))
+    {
+        info = list_iterator_next(list_iterator);
+        offset = (info->inicio - inicio) % config_memoria->TAMANIO_PAGINA;
+        if(info->contenido->prevAlloc == 0){
+            //ES EL PRIMER ALLOC EL QUE ESTOY CARGANDO NUEVAMENTE
+            t_heap_metadata *data = malloc(sizeof(t_heap_metadata));
+            data->prevAlloc = info->contenido->prevAlloc;
+            data->nextAlloc = info->contenido->nextAlloc;
+            data->isFree = info->contenido->isFree;
+            
+            t_contenidos_pagina *header_pagina_actual = getContenidoPaginaByTipo(pagina->listado_de_contenido, HEADER);
+            header_pagina_actual->dir_comienzo=(inicio + (pagina->marco_asignado * config_memoria->TAMANIO_PAGINA))+offset;
+            header_pagina_actual->dir_fin = header_pagina_actual->dir_comienzo + header_pagina_actual->tamanio;
+            guardarAlloc(data,header_pagina_actual->dir_comienzo);
+            free(data);
 
-    t_list_iterator *list_iterator = list_iterator_create(pagina->listado_de_contenido);
+            nextAnterior = info->contenido->nextAlloc;
+        }else{
+            //TENGO QUE TRAERME EL NEXT ANTERIOR Y SACAR EL OFFSET 
+        }
+        int a = 0;
+        a++;
+    }
+    tabla_paginas->paginas_en_memoria+=1;
+    /*t_list_iterator *list_iterator = list_iterator_create(pagina->listado_de_contenido);
     t_contenidos_pagina *contenido;
 
     while (list_iterator_has_next(list_iterator))
@@ -391,7 +419,7 @@ void escribirPaginaEnMemoria(t_pagina* pagina,t_pagina_swap* pagina_swap){
             list_remove(pagina_swap->contenido_carpincho_info,0);
             offset += size;
         }
-    }
+    }*/
     list_iterator_destroy(list_iterator);
     return;
 }
@@ -632,7 +660,7 @@ int solicitarPaginaNueva(uint32_t carpincho_id)
     }
     if(marco == -1){
         log_info(logger_memoria, "Tengo que ir a swap");
-        marco = reemplazarPagina(tabla_paginas);
+        marco = reemplazarPagina();
         if(marco < 0)
             return -1;
     }
@@ -725,12 +753,10 @@ void liberarPagina(t_pagina* pagina, uint32_t carpincho_id){
 
 int traerPaginaAMemoria(t_pagina* pagina_alloc_actual){
 
-    t_tabla_paginas* tabla = buscarTablaPorPID(pagina_alloc_actual->carpincho_id);
-
     // Busco pagina que esta en swap, puede ser que haya liberado espacio y que ahora tenga un marco libre en memoria
     int marco = -1;
     int trajeDeMemoria = false;
-    marco = getMarco(tabla);
+    marco = getMarco(tabla_paginas);
     if(marco < -1){
         log_error(logger_memoria,"No se pudo asignar un marco");
         return;
@@ -739,9 +765,11 @@ int traerPaginaAMemoria(t_pagina* pagina_alloc_actual){
     }
     if(marco == -1){
         log_info(logger_memoria, "Tengo que ir a swap");
-        marco = reemplazarPagina(tabla_paginas);
+        marco = reemplazarPagina();
         if(marco < 0)
             return -1;
+
+        pagina_alloc_actual->marco_asignado = marco;
         int resultado = recibirPaginaSwap(pagina_alloc_actual);
         if(resultado == -1){
             //Swap no trajo nada
@@ -751,7 +779,7 @@ int traerPaginaAMemoria(t_pagina* pagina_alloc_actual){
     }
 
     pagina_alloc_actual->marco_asignado = marco;
-    pagina_alloc_actual->bit_presencia = 1;
+    pagina_alloc_actual->bit_presencia = true;
     if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "LRU") == 0 || trajeDeMemoria){
         agregarAsignacion(pagina_alloc_actual);
     }else

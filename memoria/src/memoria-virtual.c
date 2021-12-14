@@ -23,16 +23,16 @@ void agregarAsignacion(t_pagina* pagina){
     return;
 }
 
-int reemplazarPagina(t_tabla_paginas* tabla){
+int reemplazarPagina(){
     int marco = -1;
     if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "CLOCK-M") == 0){
         //SWAP CLOCK 
-        marco = reemplazarClockM(tabla);
+        marco = reemplazarClockM();
         return marco;
     }
     else{
         //SWAP LRU
-        marco = reemplazarLRU(tabla);
+        marco = reemplazarLRU();
         return marco;
     }
 }
@@ -182,10 +182,10 @@ int enviarPaginaSwap(t_pagina* pagina){
 
 }
 
-int reemplazarLRU(t_tabla_paginas* tabla){
+int reemplazarLRU(){
     int marco = -1;
     if(strcmp(config_memoria->TIPO_ASIGNACION, "FIJA") == 0){
-        t_pagina* old = list_get(tabla->Lru,0);
+        t_pagina* old = list_get(tabla_paginas->Lru,0);
         marco = enviarPaginaSwap(old);
 
         if(marco <0){
@@ -193,8 +193,8 @@ int reemplazarLRU(t_tabla_paginas* tabla){
         }else
         {
             old->bit_presencia = 0;
-            tabla->paginas_en_memoria -= 1;
-            list_remove(tabla->Lru,0);
+            tabla_paginas->paginas_en_memoria -= 1;
+            list_remove(tabla_paginas->Lru,0);
             return old->marco_asignado;
         }
         
@@ -275,7 +275,7 @@ void replaceClock(t_pagina *pagina){
 
 }
 
-int reemplazarClockM(t_tabla_paginas* tabla_paginas){
+int reemplazarClockM(){
 
     int index = 0;
     int marco = -1;

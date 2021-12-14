@@ -6,7 +6,7 @@
 #include <commons/collections/queue.h>
 #include "tlb.h"
 #include "memoria-virtual.h"
-
+#include "alloc.h"
 
 t_contenidos_pagina *getLastContenidoByPagina(t_pagina* pagina);
 t_contenidos_pagina *getLastHeaderContenidoByPagina(t_pagina* pagina);
