@@ -277,6 +277,8 @@ int memAlloc(t_paquete *paquete)
             primera_pagina  = pagina_Disponible;
         }
 
+        if(!primera_pagina->bit_presencia)
+            primera_pagina = traerPaginaAMemoria(primera_pagina);
 
         t_contenidos_pagina *contenido = getContenidoPaginaByTipo(primera_pagina->listado_de_contenido, HEADER);
         t_heap_metadata *data = traerAllocDeMemoria(contenido->dir_comienzo);
