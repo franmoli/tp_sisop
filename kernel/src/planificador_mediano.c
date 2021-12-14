@@ -22,7 +22,7 @@ void *planificador_mediano_plazo(void *_){
 
         if(tamanio_block > 0 && tamanio_ready == 0 && tamanio_new > 0){
             
-            
+            print_lists();
             mover_proceso_de_lista(lista_blocked, lista_s_blocked, tamanio_block - 1, S_BLOCKED);
             sem_wait(&mutex_multiprogramacion);
             multiprogramacion_disponible = multiprogramacion_disponible + 1;
@@ -37,7 +37,7 @@ void *salida_de_block(void *_){
     while(1){
         //sem_wait(&pedir_salida_de_block);
         sem_wait(&salida_block);
-
+        sem_wait(&mutex_listas);
         bool encontrado = false;
         int tamanio_lista_blocked = list_size(lista_blocked);
         int tamanio_lista_s_blocked = list_size(lista_s_blocked);
@@ -71,7 +71,7 @@ void *salida_de_block(void *_){
             }
             index ++;
         }
-        
+        sem_post(&mutex_listas);        
     }
     return NULL;
 }

@@ -104,6 +104,7 @@ void iniciar_semaforos_generales(){
     sem_init(&cambio_de_listas_corto, 0, 0);
     sem_init(&pedir_salida_de_block, 0, 0);
     sem_init(&solicitar_block, 0, 0);
+    sem_init(&mutex_semaforos, 0, 1);
     return;
 }
 
@@ -111,15 +112,17 @@ void mover_proceso_de_lista(t_list *origen, t_list *destino, int index, int stat
     t_proceso *aux;
     sem_wait(&mutex_listas);
         aux = list_remove(origen, index);
-        //printf("Moviendo proceso - %d | to: %d\n", aux->id , status);
+        sleep(1);
+        printf("Moviendo proceso - %d | to: %d\n", aux->id , status);
         if(status == READY)
             aux->entrada_a_ready = clock();
         aux->status =  status;
         aux->termino_rafaga = false;
         list_add(destino, aux);
     sem_post(&mutex_listas);
-    
+    printf("Avisando del cambio\n");
     avisar_cambio();
+    printf("Cambio avisado\n");
     return;
 }
 
@@ -127,18 +130,17 @@ void avisar_cambio(){
     sem_wait(&mutex_cant_procesos);
     //log_info(logger_kernel,"Avise de un cambio de listas");
     //Aviso que hubo un cambio de listas
-    //printf("Cantidad de procesos %d\n", cantidad_de_procesos);
+    printf("Cantidad de procesos %d\n", cantidad_de_procesos);
     for(int i = 0; i < cantidad_de_procesos; i++){
-        //printf("Un post\n");
+        printf("Un post\n");
         sem_post(&actualizacion_de_listas_1);
     }
 
     //Espero que todos los procesos hayan recibido el aviso y ejecutado
     for(int i = 0; i < cantidad_de_procesos; i++){
-        //printf("Un wait\n");        
+        printf("Un wait\n");        
         sem_wait(&actualizacion_de_listas_1_recibido);
     }
-    //printf("Pasó todos los wait\n");
     //Habilito que vuelvan a esperar una vez ya resuelto todo lo que tengan que hacer con su nuevo estado
     for(int i = 0; i < cantidad_de_procesos; i++){
         sem_post(&actualizacion_de_listas_2);
@@ -152,6 +154,7 @@ void avisar_cambio(){
     sem_post(&cambio_de_listas_corto);
 
     sem_post(&mutex_cant_procesos);
+    printf("Pasó todos los wait\n");
 }
 
 void iniciar_debug_console(){

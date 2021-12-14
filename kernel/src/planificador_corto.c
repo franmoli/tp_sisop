@@ -207,8 +207,9 @@ void *esperar_bloqueo(void *multiprocesamiento_p){
             t_proceso *aux = list_get(lista_exec, index);
             
                 if(aux->block){
-                    printf("Bloqueando %d ", aux->id);
+                    printf("BloqueandoX %d \n", aux->id);
                     mover_proceso_de_lista(lista_exec, lista_blocked, index, BLOCKED);
+                    printf("Ya bloqueado %d\n", aux->id);
                     encontrado = true;
                 }
             index ++;

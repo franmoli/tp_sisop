@@ -240,10 +240,15 @@ void liberar_recursos_en_deadlock(t_list *lista_de_recursos_en_deadlock){
     }
     
     proceso_a_eliminar = list_find(lista_blocked, proceso_encontrado);
+
     if(proceso_a_eliminar == NULL){
         proceso_a_eliminar = list_find(lista_s_blocked, proceso_encontrado);
     }
-
+    if(proceso_a_eliminar == NULL){
+        print_lists();
+        log_error(logger_kernel, "Error en la recuperacion de deadlock, no se encontró a %d bloqueado", aux);
+        exit(EXIT_FAILURE);
+    }
     proceso_a_eliminar->salida_exit = true;
     sem_post(&salida_a_exit);
 

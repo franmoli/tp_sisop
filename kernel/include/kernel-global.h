@@ -102,6 +102,7 @@ sem_t cambio_de_listas_mediano;
 sem_t cambio_de_listas_corto;
 sem_t pedir_salida_de_block;
 sem_t solicitar_block;
+sem_t mutex_semaforos;
 
 //Auxiliares
 int cantidad_de_procesos;
