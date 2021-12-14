@@ -4,8 +4,7 @@ void agregarAsignacion(t_pagina* pagina){
     if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "CLOCK-M") == 0){
 
         if(strcmp(config_memoria->TIPO_ASIGNACION, "FIJA") == 0){
-            t_tabla_paginas* tabla = buscarTablaPorPID(pagina->carpincho_id);
-            list_add(tabla->Clock,pagina);
+            list_add(tabla_paginas->Clock,pagina);
         }else 
         {
             list_add(reemplazo_CLOCK,pagina);
@@ -13,8 +12,7 @@ void agregarAsignacion(t_pagina* pagina){
     }else
     {
         if(strcmp(config_memoria->TIPO_ASIGNACION, "FIJA") == 0){
-            t_tabla_paginas* tabla = buscarTablaPorPID(pagina->carpincho_id);
-            list_add(tabla->Lru,pagina);
+            list_add(tabla_paginas->Lru,pagina);
         }else
         {
             list_add(reemplazo_LRU,pagina);
@@ -134,7 +132,6 @@ int enviarPaginaSwap(t_pagina* pagina){
     t_paquete *paquete = malloc(sizeof(t_paquete));
     paquete->codigo_operacion = SWAPSAVE;
     paquete->buffer = buffer;
-
     if(socket_cliente_swap < 0)
         return -1;
         

@@ -226,7 +226,9 @@ void limpiarTlb()
 }
 void generarDump()
 {
+   log_info(logger_memoria, "SEÑAL RECIBIDA GENERANDO DUMP");
    memdump();
+   log_info(logger_memoria, "DUMP GENERADO");
 }
 void imprimirMetricas()
 {
