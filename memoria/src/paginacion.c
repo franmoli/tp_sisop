@@ -195,6 +195,7 @@ int memWrite(t_paquete *paquete)
    free(paquete);
    int inicio = tamanio_memoria;
    int numero_pagina = (direccion_logica - inicio) / config_memoria->TAMANIO_PAGINA;
+   int desplazamiento = (direccion_logica-inicio) % config_memoria->TAMANIO_PAGINA + sizeof(t_heap_metadata);
    t_tabla_paginas* tabla_paginas = buscarTablaPorPID(socket_client);
    t_pagina* pagina = malloc(sizeof(t_pagina));
 
@@ -221,8 +222,6 @@ int memWrite(t_paquete *paquete)
    }
 
    agregarTLB(numero_pagina,marco,tabla_paginas->pid);
-    
-   int desplazamiento = (direccion_logica-inicio) % config_memoria->TAMANIO_PAGINA;
 
    escribirEnMemoria(pagina->marco_asignado,desplazamiento, size, contenido_escribir);
 
