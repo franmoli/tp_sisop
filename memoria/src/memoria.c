@@ -55,22 +55,27 @@ int main(int argc, char **argv)
         signal(SIGUSR1, generarDump);
         signal(SIGUSR2, limpiarTlb);
 
+    /*
+
+
+    
+
+    free(paquete->buffer->stream);
+    free(paquete->buffer);
+    free(paquete);
+
+    
+    t_paquete *paquete2 = serializar(MEMWRITE,6,CHAR_PTR,"holaholaholaholaholaholholaholaholaholaholahol",INT,dire_logica,INT,46);
+    memWrite(paquete2);
+
+    free(paquete2->buffer);
+    free(paquete2);*/
+  
     inicializarCarpincho(0);
     socket_client = 0;
-    t_paquete* paquete = serializar_alloc(46);
+    
+    t_paquete* paquete = serializar_alloc(23);
     int dire_logica =memAlloc(paquete);
-
-    t_paquete* paquete2 = serializar(MEMWRITE,6,CHAR_PTR,"holaholaholaholaholaholholaholaholaholaholahol",INT,dire_logica,INT,46);
-    memWrite(paquete2);
-    char *contenido = malloc(24);
-    char *contenido2 = malloc(24);
-
-    contenido = traerDeMemoria(0,9,23);
-    contenido2 = traerDeMemoria(1,0,23);
-
-    log_info(logger_memoria,"CONTENIDO: %s", contenido);
-    log_info(logger_memoria,"CONTENIDO: %s", contenido2);
- 
 
     free(paquete->buffer->stream);
     free(paquete->buffer);
@@ -97,7 +102,7 @@ int main(int argc, char **argv)
     free(paquete->buffer);
     free(paquete);
 
-    paquete = serializar_alloc(23);
+    /*paquete = serializar_alloc(23);
     memAlloc(paquete); 
 
     free(paquete->buffer->stream);
@@ -109,7 +114,7 @@ int main(int argc, char **argv)
 
     free(paquete->buffer->stream);
     free(paquete->buffer);
-    free(paquete);
+    free(paquete);*/
 
 
     /*while (1)

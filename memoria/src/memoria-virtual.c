@@ -218,7 +218,7 @@ void actualizarLRU(t_pagina* pagina){
 
         t_tabla_paginas *tabla = buscarTablaPorPID(pagina->carpincho_id);
         t_list_iterator *list_iterator = list_iterator_create(tabla->Lru);
-        t_pagina *pag = malloc(sizeof(t_pagina));
+        t_pagina *pag;
 
         while (list_iterator_has_next(list_iterator)){
 

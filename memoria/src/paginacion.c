@@ -189,25 +189,30 @@ int memWrite(t_paquete *paquete)
 {
    char*  contenido_escribir= NULL;
    int size = 0;
-   int32_t direccion_logica ; 
+   uint32_t direccion_logica;
 
    deserializar(paquete,6,CHAR_PTR,&contenido_escribir,INT,&direccion_logica,INT,&size);
    free(paquete);
-   int inicio = tamanio_memoria;
+   uint32_t inicio = tamanio_memoria;
    int numero_pagina = (direccion_logica - inicio) / config_memoria->TAMANIO_PAGINA;
    int desplazamiento = ((direccion_logica-inicio) % config_memoria->TAMANIO_PAGINA) + sizeof(t_heap_metadata);
-   t_tabla_paginas* tabla_paginas = buscarTablaPorPID(socket_client);
-   t_pagina* pagina = malloc(sizeof(t_pagina));
-
-   if(numero_pagina > list_size(tabla_paginas)){
-       return -1;
-   }
    
+
+   if(numero_pagina > list_size(tabla_paginas))
+       return -1;
+   
+   if(numero_pagina < 0)
+    return -1;
+
+   t_pagina* pagina = list_get(tabla_paginas->paginas,numero_pagina);
+
+   
+
    //Ver que el contenido esta completo en la pagina, si no esta hay que fijarse en las paginas siguientes que contengan si estan en memoria (bit presencia en 1)
    
-   int marco = buscarEnTLB(numero_pagina,tabla_paginas->pid);
+   int marco = 0;
+   marco = buscarEnTLB(numero_pagina,tabla_paginas->pid);
    if (marco == -1){
-       pagina = list_get(tabla_paginas->paginas,numero_pagina);
        if(pagina->bit_presencia != 0){
             marco = buscarMarcoEnMemoria(numero_pagina,tabla_paginas->pid);
        }else
@@ -304,9 +309,9 @@ int memWrite(t_paquete *paquete)
 void escribirEnMemoria(int marco, int desplazamiento, int size, char* contenido)
 {
     uint32_t inicio = tamanio_memoria;
-    uint32_t dir_fisica = inicio + marco * config_memoria->TAMANIO_PAGINA + desplazamiento;
-    uint32_t offset = 0;
-    log_info(logger_memoria,"Escribiendo en la direccion %d el contenido: %s.\n",dir_fisica,contenido);
+    uint32_t dir_fisica = 0;
+    dir_fisica = inicio + marco * config_memoria->TAMANIO_PAGINA + desplazamiento;
+    log_info(logger_memoria,"Escribiendo en la direccion %d \n",dir_fisica);
     memcpy(dir_fisica,contenido, size);
     log_info(logger_memoria,"Se termino de escribir en memoria.");
 }
