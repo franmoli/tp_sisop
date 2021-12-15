@@ -22,7 +22,7 @@ void *planificador_mediano_plazo(void *_){
 
         if(tamanio_block > 0 && tamanio_ready == 0 && tamanio_new > 0){
             
-            print_lists();
+            
             mover_proceso_de_lista(lista_blocked, lista_s_blocked, tamanio_block - 1, S_BLOCKED);
             sem_wait(&mutex_multiprogramacion);
             multiprogramacion_disponible = multiprogramacion_disponible + 1;

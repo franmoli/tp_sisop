@@ -42,7 +42,6 @@ void *proceso(void *self){
 
 void new(){
     //printf("iniciando el carpincho - new\n");
-    sleep(1);
 }
 
 void exec(t_proceso *self){
@@ -114,6 +113,7 @@ void exec(t_proceso *self){
                 case OP_ERROR:
                     break;
                 case CALLIO:
+                    sleep(1);
                     io_recibida = next_task->datos_tarea;
 
                     while(index < list_size(config_kernel->DISPOSITIVOS_IO)){
@@ -124,7 +124,7 @@ void exec(t_proceso *self){
                         index++;
                     }
                     io_recibida->proceso_solicitante = self;
-                    //strtol(list_get(config_kernel->DURACIONES_IO, index), NULL, 10);
+                    io_recibida->id = index;
                     io_recibida->duracion = atoi(list_get(config_kernel->DURACIONES_IO, index));
                     pthread_create(&hilo_desbloquear_en, NULL, desbloquear_en, (void *)io_recibida);
                     index = 0;
@@ -282,7 +282,6 @@ t_proceso *traer_proceso_bloqueado(int id){
 
         index_aux--;
         printf("Sleeping\n");
-        sleep(1);
     }
 
     print_lists();
@@ -322,19 +321,21 @@ void bloquear(t_proceso *self){
 void desbloquear(t_proceso *self){
     printf("Desbloquear proceso: %d %d\n", self->id, procesos_esperando_bloqueo);
     self->salida_block = true;
-    //while(procesos_esperando_bloqueo);
-
-    printf("pasó while inside desblk\n");
     sem_post(&salida_block);
     return;
 }
 
 void *desbloquear_en(void *param){
     t_io *io_recibida = param;
+    sem_wait(&io_libre[io_recibida->id]);
+
     sleep(io_recibida->duracion/1000);
     log_info(logger_kernel, "IO ejecutada %s", io_recibida->mensaje);
     //printf("Desbloqueando X salida de io\n");
     desbloquear(io_recibida->proceso_solicitante);
+    
+    sem_post(&io_libre[io_recibida->id]);
+    
     return NULL;
 }
 

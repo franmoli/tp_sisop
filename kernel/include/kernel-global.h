@@ -55,6 +55,7 @@ typedef struct {
     char *mensaje;
     int duracion;
     t_proceso *proceso_solicitante;
+    int id;
 }t_io;
 
 typedef struct {
@@ -104,6 +105,7 @@ sem_t pedir_salida_de_block;
 sem_t solicitar_block;
 sem_t mutex_semaforos;
 sem_t mutex_recursos_asignados;
+sem_t *io_libre;
 
 
 //Auxiliares

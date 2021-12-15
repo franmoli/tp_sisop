@@ -47,10 +47,13 @@ void *planificador_corto_plazo_sjf (void *_){
         }
         if(multiprocesamiento && list_size(lista_ready)){
             int index = -1;
-            int estimacion_aux = 0;
+            float estimacion_aux = 0;
+            printf("Elijo de entre %d\n", list_size(lista_ready));
+            sleep(1);
             //se busca la estimacion menor
             for(int i = 0; i < list_size(lista_ready); i++){
                 aux = list_get(lista_ready, i);
+                printf("Probando una estimacion %f\n", aux->estimacion);
                 if(aux->estimacion < estimacion_aux || i == 0){
                     estimacion_aux = aux->estimacion;
                     index = i;
@@ -91,7 +94,7 @@ void *planificador_corto_plazo_hrrn (void *_){
         if(multiprocesamiento && list_size(lista_ready)){
             int index = -1;
             int response_ratio = 0;
-
+            printf("Elijo de entre %d\n", list_size(lista_ready));
             //se busca el response ratio mas alto
             for(int i = 0; i < list_size(lista_ready); i++){
 
@@ -119,7 +122,7 @@ void estimar(t_proceso *proceso){
     float alfa = config_kernel->ALFA;
     proceso->estimacion = (alfa * proceso->ejecucion_anterior) + (( 1 - alfa) * proceso->estimacion);
     proceso->estimar = false;
-    //printf("Estimo que la proxima ejecucion del proceso %d: %d - ejecutó la vez pasada %d | | | alfa %f \n", proceso->id, proceso->estimacion, proceso->ejecucion_anterior, alfa);
+    printf("Estimo que la proxima ejecucion del proceso %d: %f - ejecutó la vez pasada %d | | | alfa %f \n", proceso->id, proceso->estimacion, proceso->ejecucion_anterior, alfa);
     return;
 }
 
@@ -138,9 +141,7 @@ void *esperar_bloqueo(void *multiprocesamiento_p){
     while(1){
 
         sem_wait(&solicitar_block);
-        printf("Block solicitado\n");
         sem_wait(&mutex_listas);
-        printf("Block Aceptado\n");
         procesos_esperando_bloqueo--;
         bool encontrado = false;
         int tamanio_lista_exec = list_size(lista_exec);
@@ -150,10 +151,8 @@ void *esperar_bloqueo(void *multiprocesamiento_p){
             t_proceso *aux = list_get(lista_exec, index);
             
                 if(aux->block){
-                    printf("BloqueandoX %d \n", aux->id);
                     aux->block = false;
                     mover_proceso_de_lista(lista_exec, lista_blocked, index, BLOCKED);
-                    printf("Ya bloqueado %d\n", aux->id);
                     encontrado = true;
                 }
             index ++;

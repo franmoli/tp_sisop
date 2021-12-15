@@ -108,6 +108,10 @@ void iniciar_semaforos_generales(){
     sem_init(&solicitar_block, 0, 0);
     sem_init(&mutex_semaforos, 0, 1);
     sem_init(&mutex_recursos_asignados, 0, 1);
+    io_libre = calloc(&io_libre,list_size(config_kernel->DISPOSITIVOS_IO));
+    for(int i = 0; i<list_size(config_kernel->DISPOSITIVOS_IO); i++){
+        sem_init(&io_libre[i], 0, 1);
+    }
     return;
 }
 
@@ -138,16 +142,13 @@ void mover_proceso_de_lista(t_list *origen, t_list *destino, int index, int stat
 
     list_add(destino, aux);
 
-    printf("Avisando del cambio\n");
     avisar_cambio();
-    printf("Cambio avisado\n");
     return;
 }
 
 void avisar_cambio(){
     sem_wait(&mutex_cant_procesos);
     //Aviso que hubo un cambio de listas
-    printf("Cantidad de procesos %d\n", cantidad_de_procesos);
     for(int i = 0; i < cantidad_de_procesos; i++){
         //printf("Un post\n");
         sem_post(&actualizacion_de_listas_1);
@@ -169,7 +170,6 @@ void avisar_cambio(){
     sem_post(&cambio_de_listas_mediano);
 
     sem_post(&mutex_cant_procesos);
-    printf("Pasó todos los wait\n");
 }
 
 void iniciar_debug_console(){
