@@ -88,7 +88,7 @@ int main(int argc, char **argv)
     free(paquete2->buffer);
     free(paquete2);*/
   
-    inicializarCarpincho(0);
+    /*inicializarCarpincho(0);
     socket_client = 0;
     
     t_paquete* paquete = serializar_alloc(23);
@@ -131,9 +131,9 @@ int main(int argc, char **argv)
 
     free(paquete->buffer->stream);
     free(paquete->buffer);
-    free(paquete);
+    free(paquete);*/
 
-    /*while (1)
+    while (1)
     {
         socket_client = esperar_cliente(socket_server, logger_memoria);
         if (socket_client != -1)
@@ -141,7 +141,7 @@ int main(int argc, char **argv)
             inicializarCarpincho(socket_client);
             pthread_create(&hilo_client, NULL, (void *)ejecutar_operacion, (void *)socket_client);
         }
-    }*/
+    }
     log_info(logger_memoria, "Programa finalizado con éxito");
     log_destroy(logger_memoria);
     liberar_config(config);
