@@ -41,8 +41,8 @@ typedef enum {
     BOOL = 4,
     LIST = 5,
 	U_INT = 6,
-	SWAP_PAGINA_HEAP = 7,
-	SWAP_PAGINA_CONTENIDO = 8
+	//SWAP_PAGINA_HEAP = 7,
+	//SWAP_PAGINA_CONTENIDO = 8
 }t_type;
 
 
