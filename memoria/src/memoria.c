@@ -68,7 +68,7 @@ int main(int argc, char **argv)
     list_add(p->heap_contenidos,h);
 
     t_pagina_enviada_swap* p2= maloc(sizeof(t_pagina_enviada_swap));
-    p2->numero_pagina = 0;
+    p2->numero_pagina = 1;
     p2->pid = 0;
     p2->heap_contenidos = list_create();
     t_heap_contenido_enviado * h2 = malloc(sizeof(t_heap_contenido_enviado));
