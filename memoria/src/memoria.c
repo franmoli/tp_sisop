@@ -65,7 +65,7 @@ int main(int argc, char **argv)
     free(paquete);
 
     
-    t_paquete *paquete2 = serializar(MEMWRITE,6,CHAR_PTR,"holaholaholaholaholaholholaholaholaholaholahol",INT,dire_logica,INT,46);
+    t_paquete *paquete2 = serializar(MEMWRITE,6,CHAR_PTR,"holaholaholaholaholahol",INT,dire_logica,INT,23);
     memWrite(paquete2);
 
     free(paquete2->buffer);
