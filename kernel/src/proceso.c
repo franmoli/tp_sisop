@@ -246,6 +246,9 @@ void postear_semaforo(char *nombre_semaforo, int id_del_chabon_que_postea ){
 
         //printf("Pass %d\n", *aux);
         printf("Quiero desbloquear a %d\n", *aux);
+
+        while(procesos_esperando_bloqueo);
+
         desbloquear(traer_proceso_bloqueado(*aux));
 
     }
@@ -256,6 +259,7 @@ void postear_semaforo(char *nombre_semaforo, int id_del_chabon_que_postea ){
 }
 
 t_proceso *traer_proceso_bloqueado(int id){
+    printf("trayendo proceso bloqueado %d \n", id);
 
     t_proceso *encontrado = NULL;
     int index_aux = 20;
@@ -310,13 +314,17 @@ t_semaforo *traer_semaforo(char *nombre_solicitado){
 void bloquear(t_proceso *self){
     printf("Bloqueando proceso: %d\n", self->id);
     self->block = true;
+    procesos_esperando_bloqueo++;
     sem_post(&solicitar_block);
     return;
 }
 
 void desbloquear(t_proceso *self){
-    printf("Desbloquear proceso: %d\n", self->id);
+    printf("Desbloquear proceso: %d %d\n", self->id, procesos_esperando_bloqueo);
     self->salida_block = true;
+    //while(procesos_esperando_bloqueo);
+
+    printf("pasó while inside desblk\n");
     sem_post(&salida_block);
     return;
 }

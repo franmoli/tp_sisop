@@ -138,8 +138,10 @@ void *esperar_bloqueo(void *multiprocesamiento_p){
     while(1){
 
         sem_wait(&solicitar_block);
+        printf("Block solicitado\n");
         sem_wait(&mutex_listas);
-
+        printf("Block Aceptado\n");
+        procesos_esperando_bloqueo--;
         bool encontrado = false;
         int tamanio_lista_exec = list_size(lista_exec);
         int index = 0;
@@ -149,6 +151,7 @@ void *esperar_bloqueo(void *multiprocesamiento_p){
             
                 if(aux->block){
                     printf("BloqueandoX %d \n", aux->id);
+                    aux->block = false;
                     mover_proceso_de_lista(lista_exec, lista_blocked, index, BLOCKED);
                     printf("Ya bloqueado %d\n", aux->id);
                     encontrado = true;

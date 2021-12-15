@@ -112,6 +112,7 @@ bool salida_de_exec;
 int multiprogramacion_disponible;
 int socket_cliente_memoria;
 int multiprocesamiento;
+int procesos_esperando_bloqueo;
 
 //funciones
 void mover_proceso_de_lista(t_list *origen, t_list *destino, int index, int status);

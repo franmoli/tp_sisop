@@ -149,7 +149,7 @@ void atender_proceso (void* parametro ){
                 
                 break;
             default:
-                log_error(logger_kernel, "Codigo de operacion desconocido");
+                log_error(logger_kernel, "Codigo de operacion desconocido %d", paquete->codigo_operacion);
                 //exit(EXIT_FAILURE);
                 carpincho->salida_exit = true;
                 sem_post(&salida_a_exit);

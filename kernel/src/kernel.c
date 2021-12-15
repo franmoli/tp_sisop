@@ -16,6 +16,7 @@ int main(int argc, char **argv) {
     iniciar_semaforos_generales();
     multiprogramacion_disponible = config_kernel->GRADO_MULTIPROGRAMACION;
     multiprocesamiento = config_kernel->GRADO_MULTIPROCESAMIENTO;
+    procesos_esperando_bloqueo = 0;
 
     //Iniciar listas de procesos
     iniciar_listas();
@@ -148,13 +149,13 @@ void avisar_cambio(){
     //Aviso que hubo un cambio de listas
     printf("Cantidad de procesos %d\n", cantidad_de_procesos);
     for(int i = 0; i < cantidad_de_procesos; i++){
-        printf("Un post\n");
+        //printf("Un post\n");
         sem_post(&actualizacion_de_listas_1);
     }
 
     //Espero que todos los procesos hayan recibido el aviso y ejecutado
     for(int i = 0; i < cantidad_de_procesos; i++){
-        printf("Un wait\n");        
+        //printf("Un wait\n");        
         sem_wait(&actualizacion_de_listas_1_recibido);
     }
     //Habilito que vuelvan a esperar una vez ya resuelto todo lo que tengan que hacer con su nuevo estado
@@ -224,6 +225,9 @@ void *debug_console(void *_ ){
         }
         if(string_contains(input, "sem_t")){
             print_sem_tipe();
+        }
+        if(string_contains(input, "blocking")){
+            printf("Procesos esperando bloqueo %d\n", procesos_esperando_bloqueo);
         }
 
     }

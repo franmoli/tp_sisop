@@ -49,6 +49,7 @@ void *salida_de_block(void *_){
             
             t_proceso *aux = list_get(lista_blocked, index);
             if(aux->salida_block){
+                aux->salida_block = false;
                 printf("salió de block el %d\n", aux->id);
                 mover_proceso_de_lista(lista_blocked, lista_ready, index, READY);
 
@@ -65,7 +66,7 @@ void *salida_de_block(void *_){
             t_proceso *aux = list_get(lista_s_blocked, index);
             
             if(aux->salida_block){
-                
+                aux->salida_block = false;                
                 mover_proceso_de_lista(lista_s_blocked, lista_s_ready, 0, READY);
                 encontrado = true;
                 
