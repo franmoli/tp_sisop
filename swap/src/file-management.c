@@ -170,7 +170,7 @@ t_pagina_enviada_swap leer_pagina_de_archivo(int numero_pagina) {
 
         t_list *contenidos_heap = list_create();
         for(int i=0; i<informacion_almacenamiento->cantidad_contenidos; i++) {
-            t_heap_contenido_enviado *contenido_heap = malloc(sizeof(t_info_heap_swap));
+            t_heap_contenido_enviado *contenido_heap = malloc(sizeof(t_heap_contenido_enviado));
             
             memcpy(&contenido_heap->prevAlloc, paginas_obtenidas + offset_actual, sizeof(uint32_t));
             offset_actual += sizeof(uint32_t);
@@ -180,7 +180,9 @@ t_pagina_enviada_swap leer_pagina_de_archivo(int numero_pagina) {
             offset_actual += sizeof(uint8_t);
 
             int strlen_contenido = list_get(informacion_almacenamiento->sizes_contenidos, i);
-            memcpy(&contenido_heap->contenido, paginas_obtenidas + offset_actual, strlen_contenido);
+            contenido_heap->contenido = malloc(strlen_contenido);
+            contenido_heap->size_contenido = strlen_contenido;
+            memcpy(contenido_heap->contenido, paginas_obtenidas + offset_actual, strlen_contenido);
             offset_actual += strlen_contenido;
 
             list_add(contenidos_heap, contenido_heap);

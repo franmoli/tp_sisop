@@ -119,11 +119,11 @@ t_swap_serializado* deserializar_swap(t_paquete *paquete){
 int bytes_pagina(t_pagina_enviada_swap* pagina) {
     int size = 0;
 
-    size += sizeof(pagina->pid);
-    size += sizeof(pagina->numero_pagina);
+    size += sizeof(uint32_t);
+    size += sizeof(uint32_t);
 
     //Contenidos heap
-    size += sizeof(pagina->heap_contenidos->elements_count);
+    size += sizeof(int);
     for(int i=0; i<list_size(pagina->heap_contenidos); i++) {
 		t_heap_contenido_enviado *contenido = list_get(pagina->heap_contenidos, i);
 		size += bytes_info_heap(*contenido);
@@ -136,10 +136,10 @@ int bytes_info_heap(t_heap_contenido_enviado info) {
     int size = 0;
 
     //Heap metadata
-    size += sizeof(info.prevAlloc);
-    size += sizeof(info.nextAlloc);
-    size += sizeof(info.isFree);
-    size += sizeof(int); //Longitud del contenido
+    size += sizeof(uint32_t);
+    size += sizeof(uint32_t);
+    size += sizeof(uint8_t);
+    size += sizeof(uint32_t); //Longitud del contenido
     size += sizeof(char) * (strlen(info.contenido) + 1);
 
     return size;
@@ -173,11 +173,11 @@ void* serializar_pagina(t_pagina_enviada_swap* pagina) {
         memcpy(stream + offset, &(contenido->isFree), sizeof(uint8_t));
 	    offset += sizeof(uint8_t);
 
-        int strlen_contenido = strlen(contenido->contenido);
-        memcpy(stream + offset, &strlen_contenido, sizeof(int));
-	    offset += sizeof(int);
-        memcpy(stream + offset, contenido->contenido, strlen_contenido + 1);
-	    offset += strlen_contenido + 1;
+        memcpy(stream + offset, &(contenido->size_contenido), sizeof(uint32_t));
+	    offset += sizeof(uint32_t);
+
+        memcpy(stream + offset, contenido->contenido, strlen(contenido->contenido) + 1);
+	    offset += strlen(contenido->contenido) + 1;
     }
 
     return stream;
@@ -210,13 +210,12 @@ t_pagina_enviada_swap* deserializar_pagina(void *stream) {
         memcpy(&heap_metadata->isFree, stream + offset, sizeof(uint8_t));
 	    offset += sizeof(uint8_t);
 
-        int strlen_contenido = 0;
-        memcpy(&strlen_contenido, stream + offset, sizeof(int));
-	    offset += sizeof(int);
+        memcpy(&heap_metadata->size_contenido, stream + offset, sizeof(uint32_t));
+	    offset += sizeof(uint32_t);
 
-        heap_metadata->contenido = malloc(sizeof(char) * (strlen_contenido + 1));
-        memcpy(heap_metadata->contenido, stream + offset, strlen_contenido + 1);
-	    offset += strlen_contenido + 1;
+        heap_metadata->contenido = malloc(heap_metadata->size_contenido);
+        memcpy(heap_metadata->contenido, stream + offset, heap_metadata->size_contenido);
+	    offset += heap_metadata->size_contenido;
 
         list_add(contenidos_heap, heap_metadata);
     }
@@ -240,13 +239,10 @@ t_paquete * serializar (int codigo_operacion, int arg_count, ...){
     uint32_t param_ui = 0;
     bool param_b = false;
     t_list *param_l = NULL; 
-    t_paquete *paquete_aux = malloc(sizeof(t_paquete));
-    paquete_aux->buffer = malloc(sizeof(t_buffer));
+    //t_paquete *paquete_aux = malloc(sizeof(t_paquete));
+    //paquete_aux->buffer = malloc(sizeof(t_buffer));
     t_type tipo_de_lista = INT;
     void *list_elem = NULL;
-
-    t_info_heap_swap* contenido_lista_swap = NULL;
-    t_info_carpincho_swap* contenido_carpincho_lista_swap = NULL;
 
     va_list valist;
     va_start(valist, arg_count);
@@ -301,12 +297,12 @@ t_paquete * serializar (int codigo_operacion, int arg_count, ...){
                 for(int j = 0; j < list_size(param_l); j++){
 
                     //Traigo un elemento de la lista y lo serializo recursivamente
-                    list_elem = list_get(param_l, j);
+                   /* list_elem = list_get(param_l, j);
                     paquete_aux = serializar(NUEVO_CARPINCHO, 2, tipo_de_lista, list_elem);
                     added_size = paquete_aux->buffer->size;
 
 
-                    serializar_single(&stream, paquete_aux->buffer->stream, &size, added_size, &offset);
+                    serializar_single(&stream, paquete_aux->buffer->stream, &size, added_size, &offset);*/
                 }
                 break;
             case U_INT:
@@ -316,16 +312,6 @@ t_paquete * serializar (int codigo_operacion, int arg_count, ...){
                 serializar_single(&stream, &param_un_i, &size, added_size, &offset);
 
                 break;
-            case SWAP_PAGINA_HEAP:
-                contenido_lista_swap = va_arg(valist, t_info_heap_swap*);
-                added_size = sizeof(t_info_heap_swap);
-                serializar_single(&stream, &contenido_lista_swap, &size, added_size, &offset);
-                break;
-            case SWAP_PAGINA_CONTENIDO:
-                contenido_carpincho_lista_swap = va_arg(valist, t_info_carpincho_swap*);
-                added_size = sizeof(t_info_carpincho_swap);
-                serializar_single(&stream, &contenido_carpincho_lista_swap, &size, added_size, &offset);
-            break;
         }
     }
     
@@ -395,8 +381,6 @@ int deserializar(t_paquete *paquete, int arg_count, ...){
     
     t_paquete *paquete_aux= NULL;
 
-    t_info_heap_swap **param_heap_swap = NULL;
-    t_info_carpincho_swap ** param_heap_swap_carpincho = NULL;
     t_list *param_l = NULL; 
     t_type tipo_de_lista = INT;
     void *list_elem = NULL;
@@ -459,25 +443,6 @@ int deserializar(t_paquete *paquete, int arg_count, ...){
                     list_add(param_l,list_elem);
                 }
                 break;
-            
-            case SWAP_PAGINA_HEAP:
-                param_heap_swap = va_arg(valist, t_info_heap_swap**);
-                //Primero traigo el tamanio del string
-                size = sizeof(t_info_heap_swap);
-                //Con el tamanio del string asigno memoria y traigo variable
-                *param_heap_swap = realloc(*param_heap_swap, size);
-                deserializar_single(stream, *param_heap_swap, size, &offset);   
-                
-                break;
-            case SWAP_PAGINA_CONTENIDO:
-                param_heap_swap_carpincho = va_arg(valist, t_info_carpincho_swap**);
-                //Primero traigo el tamanio del string
-                size = sizeof(t_info_carpincho_swap);
-                //Con el tamanio del string asigno memoria y traigo variable
-                *param_heap_swap_carpincho = realloc(*param_heap_swap_carpincho, size);
-                deserializar_single(stream, *param_heap_swap_carpincho, size, &offset);   
-
-                break;
         }
     }
     return offset;
@@ -502,17 +467,4 @@ t_kernel_dire_logica_serializado *deserializar_direccion_logica(t_paquete* paque
     int offset = 0;
     memcpy(&(direccion_logica->direccion_logica), stream + offset, sizeof(uint32_t));
     return direccion_logica;
-}
-
-t_paquete* serializar_pagina_swap(t_pagina_swap* pagina_swap){
-    t_paquete *paquete = malloc(sizeof(t_paquete));
-    t_buffer *new_buffer = malloc(sizeof(t_buffer));
-    new_buffer->size = sizeof(uint32_t) * 2 + sizeof(info_contenido)
-                        +list_size(pagina_swap->contenido_carpincho_info) * (sizeof(uint32_t) * 2 + sizeof(int));
-    void *stream = malloc(new_buffer->size);
-
-    new_buffer->stream = stream;
-    paquete->buffer = new_buffer;
-    paquete->codigo_operacion = SWAPSAVE;
-    return paquete;
 }

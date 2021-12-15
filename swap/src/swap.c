@@ -56,11 +56,11 @@ int main(int argc, char **argv) {
 
 int ejecutar_operacion(int client) {
     t_paquete *paquete = recibir_paquete(client);
-
     //Analizo el código de operación recibido y ejecuto acciones según corresponda
     if(paquete->codigo_operacion == SWAPSAVE) {
         //Deserializo la página enviada por Memoria
         t_pagina_enviada_swap *pagina = deserializar_pagina(paquete->buffer->stream);
+        t_heap_contenido_enviado *c = list_get(pagina->heap_contenidos,0);
         
         //Inserto la página en los archivos de swap
         int op_code = insertar_pagina_en_archivo(pagina);
