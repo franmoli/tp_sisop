@@ -195,7 +195,7 @@ int memWrite(t_paquete *paquete)
    free(paquete);
    int inicio = tamanio_memoria;
    int numero_pagina = (direccion_logica - inicio) / config_memoria->TAMANIO_PAGINA;
-   int desplazamiento = (direccion_logica-inicio) % config_memoria->TAMANIO_PAGINA + sizeof(t_heap_metadata);
+   int desplazamiento = ((direccion_logica-inicio) % config_memoria->TAMANIO_PAGINA) + sizeof(t_heap_metadata);
    t_tabla_paginas* tabla_paginas = buscarTablaPorPID(socket_client);
    t_pagina* pagina = malloc(sizeof(t_pagina));
 
@@ -240,6 +240,7 @@ int memWrite(t_paquete *paquete)
    {
        size_primera_pagina = config_memoria->TAMANIO_PAGINA - desplazamiento;
        escribirEnMemoria(pagina->marco_asignado,desplazamiento, size_primera_pagina, contenido_escribir);
+       contenido_escribir = string_substring_from(contenido_escribir, size_primera_pagina);
        pagina = list_get(tabla_paginas->paginas,numero_pagina);
         if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "LRU") == 0){
             actualizarLRU(pagina);
@@ -255,7 +256,7 @@ int memWrite(t_paquete *paquete)
    int paginas_escribir = (size / config_memoria->TAMANIO_PAGINA);
    uint32_t offset = size_primera_pagina;
 
-   for (int i = 0; i<paginas_escribir; i++){
+   for (int i = 0; i<=paginas_escribir; i++){
 
         numero_pagina++;
 
@@ -278,9 +279,9 @@ int memWrite(t_paquete *paquete)
         agregarTLB(numero_pagina,marco,tabla_paginas->pid);
 
         if(size < config_memoria->TAMANIO_PAGINA){
-            escribirEnMemoria(pagina->marco_asignado,0, size, contenido_escribir + offset);
+            escribirEnMemoria(marco,0, size, contenido_escribir);
         }else{
-            escribirEnMemoria(pagina->marco_asignado,0, config_memoria->TAMANIO_PAGINA, contenido_escribir + offset);
+            escribirEnMemoria(marco,0, config_memoria->TAMANIO_PAGINA, contenido_escribir);
             size -= config_memoria->TAMANIO_PAGINA;
             offset += config_memoria->TAMANIO_PAGINA;
         }
@@ -306,7 +307,7 @@ void escribirEnMemoria(int marco, int desplazamiento, int size, char* contenido)
     uint32_t dir_fisica = inicio + marco * config_memoria->TAMANIO_PAGINA + desplazamiento;
     uint32_t offset = 0;
     log_info(logger_memoria,"Escribiendo en la direccion %d el contenido: %s.\n",dir_fisica,contenido);
-    memcpy(dir_fisica,&contenido, size);
+    memcpy(dir_fisica,contenido, size);
     log_info(logger_memoria,"Se termino de escribir en memoria.");
 }
 
