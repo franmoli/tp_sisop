@@ -40,13 +40,7 @@ typedef enum {
     UINT32 = 3,
     BOOL = 4,
     LIST = 5,
-<<<<<<< HEAD
 	U_INT = 6
-=======
-	U_INT = 6,
-	//SWAP_PAGINA_HEAP = 7,
-	//SWAP_PAGINA_CONTENIDO = 8
->>>>>>> 30c587df641b0cc440e850dddec7d70d20810471
 }t_type;
 
 
