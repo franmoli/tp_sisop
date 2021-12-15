@@ -240,8 +240,8 @@ t_paquete * serializar (int codigo_operacion, int arg_count, ...){
     t_list *param_l = NULL; 
     //t_paquete *paquete_aux = malloc(sizeof(t_paquete));
     //paquete_aux->buffer = malloc(sizeof(t_buffer));
-    t_type tipo_de_lista = INT;
-    void *list_elem = NULL;
+    //t_type tipo_de_lista = INT;
+    //void *list_elem = NULL;
 
     va_list valist;
     va_start(valist, arg_count);
@@ -284,7 +284,7 @@ t_paquete * serializar (int codigo_operacion, int arg_count, ...){
 
                 break;
             case LIST:
-                tipo_de_lista = va_arg(valist, t_type); 
+                //tipo_de_lista = va_arg(valist, t_type); 
                 param_l = va_arg(valist, t_list*);
                 //Se trae el tipo de lista y se incrementa i por el va_arg extra
                 i++;
