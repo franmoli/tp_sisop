@@ -62,7 +62,6 @@ int ejecutar_operacion(int client) {
         //Deserializo la página enviada por Memoria
         t_pagina_enviada_swap *pagina = deserializar_pagina(paquete->buffer->stream);
         
-        printf("\n\nBytes pagina recibida: %d\n\n", bytes_pagina(pagina));
         //Inserto la página en los archivos de swap
         int op_code = insertar_pagina_en_archivo(pagina);
 
@@ -81,7 +80,7 @@ int ejecutar_operacion(int client) {
         memcpy(&pagina_solicitada, paquete->buffer->stream + 0, sizeof(int));
 	    
         //Busco la página y la envío en caso correcto
-        t_pagina_swap pagina = leer_pagina_de_archivo(pagina_solicitada);
+        t_pagina_enviada_swap pagina = leer_pagina_de_archivo(pagina_solicitada);
 
         if(pagina.numero_pagina >= 0) {
             void *pagina_serializada = serializar_pagina(&pagina);

@@ -140,7 +140,7 @@ int bytes_info_heap(t_heap_contenido_enviado info) {
     size += sizeof(info.nextAlloc);
     size += sizeof(info.isFree);
     size += sizeof(int); //Longitud del contenido
-    size += sizeof(char) * strlen(info.contenido);
+    size += sizeof(char) * (strlen(info.contenido) + 1);
 
     return size;
 }
@@ -176,8 +176,8 @@ void* serializar_pagina(t_pagina_enviada_swap* pagina) {
         int strlen_contenido = strlen(contenido->contenido);
         memcpy(stream + offset, &strlen_contenido, sizeof(int));
 	    offset += sizeof(int);
-        memcpy(stream + offset, contenido->contenido, strlen_contenido);
-	    offset += strlen_contenido;
+        memcpy(stream + offset, contenido->contenido, strlen_contenido + 1);
+	    offset += strlen_contenido + 1;
     }
 
     return stream;
@@ -202,7 +202,7 @@ t_pagina_enviada_swap* deserializar_pagina(void *stream) {
 
     t_list *contenidos_heap = list_create();
     for(int i=0; i<cantidad_contenidos_heap; i++) {
-        t_heap_contenido_enviado *heap_metadata = malloc(sizeof(t_heap_swap));
+        t_heap_contenido_enviado *heap_metadata = malloc(sizeof(t_heap_contenido_enviado));
         memcpy(&heap_metadata->prevAlloc, stream + offset, sizeof(uint32_t));
 	    offset += sizeof(uint32_t);
         memcpy(&heap_metadata->nextAlloc, stream + offset, sizeof(uint32_t));
@@ -213,9 +213,10 @@ t_pagina_enviada_swap* deserializar_pagina(void *stream) {
         int strlen_contenido = 0;
         memcpy(&strlen_contenido, stream + offset, sizeof(int));
 	    offset += sizeof(int);
-        heap_metadata->contenido = malloc(strlen_contenido);
-        memcpy(heap_metadata->contenido, stream + offset, strlen_contenido);
-	    offset += strlen_contenido;
+
+        heap_metadata->contenido = malloc(sizeof(char) * (strlen_contenido + 1));
+        memcpy(heap_metadata->contenido, stream + offset, strlen_contenido + 1);
+	    offset += strlen_contenido + 1;
 
         list_add(contenidos_heap, heap_metadata);
     }
