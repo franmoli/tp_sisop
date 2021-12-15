@@ -73,7 +73,7 @@ char *memRead(t_paquete *paquete)
    int desplazamiento = ((direccion_logica-inicio) % config_memoria->TAMANIO_PAGINA)  + sizeof(t_heap_metadata);
 
    if(numero_pagina > list_size(tabla_paginas)){
-       return -1;
+       return "FAIL";
    }
 
     //Ver que el contenido esta completo en la pagina, si no esta hay que fijarse en las paginas siguientes que contengan si estan en memoria (bit presencia en 1)
@@ -89,7 +89,7 @@ char *memRead(t_paquete *paquete)
             marco = traerPaginaAMemoria(pagina);
             if(marco == -1){
                 //No pude traer a memoria
-                return -1;
+                return "FAIL";
             }
        }
    }
@@ -149,7 +149,7 @@ char *memRead(t_paquete *paquete)
                     marco = traerPaginaAMemoria(pagina);
                     if(marco == -1){
                         //No pude traer a memoria
-                        return -1;
+                        return "FAIL";
                     }
             }
         }

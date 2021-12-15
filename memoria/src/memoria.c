@@ -204,7 +204,20 @@ static void *ejecutar_operacion()
         case MEMREAD:
             log_info(logger_memoria, "recibi orden de leer memoria del cliente %d", socket_client);
             char *data = memRead(paquete);
-            //ENVIAR PAQUETE A KERNEL
+            if(data = "FAIL"){
+                //NO SE PUDO LEER
+                t_paquete* paquete_enviar = serializar(DIRECCION_LOGICA_INVALIDA,2,INT,0);
+                log_info(logger_memoria,"No se pudo leer de la direccion logica solicitada.");
+                enviar_paquete(paquete_enviar,socket_client);
+            }
+            else{
+                //SI SE PUDO LEER
+                t_paquete* paquete_enviar = serializar(MEMREAD,6,CHAR_PTR,data,INT,strlen(data),INT,0);
+                log_info(logger_memoria,"Enviando paquete");
+                enviar_paquete(paquete_enviar,socket_client);
+                log_info(logger_memoria,"Paquete enviado");
+            }
+
             break;
         case MATEINIT:
             log_info(logger_memoria, "recibi un nuevo carpincho para inicializar del cliente %d", socket_client);
