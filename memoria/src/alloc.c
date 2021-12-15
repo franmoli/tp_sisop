@@ -351,7 +351,10 @@ int memAlloc(t_paquete *paquete)
                 traerPaginaAMemoria(pagina_alloc_actual);
             
             free(data);
-            data = traerAllocDeMemoria(nextAnterior);
+            uint32_t offset = (nextAnterior-inicio) % config_memoria->TAMANIO_PAGINA;
+            uint32_t direccion_fisica_anterior = inicio + offset + pagina_alloc_actual->marco_asignado * config_memoria->TAMANIO_PAGINA;
+            
+            data = traerAllocDeMemoria(direccion_fisica_anterior);
             index++;
         }
         //Nuevo Alloc

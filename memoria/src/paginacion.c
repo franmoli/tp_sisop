@@ -916,7 +916,7 @@ int traerPaginaAMemoria(t_pagina* pagina_alloc_actual){
     {
         replaceClock(pagina_alloc_actual);
     }
-
+    log_info(logger_memoria, "PAGINA %d TRAIDA A MEMORIA CORRECTAMENTE", pagina_alloc_actual->numero_pagina);
     return pagina_alloc_actual->marco_asignado;
 }
 
