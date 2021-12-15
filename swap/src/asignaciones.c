@@ -308,11 +308,11 @@ bool asignacion_fija_de_pagina(int posicion_archivo, char *path_archivo, int arc
             offset += sizeof(uint32_t);
             memcpy(mapping + offset, &(contenido_carpincho->fin), sizeof(uint32_t));
             offset += sizeof(uint32_t);
-
+            
             int strlen_contenido = strlen(contenido_carpincho->contenido);
             memcpy(mapping + offset, &(strlen_contenido), sizeof(int));
             offset += sizeof(int);
-            memcpy(mapping + offset, &(contenido_carpincho->contenido), strlen_contenido + 1);
+            memcpy(mapping + offset, contenido_carpincho->contenido, strlen_contenido + 1);
             offset += strlen_contenido + 1;
         }
 

@@ -165,7 +165,7 @@ t_pagina_swap leer_pagina_de_archivo(int numero_pagina) {
 
         int offset_actual = informacion_almacenamiento->marco->base;
         memcpy(&pagina_obtenida.tipo_contenido, paginas_obtenidas + offset_actual, sizeof(int));
-        offset_actual += sizeof(pagina_obtenida.tipo_contenido);
+        offset_actual += sizeof(int);
         memcpy(&pagina_obtenida.pid, paginas_obtenidas + offset_actual, sizeof(uint32_t));
         offset_actual += sizeof(uint32_t);
         memcpy(&pagina_obtenida.numero_pagina, paginas_obtenidas + offset_actual, sizeof(uint32_t));
