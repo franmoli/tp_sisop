@@ -52,7 +52,7 @@ void instanciar_marcos_fija(int file);
 
 //Funciones de páginas
 bool insertar_pagina_en_archivo(t_pagina_enviada_swap *pagina);
-t_pagina_enviada_swap leer_pagina_de_archivo(int numero_pagina);
+t_pagina_enviada_swap leer_pagina_de_archivo(int id_proceso, int numero_pagina);
 void eliminar_pagina(int numero_pagina);
 
 //Esquemas de asignación

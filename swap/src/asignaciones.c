@@ -184,7 +184,7 @@ bool asignacion_global_de_pagina(int posicion_archivo, char *path_archivo, int a
 
         int strlen_contenido = strlen(contenido_heap->contenido);
         list_add(sizes_contenidos, strlen_contenido);
-        memcpy(mapping + offset, &(contenido_heap->contenido), strlen_contenido);
+        memcpy(mapping + offset, contenido_heap->contenido, strlen_contenido);
         offset += strlen_contenido;
     }
 

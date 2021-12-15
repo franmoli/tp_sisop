@@ -56,10 +56,6 @@ int main(int argc, char **argv)
         signal(SIGUSR2, limpiarTlb);
 
     /*
-
-
-    
-
     free(paquete->buffer->stream);
     free(paquete->buffer);
     free(paquete);
@@ -71,7 +67,7 @@ int main(int argc, char **argv)
     free(paquete2->buffer);
     free(paquete2);*/
   
-    /*inicializarCarpincho(0);
+    inicializarCarpincho(0);
     socket_client = 0;
     
     t_paquete* paquete = serializar_alloc(23);
@@ -81,21 +77,6 @@ int main(int argc, char **argv)
     free(paquete->buffer);
     free(paquete);
     
-    t_paquete *paquete2 = serializar(MEMWRITE,6,CHAR_PTR,"holaholaholaholahol",INT,dire_logica,INT,23);
-    memWrite(paquete2);
-
-    free(paquete2->buffer->stream);
-    free(paquete2->buffer);
-    free(paquete2);
-t_paquete* paquete = serializar_alloc(23);
-    int dire_logica =memAlloc(paquete);
-    paquete = serializar_alloc(23);
-    dire_logica =memAlloc(paquete); 
-
-    free(paquete->buffer->stream);
-    free(paquete->buffer);
-    free(paquete);
-    
     paquete = serializar_alloc(23);
     memAlloc(paquete); 
 
@@ -123,9 +104,15 @@ t_paquete* paquete = serializar_alloc(23);
     free(paquete->buffer->stream);
     free(paquete->buffer);
     free(paquete);
-*/
 
-    while (1)
+    paquete = serializar_alloc(23);
+    memAlloc(paquete); 
+
+    free(paquete->buffer->stream);
+    free(paquete->buffer);
+    free(paquete);
+
+    /*while (1)
     {
         socket_client = esperar_cliente(socket_server, logger_memoria);
         if (socket_client != -1)
@@ -133,7 +120,7 @@ t_paquete* paquete = serializar_alloc(23);
             inicializarCarpincho(socket_client);
             pthread_create(&hilo_client, NULL, (void *)ejecutar_operacion, (void *)socket_client);
         }
-    }
+    }*/
     log_info(logger_memoria, "Programa finalizado con éxito");
     log_destroy(logger_memoria);
     liberar_config(config);

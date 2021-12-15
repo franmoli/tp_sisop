@@ -395,7 +395,6 @@ void crearPrimerHeader(t_pagina *pagina, uint32_t size)
     contenido_contenido->contenido_pagina = CONTENIDO;
     contenido_contenido->tamanio = size;
     list_add(pagina->listado_de_contenido, contenido_contenido);
-
 }
 
 int agregarPagina(t_pagina *pagina, t_heap_metadata *data, uint32_t nextAnterior, uint32_t size, bool ultimo, int index_alloc)

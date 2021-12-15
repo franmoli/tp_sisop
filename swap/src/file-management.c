@@ -149,13 +149,14 @@ bool insertar_pagina_en_archivo(t_pagina_enviada_swap *pagina) {
 /*
     Lectura de una página de un archivo de SWAP
 */
-t_pagina_enviada_swap leer_pagina_de_archivo(int numero_pagina) {
-    log_info(logger_swap, "Se ha solicitado la pagina %d para enviar a memoria principal", numero_pagina);
+t_pagina_enviada_swap leer_pagina_de_archivo(int id_carpincho, int numero_pagina) {
+    log_info(logger_swap, "Se ha solicitado la pagina %d del carpincho %d para enviar a memoria principal", numero_pagina, id_carpincho);
+    
     //Me fijo si la página solicitada es una de las páginas almacenadas
     t_pagina_almacenada *informacion_almacenamiento = NULL;
     for(int i=0; i<list_size(lista_paginas_almacenadas); i++) {
         t_pagina_almacenada *pagina_almacenada = list_get(lista_paginas_almacenadas, i);
-        if(numero_pagina == pagina_almacenada->numero_pagina) {
+        if(id_carpincho == pagina_almacenada->id_proceso && numero_pagina == pagina_almacenada->numero_pagina) {
             informacion_almacenamiento = pagina_almacenada;
             break;
         }
