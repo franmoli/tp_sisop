@@ -6,12 +6,13 @@ void iniciar_planificador_largo(){
 
     pthread_t hilo_servidor;
     pthread_create(&hilo_servidor, NULL, iniciar_servidor_kernel, (void *)NULL);
-
+    
     pthread_t hilo_planificador;
     pthread_create(&hilo_planificador, NULL, planificador_largo_plazo, (void *)NULL);
-
+    
     pthread_t hilo_exit;
     pthread_create(&hilo_exit, NULL, hilo_salida_a_exit, (void *)NULL);
+
 }
 
 
