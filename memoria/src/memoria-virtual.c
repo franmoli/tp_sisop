@@ -93,10 +93,8 @@ int enviarPaginaSwap(t_pagina* pagina){
 
     //t_contenidos_pagina* contenido = list_get(pagina->listado_de_contenido,0);
     uint32_t inicio = tamanio_memoria;
-    t_pagina_swap *pagina_swap = malloc(sizeof(t_pagina_swap));
-    pagina_swap->tipo_contenido = AMBOS;
-    pagina_swap->contenido_heap_info = list_create();
-    pagina_swap->contenido_carpincho_info = list_create();
+    t_pagina_enviada_swap *pagina_swap = malloc(sizeof(t_pagina_enviada_swap));
+    pagina_swap->heap_contenidos = list_create();
     pagina_swap->pid = pagina->carpincho_id;
     pagina_swap->numero_pagina = pagina->numero_pagina;
 
@@ -107,20 +105,25 @@ int enviarPaginaSwap(t_pagina* pagina){
 
         if(contenido->contenido_pagina == RESTO_CONTENIDO || contenido->contenido_pagina == CONTENIDO){
             int offset = (contenido->dir_comienzo - inicio) % config_memoria->TAMANIO_PAGINA;
-            t_info_carpincho_swap* contenido_swap = malloc(sizeof(t_info_carpincho_swap));
-            contenido_swap->size = contenido->tamanio;
-            contenido_swap->inicio = contenido->dir_comienzo;
-            contenido_swap->fin = contenido->dir_fin;
-            contenido_swap->contenido = traerDeMemoria(pagina->marco_asignado, offset, contenido->tamanio);
-            list_add(pagina_swap->contenido_carpincho_info,contenido_swap);
+            if(list_size(pagina_swap->heap_contenidos) == 0){
+                t_heap_contenido_enviado* heap_swap = malloc(sizeof(t_heap_contenido_enviado));
+                heap_swap->prevAlloc = 1;
+                heap_swap->nextAlloc = 1;
+                heap_swap->isFree = false;
+                list_add(pagina_swap->heap_contenidos,heap_swap);
+            }else{
+                t_heap_contenido_enviado *contenido_heap_enviado = list_get(pagina_swap->heap_contenidos,list_size(pagina_swap->heap_contenidos)-1);
+                contenido_heap_enviado->size = contenido->tamanio;
+                contenido_heap_enviado->contenido = traerDeMemoria(pagina->marco_asignado, offset, contenido->tamanio);
+            }
         }else
         {
             t_heap_metadata* heap = traerAllocIncompleto(pagina->marco_asignado,contenido->dir_comienzo,contenido->dir_fin);
-            t_info_heap_swap* heap_swap = malloc(sizeof(t_info_heap_swap));
-            heap_swap->inicio = contenido->dir_comienzo;
-            heap_swap->fin = contenido->dir_fin;
-            heap_swap->contenido = heap;
-            list_add(pagina_swap->contenido_heap_info,heap_swap);
+            t_heap_contenido_enviado* heap_swap = malloc(sizeof(t_heap_contenido_enviado));
+            heap_swap->prevAlloc = heap->prevAlloc;
+            heap_swap->nextAlloc = heap->nextAlloc;
+            heap_swap->isFree = heap->isFree;
+            list_add(pagina_swap->heap_contenidos,heap_swap);
         }
     }
     list_iterator_destroy(list_iterator);
@@ -141,7 +144,7 @@ int enviarPaginaSwap(t_pagina* pagina){
     free(pagina_serial);
     free(buffer);
 
-    list_iterator = list_iterator_create(pagina_swap->contenido_heap_info);
+    list_iterator = list_iterator_create(pagina_swap->heap_contenidos);
     while(list_iterator_has_next(list_iterator))
     {
          t_info_heap_swap* heap_swap  = list_iterator_next(list_iterator);
@@ -149,17 +152,8 @@ int enviarPaginaSwap(t_pagina* pagina){
          free(heap_swap);
     }
     list_iterator_destroy(list_iterator);
-    list_iterator = list_iterator_create(pagina_swap->contenido_carpincho_info);
-    while(list_iterator_has_next(list_iterator))
-    {
-         t_info_carpincho_swap* heap_swap  = list_iterator_next(list_iterator);
-         free(heap_swap->contenido);
-         free(heap_swap);
-    }
-    list_destroy(pagina_swap->contenido_heap_info);
-    list_destroy(pagina_swap->contenido_carpincho_info);
+    list_destroy(pagina_swap->heap_contenidos);
     
-    list_iterator_destroy(list_iterator);
     free(pagina_swap);
 
     t_paquete* paquete_recibir = recibir_paquete(socket_cliente_swap);

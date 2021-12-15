@@ -78,6 +78,7 @@ typedef struct {
     uint32_t nextAlloc;
     uint8_t isFree;
 	char* contenido;
+	uint32_t size;
 } __attribute__((packed))
 t_heap_contenido_enviado;
 
