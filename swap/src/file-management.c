@@ -123,6 +123,17 @@ bool insertar_pagina_en_archivo(t_pagina_enviada_swap *pagina) {
 
         //Cierro el archivo y libero la memoria de la página
         close(archivo);
+
+        t_list_iterator *list_iterator = list_iterator_create(pagina->heap_contenidos);
+        while(list_iterator_has_next(list_iterator))
+        {
+            t_heap_contenido_enviado* heap_swap  = list_iterator_next(list_iterator);
+            free(heap_swap->contenido);
+            free(heap_swap);
+        }
+        list_iterator_destroy(list_iterator);
+        list_destroy(pagina->heap_contenidos);
+        
         free(pagina);
     } else if(posicion_archivo_obtenido == -2) {
         log_error(logger_swap, "No se ha podido guardar la pagina %d en el archivo dado que no hay espacio suficiente. No puede almacenarse en otros archivos dado que se encontraron paginas asociadas al mismo proceso (%d) en este archivo.", pagina->numero_pagina, pagina->pid);
@@ -168,7 +179,7 @@ t_pagina_enviada_swap leer_pagina_de_archivo(int numero_pagina) {
         void *paginas_obtenidas = mmap(0, statbuf.st_size, PROT_READ, MAP_PRIVATE, archivo, 0);
         int offset_actual = informacion_almacenamiento->marco->base;
 
-        t_list *contenidos_heap = list_create();
+        pagina_obtenida.heap_contenidos = list_create();
         for(int i=0; i<informacion_almacenamiento->cantidad_contenidos; i++) {
             t_heap_contenido_enviado *contenido_heap = malloc(sizeof(t_heap_contenido_enviado));
             
@@ -185,9 +196,8 @@ t_pagina_enviada_swap leer_pagina_de_archivo(int numero_pagina) {
             memcpy(contenido_heap->contenido, paginas_obtenidas + offset_actual, strlen_contenido);
             offset_actual += strlen_contenido;
 
-            list_add(contenidos_heap, contenido_heap);
+            list_add(pagina_obtenida.heap_contenidos, contenido_heap);
         }
-        pagina_obtenida.heap_contenidos = contenidos_heap;
 
         close(archivo);
         eliminar_pagina(numero_pagina);

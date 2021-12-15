@@ -71,10 +71,10 @@ int main(int argc, char **argv)
     free(paquete2->buffer);
     free(paquete2);*/
   
-    inicializarCarpincho(0);
+    /*inicializarCarpincho(0);
     socket_client = 0;
     
-   /* t_paquete* paquete = serializar_alloc(23);
+    t_paquete* paquete = serializar_alloc(23);
     int dire_logica =memAlloc(paquete);
 
     free(paquete->buffer->stream);
@@ -86,7 +86,7 @@ int main(int argc, char **argv)
 
     free(paquete2->buffer->stream);
     free(paquete2->buffer);
-    free(paquete2);*/
+    free(paquete2);
 t_paquete* paquete = serializar_alloc(23);
     int dire_logica =memAlloc(paquete);
     paquete = serializar_alloc(23);
@@ -123,9 +123,9 @@ t_paquete* paquete = serializar_alloc(23);
     free(paquete->buffer->stream);
     free(paquete->buffer);
     free(paquete);
+*/
 
-
-    /*while (1)
+    while (1)
     {
         socket_client = esperar_cliente(socket_server, logger_memoria);
         if (socket_client != -1)
@@ -133,7 +133,7 @@ t_paquete* paquete = serializar_alloc(23);
             inicializarCarpincho(socket_client);
             pthread_create(&hilo_client, NULL, (void *)ejecutar_operacion, (void *)socket_client);
         }
-    }*/
+    }
     log_info(logger_memoria, "Programa finalizado con éxito");
     log_destroy(logger_memoria);
     liberar_config(config);
@@ -242,6 +242,8 @@ static void *ejecutar_operacion()
 
             enviar_paquete(paquete, socket_client);
             break;
+        case INIT_SEM:
+             break;
         default:
             log_error(logger_memoria, "Codigo de operacion desconocido. Codigo operacion recibida: %d",paquete->codigo_operacion);
             break;

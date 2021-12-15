@@ -492,7 +492,7 @@ int agregarPagina(t_pagina *pagina, t_heap_metadata *data, uint32_t nextAnterior
             int restante = size - (config_memoria->TAMANIO_PAGINA - pagina->tamanio_ocupado);
             if(ultimo){
                 //ARREGLAR QUE ESTA MAL, FALTA RETURN
-                asignarFooterSeparado(pagina,data,size,nextAnterior);
+                return asignarFooterSeparado(pagina,data,size,nextAnterior);
                 return;
             }
             if (list_size(tabla_paginas->paginas) + 1 <= tabla_paginas->paginas_totales_maximas)
@@ -587,18 +587,22 @@ int agregarPagina(t_pagina *pagina, t_heap_metadata *data, uint32_t nextAnterior
         pagina->tamanio_ocupado += size;
     }
 }
-void asignarFooterSeparado(t_pagina* pagina,t_heap_metadata* data,uint32_t size, uint32_t nextAnterior){
+uint32_t asignarFooterSeparado(t_pagina* pagina,t_heap_metadata* data,uint32_t size, uint32_t nextAnterior){
     int restante = size - (config_memoria->TAMANIO_PAGINA - pagina->tamanio_ocupado);
     uint32_t inicio = tamanio_memoria;
     data->prevAlloc = nextAnterior;
     nextAnterior = data->nextAlloc;
     data->nextAlloc = NULL;
     data->isFree = true;
+
+    uint32_t offset = (nextAnterior - inicio) % config_memoria->TAMANIO_PAGINA;
+
     //data = traerAllocDeMemoria(inicio + pagina->marco_asignado * config_memoria->TAMANIO_PAGINA + nextAnterior);
-    guardarAlloc(data, inicio + pagina->marco_asignado * config_memoria->TAMANIO_PAGINA + nextAnterior);
+    guardarAlloc(data, inicio + pagina->marco_asignado * config_memoria->TAMANIO_PAGINA + offset);
     pagina = asignarFooterSeparadoSubContenido(PREV, pagina,nextAnterior);
     pagina = asignarFooterSeparadoSubContenido(NEXT, pagina,nextAnterior);
     pagina = asignarFooterSeparadoSubContenido(FREE, pagina,nextAnterior);
+    return data->prevAlloc;
 }
 
 t_pagina* asignarFooterSeparadoSubContenido(t_contenido subcontenido, t_pagina* pagina, uint32_t nextAnterior){

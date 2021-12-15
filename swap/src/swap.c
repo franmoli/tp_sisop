@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
     }
 
     //Se inicializan el servidor y la conexión con memoria
-    socket_server = iniciar_servidor(config_swap->IP, string_itoa(config_swap->PUERTO), logger_swap);
+    socket_server = iniciar_servidor(config_swap->IP, (config_swap->PUERTO), logger_swap);
 
     //Se inicializan los archivos
     log_info(logger_swap, "Aguarde un momento... Generando archivos...");
@@ -60,11 +60,9 @@ int ejecutar_operacion(int client) {
     if(paquete->codigo_operacion == SWAPSAVE) {
         //Deserializo la página enviada por Memoria
         t_pagina_enviada_swap *pagina = deserializar_pagina(paquete->buffer->stream);
-        t_heap_contenido_enviado *c = list_get(pagina->heap_contenidos,0);
         
         //Inserto la página en los archivos de swap
         int op_code = insertar_pagina_en_archivo(pagina);
-
         //Envío respuesta de la operación a memoria
         t_buffer *buffer = malloc(sizeof(t_buffer));
         buffer->size = 0;
@@ -74,6 +72,9 @@ int ejecutar_operacion(int client) {
         paquete_respuesta->buffer = buffer;
 
         enviar_paquete(paquete_respuesta, socket_client);
+        free(buffer->stream);
+        free(buffer);
+
     } else if(paquete->codigo_operacion == SWAPFREE) {
         //Deserializo el pedido enviado por Memoria
         int pagina_solicitada;
@@ -94,6 +95,19 @@ int ejecutar_operacion(int client) {
             paquete_respuesta->buffer = buffer;
 
             enviar_paquete(paquete_respuesta, socket_client);
+
+            t_list_iterator *list_iterator = list_iterator_create(pagina.heap_contenidos);
+            while(list_iterator_has_next(list_iterator))
+            {
+                t_heap_contenido_enviado* heap_swap  = list_iterator_next(list_iterator);
+                free(heap_swap->contenido);
+                free(heap_swap);
+            }
+            list_iterator_destroy(list_iterator);
+            list_destroy(pagina.heap_contenidos);
+
+            free(buffer->stream);
+            free(buffer);
         }
     } else {
         log_info(logger_swap, "Memoria se esta preparando para finalizar, apagando memoria virtual");
@@ -127,7 +141,6 @@ void liberar_memoria_y_finalizar(){
     list_destroy_and_destroy_elements(archivos_abiertos, (void *) destruir_elemento_lista);
     list_destroy_and_destroy_elements(lista_paginas_almacenadas, (void *) destruir_elemento_lista);
     list_destroy_and_destroy_elements(tabla_marcos, (void *) destruir_elemento_lista);
-    
     free(config_swap);
 }
 

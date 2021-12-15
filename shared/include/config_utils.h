@@ -41,7 +41,7 @@ typedef struct {
 
 typedef struct {
     char *IP;
-    int PUERTO;
+    char *PUERTO;
     int TAMANIO_SWAP;
     int TAMANIO_PAGINA;
     t_list *ARCHIVOS_SWAP;

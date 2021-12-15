@@ -123,7 +123,7 @@ int bytes_pagina(t_pagina_enviada_swap* pagina) {
     size += sizeof(uint32_t);
 
     //Contenidos heap
-    size += sizeof(int);
+    size += sizeof(uint32_t);
     for(int i=0; i<list_size(pagina->heap_contenidos); i++) {
 		t_heap_contenido_enviado *contenido = list_get(pagina->heap_contenidos, i);
 		size += bytes_info_heap(*contenido);
@@ -177,7 +177,7 @@ void* serializar_pagina(t_pagina_enviada_swap* pagina) {
 	    offset += sizeof(uint32_t);
 
         memcpy(stream + offset, contenido->contenido, strlen(contenido->contenido) + 1);
-	    offset += strlen(contenido->contenido) + 1;
+	    offset += contenido->size_contenido;
     }
 
     return stream;
@@ -200,7 +200,7 @@ t_pagina_enviada_swap* deserializar_pagina(void *stream) {
     memcpy(&cantidad_contenidos_heap, stream + offset, sizeof(uint32_t));
 	offset += sizeof(uint32_t);
 
-    t_list *contenidos_heap = list_create();
+    pagina->heap_contenidos = list_create();
     for(int i=0; i<cantidad_contenidos_heap; i++) {
         t_heap_contenido_enviado *heap_metadata = malloc(sizeof(t_heap_contenido_enviado));
         memcpy(&heap_metadata->prevAlloc, stream + offset, sizeof(uint32_t));
@@ -213,13 +213,12 @@ t_pagina_enviada_swap* deserializar_pagina(void *stream) {
         memcpy(&heap_metadata->size_contenido, stream + offset, sizeof(uint32_t));
 	    offset += sizeof(uint32_t);
 
-        heap_metadata->contenido = malloc(heap_metadata->size_contenido);
-        memcpy(heap_metadata->contenido, stream + offset, heap_metadata->size_contenido);
-	    offset += heap_metadata->size_contenido;
+        heap_metadata->contenido = malloc(heap_metadata->size_contenido+1);
+        memcpy(heap_metadata->contenido, stream + offset, heap_metadata->size_contenido+1);
+	    offset += heap_metadata->size_contenido+1;
 
-        list_add(contenidos_heap, heap_metadata);
+        list_add(pagina->heap_contenidos, heap_metadata);
     }
-    pagina->heap_contenidos = contenidos_heap;
     
     return pagina;
 }

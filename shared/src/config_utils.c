@@ -100,7 +100,7 @@ t_config_swap *generar_config_swap(t_config *config) {
     //Cargo la configuración
     t_config_swap *config_swap = malloc(sizeof(t_config_swap));
     config_swap->IP = config_get_string_value(config, "IP");
-    config_swap->PUERTO = config_get_int_value(config, "PUERTO");
+    config_swap->PUERTO = config_get_string_value(config, "PUERTO");
     config_swap->TAMANIO_SWAP = config_get_int_value(config, "TAMANIO_SWAP");
     config_swap->TAMANIO_PAGINA = config_get_int_value(config, "TAMANIO_PAGINA");
     config_swap->MARCOS_MAXIMOS = config_get_int_value(config, "MARCOS_MAXIMOS");

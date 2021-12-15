@@ -30,11 +30,11 @@ int main(int argc, char *argv[]) {
 
     char saludo[] = "¡Hola mundo!\n";
 
-   // mate_pointer saludoRef = mate_memalloc(&instance, strlen(saludo));
+    mate_pointer saludoRef = mate_memalloc(&instance, strlen(saludo));
 
-    //mate_memwrite(&instance, saludo, saludoRef, strlen(saludo));
+    mate_memwrite(&instance, saludo, saludoRef, strlen(saludo));
 
-    //mate_memread(&instance, saludoRef, saludo, strlen(saludo));
+    mate_memread(&instance, saludoRef, saludo, strlen(saludo));
 
     printf(saludo);
 
