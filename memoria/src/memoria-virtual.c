@@ -137,7 +137,6 @@ int enviarPaginaSwap(t_pagina* pagina){
     paquete->codigo_operacion = SWAPSAVE;
     paquete->buffer = buffer;
 
-    t_pagina_enviada_swap *p2 = deserializar_pagina(paquete->buffer->stream);
     if(socket_cliente_swap < 0)
         return -1;
         
@@ -149,7 +148,7 @@ int enviarPaginaSwap(t_pagina* pagina){
     list_iterator = list_iterator_create(pagina_swap->heap_contenidos);
     while(list_iterator_has_next(list_iterator))
     {
-         t_info_heap_swap* heap_swap  = list_iterator_next(list_iterator);
+         t_heap_contenido_enviado* heap_swap  = list_iterator_next(list_iterator);
          free(heap_swap->contenido);
          free(heap_swap);
     }
