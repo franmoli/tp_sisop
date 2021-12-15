@@ -116,29 +116,29 @@ t_swap_serializado* deserializar_swap(t_paquete *paquete){
 }
 
 //--------------------------------------------------------------------------------------------
-int bytes_pagina(t_pagina_swap* pagina) {
+int bytes_pagina(t_pagina_enviada_swap* pagina) {
     int size = 0;
 
     size += sizeof(pagina->pid);
     size += sizeof(pagina->numero_pagina);
 
     //Contenidos heap
-    size += sizeof(pagina->contenido_heap_info->elements_count);
-    for(int i=0; i<list_size(pagina->contenido_heap_info); i++) {
-		t_info_heap_swap *contenido = list_get(pagina->contenido_heap_info, i);
+    size += sizeof(pagina->heap_contenidos->elements_count);
+    for(int i=0; i<list_size(pagina->heap_contenidos); i++) {
+		t_heap_contenido_enviado *contenido = list_get(pagina->heap_contenidos, i);
 		size += bytes_info_heap(*contenido);
 	}
 
     return size;
 }
 
-int bytes_info_heap(t_info_heap_swap info) {
+int bytes_info_heap(t_heap_contenido_enviado info) {
     int size = 0;
 
     //Heap metadata
-    size += sizeof(info.contenido->prevAlloc);
-    size += sizeof(info.contenido->nextAlloc);
-    size += sizeof(info.contenido->isFree);
+    size += sizeof(info.prevAlloc);
+    size += sizeof(info.nextAlloc);
+    size += sizeof(info.isFree);
     size += sizeof(int); //Longitud del contenido
     size += sizeof(char) * strlen(info.contenido);
 
@@ -183,8 +183,8 @@ void* serializar_pagina(t_pagina_enviada_swap* pagina) {
     return stream;
 }
 
-t_pagina_swap* deserializar_pagina(void *stream) {
-    t_pagina_swap* pagina = malloc(sizeof(t_pagina_swap));
+t_pagina_enviada_swap* deserializar_pagina(void *stream) {
+    t_pagina_enviada_swap* pagina = malloc(sizeof(t_pagina_enviada_swap));
     int offset = 0;
 
     //Número de página
@@ -218,7 +218,7 @@ t_pagina_swap* deserializar_pagina(void *stream) {
 
         list_add(contenidos_heap, heap_metadata);
     }
-    pagina->contenido_heap_info = contenidos_heap;
+    pagina->heap_contenidos = contenidos_heap;
     
     return pagina;
 }

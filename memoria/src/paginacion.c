@@ -429,20 +429,20 @@ void escribirMarcoEnMemoria(t_pagina* pagina, void* stream){
     list_iterator_destroy(list_iterator);
 }
 
-void escribirPaginaEnMemoria(t_pagina* pagina,t_pagina_swap* pagina_swap){
+void escribirPaginaEnMemoria(t_pagina* pagina,t_pagina_enviada_swap* pagina_swap){
 
     int marco = pagina->marco_asignado;
     int offset = 0;
     int size = 0;
     uint32_t inicio = tamanio_memoria;
     uint32_t nextAnterior = tamanio_memoria;
-    t_list_iterator *list_iterator = list_iterator_create(pagina_swap->contenido_heap_info);
-    t_info_heap_swap *info;
+    t_list_iterator *list_iterator = list_iterator_create(pagina_swap->heap_contenidos);
+    t_heap_contenido_enviado *info;
     while (list_iterator_has_next(list_iterator))
     {
         info = list_iterator_next(list_iterator);
-        offset = (info->inicio - inicio) % config_memoria->TAMANIO_PAGINA;
-        if(info->contenido->prevAlloc == 0){
+        //offset = (info->inicio - inicio) % config_memoria->TAMANIO_PAGINA;
+        /*if(info->contenido->prevAlloc == 0){
             //ES EL PRIMER ALLOC EL QUE ESTOY CARGANDO NUEVAMENTE
             t_heap_metadata *data = malloc(sizeof(t_heap_metadata));
             data->prevAlloc = info->contenido->prevAlloc;
@@ -457,7 +457,7 @@ void escribirPaginaEnMemoria(t_pagina* pagina,t_pagina_swap* pagina_swap){
 
             nextAnterior = info->contenido->nextAlloc;
         }else{
-            
+            */
             //TENGO QUE TRAERME EL NEXT ANTERIOR Y SACAR EL OFFSET 
             /*int numero_pagina_alloc_anterior = getPaginaByDireccionLogica(info->contenido->prevAlloc - inicio);
             if(numero_pagina_alloc_anterior < 0)
@@ -482,7 +482,7 @@ void escribirPaginaEnMemoria(t_pagina* pagina,t_pagina_swap* pagina_swap){
             guardarAlloc(alloc_actual,header_pagina_actual->dir_comienzo);
             free(alloc_actual);
             free(alloc_anterior);*/
-        }
+        //}
     }
     tabla_paginas->paginas_en_memoria+=1;
     /*t_list_iterator *list_iterator = list_iterator_create(pagina->listado_de_contenido);

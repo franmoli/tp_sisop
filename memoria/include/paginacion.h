@@ -37,7 +37,7 @@ int memWrite(t_paquete *paquete);
 void escribirEnMemoria(int marco, int desplazamiento, int size, char* contenido);
 
 
-void escribirPaginaEnMemoria(t_pagina* pagina,t_pagina_swap* pagina_swap);
+void escribirPaginaEnMemoria(t_pagina* pagina,t_pagina_enviada_swap* pagina_swap);
 
 void* traerMarcoDeMemoria(t_pagina* pagina);
 t_heap_metadata* traerAllocIncompleto(int marco,uint32_t dir_comienzo, uint32_t dir_final);
