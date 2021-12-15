@@ -57,8 +57,20 @@ int main(int argc, char **argv)
 
     inicializarCarpincho(0);
     socket_client = 0;
-    t_paquete* paquete = serializar_alloc(23);
-    int dire_logica =memAlloc(paquete); 
+    t_paquete* paquete = serializar_alloc(46);
+    int dire_logica =memAlloc(paquete);
+
+    t_paquete* paquete2 = serializar(MEMWRITE,6,CHAR_PTR,"holaholaholaholaholaholholaholaholaholaholahol",INT,dire_logica,INT,46);
+    memWrite(paquete2);
+    char *contenido = malloc(24);
+    char *contenido2 = malloc(24);
+
+    contenido = traerDeMemoria(0,9,23);
+    contenido2 = traerDeMemoria(1,0,23);
+
+    log_info(logger_memoria,"CONTENIDO: %s", contenido);
+    log_info(logger_memoria,"CONTENIDO: %s", contenido2);
+ 
 
     free(paquete->buffer->stream);
     free(paquete->buffer);
