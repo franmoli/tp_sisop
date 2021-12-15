@@ -459,6 +459,7 @@ void escribirPaginaEnMemoria(t_pagina* pagina,t_pagina_enviada_swap* pagina_swap
         else{
             if(info->prevAlloc == 1){
                 //ES UN RESTO DE UN ALLOC ANTERIOR
+                
             }else{
                 //ES UN ALLOC PERO NO ES EL PRIMERO
                 t_contenidos_pagina *contenido_alloc_actual = list_get(pagina->listado_de_contenido, indice);
