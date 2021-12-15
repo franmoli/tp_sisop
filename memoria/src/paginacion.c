@@ -394,7 +394,31 @@ void escribirPaginaEnMemoria(t_pagina* pagina,t_pagina_swap* pagina_swap){
 
             nextAnterior = info->contenido->nextAlloc;
         }else{
+            
             //TENGO QUE TRAERME EL NEXT ANTERIOR Y SACAR EL OFFSET 
+            /*int numero_pagina_alloc_anterior = getPaginaByDireccionLogica(info->contenido->prevAlloc - inicio);
+            if(numero_pagina_alloc_anterior < 0)
+                return -1;
+            
+            t_pagina *pagina_alloc_anterior = list_get(numero_pagina_alloc_anterior, numero_pagina_alloc_anterior);
+            if(!pagina_alloc_anterior->bit_presencia)
+                traerPaginaAMemoria(pagina_alloc_anterior);
+            
+            uint32_t offset = (info->contenido->prevAlloc - inicio) % config_memoria->TAMANIO_PAGINA;
+
+            t_heap_metadata *alloc_anterior = traerAllocDeMemoria(inicio + pagina_alloc_anterior->marco_asignado * config_memoria->TAMANIO_PAGINA + offset);
+
+            t_heap_metadata *alloc_actual = malloc(sizeof(t_heap_metadata));
+            alloc_actual->prevAlloc = info->contenido->prevAlloc;
+            alloc_actual->nextAlloc = info->contenido->nextAlloc;
+            alloc_actual->isFree = info->contenido->isFree;
+            
+            t_contenidos_pagina *header_pagina_actual = getContenidoPaginaByTipo(pagina->listado_de_contenido, HEADER);
+            header_pagina_actual->dir_comienzo=(inicio + (pagina->marco_asignado * config_memoria->TAMANIO_PAGINA))+offset;
+            header_pagina_actual->dir_fin = header_pagina_actual->dir_comienzo + header_pagina_actual->tamanio;
+            guardarAlloc(alloc_actual,header_pagina_actual->dir_comienzo);
+            free(alloc_actual);
+            free(alloc_anterior);*/
         }
     }
     tabla_paginas->paginas_en_memoria+=1;

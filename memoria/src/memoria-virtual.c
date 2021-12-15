@@ -78,6 +78,7 @@ int recibirPaginaSwap(t_pagina* pagina){
 
     t_pagina_swap *pagina_swap = deserializar_pagina(paquete->buffer->stream);
 
+    uint32_t inicio = tamanio_memoria;
     //Escribir pagina en memoria
     escribirPaginaEnMemoria(pagina, pagina_swap);
     free(paquete);
