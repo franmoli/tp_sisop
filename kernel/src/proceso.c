@@ -1,7 +1,7 @@
 #include "proceso.h"
 
 void *proceso(void *self){
-
+    
     t_proceso *proceso_struct = self;
     int prev_status = -1;
     
@@ -45,7 +45,7 @@ void new(){
 }
 
 void exec(t_proceso *self){
-
+    pthread_detach(pthread_self());
     log_info(logger_kernel,"Ejecutando el proceso %d",self->id);
     t_task *next_task = NULL;
     bool bloquear_f = false;
@@ -152,6 +152,7 @@ void exec(t_proceso *self){
     self->estimar = true;
 
     bloquear(self);
+    return;
 }
 
 bool solicitar_semaforo(char *nombre_semaforo, int id){

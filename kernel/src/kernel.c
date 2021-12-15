@@ -5,6 +5,7 @@ int main(int argc, char **argv) {
     system("clear");
     logger_kernel = log_create("./cfg/kernel.log", "KERNEL", true, LOG_LEVEL_INFO);
     log_info(logger_kernel, "Programa inicializado correctamente ");
+    terminar_kernel = false;
 
     //Se carga la configuración
     log_info(logger_kernel, "Iniciando carga del archivo de configuración");
@@ -42,7 +43,7 @@ int main(int argc, char **argv) {
     }
 
     //bloquear con algo
-    while(1);
+    while(!terminar_kernel);
 
     //Fin del programa
     liberar_memoria_y_finalizar(config_kernel, logger_kernel, config_file);
@@ -52,7 +53,8 @@ int main(int argc, char **argv) {
 
 
 void liberar_memoria_y_finalizar(t_config_kernel *config_kernel, t_log *logger_kernel, t_config *config_file){
-    config_destroy(config_file);
+    //config_destroy(config_file);
+    destruir_semaforos();
     list_destroy_and_destroy_elements(config_kernel->DISPOSITIVOS_IO, element_destroyer);
     list_destroy_and_destroy_elements(config_kernel->DURACIONES_IO, element_destroyer);
     free(config_kernel);
@@ -209,7 +211,8 @@ void *debug_console(void *_ ){
             list_iterate(lista_new, cerrar_conexion);
             list_iterate(lista_s_ready, cerrar_conexion);
             list_iterate(lista_s_blocked, cerrar_conexion);
-            exit(EXIT_SUCCESS);
+            terminar_kernel = true;
+            //exit(EXIT_SUCCESS);
         }
         if(string_contains(input, "list")){
             print_lists();
@@ -453,4 +456,35 @@ void print_sem_tipe(){
     sem_getvalue(&solicitar_block, &aux);
     printf("Sem solicitar_block : %d\n", aux);
     
+}
+
+void destruir_semaforos(){
+    sem_destroy(&proceso_finalizo_o_suspended);
+    sem_destroy(&salida_exec);
+    sem_destroy(&salida_block);
+    sem_destroy(&actualizacion_de_listas_1);
+    sem_destroy(&actualizacion_de_listas_2);
+    sem_destroy(&actualizacion_de_listas_1_recibido);
+    sem_destroy(&proceso_inicializado);
+    sem_destroy(&libre_para_inicializar_proceso);
+    sem_destroy(&mutex_multiprocesamiento);
+    sem_destroy(&mutex_cant_procesos);
+    sem_destroy(&mutex_multiprogramacion);
+    sem_destroy(&salida_a_exit);
+    sem_destroy(&liberar_multiprocesamiento);
+    sem_destroy(&salida_de_exec_recibida);
+    sem_destroy(&salida_a_exit_recibida);
+    sem_destroy(&cambio_de_listas);
+    sem_destroy(&cambio_de_listas_largo);
+    sem_destroy(&cambio_de_listas_mediano);
+    sem_destroy(&cambio_de_listas_corto);
+    sem_destroy(&pedir_salida_de_block);
+    sem_destroy(&solicitar_block);
+    sem_destroy(&mutex_semaforos);
+    sem_destroy(&mutex_recursos_asignados);
+    for(int i = 0; i<list_size(config_kernel->DISPOSITIVOS_IO); i++){
+        sem_destroy(&io_libre[i]);
+    }
+    free(io_libre);
+    return;
 }
