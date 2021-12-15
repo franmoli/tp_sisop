@@ -69,6 +69,37 @@ typedef struct {
 t_heap_contenido_enviado;
 
 
+
+
+/////////////////////////////BORRRARRR///////////////////
+typedef struct {
+    info_contenido tipo_contenido;
+	uint32_t pid;
+	uint32_t numero_pagina;
+	t_list* contenido_heap_info;
+	t_list* contenido_carpincho_info;
+} t_pagina_swap;
+
+typedef struct {
+	int size;
+	uint32_t inicio;
+	uint32_t fin;
+	char* contenido;
+} t_info_carpincho_swap;
+
+typedef struct {
+    uint32_t prevAlloc;
+    uint32_t nextAlloc;
+    uint8_t isFree;
+} __attribute__((packed))
+t_heap_swap;
+typedef struct {
+	uint32_t inicio;
+	uint32_t fin;
+	t_heap_swap* contenido;
+} t_info_heap_swap;
+///////////////////////
+
 t_paquete *serializar_mate_init(uint32_t carpincho_id);
 t_mateinit_serializado* deserializar_mate_init(t_paquete *paquete);
 

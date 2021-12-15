@@ -60,7 +60,7 @@ int ejecutar_operacion(int client) {
     //Analizo el código de operación recibido y ejecuto acciones según corresponda
     if(paquete->codigo_operacion == SWAPSAVE) {
         //Deserializo la página enviada por Memoria
-        t_pagina_swap *pagina = deserializar_pagina(paquete->buffer->stream);
+        t_pagina_enviada_swap *pagina = deserializar_pagina(paquete->buffer->stream);
         
         printf("\n\nBytes pagina recibida: %d\n\n", bytes_pagina(pagina));
         //Inserto la página en los archivos de swap
