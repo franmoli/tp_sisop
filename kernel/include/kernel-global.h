@@ -28,7 +28,7 @@ typedef struct {
     int id;
     t_status status;
     t_list *task_list;
-    int estimacion;
+    float estimacion;
     int ejecucion_anterior;
     int entrada_a_ready;
     bool estimar;
@@ -102,12 +102,16 @@ sem_t cambio_de_listas_mediano;
 sem_t cambio_de_listas_corto;
 sem_t pedir_salida_de_block;
 sem_t solicitar_block;
+sem_t mutex_semaforos;
+sem_t mutex_recursos_asignados;
+
 
 //Auxiliares
 int cantidad_de_procesos;
 bool salida_de_exec;
 int multiprogramacion_disponible;
 int socket_cliente_memoria;
+int multiprocesamiento;
 
 //funciones
 void mover_proceso_de_lista(t_list *origen, t_list *destino, int index, int status);

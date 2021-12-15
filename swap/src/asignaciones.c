@@ -215,7 +215,7 @@ bool asignacion_global_de_pagina(int posicion_archivo, char *path_archivo, int a
         int strlen_contenido = strlen(contenido_carpincho->contenido);
         memcpy(mapping + offset, &(strlen_contenido), sizeof(int));
         offset += sizeof(int);
-        memcpy(mapping + offset, &(contenido_carpincho->contenido), strlen_contenido + 1);
+        memcpy(mapping + offset, contenido_carpincho->contenido, strlen_contenido + 1);
         offset += strlen_contenido + 1;
     }
 

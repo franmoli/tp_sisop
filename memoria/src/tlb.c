@@ -54,6 +54,31 @@ void agregarTLB(int pagina, int marco, int id){
 
 }
 
+void eliminarDeTLB(int pagina,int carpincho_id){
+
+    int index = 0;
+
+    t_list_iterator *list_iterator = list_iterator_create(tabla_tlb->tlb);
+    while (list_iterator_has_next(list_iterator)){
+
+        t_tlb *tlb = list_iterator_next(list_iterator);
+        if (tlb->numero_pagina == pagina && tlb->pid == carpincho_id){
+
+            list_remove(tabla_tlb->tlb, index);
+            list_iterator_destroy(list_iterator);
+            return;
+
+        }
+
+        index ++;
+
+    }
+
+    //No estaba en la tlb
+    list_iterator_destroy(list_iterator);
+    return;
+}
+
 void reordenarLRU(int numero_pagina_buscada, int id) {
 
     //Busco y guardo el indice, hago un remove y agrego al final de la lista el mismo elemento

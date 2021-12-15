@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
 
     //Fin del programa
     close(socket_client);
-    borrar_archivos_swap();
+    close(socket_server);
     liberar_memoria_y_finalizar();
     return 1;
 }
@@ -60,17 +60,18 @@ int ejecutar_operacion(int client) {
     //Analizo el código de operación recibido y ejecuto acciones según corresponda
     if(paquete->codigo_operacion == SWAPSAVE) {
         //Deserializo la página enviada por Memoria
-        t_pagina_swap *pagina = malloc(sizeof(t_pagina_swap));
-        pagina->contenido_heap_info = list_create();
-        pagina->contenido_carpincho_info = list_create();
-        deserializar(paquete,12,INT,&(pagina->tipo_contenido),INT,&(pagina->pid),INT,&(pagina->numero_pagina),LIST,SWAP_PAGINA_HEAP,(pagina->contenido_heap_info),LIST,SWAP_PAGINA_CONTENIDO,(pagina->contenido_carpincho_info));
-
+        t_pagina_swap *pagina = deserializar_pagina(paquete->buffer->stream);
+        
         //Inserto la página en los archivos de swap
         int op_code = insertar_pagina_en_archivo(pagina);
 
         //Envío respuesta de la operación a memoria
-        t_paquete *paquete_respuesta = malloc(sizeof(paquete));
+        t_buffer *buffer = malloc(sizeof(t_buffer));
+        buffer->size = 0;
+
+        t_paquete *paquete_respuesta = malloc(sizeof(t_paquete));
         paquete_respuesta->codigo_operacion = op_code ? PAGINA_GUARDADA:PAGINA_NO_GUARDADA;
+        paquete_respuesta->buffer = buffer;
 
         enviar_paquete(paquete_respuesta, socket_client);
     } else if(paquete->codigo_operacion == SWAPFREE) {
@@ -82,13 +83,21 @@ int ejecutar_operacion(int client) {
         t_pagina_swap pagina = leer_pagina_de_archivo(pagina_solicitada);
 
         if(pagina.numero_pagina >= 0) {
-            t_paquete *paquete_respuesta = serializar(SWAPSAVE,12,INT,pagina.tipo_contenido,INT,pagina.pid,INT,pagina.numero_pagina,LIST,SWAP_PAGINA_HEAP,(pagina.contenido_heap_info),LIST,SWAP_PAGINA_CONTENIDO,(pagina.contenido_carpincho_info));
+            void *pagina_serializada = serializar_pagina(&pagina);
+
+            t_buffer *buffer = malloc(sizeof(t_buffer));
+            buffer->size = bytes_pagina(&pagina);
+            buffer->stream = pagina_serializada;
+
+            t_paquete *paquete_respuesta = malloc(sizeof(t_paquete));
+            paquete_respuesta->codigo_operacion = RECEPCION_PAGINA;
+            paquete_respuesta->buffer = buffer;
+
             enviar_paquete(paquete_respuesta, socket_client);
         }
     } else {
         log_info(logger_swap, "Memoria se esta preparando para finalizar, apagando memoria virtual");
         
-        free(paquete->buffer->stream);
         free(paquete->buffer);
         free(paquete); 
         
@@ -105,13 +114,30 @@ int ejecutar_operacion(int client) {
 
 /* Liberado de memoria */
 void liberar_memoria_y_finalizar(){
-    config_destroy(config_file);
-    list_destroy_and_destroy_elements(config_swap->ARCHIVOS_SWAP, (void *) destruir_elementos_lista);
-    free(config_swap);
     log_info(logger_swap, "Programa finalizado con éxito");
+    
+    destruir_mapeos();
+    borrar_archivos_swap();
+    
+    config_destroy(config_file);
     log_destroy(logger_swap);
+    sem_destroy(&mutex_operacion);
+    
+    list_destroy_and_destroy_elements(config_swap->ARCHIVOS_SWAP, (void *) destruir_elemento_lista);
+    list_destroy_and_destroy_elements(archivos_abiertos, (void *) destruir_elemento_lista);
+    list_destroy_and_destroy_elements(lista_paginas_almacenadas, (void *) destruir_elemento_lista);
+    list_destroy_and_destroy_elements(tabla_marcos, (void *) destruir_elemento_lista);
+    
+    free(config_swap);
 }
 
-void destruir_elementos_lista(void *elemento){
+void destruir_elemento_lista(void *elemento){
     free(elemento);
+}
+
+void destruir_mapeos(){
+    for(int i=0; i<list_size(lista_mapeos); i++) {
+        list_remove(lista_mapeos, i);
+    }
+    list_destroy(lista_mapeos);
 }

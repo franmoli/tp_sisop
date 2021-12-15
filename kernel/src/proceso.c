@@ -3,34 +3,31 @@
 void *proceso(void *self){
 
     t_proceso *proceso_struct = self;
-    sem_wait(&proceso_inicializado);
     int prev_status = -1;
     
     pthread_t hilo_ejecucion;
+
 
     while(1){
         sem_wait(&actualizacion_de_listas_1);
         if(prev_status != proceso_struct->status){
             switch (proceso_struct->status){
                 case NEW:
-                    //printf("New - p: %d ", proceso_struct->id);
-                    new();
-                    sleep(1);
                     break;
                 case EXEC:
                     pthread_create(&hilo_ejecucion, NULL, exec, (void *)proceso_struct);
                     break;
                 case BLOCKED:
-                    //printf("Block - p: %d \n", proceso_struct->id);
                     break;
                 case EXIT:
                     //liberar semaforos tomados por este
                     sem_post(&actualizacion_de_listas_1_recibido);
                     sem_wait(&actualizacion_de_listas_2);
                     return;
+                case S_BLOCKED:
+                    log_info(logger_kernel, "Suspendo al proceso %d", proceso_struct->id);
                 default:
                     break;
-                    //printf("Estoy en default y no hago nada %d - %d\n", proceso_struct->id, proceso_struct->status);
             }
             prev_status = proceso_struct->status;
         }
@@ -44,13 +41,13 @@ void *proceso(void *self){
 }
 
 void new(){
-    printf("iniciando el carpincho - new\n");
+    //printf("iniciando el carpincho - new\n");
     sleep(1);
 }
 
 void exec(t_proceso *self){
 
-    log_info(logger_kernel,"Estoy ejecutando el proceso %d",self->id);
+    log_info(logger_kernel,"Ejecutando el proceso %d",self->id);
     t_task *next_task = NULL;
     bool bloquear_f = false;
     int reloj_i = 0;
@@ -88,13 +85,28 @@ void exec(t_proceso *self){
                     break;
                 case SEM_WAIT:
                     semaforo_aux = next_task->datos_tarea;
+
+                    sem_wait(&mutex_semaforos);
+                    sem_wait(&mutex_recursos_asignados);
+
                     bloquear_f = solicitar_semaforo(semaforo_aux->nombre_semaforo, self->socket_carpincho);
+
+                    sem_post(&mutex_recursos_asignados);
+                    sem_post(&mutex_semaforos);
                     break;
 
                 case SEM_POST:
                     semaforo_aux = next_task->datos_tarea;
-                    printf("Posteando semaforo %s\n", semaforo_aux->nombre_semaforo);
+
+                    sem_wait(&mutex_semaforos);
+                    sem_wait(&mutex_recursos_asignados);
+
+                    printf("Carpincho %d posteando semaforo %s\n", self->socket_carpincho, semaforo_aux->nombre_semaforo);
                     postear_semaforo(semaforo_aux->nombre_semaforo, self->id);
+
+                    sem_post(&mutex_recursos_asignados);
+                    sem_post(&mutex_semaforos);
+
                     enviar_confirmacion(self->socket_carpincho);
                     break;
 
@@ -102,7 +114,6 @@ void exec(t_proceso *self){
                 case OP_ERROR:
                     break;
                 case CALLIO:
-                    printf("Ejecutando la io\n");
                     io_recibida = next_task->datos_tarea;
 
                     while(index < list_size(config_kernel->DISPOSITIVOS_IO)){
@@ -136,9 +147,8 @@ void exec(t_proceso *self){
     }
 
     //Solo por debug, borrar despues
-    sleep(2);
-
-    self->ejecucion_anterior = clock() - reloj_i;
+    
+    self->ejecucion_anterior = ((clock() - reloj_i) / CLOCKS_PER_SEC) * 1000;
     self->estimar = true;
 
     bloquear(self);
@@ -147,7 +157,7 @@ void exec(t_proceso *self){
 bool solicitar_semaforo(char *nombre_semaforo, int id){
     //TODO: AGREGAR MUTEX DE VALUE O LO QUE SEA
     // traer de la lista el semaforo
-    printf("Se solicito el semadoro %s\n", nombre_semaforo);
+    printf("Carpincho %d - solicité el semaforo %s\n", id, nombre_semaforo);
     t_semaforo *semaforo_solicitado = traer_semaforo(nombre_semaforo);
     
     if(semaforo_solicitado == NULL){
@@ -208,6 +218,7 @@ void postear_semaforo(char *nombre_semaforo, int id_del_chabon_que_postea ){
 
     // traer de la lista el semaforo
     t_semaforo *semaforo_solicitado = traer_semaforo(nombre_semaforo);
+        //printf("\nPass %p\n\n", semaforo_solicitado);
     
     if(semaforo_solicitado == NULL) return; //TODO: ENVIAR ERROR AL CARPINCHO
     
@@ -215,46 +226,63 @@ void postear_semaforo(char *nombre_semaforo, int id_del_chabon_que_postea ){
         //si esta disponible sumarle uno a value
         semaforo_solicitado->value = semaforo_solicitado->value + 1;
 
+        //printf("Posteando %d\n", semaforo_solicitado->value);
+
     }else{
         //si no esta disponible: sumarle uno a value - sacarlo de la lista de solicitantes - enviar habilitacion de continuar a ese proceso 
         //TODO: hacer un mutex para estas listas de semaforos
+        
         int *aux;
         semaforo_solicitado->value = semaforo_solicitado->value + 1;
         aux = list_remove(semaforo_solicitado->solicitantes, 0);
 
+        printf("Posteando al solicitante %d\n", *aux);
         //sumar a lista de recursos asignados
         t_recurso_asignado *recurso_asignado = malloc(sizeof(t_recurso_asignado));
         recurso_asignado->nombre_recurso = nombre_semaforo;
         recurso_asignado->id_asignado = *aux;
+
         list_add(lista_recursos_asignados, recurso_asignado);        
 
+        //printf("Pass %d\n", *aux);
+        printf("Quiero desbloquear a %d\n", *aux);
         desbloquear(traer_proceso_bloqueado(*aux));
 
     }
-    
-    devolver_recurso(id_del_chabon_que_postea);
+    //printf("Pass 2\n");
+    devolver_recurso(id_del_chabon_que_postea, nombre_semaforo);
+
 
 }
 
 t_proceso *traer_proceso_bloqueado(int id){
 
     t_proceso *encontrado = NULL;
+    int index_aux = 20;
 
     bool se_encontro(void *elemento){
         t_proceso *proceso = elemento;
         return proceso->id == id;
+    };
+
+    while(index_aux){
+        encontrado = list_find(lista_blocked, se_encontro);
+
+        if(encontrado != NULL)
+            return encontrado;
+        
+        encontrado = list_find(lista_s_blocked, se_encontro);
+
+        if(encontrado != NULL)
+            return encontrado;
+
+        index_aux--;
+        printf("Sleeping\n");
+        sleep(1);
     }
 
-    encontrado = list_find(lista_blocked, se_encontro);
-
-    if(encontrado != NULL)
-        return encontrado;
-    
-    encontrado = list_find(lista_s_blocked, se_encontro);
-
-    if(encontrado != NULL)
-        return encontrado;
-
+    print_lists();
+    log_error(logger_kernel, "Error en traer bloqueado");
     exit(1);
 
 }
@@ -280,25 +308,21 @@ t_semaforo *traer_semaforo(char *nombre_solicitado){
 }
 
 void bloquear(t_proceso *self){
-    //printf("Bloqueando proceso: %d\n", self->id);
+    printf("Bloqueando proceso: %d\n", self->id);
     self->block = true;
-    sleep(1);
     sem_post(&solicitar_block);
     return;
 }
 
 void desbloquear(t_proceso *self){
-    //printf("Desbloquear proceso: %d\n", self->id);
+    printf("Desbloquear proceso: %d\n", self->id);
     self->salida_block = true;
-    sleep(1);
     sem_post(&salida_block);
-    //sem_post(&pedir_salida_de_block);
     return;
 }
 
 void *desbloquear_en(void *param){
     t_io *io_recibida = param;
-    log_info(logger_kernel, "Solicitando el dispositivo %s", io_recibida->nombre);
     sleep(io_recibida->duracion/1000);
     log_info(logger_kernel, "IO ejecutada %s", io_recibida->mensaje);
     //printf("Desbloqueando X salida de io\n");
@@ -306,10 +330,10 @@ void *desbloquear_en(void *param){
     return NULL;
 }
 
-void devolver_recurso(int id){
+void devolver_recurso(int id, char *sem_devuelto){
     bool lo_encontre(void *elemento){
         t_recurso_asignado *recurso = elemento;
-        if(recurso->id_asignado == id)
+        if(recurso->id_asignado == id && !strcmp(sem_devuelto, recurso->nombre_recurso))
             return true;
         
         return false;

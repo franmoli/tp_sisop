@@ -57,8 +57,16 @@ void exec_carpincho_3(char *config)
     for (int i = 0; i < 3; i++)
     {
         imprimir_carpincho_n_hace_algo(3);
+        imprimir_carpincho_n_hace_algo(3);
+        imprimir_carpincho_n_hace_algo(3);
+        imprimir_carpincho_n_hace_algo(3);
+        imprimir_carpincho_n_hace_algo(3);
         mate_call_io(&self, (mate_io_resource) "pelopincho", "Carpincho 3 se va a IO");
     }
+    imprimir_carpincho_n_hace_algo(3);
+    imprimir_carpincho_n_hace_algo(3);
+    imprimir_carpincho_n_hace_algo(3);
+    imprimir_carpincho_n_hace_algo(3);
     imprimir_carpincho_n_hace_algo(3);
     log_info(logger, "TERMINO Carpincho 3");
     mate_close(&self);

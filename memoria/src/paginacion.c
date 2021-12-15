@@ -62,44 +62,56 @@ t_contenidos_pagina *getLastHeaderContenidoByPagina(t_pagina *pagina)
 char *memRead(t_paquete *paquete)
 {
 
-    /*1- Deserializo el paquete -> carpincho_id, direccion_logica
-      2- Con la dir logica calculo la pagina y el desplazamiento -> pagina = dir logica / tamaño_pagina ... deplazamiento = resto
-      3- Con la pagina y el pid busco en la tlb
-        3b- Si ocurre un miss sumo metrica y voy a memoria
-        3c- Si no esta en memoria voy a swap y cambio bits (referido)
-        3d- Si estaba en tlb sumo metrica HIT
-      4- Obtenido el marco, junto con el desplazamiento voy a memoria y busco la info
-
-      typedef struct {
-	uint32_t size_reservar; -> direccion logica
-	uint32_t carpincho_id;
-} t_malloc_serializado;
-    */
-
-   char*  contenido_escribir= NULL;
-   int size = 0;
    int32_t direccion_logica ; 
 
-   deserializar(paquete,6,CHAR_PTR,&contenido_escribir,INT,&direccion_logica,INT,&size);
+   deserializar(paquete,2,INT,&direccion_logica);
    
    int inicio = tamanio_memoria;
    int numero_pagina = (direccion_logica - inicio) / config_memoria->TAMANIO_PAGINA;
+   int offset = (direccion_logica - inicio) % config_memoria->TAMANIO_PAGINA;
    t_tabla_paginas* tabla_paginas = buscarTablaPorPID(socket_client);
+   t_pagina* pagina = malloc(sizeof(t_pagina));
 
    if(numero_pagina > list_size(tabla_paginas)){
        return -1;
    }
 
-   t_pagina* pagina = list_get(tabla_paginas->paginas,numero_pagina);
-   if(pagina->bit_presencia == 0){
-       //TRAER DE SWAP
-       //getMarcoParaPagina(tabla_paginas);
+    //Ver que el contenido esta completo en la pagina, si no esta hay que fijarse en las paginas siguientes que contengan si estan en memoria (bit presencia en 1)
+
+   int marco = buscarEnTLB(numero_pagina,tabla_paginas->pid);
+   if (marco == -1){
+       pagina = list_get(tabla_paginas->paginas,numero_pagina);
+       if(pagina->bit_presencia != 0){
+            marco = buscarMarcoEnMemoria(numero_pagina,tabla_paginas->pid);
+       }else
+       {
+           //TRAER DE SWAP
+            marco = traerPaginaAMemoria(pagina);
+            if(marco == -1){
+                //No pude traer a memoria
+                return -1;
+            }
+       }
    }
+
+   t_heap_metadata* heap = traerAllocDeMemoria(inicio + marco*config_memoria->TAMANIO_PAGINA + offset);
+   int size = heap->nextAlloc - direccion_logica - 9;
+   char * contenido = malloc(size);
+   free(heap);
+
+   agregarTLB(numero_pagina,marco,tabla_paginas->pid);
     
-   int desplazamiento = (direccion_logica-inicio) % config_memoria->TAMANIO_PAGINA;
+   int desplazamiento = (direccion_logica-inicio) % config_memoria->TAMANIO_PAGINA  + sizeof(t_heap_metadata);
 
-   char * contenido = traerDeMemoria(pagina->marco_asignado,desplazamiento, size);
+   if(size <= (config_memoria->TAMANIO_PAGINA - desplazamiento)){
+        contenido = traerDeMemoria(marco,desplazamiento, size);
+   }else
+   {
+       contenido = traerDeMemoria(marco,desplazamiento, config_memoria->TAMANIO_PAGINA - desplazamiento);
+       
+   }
 
+    pagina = list_get(tabla_paginas->paginas,numero_pagina);
     if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "LRU") == 0){
         actualizarLRU(pagina);
     }else
@@ -107,18 +119,70 @@ char *memRead(t_paquete *paquete)
         pagina->bit_uso = 1;
     }
 
+   int tamanio = config_memoria->TAMANIO_PAGINA - desplazamiento;
+   desplazamiento = 0;
+   
+
+   //direccion_logica es inicio heap
+   int pag = numero_pagina + 1;
+
+   if (size > (config_memoria->TAMANIO_PAGINA - desplazamiento)){
+       // El tamaño es mayor a lo que me queda de pagina, tengo que traer mas paginas
+       while(tamanio < size){
+           marco = buscarEnTLB(pag ,tabla_paginas->pid);
+            if (marco == -1){
+                pagina = list_get(tabla_paginas->paginas,pag);
+                if(pagina->bit_presencia != 0){
+                        marco = buscarMarcoEnMemoria(pag,tabla_paginas->pid);
+                }else
+                {
+                    //TRAER DE SWAP
+                        marco = traerPaginaAMemoria(pagina);
+                        if(marco == -1){
+                            //No pude traer a memoria
+                            return -1;
+                        }
+                }    
+            }
+
+            agregarTLB(pag,marco,tabla_paginas->pid);
+            //Desplazamiento tiene que cambiar
+
+            if(size - tamanio >= config_memoria->TAMANIO_PAGINA){
+                char* concateno = traerDeMemoria(marco,desplazamiento, config_memoria->TAMANIO_PAGINA);
+                memcpy(contenido + tamanio, concateno ,config_memoria->TAMANIO_PAGINA);
+                tamanio += config_memoria->TAMANIO_PAGINA;
+                free(concateno);
+            }else
+            {
+                char* concateno = traerDeMemoria(marco,desplazamiento, size - tamanio);
+                memcpy(contenido + tamanio, concateno ,size - tamanio);
+                tamanio += (size - tamanio);
+                free(concateno);
+
+            }
+
+            pagina = list_get(tabla_paginas->paginas,pag);
+            if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "LRU") == 0){
+                actualizarLRU(pagina);
+            }else
+            {
+                pagina->bit_uso = 1;
+            }
+
+       }
+   }
+
    return contenido;
 
 }
 
-char* traerDeMemoria(int marco, int desplazamiento, int size)
-{
+char* traerDeMemoria(int marco, int desplazamiento, int size) {
     char* contenido = malloc(size);
     uint32_t dir_fisica = tamanio_memoria + marco * config_memoria->TAMANIO_PAGINA + desplazamiento;
-
     memcpy(contenido, dir_fisica, size);
-
-    return contenido;
+  
+    return string_substring(contenido, 0,size);
 }
 
 int memWrite(t_paquete *paquete)
@@ -128,31 +192,110 @@ int memWrite(t_paquete *paquete)
    int32_t direccion_logica ; 
 
    deserializar(paquete,6,CHAR_PTR,&contenido_escribir,INT,&direccion_logica,INT,&size);
-   
+   free(paquete);
    int inicio = tamanio_memoria;
    int numero_pagina = (direccion_logica - inicio) / config_memoria->TAMANIO_PAGINA;
+   int desplazamiento = (direccion_logica-inicio) % config_memoria->TAMANIO_PAGINA + sizeof(t_heap_metadata);
    t_tabla_paginas* tabla_paginas = buscarTablaPorPID(socket_client);
+   t_pagina* pagina = malloc(sizeof(t_pagina));
 
    if(numero_pagina > list_size(tabla_paginas)){
        return -1;
    }
-
-   t_pagina* pagina = list_get(tabla_paginas->paginas,numero_pagina);
-   if(pagina->bit_presencia == 0){
-       //TRAER DE SWAP
-       //getMarcoParaPagina(tabla_paginas);
+   
+   //Ver que el contenido esta completo en la pagina, si no esta hay que fijarse en las paginas siguientes que contengan si estan en memoria (bit presencia en 1)
+   
+   int marco = buscarEnTLB(numero_pagina,tabla_paginas->pid);
+   if (marco == -1){
+       pagina = list_get(tabla_paginas->paginas,numero_pagina);
+       if(pagina->bit_presencia != 0){
+            marco = buscarMarcoEnMemoria(numero_pagina,tabla_paginas->pid);
+       }else
+       {
+           //TRAER DE SWAP
+            marco = traerPaginaAMemoria(pagina);
+            if(marco == -1){
+                //No pude traer a memoria
+                return -1;
+            }
+       }
    }
-    
-   int desplazamiento = (direccion_logica-inicio) % config_memoria->TAMANIO_PAGINA;
 
-   escribirEnMemoria(pagina->marco_asignado,desplazamiento, size, contenido_escribir);
+   agregarTLB(numero_pagina,marco,tabla_paginas->pid);
 
-   if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "LRU") == 0){
-        actualizarLRU(pagina);
-    }else
-    {
-        pagina->bit_modificado = 1;
-    }
+   int size_primera_pagina;
+
+   if(size <= config_memoria->TAMANIO_PAGINA - desplazamiento){
+       size_primera_pagina = size;
+       escribirEnMemoria(pagina->marco_asignado,desplazamiento, size, contenido_escribir);
+       pagina = list_get(tabla_paginas->paginas,numero_pagina);
+        if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "LRU") == 0){
+            actualizarLRU(pagina);
+        }else
+        {
+            pagina->bit_modificado = 1;
+        }
+        return 1;
+   }else
+   {
+       size_primera_pagina = config_memoria->TAMANIO_PAGINA - desplazamiento;
+       escribirEnMemoria(pagina->marco_asignado,desplazamiento, size_primera_pagina, contenido_escribir);
+       pagina = list_get(tabla_paginas->paginas,numero_pagina);
+        if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "LRU") == 0){
+            actualizarLRU(pagina);
+        }else
+        {
+            pagina->bit_modificado = 1;
+        }
+   }
+
+   //Acabo de escribir el principio de contenido en la primera pagina, tengo que seguir trayendo paginas y escribir la continuacion del contenido
+
+   size -= size_primera_pagina;
+   int paginas_escribir = (size / config_memoria->TAMANIO_PAGINA);
+   uint32_t offset = size_primera_pagina;
+
+   for (int i = 0; i<paginas_escribir; i++){
+
+        numero_pagina++;
+
+        marco = buscarEnTLB(numero_pagina,tabla_paginas->pid);
+        if (marco == -1){
+            pagina = list_get(tabla_paginas->paginas,numero_pagina);
+            if(pagina->bit_presencia != 0){
+                    marco = buscarMarcoEnMemoria(numero_pagina,tabla_paginas->pid);
+            }else
+            {
+                //TRAER DE SWAP
+                    marco = traerPaginaAMemoria(pagina);
+                    if(marco == -1){
+                        //No pude traer a memoria
+                        return -1;
+                    }
+            }
+        }
+
+        agregarTLB(numero_pagina,marco,tabla_paginas->pid);
+
+        if(size < config_memoria->TAMANIO_PAGINA){
+            escribirEnMemoria(pagina->marco_asignado,0, size, contenido_escribir + offset);
+        }else{
+            escribirEnMemoria(pagina->marco_asignado,0, config_memoria->TAMANIO_PAGINA, contenido_escribir + offset);
+            size -= config_memoria->TAMANIO_PAGINA;
+            offset += config_memoria->TAMANIO_PAGINA;
+        }
+
+        pagina = list_get(tabla_paginas->paginas,numero_pagina);
+        if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "LRU") == 0){
+            actualizarLRU(pagina);
+        }else
+        {
+            pagina->bit_modificado = 1;
+        }
+
+   }
+
+    free(contenido_escribir);
 
    return 1;
 }
@@ -291,8 +434,58 @@ void escribirPaginaEnMemoria(t_pagina* pagina,t_pagina_swap* pagina_swap){
     int marco = pagina->marco_asignado;
     int offset = 0;
     int size = 0;
+    uint32_t inicio = tamanio_memoria;
+    uint32_t nextAnterior = tamanio_memoria;
+    t_list_iterator *list_iterator = list_iterator_create(pagina_swap->contenido_heap_info);
+    t_info_heap_swap *info;
+    while (list_iterator_has_next(list_iterator))
+    {
+        info = list_iterator_next(list_iterator);
+        offset = (info->inicio - inicio) % config_memoria->TAMANIO_PAGINA;
+        if(info->contenido->prevAlloc == 0){
+            //ES EL PRIMER ALLOC EL QUE ESTOY CARGANDO NUEVAMENTE
+            t_heap_metadata *data = malloc(sizeof(t_heap_metadata));
+            data->prevAlloc = info->contenido->prevAlloc;
+            data->nextAlloc = info->contenido->nextAlloc;
+            data->isFree = info->contenido->isFree;
+            
+            t_contenidos_pagina *header_pagina_actual = getContenidoPaginaByTipo(pagina->listado_de_contenido, HEADER);
+            header_pagina_actual->dir_comienzo=(inicio + (pagina->marco_asignado * config_memoria->TAMANIO_PAGINA))+offset;
+            header_pagina_actual->dir_fin = header_pagina_actual->dir_comienzo + header_pagina_actual->tamanio;
+            guardarAlloc(data,header_pagina_actual->dir_comienzo);
+            free(data);
 
-    t_list_iterator *list_iterator = list_iterator_create(pagina->listado_de_contenido);
+            nextAnterior = info->contenido->nextAlloc;
+        }else{
+            
+            //TENGO QUE TRAERME EL NEXT ANTERIOR Y SACAR EL OFFSET 
+            /*int numero_pagina_alloc_anterior = getPaginaByDireccionLogica(info->contenido->prevAlloc - inicio);
+            if(numero_pagina_alloc_anterior < 0)
+                return -1;
+            
+            t_pagina *pagina_alloc_anterior = list_get(numero_pagina_alloc_anterior, numero_pagina_alloc_anterior);
+            if(!pagina_alloc_anterior->bit_presencia)
+                traerPaginaAMemoria(pagina_alloc_anterior);
+            
+            uint32_t offset = (info->contenido->prevAlloc - inicio) % config_memoria->TAMANIO_PAGINA;
+
+            t_heap_metadata *alloc_anterior = traerAllocDeMemoria(inicio + pagina_alloc_anterior->marco_asignado * config_memoria->TAMANIO_PAGINA + offset);
+
+            t_heap_metadata *alloc_actual = malloc(sizeof(t_heap_metadata));
+            alloc_actual->prevAlloc = info->contenido->prevAlloc;
+            alloc_actual->nextAlloc = info->contenido->nextAlloc;
+            alloc_actual->isFree = info->contenido->isFree;
+            
+            t_contenidos_pagina *header_pagina_actual = getContenidoPaginaByTipo(pagina->listado_de_contenido, HEADER);
+            header_pagina_actual->dir_comienzo=(inicio + (pagina->marco_asignado * config_memoria->TAMANIO_PAGINA))+offset;
+            header_pagina_actual->dir_fin = header_pagina_actual->dir_comienzo + header_pagina_actual->tamanio;
+            guardarAlloc(alloc_actual,header_pagina_actual->dir_comienzo);
+            free(alloc_actual);
+            free(alloc_anterior);*/
+        }
+    }
+    tabla_paginas->paginas_en_memoria+=1;
+    /*t_list_iterator *list_iterator = list_iterator_create(pagina->listado_de_contenido);
     t_contenidos_pagina *contenido;
 
     while (list_iterator_has_next(list_iterator))
@@ -311,7 +504,7 @@ void escribirPaginaEnMemoria(t_pagina* pagina,t_pagina_swap* pagina_swap){
             list_remove(pagina_swap->contenido_carpincho_info,0);
             offset += size;
         }
-    }
+    }*/
     list_iterator_destroy(list_iterator);
     return;
 }
@@ -552,7 +745,7 @@ int solicitarPaginaNueva(uint32_t carpincho_id)
     }
     if(marco == -1){
         log_info(logger_memoria, "Tengo que ir a swap");
-        marco = reemplazarPagina(tabla_paginas);
+        marco = reemplazarPagina();
         if(marco < 0)
             return -1;
     }
@@ -577,6 +770,8 @@ int solicitarPaginaNueva(uint32_t carpincho_id)
     marcoAsignado->isFree = false;
     tabla_paginas->paginas_en_memoria += 1;
 
+    agregarTLB(numero_pagina, marco, carpincho_id);
+
     if(trajeDeMemoria == true){
         agregarAsignacion(pagina);
     }else{
@@ -584,6 +779,7 @@ int solicitarPaginaNueva(uint32_t carpincho_id)
             agregarAsignacion(pagina); 
         }else{
             //Resolver reemplazo Clock
+            replaceClock(pagina);
         }
            
     }
@@ -642,23 +838,63 @@ void liberarPagina(t_pagina* pagina, uint32_t carpincho_id){
     tabla_paginas->paginas_en_memoria-=1;
 }
 
-t_pagina* traerPaginaAMemoria(t_pagina* pagina_alloc_actual){
+int traerPaginaAMemoria(t_pagina* pagina_alloc_actual){
 
-    t_tabla_paginas* tabla = buscarTablaPorPID(pagina_alloc_actual->carpincho_id);
-    int marco = reemplazarPagina(tabla);
-    pagina_alloc_actual->marco_asignado = marco;
-    int resultado = recibirPaginaSwap(pagina_alloc_actual);
-    if(resultado == -1){
-        //Swap no trajo nada
-        //return -1;
+    // Busco pagina que esta en swap, puede ser que haya liberado espacio y que ahora tenga un marco libre en memoria
+    int marco = -1;
+    int trajeDeMemoria = false;
+    marco = getMarco(tabla_paginas);
+    if(marco < -1){
+        log_error(logger_memoria,"No se pudo asignar un marco");
+        return;
+    }if (marco > -1){
+        trajeDeMemoria = true;
     }
-    pagina_alloc_actual->bit_presencia = 1;
-    if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "LRU") == 0){
+    if(marco == -1){
+        log_info(logger_memoria, "Tengo que ir a swap");
+        marco = reemplazarPagina();
+        if(marco < 0)
+            return -1;
+
+        pagina_alloc_actual->marco_asignado = marco;
+        int resultado = recibirPaginaSwap(pagina_alloc_actual);
+        if(resultado == -1){
+            //Swap no trajo nada
+            //Capaz tengo que mandar devuelta la pagina anterior
+            return -1;
+        }
+    }
+
+    pagina_alloc_actual->marco_asignado = marco;
+    pagina_alloc_actual->bit_presencia = true;
+    if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "LRU") == 0 || trajeDeMemoria){
         agregarAsignacion(pagina_alloc_actual);
     }else
     {
         replaceClock(pagina_alloc_actual);
     }
 
-    return pagina_alloc_actual;
+    return pagina_alloc_actual->marco_asignado;
+}
+
+int getPosicionEnTablaDeProcesos(t_tabla_paginas* tabla){
+
+    int index = 0;
+
+    t_list_iterator* list_iterator = list_iterator_create(tabla_procesos);
+
+    while(list_iterator_has_next(list_iterator)){
+
+        t_tabla_paginas* tablaIterada = list_iterator_next(list_iterator);
+        if(tabla->pid == tablaIterada->pid){
+            list_iterator_destroy(list_iterator);
+            return index;
+        }
+        index++;
+    }
+
+    list_iterator_destroy(list_iterator);
+    //La tabla no esta cargada en memoria -> No va a pasar nunca creo
+    return -1;
+
 }

@@ -24,7 +24,7 @@ int freeAlloc(t_paquete *paquete)
         return -1;
 
     if(pagina_alloc_actual->bit_presencia == 0){
-         pagina_alloc_actual = traerPaginaAMemoria(pagina_alloc_actual);
+         traerPaginaAMemoria(pagina_alloc_actual);
     }
 
     uint32_t resto_alloc_actual = (direccion - inicio) % config_memoria->TAMANIO_PAGINA;
@@ -53,7 +53,7 @@ int freeAlloc(t_paquete *paquete)
 
         t_pagina *pagina_alloc_anterior = list_get(tabla_paginas->paginas, nro_pagina_alloc_anterior);
         if(pagina_alloc_anterior->bit_presencia == 0){
-            pagina_alloc_anterior = traerPaginaAMemoria(pagina_alloc_anterior);
+            traerPaginaAMemoria(pagina_alloc_anterior);
         }
         direccion_fisica_back = inicio + pagina_alloc_anterior->marco_asignado * config_memoria->TAMANIO_PAGINA + resto_alloc_anterior;
         t_heap_metadata *anterior_alloc = traerAllocDeMemoria(direccion_fisica_back);
@@ -69,7 +69,7 @@ int freeAlloc(t_paquete *paquete)
 
                 t_pagina *pagina_alloc_posterior = list_get(tabla_paginas->paginas, nro_pagina_alloc_posterior);
                 if(pagina_alloc_posterior->bit_presencia == 0){
-                    pagina_alloc_posterior = traerPaginaAMemoria(pagina_alloc_posterior);
+                    traerPaginaAMemoria(pagina_alloc_posterior);
                 }
                 direccion_fisica_next= inicio + pagina_alloc_posterior->marco_asignado * config_memoria->TAMANIO_PAGINA + resto_alloc_posterior;
                 t_heap_metadata *posterior_alloc = traerAllocDeMemoria(direccion_fisica_next);
@@ -90,7 +90,7 @@ int freeAlloc(t_paquete *paquete)
 
         t_pagina *pagina_alloc_posterior = list_get(tabla_paginas->paginas, nro_pagina_alloc_posterior);
         if(pagina_alloc_posterior->bit_presencia == 0){
-            pagina_alloc_posterior = traerPaginaAMemoria(pagina_alloc_posterior);
+            traerPaginaAMemoria(pagina_alloc_posterior);
         }
         direccion_fisica_next = inicio + pagina_alloc_posterior->marco_asignado * config_memoria->TAMANIO_PAGINA + resto_alloc_posterior;
         t_heap_metadata *posterior_alloc = traerAllocDeMemoria(direccion_fisica_next);
@@ -118,7 +118,7 @@ void restarTamanioaPagina(t_pagina* pagina_alloc_actual,t_heap_metadata* alloc_a
 
     t_pagina *pagina_alloc_anterior = list_get(tabla_paginas->paginas, nro_pagina_alloc_anterior);
     if(pagina_alloc_anterior->bit_presencia == 0)
-        pagina_alloc_anterior = traerPaginaAMemoria(pagina_alloc_anterior);
+         traerPaginaAMemoria(pagina_alloc_anterior);
     
 
     int nro_pagina_alloc_posterior= getPaginaByDireccionLogica(alloc_actual->nextAlloc-inicio);
@@ -127,7 +127,7 @@ void restarTamanioaPagina(t_pagina* pagina_alloc_actual,t_heap_metadata* alloc_a
 
     t_pagina *pagina_alloc_posterior = list_get(tabla_paginas->paginas, nro_pagina_alloc_posterior);
     if(pagina_alloc_posterior->bit_presencia == 0)
-        pagina_alloc_posterior = traerPaginaAMemoria(pagina_alloc_posterior);
+         traerPaginaAMemoria(pagina_alloc_posterior);
     
     bool elimino_contenido= false;
     uint32_t tamanio_ocupado = alloc_actual->nextAlloc - next_anterior_alloc - sizeof(t_heap_metadata);
@@ -277,6 +277,8 @@ int memAlloc(t_paquete *paquete)
             primera_pagina  = pagina_Disponible;
         }
 
+        if(!primera_pagina->bit_presencia)
+            traerPaginaAMemoria(primera_pagina);
 
         t_contenidos_pagina *contenido = getContenidoPaginaByTipo(primera_pagina->listado_de_contenido, HEADER);
         t_heap_metadata *data = traerAllocDeMemoria(contenido->dir_comienzo);
@@ -311,7 +313,7 @@ int memAlloc(t_paquete *paquete)
                     t_pagina *paginaAlloc = list_get(tabla_paginas->paginas, pagina);
                     if (paginaAlloc->bit_presencia == 0)
                     {
-                        paginaAlloc = traerPaginaAMemoria(paginaAlloc);
+                        traerPaginaAMemoria(paginaAlloc);
                     }
                     paginaAlloc->cantidad_contenidos += 1;
                     paginaAlloc->tamanio_ocupado += size;
@@ -345,9 +347,9 @@ int memAlloc(t_paquete *paquete)
 
             t_pagina *pagina_alloc_actual = list_get(tabla_paginas->paginas,nropagina_alloc);
             
-            if(pagina_alloc_actual->bit_presencia == false){
-                pagina_alloc_actual = traerPaginaAMemoria(pagina_alloc_actual);
-            }
+            if(!pagina_alloc_actual->bit_presencia)
+                traerPaginaAMemoria(pagina_alloc_actual);
+            
             free(data);
             data = traerAllocDeMemoria(nextAnterior);
             index++;

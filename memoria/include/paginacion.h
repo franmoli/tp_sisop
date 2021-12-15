@@ -6,7 +6,7 @@
 #include <commons/collections/queue.h>
 #include "tlb.h"
 #include "memoria-virtual.h"
-
+#include "alloc.h"
 
 t_contenidos_pagina *getLastContenidoByPagina(t_pagina* pagina);
 t_contenidos_pagina *getLastHeaderContenidoByPagina(t_pagina* pagina);
@@ -43,8 +43,9 @@ void escribirAllocIncompleto(int marco,uint32_t dir_comienzo,uint32_t dir_fin,vo
 void escribirAllocEnMarco(int marco,uint32_t dir_comienzo,uint32_t dir_fin,t_heap_metadata* heap);
 
 //GENERALES
-t_pagina* traerPaginaAMemoria(t_pagina* pagina_alloc_actual);
+int traerPaginaAMemoria(t_pagina* pagina_alloc_actual);
 int getPaginaByDireccionLogica(uint32_t direccion);
 int getPaginaByDireccionFisica(uint32_t direccion);
 int getPrimeraPaginaDisponible(int size, t_tabla_paginas *tabla_paginas);
+int getPosicionEnTablaDeProcesos(t_tabla_paginas* tabla);
 #endif

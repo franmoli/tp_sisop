@@ -18,7 +18,8 @@ void enviar_sem_disponible(int id);
 t_semaforo *traer_semaforo(char *nombre_solicitado);
 void enviar_error(int socket);
 bool solicitar_semaforo(char *nombre_semaforo, int id);
+void postear_semaforo(char *nombre_semaforo, int id_del_chabon_que_postea );
 t_proceso *traer_proceso_bloqueado(int id);
 void *desbloquear_en(void *param);
-void devolver_recurso(int id);
+void devolver_recurso(int id, char *sem_devuelto);
 #endif

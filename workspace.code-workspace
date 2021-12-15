@@ -18,5 +18,13 @@
 		{
 			"path": "swap"
 		}
-	]
+	],
+	"settings": {
+		"files.associations": {
+			"kernel.h": "c",
+			"kernel-global.h": "c",
+			"time.h": "c",
+			"stdlib.h": "c"
+		}
+	}
 }

@@ -15,6 +15,7 @@ int main(int argc, char **argv) {
     //Iniciar semaforos de uso general
     iniciar_semaforos_generales();
     multiprogramacion_disponible = config_kernel->GRADO_MULTIPROGRAMACION;
+    multiprocesamiento = config_kernel->GRADO_MULTIPROCESAMIENTO;
 
     //Iniciar listas de procesos
     iniciar_listas();
@@ -104,38 +105,58 @@ void iniciar_semaforos_generales(){
     sem_init(&cambio_de_listas_corto, 0, 0);
     sem_init(&pedir_salida_de_block, 0, 0);
     sem_init(&solicitar_block, 0, 0);
+    sem_init(&mutex_semaforos, 0, 1);
+    sem_init(&mutex_recursos_asignados, 0, 1);
     return;
 }
 
 void mover_proceso_de_lista(t_list *origen, t_list *destino, int index, int status){
+
     t_proceso *aux;
-    sem_wait(&mutex_listas);
-        aux = list_remove(origen, index);
-        printf("Moviendo proceso - %d | to: %d\n", aux->id , status);
-        if(status == READY)
-            aux->entrada_a_ready = clock();
-        aux->status =  status;
-        aux->termino_rafaga = false;
-        list_add(destino, aux);
-    sem_post(&mutex_listas);
+
+    aux = list_remove(origen, index);
+    printf("Moviendo proceso - %d | to: %d\n", aux->id , status);
+
+    if(status == READY)
+        aux->entrada_a_ready = clock();
     
+    if(status == EXIT)
+        cantidad_de_procesos--;
+
+    if(status == NEW)
+        cantidad_de_procesos++;
+
+    if(status == BLOCKED)
+        multiprocesamiento++;
+
+    if(status == EXEC)
+        multiprocesamiento--;
+
+    aux->status =  status;
+    aux->termino_rafaga = false;
+
+    list_add(destino, aux);
+
+    printf("Avisando del cambio\n");
     avisar_cambio();
+    printf("Cambio avisado\n");
     return;
 }
 
 void avisar_cambio(){
     sem_wait(&mutex_cant_procesos);
-    //log_info(logger_kernel,"Avise de un cambio de listas");
     //Aviso que hubo un cambio de listas
+    printf("Cantidad de procesos %d\n", cantidad_de_procesos);
     for(int i = 0; i < cantidad_de_procesos; i++){
+        printf("Un post\n");
         sem_post(&actualizacion_de_listas_1);
     }
 
     //Espero que todos los procesos hayan recibido el aviso y ejecutado
     for(int i = 0; i < cantidad_de_procesos; i++){
+        printf("Un wait\n");        
         sem_wait(&actualizacion_de_listas_1_recibido);
     }
-
     //Habilito que vuelvan a esperar una vez ya resuelto todo lo que tengan que hacer con su nuevo estado
     for(int i = 0; i < cantidad_de_procesos; i++){
         sem_post(&actualizacion_de_listas_2);
@@ -143,12 +164,11 @@ void avisar_cambio(){
 
     //Habilito planificadores
     sem_post(&cambio_de_listas_largo);
-    sleep(0.5);
-    sem_post(&cambio_de_listas_mediano);
-    sleep(0.5);
     sem_post(&cambio_de_listas_corto);
+    sem_post(&cambio_de_listas_mediano);
 
     sem_post(&mutex_cant_procesos);
+    printf("Pasó todos los wait\n");
 }
 
 void iniciar_debug_console(){
@@ -199,6 +219,12 @@ void *debug_console(void *_ ){
         if(string_contains(input, "process")){
             printf("Procesos activos %d\n", cantidad_de_procesos);
         }
+        if(string_contains(input, "asign")){
+            print_sem_asignados();
+        }
+        if(string_contains(input, "sem_t")){
+            print_sem_tipe();
+        }
 
     }
 
@@ -225,6 +251,7 @@ void print_semaforos(){
             }
         }
         printf("\n");
+        index2 = 0;
         index++;
     }
 }
@@ -359,4 +386,67 @@ void print_lists(){
 
     printf("\n");
 
+}
+
+void print_sem_asignados(){
+    int index = 0;
+    t_recurso_asignado *aux = NULL;
+    printf("Printing semaphores %d:\n", list_size(lista_recursos_asignados));
+
+    while(index < list_size(lista_recursos_asignados)){
+        aux = list_get(lista_recursos_asignados, index);
+
+        printf("Semaforo \"%s\" - Asignado a %d:\n",aux->nombre_recurso, aux->id_asignado);
+        printf("\n");
+        index++;
+    }
+}
+
+void print_sem_tipe(){
+    int aux = -100;
+    sem_getvalue(&mutex_listas, &aux);
+    printf("Sem mutex_listas : %d\n", aux);
+    sem_getvalue(&proceso_finalizo_o_suspended, &aux);
+    printf("Sem proceso_finalizo_o_suspended : %d\n", aux);
+    sem_getvalue(&salida_exec, &aux);
+    printf("Sem salida_exec : %d\n", aux);
+    sem_getvalue(&salida_block, &aux);
+    printf("Sem salida_block : %d\n", aux);
+    sem_getvalue(&actualizacion_de_listas_1, &aux);
+    printf("Sem actualizacion_de_listas_1 : %d\n", aux);
+    sem_getvalue(&actualizacion_de_listas_2, &aux);
+    printf("Sem actualizacion_de_listas_2 : %d\n", aux);
+    sem_getvalue(&actualizacion_de_listas_1_recibido, &aux);
+    printf("Sem actualizacion_de_listas_1_recibido : %d\n", aux);
+    sem_getvalue(&proceso_inicializado, &aux);
+    printf("Sem proceso_inicializado : %d\n", aux);
+    sem_getvalue(&libre_para_inicializar_proceso, &aux);
+    printf("Sem libre_para_inicializar_proceso : %d\n", aux);
+    sem_getvalue(&mutex_multiprocesamiento, &aux);
+    printf("Sem mutex_multiprocesamiento : %d\n", aux);
+    sem_getvalue(&mutex_multiprogramacion, &aux);
+    printf("Sem mutex_multiprogramacion : %d\n", aux);
+    sem_getvalue(&mutex_cant_procesos, &aux);
+    printf("Sem mutex_cant_procesos : %d\n", aux);
+    sem_getvalue(&salida_a_exit, &aux);
+    printf("Sem salida_a_exit : %d\n", aux);
+    sem_getvalue(&liberar_multiprocesamiento, &aux);
+    printf("Sem liberar_multiprocesamiento : %d\n", aux);
+    sem_getvalue(&salida_a_exit_recibida, &aux);
+    printf("Sem salida_a_exit_recibida : %d\n", aux);
+    sem_getvalue(&salida_de_exec_recibida, &aux);
+    printf("Sem salida_de_exec_recibida : %d\n", aux);
+    sem_getvalue(&cambio_de_listas, &aux);
+    printf("Sem cambio_de_listas : %d\n", aux);
+    sem_getvalue(&cambio_de_listas_largo, &aux);
+    printf("Sem cambio_de_listas_largo : %d\n", aux);
+    sem_getvalue(&cambio_de_listas_mediano, &aux);
+    printf("Sem cambio_de_listas_mediano : %d\n", aux);
+    sem_getvalue(&cambio_de_listas_corto, &aux);
+    printf("Sem cambio_de_listas_corto : %d\n", aux);
+    sem_getvalue(&pedir_salida_de_block, &aux);
+    printf("Sem pedir_salida_de_block : %d\n", aux);
+    sem_getvalue(&solicitar_block, &aux);
+    printf("Sem solicitar_block : %d\n", aux);
+    
 }
