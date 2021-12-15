@@ -72,16 +72,17 @@ int ejecutar_operacion(int client) {
         paquete_respuesta->buffer = buffer;
 
         enviar_paquete(paquete_respuesta, socket_client);
-        free(buffer->stream);
         free(buffer);
 
     } else if(paquete->codigo_operacion == SWAPFREE) {
         //Deserializo el pedido enviado por Memoria
+        int id_carpincho;
+        memcpy(&id_carpincho, paquete->buffer->stream + 0, sizeof(int));
         int pagina_solicitada;
-        memcpy(&pagina_solicitada, paquete->buffer->stream + 0, sizeof(int));
+        memcpy(&pagina_solicitada, paquete->buffer->stream + sizeof(int), sizeof(int));
 	    
         //Busco la página y la envío en caso correcto
-        t_pagina_enviada_swap pagina = leer_pagina_de_archivo(pagina_solicitada);
+        t_pagina_enviada_swap pagina = leer_pagina_de_archivo(id_carpincho, pagina_solicitada);
 
         if(pagina.numero_pagina >= 0) {
             void *pagina_serializada = serializar_pagina(&pagina);

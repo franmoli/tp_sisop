@@ -351,7 +351,10 @@ int memAlloc(t_paquete *paquete)
                 traerPaginaAMemoria(pagina_alloc_actual);
             
             free(data);
-            data = traerAllocDeMemoria(nextAnterior);
+            uint32_t offset = (nextAnterior-inicio) % config_memoria->TAMANIO_PAGINA;
+            uint32_t direccion_fisica_anterior = inicio + offset + pagina_alloc_actual->marco_asignado * config_memoria->TAMANIO_PAGINA;
+            
+            data = traerAllocDeMemoria(direccion_fisica_anterior);
             index++;
         }
         //Nuevo Alloc
@@ -395,7 +398,6 @@ void crearPrimerHeader(t_pagina *pagina, uint32_t size)
     contenido_contenido->contenido_pagina = CONTENIDO;
     contenido_contenido->tamanio = size;
     list_add(pagina->listado_de_contenido, contenido_contenido);
-
 }
 
 int agregarPagina(t_pagina *pagina, t_heap_metadata *data, uint32_t nextAnterior, uint32_t size, bool ultimo, int index_alloc)

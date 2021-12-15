@@ -140,7 +140,7 @@ int bytes_info_heap(t_heap_contenido_enviado info) {
     size += sizeof(uint32_t);
     size += sizeof(uint8_t);
     size += sizeof(uint32_t); //Longitud del contenido
-    size += sizeof(char) * (strlen(info.contenido) + 1);
+    size += sizeof(char) * (info.size_contenido + 1);
 
     return size;
 }
@@ -176,8 +176,8 @@ void* serializar_pagina(t_pagina_enviada_swap* pagina) {
         memcpy(stream + offset, &(contenido->size_contenido), sizeof(uint32_t));
 	    offset += sizeof(uint32_t);
 
-        memcpy(stream + offset, contenido->contenido, strlen(contenido->contenido) + 1);
-	    offset += contenido->size_contenido;
+        memcpy(stream + offset, contenido->contenido, contenido->size_contenido + 1);
+	    offset += contenido->size_contenido + 1;
     }
 
     return stream;
@@ -284,7 +284,7 @@ t_paquete * serializar (int codigo_operacion, int arg_count, ...){
 
                 break;
             case LIST:
-                tipo_de_lista = va_arg(valist, t_type); 
+                //tipo_de_lista = va_arg(valist, t_type); 
                 param_l = va_arg(valist, t_list*);
                 //Se trae el tipo de lista y se incrementa i por el va_arg extra
                 i++;
