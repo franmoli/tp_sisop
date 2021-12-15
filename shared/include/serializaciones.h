@@ -68,6 +68,21 @@ typedef struct {
 } t_pagina_swap;
 
 typedef struct {
+	uint32_t pid;
+	uint32_t numero_pagina;
+	t_list* heap_contenidos; //heap_contenido_enviado
+} t_pagina_enviada_swap;
+
+typedef struct {
+    uint32_t prevAlloc;
+    uint32_t nextAlloc;
+    uint8_t isFree;
+	char* contenido;
+} __attribute__((packed))
+t_heap_contenido_enviado;
+
+
+typedef struct {
 	uint32_t inicio;
 	uint32_t fin;
 	t_heap_swap* contenido;
