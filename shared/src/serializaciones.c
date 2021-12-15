@@ -238,8 +238,8 @@ t_paquete * serializar (int codigo_operacion, int arg_count, ...){
     uint32_t param_ui = 0;
     bool param_b = false;
     t_list *param_l = NULL; 
-    //t_paquete *paquete_aux = malloc(sizeof(t_paquete));
-    //paquete_aux->buffer = malloc(sizeof(t_buffer));
+    t_paquete *paquete_aux = malloc(sizeof(t_paquete));
+    paquete_aux->buffer = malloc(sizeof(t_buffer));
     t_type tipo_de_lista = INT;
     void *list_elem = NULL;
 
@@ -296,12 +296,12 @@ t_paquete * serializar (int codigo_operacion, int arg_count, ...){
                 for(int j = 0; j < list_size(param_l); j++){
 
                     //Traigo un elemento de la lista y lo serializo recursivamente
-                   /* list_elem = list_get(param_l, j);
+                    list_elem = list_get(param_l, j);
                     paquete_aux = serializar(NUEVO_CARPINCHO, 2, tipo_de_lista, list_elem);
                     added_size = paquete_aux->buffer->size;
 
 
-                    serializar_single(&stream, paquete_aux->buffer->stream, &size, added_size, &offset);*/
+                    serializar_single(&stream, paquete_aux->buffer->stream, &size, added_size, &offset);
                 }
                 break;
             case U_INT:
@@ -310,6 +310,9 @@ t_paquete * serializar (int codigo_operacion, int arg_count, ...){
 
                 serializar_single(&stream, &param_un_i, &size, added_size, &offset);
 
+                break;
+            case SWAP_PAGINA_HEAP:
+            case SWAP_PAGINA_CONTENIDO:
                 break;
         }
     }
@@ -441,6 +444,9 @@ int deserializar(t_paquete *paquete, int arg_count, ...){
                     offset += deserializar(paquete_aux,2,tipo_de_lista,&list_elem);
                     list_add(param_l,list_elem);
                 }
+                break;
+            case SWAP_PAGINA_CONTENIDO:
+            case SWAP_PAGINA_HEAP:
                 break;
         }
     }

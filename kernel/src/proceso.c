@@ -110,6 +110,18 @@ void exec(t_proceso *self){
                     break;
 
                 case SEM_DESTROY:
+                    semaforo_aux = next_task->datos_tarea;
+
+                    sem_wait(&mutex_semaforos);
+                    sem_wait(&mutex_recursos_asignados);
+
+                    printf("Carpincho %d eliminando semaforo %s\n", self->socket_carpincho, semaforo_aux->nombre_semaforo);
+                    destruir_semaforo(semaforo_aux->nombre_semaforo);
+                    enviar_confirmacion(self->socket_carpincho);
+                    sem_post(&mutex_recursos_asignados);
+                    sem_post(&mutex_semaforos);
+
+                    break;
                 case OP_ERROR:
                     break;
                 case CALLIO:
@@ -350,5 +362,46 @@ void devolver_recurso(int id, char *sem_devuelto){
     }
     list_remove_by_condition(lista_recursos_asignados, lo_encontre);
 
+    return;
+}
+
+void destruir_semaforo(char *nombre_semaforo){
+    t_semaforo *semaforo = traer_semaforo(nombre_semaforo);
+    int cantidad_de_solicitantes = list_size(semaforo->solicitantes);
+    t_recurso_asignado *aux_asignado = NULL;
+
+    //Desbloquear todos los solicitantes bloqueados por este
+    for(int i = 0; i < cantidad_de_solicitantes; i++){
+        printf("Tenía solicitantes, posteandolo\n");
+        postear_semaforo(nombre_semaforo, 0);
+    }
+
+    //eliminar los que lo tengan como recurso asignado
+    bool recurso_encontrado(void *elemento){
+        t_recurso_asignado *a_testear = elemento;
+        if(!strcmp(a_testear->nombre_recurso, nombre_semaforo))
+            return true;
+        
+        return false;
+    };
+
+    aux_asignado = list_remove_by_condition(lista_recursos_asignados, recurso_encontrado);
+    while(aux_asignado != NULL){
+        aux_asignado = NULL;
+        aux_asignado = list_remove_by_condition(lista_recursos_asignados, recurso_encontrado);
+    }
+
+    //Eliminar de la lista de semaforos 
+    bool semaforo_encontrado(void *elemento){
+        t_semaforo *sem_a_testear = elemento;
+        if(!strcmp(sem_a_testear->nombre_semaforo, nombre_semaforo))
+            return true;
+
+        return false;
+    };
+
+    list_remove_by_condition(lista_semaforos, semaforo_encontrado);
+
+    print_semaforos();
     return;
 }

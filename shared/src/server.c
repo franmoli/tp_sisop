@@ -53,7 +53,6 @@ int crear_conexion(char *ip, char *puerto) {
 		freeaddrinfo(server_info);	
 		return -1;
 	}
-	printf("Conexion creada usando socket %d\n", socket_cliente);
 	freeaddrinfo(server_info);
 	return socket_cliente;
 }

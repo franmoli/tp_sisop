@@ -44,7 +44,7 @@ void atender_proceso (void* parametro ){
     t_proceso *carpincho = malloc(sizeof(t_proceso)); 
     carpincho->task_list = list_create();
     carpincho->socket_carpincho = socket_cliente;
-   // t_task *task_aux = NULL;
+    // t_task *task_aux = NULL;
     t_semaforo *semaforo_recibido = NULL;
     t_io *io_recibida = NULL;
     while(1) {
@@ -106,10 +106,21 @@ void atender_proceso (void* parametro ){
                 list_add(carpincho->task_list, task);
 
                 break;
+            case SEM_DESTROY:
+                semaforo_recibido = malloc(sizeof(t_semaforo));
+                semaforo_recibido->nombre_semaforo = NULL;
+
+                deserializar(paquete, 2, CHAR_PTR, &semaforo_recibido->nombre_semaforo);
                 
+                task->id = SEM_DESTROY;
+                task->datos_tarea = semaforo_recibido;
+
+                list_add(carpincho->task_list, task);
+                break;
             case CLIENTE_DESCONECTADO:
-                //log_info(logger_kernel, "Desconectando cliente %d", socket_cliente);
+                log_info(logger_kernel, "Desconectando cliente correctamente %d", socket_cliente);
                 //Se se pide la salida a exit del proceso
+
                 carpincho->salida_exit = true;
                 sem_post(&salida_a_exit);
 
@@ -291,7 +302,12 @@ void *hilo_salida_a_exit(void *multiprogramacion_disponible_p){
                 break;
             index++;
         }
-
+        if(aux == NULL){
+            sem_post(&mutex_listas);
+            sem_post(&mutex_recursos_asignados);
+            sem_post(&mutex_semaforos);
+            continue;
+        }
         log_info(logger_kernel, "Terminando con proceso %d", aux->id);
         mover_proceso_de_lista(origen_aux, lista_exit, index, EXIT);
 
@@ -322,7 +338,7 @@ void *hilo_salida_a_exit(void *multiprogramacion_disponible_p){
         multiprogramacion_disponible = multiprogramacion_disponible + 1;
         sem_post(&mutex_multiprogramacion);
 
-        
+        enviar_error(aux->id);
         //Aviso a todos los procesos, asi finaliza el hilo correspondiente
         avisar_cambio();
         sem_post(&mutex_listas);
