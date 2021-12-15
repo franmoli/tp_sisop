@@ -213,7 +213,8 @@ t_pagina_enviada_swap* deserializar_pagina(void *stream) {
         int strlen_contenido = 0;
         memcpy(&strlen_contenido, stream + offset, sizeof(int));
 	    offset += sizeof(int);
-        memcpy(&heap_metadata->contenido, stream + offset, strlen_contenido);
+        heap_metadata->contenido = malloc(strlen_contenido);
+        memcpy(heap_metadata->contenido, stream + offset, strlen_contenido);
 	    offset += strlen_contenido;
 
         list_add(contenidos_heap, heap_metadata);
