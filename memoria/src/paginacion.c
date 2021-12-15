@@ -438,9 +438,43 @@ void escribirPaginaEnMemoria(t_pagina* pagina,t_pagina_enviada_swap* pagina_swap
     uint32_t nextAnterior = tamanio_memoria;
     t_list_iterator *list_iterator = list_iterator_create(pagina_swap->heap_contenidos);
     t_heap_contenido_enviado *info;
+    int indice = 0;
     while (list_iterator_has_next(list_iterator))
     {
+        int offset = 0;
         info = list_iterator_next(list_iterator);
+        if(info->prevAlloc == 0){
+            //ES EL PRIMER ALLOC
+            t_heap_metadata *data = malloc(sizeof(t_heap_metadata));
+            data->prevAlloc = info->prevAlloc;
+            data->nextAlloc = info->nextAlloc;
+            data->isFree = info->isFree;
+
+            t_contenidos_pagina *header_pagina_actual = getContenidoPaginaByTipo(pagina->listado_de_contenido, HEADER);
+            header_pagina_actual->dir_comienzo=(inicio + (pagina->marco_asignado * config_memoria->TAMANIO_PAGINA));
+            header_pagina_actual->dir_fin = header_pagina_actual->dir_comienzo + header_pagina_actual->tamanio;
+            
+            guardarAlloc(data,header_pagina_actual->dir_comienzo);
+        }
+        else{
+            if(info->prevAlloc == 1){
+                //ES UN RESTO DE UN ALLOC ANTERIOR
+            }else{
+                //ES UN ALLOC PERO NO ES EL PRIMERO
+                t_contenidos_pagina *contenido_alloc_actual = list_get(pagina->listado_de_contenido, indice);
+                offset = (contenido_alloc_actual->dir_comienzo - inicio) % config_memoria->TAMANIO_PAGINA;
+                contenido_alloc_actual->dir_comienzo = inicio + pagina->marco_asignado * config_memoria->TAMANIO_PAGINA + offset;
+                contenido_alloc_actual->dir_fin = contenido_alloc_actual->dir_comienzo + contenido_alloc_actual->tamanio;
+
+                t_heap_metadata *data = malloc(sizeof(t_heap_metadata));
+                data->prevAlloc = info->prevAlloc;
+                data->nextAlloc = info->nextAlloc;
+                data->isFree = info->isFree;
+
+                guardarAlloc(data,contenido_alloc_actual->dir_comienzo);
+            }
+        }
+        indice ++;
         //offset = (info->inicio - inicio) % config_memoria->TAMANIO_PAGINA;
         /*if(info->contenido->prevAlloc == 0){
             //ES EL PRIMER ALLOC EL QUE ESTOY CARGANDO NUEVAMENTE
