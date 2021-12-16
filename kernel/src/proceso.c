@@ -1,7 +1,7 @@
 #include "proceso.h"
 
 void *proceso(void *self){
-    
+    pthread_detach(pthread_self());
     t_proceso *proceso_struct = self;
     int prev_status = -1;
     
@@ -23,7 +23,7 @@ void *proceso(void *self){
                     //liberar semaforos tomados por este
                     sem_post(&actualizacion_de_listas_1_recibido);
                     sem_wait(&actualizacion_de_listas_2);
-                    return;
+                    return NULL;
                 case S_BLOCKED:
                     log_info(logger_kernel, "Suspendo al proceso %d", proceso_struct->id);
                 default:
@@ -348,6 +348,8 @@ void *desbloquear_en(void *param){
     
     sem_post(&io_libre[io_recibida->id]);
 
+    free(io_recibida->nombre);
+    free(io_recibida->mensaje);
     free(io_recibida);
 
     return NULL;

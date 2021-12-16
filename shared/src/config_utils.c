@@ -50,13 +50,13 @@ t_config_kernel *generar_config_kernel(t_config *config) {
     config_kernel->TIEMPO_DEADLOCK = config_get_int_value(config, "TIEMPO_DEADLOCK");
 
     // libero memoria utilizada en el formateo
-    free(io_devices_unformatted);
-    free(io_devices_substring);
+    //free(io_devices_unformatted);
+    //free(io_devices_substring);
     free(io_devices_formatted);
 
-    free(io_durations_unformatted);
+    //free(io_durations_unformatted);
     free(io_durations_formatted);
-    free(io_durations_substring);
+    //free(io_durations_substring);
 
     return config_kernel;
 }
