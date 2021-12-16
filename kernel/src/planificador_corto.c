@@ -22,9 +22,9 @@ void iniciar_planificador_corto(){
     }
      
     pthread_create(&hilo_planificador, NULL, planificador, (void *)NULL);
-    pthread_detach(hilo_planificador);
+    //pthread_detach(hilo_planificador);
     pthread_create(&hilo_esperar_bloqueo, NULL, esperar_bloqueo, (void *)NULL);
-    pthread_detach(&hilo_esperar_bloqueo);
+    //pthread_detach(&hilo_esperar_bloqueo);
 }
 
 void *planificador_corto_plazo_sjf (void *_){
@@ -89,10 +89,11 @@ void *planificador_corto_plazo_hrrn (void *_){
 
         }
 
-        if(multiprocesamiento && list_size(lista_ready)){
+        if(multiprocesamiento > 0 && list_size(lista_ready)){
             int index = -1;
             int response_ratio = 0;
-            printf("Elijo de entre %d\n", list_size(lista_ready));
+
+            printf("Elijo de entre %d multiprocesamiento %d\n", list_size(lista_ready), multiprocesamiento);
             //se busca el response ratio mas alto
             for(int i = 0; i < list_size(lista_ready); i++){
 
@@ -153,14 +154,6 @@ void *esperar_bloqueo(void *_){
                     encontrado = true;
                 }
             index ++;
-        }
-        if(encontrado){
-
-            sem_wait(&mutex_multiprocesamiento);
-            multiprocesamiento++;
-            sem_post(&mutex_multiprocesamiento);
-            index = 0;
-
         }
         sem_post(&mutex_listas);
     }
