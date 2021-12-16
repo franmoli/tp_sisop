@@ -141,7 +141,6 @@ void exec(t_proceso *self){
                     pthread_create(&hilo_desbloquear_en, NULL, desbloquear_en, (void *)io_recibida);
                     index = 0;
                     bloquear_f = true;
-
                     break;
                 case MEMALLOC:
                 case MEMFREE:
@@ -152,9 +151,8 @@ void exec(t_proceso *self){
                     paquete_recibido = recibir_paquete(socket_cliente_memoria);
                     enviar_paquete(paquete_recibido,self->socket_carpincho);
                     break;
-
             }
-            
+            free(next_task);
         }
     }
 
@@ -339,6 +337,7 @@ void desbloquear(t_proceso *self){
 }
 
 void *desbloquear_en(void *param){
+    pthread_detach(pthread_self());
     t_io *io_recibida = param;
     sem_wait(&io_libre[io_recibida->id]);
 
@@ -348,7 +347,9 @@ void *desbloquear_en(void *param){
     desbloquear(io_recibida->proceso_solicitante);
     
     sem_post(&io_libre[io_recibida->id]);
-    
+
+    free(io_recibida);
+
     return NULL;
 }
 

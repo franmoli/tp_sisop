@@ -311,9 +311,6 @@ t_paquete * serializar (int codigo_operacion, int arg_count, ...){
                 serializar_single(&stream, &param_un_i, &size, added_size, &offset);
 
                 break;
-            case SWAP_PAGINA_HEAP:
-            case SWAP_PAGINA_CONTENIDO:
-                break;
         }
     }
     
@@ -444,9 +441,6 @@ int deserializar(t_paquete *paquete, int arg_count, ...){
                     offset += deserializar(paquete_aux,2,tipo_de_lista,&list_elem);
                     list_add(param_l,list_elem);
                 }
-                break;
-            case SWAP_PAGINA_CONTENIDO:
-            case SWAP_PAGINA_HEAP:
                 break;
         }
     }

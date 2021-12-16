@@ -251,11 +251,10 @@ mate_pointer mate_memalloc(mate_instance_pointer *instance_pointer, int size){
             log_error(lib_ref->logger,"Carpincho %d: La funcion MEM_ALLOC no se ejecuto correctamente",lib_ref->socket);
             lib_ref->desconectado = true;
         }
-        return p;
     }else{
-        log_error(lib_ref->logger, "No se pudo ejecutar la operacion mate close (Servidor desconectado)");
-        return -1;        
+        log_error(lib_ref->logger, "No se pudo ejecutar la operacion mate close (Servidor desconectado)");       
     }
+    return p;
 }
 
 int mate_memfree(mate_instance_pointer *instance_pointer, mate_pointer addr){
@@ -273,11 +272,11 @@ int mate_memfree(mate_instance_pointer *instance_pointer, mate_pointer addr){
         }else{
             log_error(lib_ref->logger,"Carpincho %d: La funcion MEM_FREE no se ejecuto correctamente",lib_ref->socket);
             lib_ref->desconectado = true;
-            return -1;
+            return MATE_FREE_FAULT;
         }
     }else{
         log_error(lib_ref->logger, "No se pudo ejecutar la operacion mate close (Servidor desconectado)");
-        return -1;        
+        return MATE_FREE_FAULT;        
     }
 }   
 
@@ -296,11 +295,11 @@ int mate_memread(mate_instance_pointer *instance_pointer, mate_pointer origin, v
         }else{
             log_error(lib_ref->logger,"Carpincho %d: La funcion MEM_READ no se ejecuto correctamente",lib_ref->socket);
             lib_ref->desconectado = true;
-            return -1;
+            return MATE_READ_FAULT;
         }
     }else{
         log_error(lib_ref->logger, "No se pudo ejecutar la operacion mate close (Servidor desconectado)");
-        return -1;        
+        return MATE_READ_FAULT;        
     }
 }
 
@@ -319,10 +318,10 @@ int mate_memwrite(mate_instance_pointer *instance_pointer, void *origin, mate_po
         }else{
             log_error(lib_ref->logger,"Carpincho %d: La funcion MEM_WRITE no se ejecuto correctamente",lib_ref->socket);
             lib_ref->desconectado = true;
-            return -1;
+            return MATE_WRITE_FAULT;
         }
     }else{
         log_error(lib_ref->logger, "No se pudo ejecutar la operacion mate close (Servidor desconectado)");
-        return -1;        
+        return MATE_WRITE_FAULT;        
     }
 }

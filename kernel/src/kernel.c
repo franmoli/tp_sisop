@@ -55,6 +55,7 @@ int main(int argc, char **argv) {
 void liberar_memoria_y_finalizar(t_config_kernel *config_kernel, t_log *logger_kernel, t_config *config_file){
     //config_destroy(config_file);
     destruir_semaforos();
+    destruir_listas();
     list_destroy_and_destroy_elements(config_kernel->DISPOSITIVOS_IO, element_destroyer);
     list_destroy_and_destroy_elements(config_kernel->DURACIONES_IO, element_destroyer);
     free(config_kernel);
@@ -482,9 +483,23 @@ void destruir_semaforos(){
     sem_destroy(&solicitar_block);
     sem_destroy(&mutex_semaforos);
     sem_destroy(&mutex_recursos_asignados);
+    sem_destroy(&mutex_listas);
     for(int i = 0; i<list_size(config_kernel->DISPOSITIVOS_IO); i++){
         sem_destroy(&io_libre[i]);
     }
     free(io_libre);
+    return;
+}
+
+void destruir_listas(){
+    list_destroy_and_destroy_elements(lista_new,element_destroyer);
+    list_destroy_and_destroy_elements(lista_ready,element_destroyer);
+    list_destroy_and_destroy_elements(lista_exec,element_destroyer);
+    list_destroy_and_destroy_elements(lista_blocked,element_destroyer);
+    list_destroy_and_destroy_elements(lista_s_blocked,element_destroyer);
+    list_destroy_and_destroy_elements(lista_s_ready,element_destroyer);
+    list_destroy_and_destroy_elements(lista_semaforos,element_destroyer);
+    list_destroy_and_destroy_elements(lista_exit,element_destroyer);
+    list_destroy_and_destroy_elements(lista_recursos_asignados,element_destroyer);
     return;
 }

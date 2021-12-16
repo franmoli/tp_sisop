@@ -123,7 +123,7 @@ void atender_proceso (void* parametro ){
 
                 carpincho->salida_exit = true;
                 sem_post(&salida_a_exit);
-
+                free(task);
                 return;
                 
             case MEMALLOC:
@@ -165,15 +165,15 @@ void atender_proceso (void* parametro ){
                 //exit(EXIT_FAILURE);
                 carpincho->salida_exit = true;
                 sem_post(&salida_a_exit);
-                return;
+                //return;
                 break;
             
         }
 
         //Libero la memoria ocupada por el paquete
 		//free(paquete->buffer->stream);
-        //free(paquete->buffer);
-        //free(paquete);
+        free(paquete->buffer);
+        free(paquete);
 
 	}
     return;

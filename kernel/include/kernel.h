@@ -19,6 +19,7 @@ void print_task_lists();
 void print_sem_asignados();
 void print_lists();
 void destruir_semaforos();
+void destruir_listas();
 
 t_config *config_file;
 
