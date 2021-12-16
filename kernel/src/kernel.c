@@ -15,9 +15,10 @@ int main(int argc, char **argv) {
 
     //Iniciar semaforos de uso general
     iniciar_semaforos_generales();
-    multiprogramacion_disponible = config_kernel->GRADO_MULTIPROGRAMACION;
-    multiprocesamiento = config_kernel->GRADO_MULTIPROCESAMIENTO;
-    procesos_esperando_bloqueo = 0;
+
+    //Inicio variables globales generales
+    iniciar_variables_generales();
+    
 
     //Iniciar listas de procesos
     iniciar_listas();
@@ -53,7 +54,7 @@ int main(int argc, char **argv) {
 
 
 void liberar_memoria_y_finalizar(t_config_kernel *config_kernel, t_log *logger_kernel, t_config *config_file){
-    //config_destroy(config_file);
+    config_destroy(config_file);
     destruir_semaforos();
     destruir_listas();
     list_destroy_and_destroy_elements(config_kernel->DISPOSITIVOS_IO, element_destroyer);
@@ -204,14 +205,17 @@ void *debug_console(void *_ ){
         if(string_contains(input, "exit")){
             void cerrar_conexion(void *elemento){
                 t_proceso *carpincho = elemento;
+                carpincho->status = EXIT;
                 close(carpincho->id);
-            }
+            };
             list_iterate(lista_blocked, cerrar_conexion);
             list_iterate(lista_ready, cerrar_conexion);
             list_iterate(lista_exec, cerrar_conexion);
             list_iterate(lista_new, cerrar_conexion);
             list_iterate(lista_s_ready, cerrar_conexion);
             list_iterate(lista_s_blocked, cerrar_conexion);
+            avisar_cambio();
+            sleep(2);
             terminar_kernel = true;
             //exit(EXIT_SUCCESS);
         }
@@ -501,5 +505,12 @@ void destruir_listas(){
     list_destroy_and_destroy_elements(lista_semaforos,element_destroyer);
     list_destroy_and_destroy_elements(lista_exit,element_destroyer);
     list_destroy_and_destroy_elements(lista_recursos_asignados,element_destroyer);
+    return;
+}
+
+void iniciar_variables_generales(){
+    multiprogramacion_disponible = config_kernel->GRADO_MULTIPROGRAMACION;
+    multiprocesamiento = config_kernel->GRADO_MULTIPROCESAMIENTO;
+    procesos_esperando_bloqueo = 0;
     return;
 }
