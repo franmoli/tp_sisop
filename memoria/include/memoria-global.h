@@ -17,6 +17,7 @@ typedef enum {
     NEXT = 6,
     FREE = 7,
     RESTO_ALLOC = 8,
+    FRAGMENTACION = 9,
 } t_contenido;
 
 typedef enum {
@@ -74,6 +75,7 @@ typedef struct{
 typedef struct{
     uint32_t numero_pagina;
     uint32_t tamanio_ocupado;
+    uint32_t tamanio_fragmentacion;
     uint32_t cantidad_contenidos;
     uint32_t marco_asignado;
     uint32_t carpincho_id;

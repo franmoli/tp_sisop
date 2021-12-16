@@ -21,7 +21,7 @@ int getPrimeraPaginaDisponible(int size, t_tabla_paginas *tabla_paginas)
     while (list_iterator_has_next(list_iterator) && !pagainaFueEncontrada)
     {
         t_pagina *paginaLeida = list_iterator_next(list_iterator);
-        int a = (config_memoria->TAMANIO_PAGINA - paginaLeida->tamanio_ocupado);
+        int a = (config_memoria->TAMANIO_PAGINA - paginaLeida->tamanio_ocupado -paginaLeida->tamanio_fragmentacion);
         if (a > 0)
         {
             pagainaFueEncontrada = true;
@@ -192,25 +192,29 @@ int memWrite(t_paquete *paquete)
 {
    char*  contenido_escribir= NULL;
    int size = 0;
-   int32_t direccion_logica = 0 ; 
+   uint32_t direccion_logica = 0 ; 
+   uint32_t inicio = tamanio_memoria;
 
    deserializar(paquete,6,CHAR_PTR,&contenido_escribir,INT,&direccion_logica,INT,&size);
-
-   int inicio = tamanio_memoria;
-   int numero_pagina = (direccion_logica - inicio) / config_memoria->TAMANIO_PAGINA;
+   int numero_pagina_original = (direccion_logica - inicio) / config_memoria->TAMANIO_PAGINA;
    int desplazamiento = ((direccion_logica-inicio) % config_memoria->TAMANIO_PAGINA) + sizeof(t_heap_metadata);
-   t_tabla_paginas* tabla_paginas = buscarTablaPorPID(socket_client);
    
+   int numero_pagina_desplazado = (direccion_logica - inicio) / config_memoria->TAMANIO_PAGINA;
    
+   int numero_pagina = numero_pagina_original;
    
-
+   /*if(numero_pagina_desplazado != numero_pagina_original){
+       numero_pagina = numero_pagina_desplazado;
+       desplazamiento = 0;
+   }*/
+     
 
    if(numero_pagina > list_size(tabla_paginas)){
        return -1;
    }
    
 
-      t_pagina* pagina = list_get(tabla_paginas->paginas,numero_pagina);
+    t_pagina* pagina = list_get(tabla_paginas->paginas,numero_pagina);
    //Ver que el contenido esta completo en la pagina, si no esta hay que fijarse en las paginas siguientes que contengan si estan en memoria (bit presencia en 1)
    
    int marco = buscarEnTLB(numero_pagina,tabla_paginas->pid);
@@ -804,6 +808,7 @@ int solicitarPaginaNueva(uint32_t carpincho_id)
     pagina->carpincho_id = carpincho_id;
     pagina->cantidad_contenidos = 0;
     pagina->bit_presencia = true;
+    pagina->tamanio_fragmentacion = 0;
     if (strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "CLOCK-M") == 0) //SOLO CLOCK USA ESTE CAMPO
         pagina->bit_uso = true;
 
@@ -940,4 +945,20 @@ int getPosicionEnTablaDeProcesos(t_tabla_paginas* tabla){
     //La tabla no esta cargada en memoria -> No va a pasar nunca creo
     return -1;
 
+}
+int getContenidoByDireccionFisica(t_pagina* pagina,uint32_t direccion_fisica_anterior){
+    t_list_iterator* list_iterator = list_iterator_create(pagina->listado_de_contenido);
+    t_contenidos_pagina *contenido_buscado;
+    int indice = 0;
+    while(list_iterator_has_next(list_iterator)){
+
+        t_contenidos_pagina* contenido = list_iterator_next(list_iterator);
+        if(contenido->dir_comienzo == direccion_fisica_anterior){
+            list_iterator_destroy(list_iterator);
+            return indice;
+        }
+        indice++;
+    }
+    list_iterator_destroy(list_iterator);
+    return -1;
 }

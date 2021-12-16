@@ -190,7 +190,7 @@ static void *ejecutar_operacion()
             else{
                 //SI SE PUDO LIBERAR
                 t_paquete* paquete_enviar = serializar(MEMFREE,2,INT,0);
-                log_info(logger_memoria,"Enviando paquete");
+                log_info(logger_memoria,"Se pudo liberar el espacio de memoria en la direccion logica solicitada.");
                 enviar_paquete(paquete_enviar,socket_client);
                 log_info(logger_memoria,"Paquete enviado");
             }
@@ -208,7 +208,7 @@ static void *ejecutar_operacion()
             else{
                 //SI SE PUDO ESCRIBIR
                 t_paquete* paquete_enviar = serializar(MEMWRITE,2,INT,0);
-                log_info(logger_memoria,"Enviando paquete");
+                log_info(logger_memoria,"Enviando la direccion logica solicitada.");
                 enviar_paquete(paquete_enviar,socket_client);
                 log_info(logger_memoria,"Paquete enviado");
             }
@@ -225,7 +225,7 @@ static void *ejecutar_operacion()
             else{
                 //SI SE PUDO LEER
                 t_paquete* paquete_enviar = serializar(MEMREAD,6,CHAR_PTR,data,INT,strlen(data),INT,0);
-                log_info(logger_memoria,"Enviando paquete");
+                log_info(logger_memoria,"Se pudo leer en la direccion logica solicitada.");
                 enviar_paquete(paquete_enviar,socket_client);
                 log_info(logger_memoria,"Paquete enviado");
             }
@@ -246,12 +246,12 @@ static void *ejecutar_operacion()
             enviar_paquete(paquete, socket_client);
             break;
 
-          case INIT_SEM:
+          /*case INIT_SEM:
             log_info(logger_memoria,"MATELIB ENVIO A MEMORIA UN AVISO");
             t_paquete *paquete_enviado = serializar(DIRECCION_LOGICA_INVALIDA,2,INT,0);
             enviar_paquete(paquete_enviado, socket_client);
 
-            break;
+            break;*/
 
         default:
             log_error(logger_memoria, "Codigo de operacion desconocido. Codigo operacion recibida: %d",paquete->codigo_operacion);
