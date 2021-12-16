@@ -43,7 +43,7 @@ int main(int argc, char **argv) {
             sem_post(&mutex_operacion);
 
             //Espero el tiempo de retardo
-            sleep(config_swap->RETARDO_SWAP);
+            sleep(config_swap->RETARDO_SWAP/1000);
         }
     }
 

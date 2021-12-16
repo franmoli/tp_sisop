@@ -14,7 +14,7 @@ int buscarEnTLB(int numero_pagina_buscada, int id){
         {
             marco = tlb->numero_marco;
             log_info(logger_memoria,"TLB HIT: PID: %d PAGINA: %d MARCO: %d",tlb->pid,tlb->numero_pagina,tlb->numero_marco);
-            sleep(config_memoria->RETARDO_ACIERTO_TLB);
+            sleep(config_memoria->RETARDO_ACIERTO_TLB/1000);
             tabla_tlb->hit_totales ++;
             t_tabla_paginas *tabla = buscarTablaPorPID(id);
             tabla->hit ++;
@@ -28,7 +28,7 @@ int buscarEnTLB(int numero_pagina_buscada, int id){
     }
 
     log_info(logger_memoria,"TLB MISS: PID: %d PAGINA: %d",id,numero_pagina_buscada);
-    sleep(config_memoria->RETARDO_FALLO_TLB);
+    sleep(config_memoria->RETARDO_FALLO_TLB/1000);
     return -1;
 
 }

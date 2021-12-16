@@ -286,6 +286,7 @@ int memAlloc(t_paquete *paquete)
         int index = 0;
         while (data->nextAlloc != 0)
         {
+            log_info(logger_memoria,"estoy en el while pev: %d, next: %d", data->prevAlloc, data->nextAlloc);
             if (data->isFree)
             {
 
@@ -409,7 +410,8 @@ void crearPrimerHeader(t_pagina *pagina, uint32_t size)
     contenido_contenido->tamanio = size;
     list_add(pagina->listado_de_contenido, contenido_contenido);
 
-    if((config_memoria->TAMANIO_PAGINA - pagina->tamanio_ocupado) < sizeof(uint32_t)){
+    if((config_memoria->TAMANIO_PAGINA - pagina->tamanio_ocupado) < sizeof(uint32_t)
+     && (config_memoria->TAMANIO_PAGINA - pagina->tamanio_ocupado) > 0){
         uint32_t fragmentacion_numero = (config_memoria->TAMANIO_PAGINA - pagina->tamanio_ocupado);
         t_contenidos_pagina *fragmentacion = malloc(sizeof(t_contenidos_pagina));
         fragmentacion->carpincho_id = pagina->carpincho_id;
