@@ -122,6 +122,9 @@ int multiprocesamiento;
 int procesos_esperando_bloqueo;
 bool terminar_kernel;
 
+//Hilos
+pthread_t hilo_deteccion_deadlock;
+
 //funciones
 void mover_proceso_de_lista(t_list *origen, t_list *destino, int index, int status);
 void avisar_cambio();
