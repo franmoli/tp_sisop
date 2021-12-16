@@ -40,20 +40,18 @@ void *iniciar_servidor_kernel(void *_){
 
 //Atencion de nuevas operaciones
 void atender_proceso (void* parametro ){
-    
+    pthread_detach(pthread_self());
     bool inicializado = false;
     int socket_cliente = *(int*)parametro;
     t_proceso *carpincho = malloc(sizeof(t_proceso)); 
     carpincho->task_list = list_create();
     carpincho->socket_carpincho = socket_cliente;
-    // t_task *task_aux = NULL;
     t_semaforo *semaforo_recibido = NULL;
     t_io *io_recibida = NULL;
     while(1) {
 
 		t_paquete *paquete = NULL;
 		paquete = recibir_paquete(socket_cliente);
-        //task_aux = malloc(sizeof(t_task));
         
         //Analizo el código de operación recibido y ejecuto acciones según corresponda
         //printf("Paquete recibido %d\n", paquete->codigo_operacion);
@@ -62,6 +60,8 @@ void atender_proceso (void* parametro ){
         switch(paquete->codigo_operacion) {
             case CLIENTE_TEST:
                 log_info(logger_kernel, "Mensaje de prueba recibido correctamente por el cliente %d", socket_cliente);
+                free(paquete->buffer);
+                free(paquete);
                 break;
 
             case NUEVO_CARPINCHO:
@@ -69,6 +69,8 @@ void atender_proceso (void* parametro ){
                     carpincho = nuevo_carpincho(socket_cliente);
                     inicializado = true;
                 }
+                free(paquete->buffer);
+                free(paquete);
                 break;
             case INIT_SEM:
 
@@ -80,7 +82,9 @@ void atender_proceso (void* parametro ){
                 task->datos_tarea = semaforo_recibido;
 
                 list_add(carpincho->task_list, task);
-                
+                free(paquete->buffer->stream);
+                free(paquete->buffer);
+                free(paquete);
                 break;
             case SEM_WAIT:
 
@@ -93,8 +97,10 @@ void atender_proceso (void* parametro ){
                 task->datos_tarea = semaforo_recibido;
 
                 list_add(carpincho->task_list, task);
+                free(paquete->buffer->stream);
+                free(paquete->buffer);
+                free(paquete);
                 break;
-
             case SEM_POST:
 
                 semaforo_recibido = malloc(sizeof(t_semaforo));
@@ -106,7 +112,9 @@ void atender_proceso (void* parametro ){
                 task->datos_tarea = semaforo_recibido;
 
                 list_add(carpincho->task_list, task);
-
+                free(paquete->buffer->stream);
+                free(paquete->buffer);
+                free(paquete);
                 break;
             case SEM_DESTROY:
                 semaforo_recibido = malloc(sizeof(t_semaforo));
@@ -118,6 +126,9 @@ void atender_proceso (void* parametro ){
                 task->datos_tarea = semaforo_recibido;
 
                 list_add(carpincho->task_list, task);
+                free(paquete->buffer->stream);
+                free(paquete->buffer);
+                free(paquete);
                 break;
             case CLIENTE_DESCONECTADO:
                 log_info(logger_kernel, "Desconectando cliente correctamente %d", socket_cliente);
@@ -126,6 +137,8 @@ void atender_proceso (void* parametro ){
                 carpincho->salida_exit = true;
                 sem_post(&salida_a_exit);
                 free(task);
+                free(paquete->buffer);
+                free(paquete);
                 return;
                 
             case MEMALLOC:
@@ -160,23 +173,18 @@ void atender_proceso (void* parametro ){
 
                 task->datos_tarea = io_recibida;
                 list_add(carpincho->task_list, task);
-                
+                free(paquete->buffer->stream);
+                free(paquete->buffer);
+                free(paquete);
                 break;
             default:
                 log_error(logger_kernel, "Codigo de operacion desconocido %d", paquete->codigo_operacion);
-                //exit(EXIT_FAILURE);
                 carpincho->salida_exit = true;
                 sem_post(&salida_a_exit);
-                //return;
-                break;
-            
-        }
-
-        //Libero la memoria ocupada por el paquete
-		//free(paquete->buffer->stream);
-        free(paquete->buffer);
-        free(paquete);
-
+                free(paquete->buffer);
+                free(paquete);
+                return;            
+        }       
 	}
     return;
 }

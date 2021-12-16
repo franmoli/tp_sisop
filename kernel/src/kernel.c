@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
 
 
 void liberar_memoria_y_finalizar(t_config_kernel *config_kernel, t_log *logger_kernel, t_config *config_file){
-    //config_destroy(config_file);
+    config_destroy(config_file);
     destruir_semaforos();
     destruir_listas();
     list_destroy_and_destroy_elements(config_kernel->DISPOSITIVOS_IO, element_destroyer);
@@ -205,6 +205,7 @@ void *debug_console(void *_ ){
         if(string_contains(input, "exit")){
             void cerrar_conexion(void *elemento){
                 t_proceso *carpincho = elemento;
+                carpincho->status = EXIT;
                 close(carpincho->id);
             };
             list_iterate(lista_blocked, cerrar_conexion);
@@ -213,7 +214,12 @@ void *debug_console(void *_ ){
             list_iterate(lista_new, cerrar_conexion);
             list_iterate(lista_s_ready, cerrar_conexion);
             list_iterate(lista_s_blocked, cerrar_conexion);
+<<<<<<< HEAD
             //config_destroy(config_file);
+=======
+            avisar_cambio();
+            sleep(2);
+>>>>>>> 026347f1b348ac0e16c233a20de24652ede3df68
             terminar_kernel = true;
             //exit(EXIT_SUCCESS);
         }
