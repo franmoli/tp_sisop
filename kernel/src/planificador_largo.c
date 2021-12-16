@@ -217,7 +217,7 @@ t_proceso *nuevo_carpincho(int socket_cliente){
 
     pthread_t hilo_proceso;
     pthread_create(&hilo_proceso, NULL, proceso, (void*)nuevo_proceso);
-    
+    pthread_detach(hilo_proceso);
     mover_proceso_de_lista(temp_list, lista_new, 0, NEW);
 
     list_destroy(temp_list);

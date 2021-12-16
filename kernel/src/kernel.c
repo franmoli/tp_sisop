@@ -129,13 +129,17 @@ void mover_proceso_de_lista(t_list *origen, t_list *destino, int index, int stat
 
     aux = list_remove(origen, index);
     printf("Moviendo proceso - %d | to: %d\n", aux->id , status);
+    
+    aux->status =  status;
+    aux->termino_rafaga = false;
 
     if(status == READY)
         aux->entrada_a_ready = clock();
     
-    if(status == EXIT)
+    if(status == EXIT){
+        avisar_cambio();
         cantidad_de_procesos--;
-
+    }
     if(status == NEW)
         cantidad_de_procesos++;
 
@@ -144,9 +148,6 @@ void mover_proceso_de_lista(t_list *origen, t_list *destino, int index, int stat
 
     if(status == EXEC)
         multiprocesamiento--;
-
-    aux->status =  status;
-    aux->termino_rafaga = false;
 
     list_add(destino, aux);
 
@@ -157,6 +158,7 @@ void mover_proceso_de_lista(t_list *origen, t_list *destino, int index, int stat
 void avisar_cambio(){
     sem_wait(&mutex_cant_procesos);
     //Aviso que hubo un cambio de listas
+    printf("CANTIDAD DE PROCESOS: %d\n", cantidad_de_procesos);
     for(int i = 0; i < cantidad_de_procesos; i++){
         //printf("Un post\n");
         sem_post(&actualizacion_de_listas_1);

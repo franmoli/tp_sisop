@@ -1,14 +1,14 @@
 #include "proceso.h"
 
 void *proceso(void *self){
-    pthread_detach(pthread_self());
+    
     t_proceso *proceso_struct = self;
     int prev_status = -1;
     
     pthread_t hilo_ejecucion;
 
 
-    while(1){
+    while(!terminar_kernel){
         sem_wait(&actualizacion_de_listas_1);
         if(prev_status != proceso_struct->status){
             switch (proceso_struct->status){
@@ -23,6 +23,7 @@ void *proceso(void *self){
                     //liberar semaforos tomados por este
                     sem_post(&actualizacion_de_listas_1_recibido);
                     sem_wait(&actualizacion_de_listas_2);
+                    printf("RETORNE 1er NULL en HILO PROCESO\n");
                     return NULL;
                 case S_BLOCKED:
                     log_info(logger_kernel, "Suspendo al proceso %d", proceso_struct->id);
@@ -35,8 +36,9 @@ void *proceso(void *self){
         sem_wait(&actualizacion_de_listas_2);
         
     }
-
-
+    sem_post(&actualizacion_de_listas_1_recibido);
+    sem_wait(&actualizacion_de_listas_2);
+    printf("RETORNE 2do NULL en HILO PROCESO\n");
     return NULL;
 }
 

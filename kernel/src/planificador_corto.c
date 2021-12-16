@@ -167,7 +167,5 @@ void *esperar_bloqueo(void *_){
 
         }
     }
-
-    printf("Lo cerro al coso este\n");
     return NULL;
 }
