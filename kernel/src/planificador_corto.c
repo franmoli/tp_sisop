@@ -7,10 +7,6 @@ void iniciar_planificador_corto(){
 
     printf("Inicio planificador CORTO \n");
     void *(*planificador)(void*);
-    pthread_t hilo_planificador;
-    pthread_t hilo_esperar_bloqueo;
-    int *multiprocesamiento = malloc(sizeof(int));
-    *multiprocesamiento = config_kernel->GRADO_MULTIPROCESAMIENTO;
 
     if(!strcmp(config_kernel->ALGORITMO_PLANIFICACION, "SJF")){
 
@@ -25,8 +21,10 @@ void iniciar_planificador_corto(){
         return;
     }
      
-    pthread_create(&hilo_planificador, NULL, planificador, (void *)multiprocesamiento);
-    pthread_create(&hilo_esperar_bloqueo, NULL, esperar_bloqueo, (void *)multiprocesamiento);
+    pthread_create(&hilo_planificador, NULL, planificador, (void *)NULL);
+    pthread_detach(hilo_planificador);
+    pthread_create(&hilo_esperar_bloqueo, NULL, esperar_bloqueo, (void *)NULL);
+    pthread_detach(&hilo_esperar_bloqueo);
 }
 
 void *planificador_corto_plazo_sjf (void *_){
@@ -135,8 +133,7 @@ float calcular_response_ratio(t_proceso *proceso){
 }
 
 
-void *esperar_bloqueo(void *multiprocesamiento_p){
-    int *multiprocesamiento = multiprocesamiento_p;
+void *esperar_bloqueo(void *_){
 
     while(1){
 
@@ -160,7 +157,7 @@ void *esperar_bloqueo(void *multiprocesamiento_p){
         if(encontrado){
 
             sem_wait(&mutex_multiprocesamiento);
-            *multiprocesamiento = *multiprocesamiento + 1;
+            multiprocesamiento++;
             sem_post(&mutex_multiprocesamiento);
             index = 0;
 

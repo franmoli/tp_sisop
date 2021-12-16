@@ -58,6 +58,7 @@ t_config_kernel *generar_config_kernel(t_config *config) {
     free(io_durations_formatted);
     free(io_durations_substring);
 
+
     return config_kernel;
 }
 
