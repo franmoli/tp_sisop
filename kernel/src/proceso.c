@@ -1,7 +1,7 @@
 #include "proceso.h"
 
 void *proceso(void *self){
-    //pthread_detach(pthread_self());
+    pthread_detach(pthread_self());
     t_proceso *proceso_struct = self;
     int prev_status = -1;
     
@@ -45,7 +45,7 @@ void new(){
 }
 
 void exec(t_proceso *self){
-    //pthread_detach(pthread_self());
+    pthread_detach(pthread_self());
     log_info(logger_kernel,"Ejecutando el proceso %d",self->id);
     t_task *next_task = NULL;
     bool bloquear_f = false;
@@ -73,6 +73,7 @@ void exec(t_proceso *self){
                     enviar_confirmacion(self->socket_carpincho);
                     break;
                 case CLIENTE_DESCONECTADO:
+                    free(self->task_list);
                     return;
                 case CLIENTE_TEST:
                 case NUEVO_CARPINCHO:
@@ -337,7 +338,7 @@ void desbloquear(t_proceso *self){
 }
 
 void *desbloquear_en(void *param){
-    //pthread_detach(pthread_self());
+    pthread_detach(pthread_self());
     t_io *io_recibida = param;
     sem_wait(&io_libre[io_recibida->id]);
 
