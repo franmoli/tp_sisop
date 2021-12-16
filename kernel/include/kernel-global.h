@@ -118,6 +118,7 @@ int cantidad_de_procesos;
 bool salida_de_exec;
 int multiprogramacion_disponible;
 int socket_cliente_memoria;
+int socket_servidor_kernel;
 int multiprocesamiento;
 int procesos_esperando_bloqueo;
 bool terminar_kernel;

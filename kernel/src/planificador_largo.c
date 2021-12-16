@@ -6,32 +6,37 @@ void iniciar_planificador_largo(){
 
     pthread_t hilo_servidor;
     pthread_create(&hilo_servidor, NULL, iniciar_servidor_kernel, (void *)NULL);
+    pthread_detach(hilo_servidor);
     
     pthread_t hilo_planificador;
     pthread_create(&hilo_planificador, NULL, planificador_largo_plazo, (void *)NULL);
+    pthread_detach(hilo_planificador);    
     
     pthread_t hilo_exit;
     pthread_create(&hilo_exit, NULL, hilo_salida_a_exit, (void *)NULL);
+    pthread_detach(hilo_exit);        
 
 }
 
 
 
 void *iniciar_servidor_kernel(void *_){
-    int socket_servidor = iniciar_servidor(config_kernel->IP_KERNEL,config_kernel->PUERTO_KERNEL, logger_kernel);
+    socket_servidor_kernel = iniciar_servidor(config_kernel->IP_KERNEL,config_kernel->PUERTO_KERNEL, logger_kernel);
     int aux = 0;
-    if(socket_servidor == -1){
+    if(socket_servidor_kernel == -1){
         log_error(logger_kernel, "Fallo en la creacion del servidor");
     }else{
         //Espero por un proceso cliente y creo hilo para atenderlo
-        while(1){
-            aux = esperar_cliente(socket_servidor, logger_kernel);
+        while(!terminar_kernel && aux != -1){
+            aux = esperar_cliente(socket_servidor_kernel, logger_kernel);
             int *socket_proceso_cliente = malloc(sizeof(int));
             *socket_proceso_cliente = aux;
             if (*socket_proceso_cliente != -1) {
                 sem_wait(&libre_para_inicializar_proceso);
                 pthread_t hilo_proceso_cliente;
                 pthread_create(&hilo_proceso_cliente, NULL, (void *)atender_proceso, (void *)socket_proceso_cliente);
+            }else{
+                free(socket_proceso_cliente);
             }
         }
     }
@@ -224,7 +229,7 @@ t_proceso *nuevo_carpincho(int socket_cliente){
 
 void *planificador_largo_plazo(void *_){
 
-    while(1){
+    while(!terminar_kernel){
         sem_wait(&cambio_de_listas_largo);
 
         sem_wait(&mutex_listas);
@@ -253,107 +258,105 @@ void *planificador_largo_plazo(void *_){
 void *hilo_salida_a_exit(void *multiprogramacion_disponible_p){
 
 
-    while(1){
+    while(!terminar_kernel){
         sem_wait(&salida_a_exit);
+        if(!terminar_kernel){
+            sem_wait(&mutex_listas);
+            sem_wait(&mutex_recursos_asignados);
+            sem_wait(&mutex_semaforos);
 
-        sem_wait(&mutex_listas);
-        sem_wait(&mutex_recursos_asignados);
-        sem_wait(&mutex_semaforos);
-
-        bool encontrado = false;
-        int tamanio_lista_exec = list_size(lista_exec);
-        int tamanio_lista_blocked = list_size(lista_blocked);
-        int tamanio_lista_ready = list_size(lista_ready);
-        int index = 0;
-        t_recurso_asignado *recurso_asignado_aux = NULL;
-        t_proceso *aux = NULL;
-        t_list *origen_aux = NULL;
+            bool encontrado = false;
+            int tamanio_lista_exec = list_size(lista_exec);
+            int tamanio_lista_blocked = list_size(lista_blocked);
+            int tamanio_lista_ready = list_size(lista_ready);
+            int index = 0;
+            t_recurso_asignado *recurso_asignado_aux = NULL;
+            t_proceso *aux = NULL;
+            t_list *origen_aux = NULL;
 
 
-        //Busco en exec
-        //printf("Exec: %d \n", list_size(lista_exec));
-        if(aux == NULL){
-            aux = list_find(lista_exec, pedido_exit);
-            origen_aux = lista_exec;
-        }
+            //Busco en exec
+            //printf("Exec: %d \n", list_size(lista_exec));
+            if(aux == NULL){
+                aux = list_find(lista_exec, pedido_exit);
+                origen_aux = lista_exec;
+            }
 
-        //Si lo encontré en exec tengo que liberar el multiprocesamiento
-        if(aux != NULL)
-            multiprocesamiento++;
+            //Si lo encontré en exec tengo que liberar el multiprocesamiento
+            if(aux != NULL)
+                multiprocesamiento++;
 
-        if(aux == NULL){
-            aux = list_find(lista_new, pedido_exit);
-            origen_aux = lista_new;
-        }
+            if(aux == NULL){
+                aux = list_find(lista_new, pedido_exit);
+                origen_aux = lista_new;
+            }
 
-        if(aux == NULL){
-            aux = list_find(lista_ready, pedido_exit);
-            origen_aux = lista_ready;
-        }
+            if(aux == NULL){
+                aux = list_find(lista_ready, pedido_exit);
+                origen_aux = lista_ready;
+            }
 
-        if(aux == NULL){
-            aux = list_find(lista_s_blocked, pedido_exit);
-            origen_aux = lista_s_blocked;
-        }
-        
-        if(aux == NULL){
-            aux = list_find(lista_s_ready, pedido_exit);
-            origen_aux = lista_s_ready;
-        }
-        
-        if(aux == NULL){
-            aux = list_find(lista_blocked, pedido_exit);
-            origen_aux = lista_blocked;
-        }
+            if(aux == NULL){
+                aux = list_find(lista_s_blocked, pedido_exit);
+                origen_aux = lista_s_blocked;
+            }
+            
+            if(aux == NULL){
+                aux = list_find(lista_s_ready, pedido_exit);
+                origen_aux = lista_s_ready;
+            }
+            
+            if(aux == NULL){
+                aux = list_find(lista_blocked, pedido_exit);
+                origen_aux = lista_blocked;
+            }
 
-        //Encuentro el index en el que está
-        while(index < list_size(origen_aux)){
-            if(aux == list_get(origen_aux, index))
-                break;
-            index++;
-        }
-        if(aux == NULL){
+            //Encuentro el index en el que está
+            while(index < list_size(origen_aux)){
+                if(aux == list_get(origen_aux, index))
+                    break;
+                index++;
+            }
+            if(aux == NULL){
+                sem_post(&mutex_listas);
+                sem_post(&mutex_recursos_asignados);
+                sem_post(&mutex_semaforos);
+                continue;
+            }
+            log_info(logger_kernel, "Terminando con proceso %d", aux->id);
+            mover_proceso_de_lista(origen_aux, lista_exit, index, EXIT);
+
+            index = 0;
+
+            //Agregar task de desconexion en caso que se encuentre en exec con prioridad máxima en caso que sea una desconexion forzosa
+            t_task *task = malloc(sizeof(t_task));
+            task->id = CLIENTE_DESCONECTADO;
+            list_add_in_index(aux->task_list, 0, task);
+
+            //Liberar recursos asignados
+            eliminar_solicitud_de_sem(aux->id);
+
+            while(index < list_size(lista_recursos_asignados)){
+                recurso_asignado_aux = list_get(lista_recursos_asignados, index);
+                if(recurso_asignado_aux->id_asignado == aux->id){
+                    
+                    list_remove(lista_recursos_asignados, index);
+                    postear_semaforo(recurso_asignado_aux->nombre_recurso, aux->id);
+                }
+                index++;
+            }
+            
+            sem_wait(&mutex_multiprogramacion);
+            multiprogramacion_disponible = multiprogramacion_disponible + 1;
+            sem_post(&mutex_multiprogramacion);
+
+            enviar_error(aux->id);
+            //Aviso a todos los procesos, asi finaliza el hilo correspondiente
+            avisar_cambio();
             sem_post(&mutex_listas);
             sem_post(&mutex_recursos_asignados);
             sem_post(&mutex_semaforos);
-            continue;
         }
-        log_info(logger_kernel, "Terminando con proceso %d", aux->id);
-        mover_proceso_de_lista(origen_aux, lista_exit, index, EXIT);
-
-        index = 0;
-
-        //Agregar task de desconexion en caso que se encuentre en exec con prioridad máxima en caso que sea una desconexion forzosa
-        t_task *task = malloc(sizeof(t_task));
-        task->id = CLIENTE_DESCONECTADO;
-        list_add_in_index(aux->task_list, 0, task);
-
-        //Liberar recursos asignados
-        eliminar_solicitud_de_sem(aux->id);
-
-        while(index < list_size(lista_recursos_asignados)){
-            recurso_asignado_aux = list_get(lista_recursos_asignados, index);
-            if(recurso_asignado_aux->id_asignado == aux->id){
-                
-                list_remove(lista_recursos_asignados, index);
-                postear_semaforo(recurso_asignado_aux->nombre_recurso, aux->id);
-            }
-            index++;
-        }
-
-
-        
-        
-        sem_wait(&mutex_multiprogramacion);
-        multiprogramacion_disponible = multiprogramacion_disponible + 1;
-        sem_post(&mutex_multiprogramacion);
-
-        enviar_error(aux->id);
-        //Aviso a todos los procesos, asi finaliza el hilo correspondiente
-        avisar_cambio();
-        sem_post(&mutex_listas);
-        sem_post(&mutex_recursos_asignados);
-        sem_post(&mutex_semaforos);
     }
     return NULL;
 }

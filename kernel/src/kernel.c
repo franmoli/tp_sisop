@@ -46,6 +46,8 @@ int main(int argc, char **argv) {
     //bloquear con algo
     while(!terminar_kernel);
 
+    sleep(config_kernel->TIEMPO_DEADLOCK/1000);
+
     pthread_join(hilo_deteccion_deadlock,NULL);
 
     //Fin del programa
@@ -181,16 +183,16 @@ void avisar_cambio(){
 void iniciar_debug_console(){
     pthread_t hilo_console;
     pthread_create(&hilo_console, NULL, debug_console, (void *)NULL);
+    pthread_detach(hilo_console);
     return;
 }
 
 //funciones de debug
 void *debug_console(void *_ ){
-    pthread_detach(pthread_self());
     log_info(logger_kernel, "Debug console active");
     char input[100] = {0};
 
-    while(1){
+    while(!terminar_kernel){
         fgets(input, 100, stdin);
 
         if(string_contains(input, "Texto")){
@@ -217,10 +219,14 @@ void *debug_console(void *_ ){
             list_iterate(lista_new, cerrar_conexion);
             list_iterate(lista_s_ready, cerrar_conexion);
             list_iterate(lista_s_blocked, cerrar_conexion);
-            avisar_cambio();
+            shutdown(socket_servidor_kernel, SHUT_RDWR);
             sleep(2);
             terminar_kernel = true;
-            return NULL;
+            avisar_cambio();
+            sem_post(&salida_a_exit);
+            sem_post(&solicitar_block);
+            sem_post(&salida_block);
+            sleep(1);
         }
         if(string_contains(input, "list")){
             print_lists();
@@ -243,7 +249,7 @@ void *debug_console(void *_ ){
 
     }
 
-
+    printf("Termino el debug console\n");
     return NULL;
 }
 
