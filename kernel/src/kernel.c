@@ -214,12 +214,8 @@ void *debug_console(void *_ ){
             list_iterate(lista_new, cerrar_conexion);
             list_iterate(lista_s_ready, cerrar_conexion);
             list_iterate(lista_s_blocked, cerrar_conexion);
-<<<<<<< HEAD
-            //config_destroy(config_file);
-=======
             avisar_cambio();
             sleep(2);
->>>>>>> 026347f1b348ac0e16c233a20de24652ede3df68
             terminar_kernel = true;
             //exit(EXIT_SUCCESS);
         }
