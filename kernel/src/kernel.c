@@ -45,6 +45,8 @@ int main(int argc, char **argv) {
     //bloquear con algo
     while(!terminar_kernel);
 
+    pthread_join(hilo_deteccion_deadlock,NULL);
+
     //Fin del programa
     liberar_memoria_y_finalizar(config_kernel, logger_kernel, config_file);
     return 0;
@@ -183,6 +185,7 @@ void iniciar_debug_console(){
 
 //funciones de debug
 void *debug_console(void *_ ){
+    pthread_detach(pthread_self());
     log_info(logger_kernel, "Debug console active");
     char input[100] = {0};
 
@@ -216,7 +219,7 @@ void *debug_console(void *_ ){
             avisar_cambio();
             sleep(2);
             terminar_kernel = true;
-            //exit(EXIT_SUCCESS);
+            return NULL;
         }
         if(string_contains(input, "list")){
             print_lists();

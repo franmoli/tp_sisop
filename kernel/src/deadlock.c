@@ -1,12 +1,13 @@
 #include "deadlock.h"
 
 void iniciar_deadlock() {
-    pthread_t hilo_deteccion_deadlock;
-    pthread_create(&hilo_deteccion_deadlock, NULL, algoritmo_deteccion, (void *)NULL);
+    
+    pthread_create(&hilo_deteccion_deadlock, NULL, algoritmo_deteccion, NULL);
 }
 
 void* algoritmo_deteccion(void *_) {
-    while(1) {
+    pthread_detach(pthread_self());
+    while(!terminar_kernel) {
         sleep(config_kernel->TIEMPO_DEADLOCK/1000);
         sem_wait(&mutex_recursos_asignados);
         log_info(logger_kernel, "Ejecutando algoritmo detecion de deadlock");
@@ -18,7 +19,7 @@ void* algoritmo_deteccion(void *_) {
         t_list *lista_recursos_en_deadlock = NULL;
         t_list *lista_de_procesos_en_deadlock = NULL;
 
-        while(index < list_size(lista_semaforos) && !deadlock){
+        while(index < list_size(lista_semaforos) && !deadlock && !terminar_kernel){
             t_semaforo *sem_aux = list_get(lista_semaforos, index);
             lista_recursos_en_deadlock = list_create();
             lista_de_procesos_en_deadlock = list_create();
@@ -53,6 +54,7 @@ void* algoritmo_deteccion(void *_) {
         deadlock = false;
         sem_post(&mutex_recursos_asignados);
     }
+    return NULL;
 }
 
 
