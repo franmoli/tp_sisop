@@ -19,13 +19,15 @@ void iniciar_planificador_largo(){
 
 void *iniciar_servidor_kernel(void *_){
     int socket_servidor = iniciar_servidor(config_kernel->IP_KERNEL,config_kernel->PUERTO_KERNEL, logger_kernel);
+    int aux = 0;
     if(socket_servidor == -1){
         log_error(logger_kernel, "Fallo en la creacion del servidor");
     }else{
         //Espero por un proceso cliente y creo hilo para atenderlo
         while(1){
+            aux = esperar_cliente(socket_servidor, logger_kernel);
             int *socket_proceso_cliente = malloc(sizeof(int));
-            *socket_proceso_cliente = esperar_cliente(socket_servidor, logger_kernel);
+            *socket_proceso_cliente = aux;
             if (*socket_proceso_cliente != -1) {
                 sem_wait(&libre_para_inicializar_proceso);
                 pthread_t hilo_proceso_cliente;

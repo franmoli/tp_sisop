@@ -14,6 +14,9 @@ t_config_kernel *generar_config_kernel(t_config *config) {
     char *io_durations_substring = string_substring(io_durations_unformatted, 1, strlen(io_durations_unformatted)-2);
     char **io_durations_formatted = string_split(io_durations_substring, ",");
 
+    free(io_durations_substring);
+    free(io_devices_substring);
+
     //Agrego los elementos de los array a una lista
     t_list *io_devices = list_create();
     int contador_devices = 0;
@@ -58,6 +61,7 @@ t_config_kernel *generar_config_kernel(t_config *config) {
     free(io_durations_formatted);
     //free(io_durations_substring);
 
+
     return config_kernel;
 }
 
@@ -95,6 +99,7 @@ t_config_swap *generar_config_swap(t_config *config) {
         }
 
         free(file_paths_substring);
+        free(file_paths_formatted);
     }
 
     //Cargo la configuración

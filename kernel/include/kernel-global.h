@@ -7,6 +7,7 @@
 #include <commons/log.h>
 #include <time.h>
 #include <stdlib.h>
+#include <signal.h>
 //#include "matelib.h"
 #include "server.h"
 #include "config_utils.h"
@@ -79,6 +80,10 @@ t_list *lista_s_ready;
 t_list *lista_semaforos;
 t_list *lista_exit;
 t_list *lista_recursos_asignados;
+
+//Hilos
+pthread_t hilo_planificador;
+pthread_t hilo_esperar_bloqueo;
 
 //Semaforos
 sem_t mutex_listas;
