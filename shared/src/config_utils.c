@@ -99,6 +99,7 @@ t_config_swap *generar_config_swap(t_config *config) {
         }
 
         free(file_paths_substring);
+        free(file_paths_formatted);
     }
 
     //Cargo la configuración
