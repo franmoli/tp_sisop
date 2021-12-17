@@ -61,17 +61,22 @@ void liberar_memoria_y_finalizar(t_config_kernel *config_kernel, t_log *logger_k
     config_destroy(config_file);
     destruir_semaforos();
     destruir_listas();
-    list_destroy_and_destroy_elements(config_kernel->DISPOSITIVOS_IO, element_destroyer);
-    list_destroy_and_destroy_elements(config_kernel->DURACIONES_IO, element_destroyer);
+    list_destroy_and_destroy_elements(config_kernel->DISPOSITIVOS_IO, destruir_cosas);
+    list_destroy_and_destroy_elements(config_kernel->DURACIONES_IO, destruir_cosas);
     free(config_kernel);
     log_info(logger_kernel, "Programa finalizado con éxito");
     log_destroy(logger_kernel);
 }
 
 void element_destroyer(void* elemento){
+    t_proceso *procesou = elemento;
+    printf("Proceso %d size %d\n", procesou->id, list_size(procesou->task_list));
+    list_destroy_and_destroy_elements(procesou->task_list, destruir_cosas);
     free(elemento);
 }
-
+void destruir_cosas(void *elemento){
+    free(elemento);
+}
 void iniciar_listas(){
     
     lista_new = list_create();
@@ -158,7 +163,7 @@ void mover_proceso_de_lista(t_list *origen, t_list *destino, int index, int stat
 void avisar_cambio(){
     sem_wait(&mutex_cant_procesos);
     //Aviso que hubo un cambio de listas
-    printf("CANTIDAD DE PROCESOS: %d\n", cantidad_de_procesos);
+    //printf("CANTIDAD DE PROCESOS: %d\n", cantidad_de_procesos);
     for(int i = 0; i < cantidad_de_procesos; i++){
         //printf("Un post\n");
         sem_post(&actualizacion_de_listas_1);
@@ -515,7 +520,7 @@ void destruir_listas(){
     list_destroy_and_destroy_elements(lista_s_ready,element_destroyer);
     list_destroy_and_destroy_elements(lista_semaforos,element_destroyer);
     list_destroy_and_destroy_elements(lista_exit,element_destroyer);
-    list_destroy_and_destroy_elements(lista_recursos_asignados,element_destroyer);
+    list_destroy_and_destroy_elements(lista_recursos_asignados,destruir_cosas);
     return;
 }
 

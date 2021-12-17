@@ -156,7 +156,7 @@ int mate_sem_wait(mate_instance_pointer *instance_pointer, mate_sem_name sem){
         free(paquete_recibido);
     }else{
         log_error(lib_ref->logger, "No se pudo ejecutar la operacion sem wait (Servidor desconectado)");     
-        ret -1;   
+        ret = -1;   
     }
     return ret;
 }

@@ -35,6 +35,7 @@ void *iniciar_servidor_kernel(void *_){
                 sem_wait(&libre_para_inicializar_proceso);
                 pthread_t hilo_proceso_cliente;
                 pthread_create(&hilo_proceso_cliente, NULL, (void *)atender_proceso, (void *)socket_proceso_cliente);
+                pthread_detach(hilo_proceso_cliente);
             }else{
                 free(socket_proceso_cliente);
             }
@@ -48,19 +49,20 @@ void atender_proceso (void* parametro ){
     pthread_detach(pthread_self());
     bool inicializado = false;
     int socket_cliente = *(int*)parametro;
-    t_proceso *carpincho = malloc(sizeof(t_proceso)); 
-    carpincho->task_list = list_create();
-    carpincho->socket_carpincho = socket_cliente;
+    free(parametro);
+    t_proceso *carpincho = NULL; 
     t_semaforo *semaforo_recibido = NULL;
     t_io *io_recibida = NULL;
-    while(1) {
+    while(!terminar_kernel) {
 
 		t_paquete *paquete = NULL;
 		paquete = recibir_paquete(socket_cliente);
         
         //Analizo el código de operación recibido y ejecuto acciones según corresponda
         //printf("Paquete recibido %d\n", paquete->codigo_operacion);
-        t_task *task = malloc(sizeof(t_task));
+        t_task *task = NULL;
+        if(!terminar_kernel)
+            task = malloc(sizeof(t_task));
 
         switch(paquete->codigo_operacion) {
             case CLIENTE_TEST:
@@ -73,9 +75,12 @@ void atender_proceso (void* parametro ){
                 if(!inicializado){
                     carpincho = nuevo_carpincho(socket_cliente);
                     inicializado = true;
+
+                    carpincho->socket_carpincho = socket_cliente;
                 }
                 free(paquete->buffer);
                 free(paquete);
+                free(task);
                 break;
             case INIT_SEM:
 
@@ -188,10 +193,12 @@ void atender_proceso (void* parametro ){
                 sem_post(&salida_a_exit);
                 free(paquete->buffer);
                 free(paquete);
+                free(task);
                 return;            
-        }       
+        }
+        
 	}
-    return;
+    return NULL;
 }
 
 t_proceso *nuevo_carpincho(int socket_cliente){
@@ -283,8 +290,11 @@ void *hilo_salida_a_exit(void *multiprogramacion_disponible_p){
             }
 
             //Si lo encontré en exec tengo que liberar el multiprocesamiento
-            if(aux != NULL)
+            if(aux != NULL){
+
+                printf("Estoy sacando al proceso %d de exec\n", aux->id);
                 multiprocesamiento++;
+            }
 
             if(aux == NULL){
                 aux = list_find(lista_new, pedido_exit);
@@ -323,16 +333,27 @@ void *hilo_salida_a_exit(void *multiprogramacion_disponible_p){
                 sem_post(&mutex_semaforos);
                 continue;
             }
+            
             log_info(logger_kernel, "Terminando con proceso %d", aux->id);
             mover_proceso_de_lista(origen_aux, lista_exit, index, EXIT);
 
             index = 0;
 
             //Agregar task de desconexion en caso que se encuentre en exec con prioridad máxima en caso que sea una desconexion forzosa
-            t_task *task = malloc(sizeof(t_task));
-            task->id = CLIENTE_DESCONECTADO;
-            list_add_in_index(aux->task_list, 0, task);
+            if(origen_aux == lista_exec){
 
+                t_task *task = malloc(sizeof(t_task));
+                task->id = CLIENTE_DESCONECTADO;
+                task->datos_tarea = NULL;
+                list_add_in_index(aux->task_list, 0, task);
+            }else{
+                while(index < list_size(aux->task_list)){
+                    t_task *task_aux = list_get(aux->task_list, index);
+                    printf("Algo se libero acá!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+                    free(task_aux);
+                }
+            }
+            index = 0;
             //Liberar recursos asignados
             eliminar_solicitud_de_sem(aux->id);
 

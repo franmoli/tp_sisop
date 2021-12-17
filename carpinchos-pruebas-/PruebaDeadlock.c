@@ -195,7 +195,7 @@ int main(int argc, char *argv[]) {
 	pthread_join(carpincho2, NULL);
 	pthread_join(carpincho1, NULL);
   
-	printf("MAIN - Como no sabemos a quienes va a matar el algoritmo, entonces hacemos el free de los semáforos acá");
+	printf("MAIN - Como no sabemos a quienes va a matar el algoritmo, entonces hacemos el free de los semáforos acá\n");
 	mate_init(&instance, argv[1]);
     mate_sem_destroy(&instance, "SEM1");
     mate_sem_destroy(&instance, "SEM2");
