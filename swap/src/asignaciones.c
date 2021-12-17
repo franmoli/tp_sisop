@@ -163,6 +163,8 @@ bool asignacion_global_de_pagina(int posicion_archivo, char *path_archivo, int a
     t_entrada_tabla_marcos *marco_seleccionado = seleccionar_marco_libre(posicion_archivo);
     if(marco_seleccionado != NULL) {
         offset = marco_seleccionado->base;
+        marco_seleccionado->esta_libre = 0;
+        marco_seleccionado->proceso_asignado = pagina->pid;
     } else {
         marco_seleccionado = instanciar_marco_global(posicion_archivo);
         offset = marco_seleccionado->base;
