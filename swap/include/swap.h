@@ -16,4 +16,5 @@ void liberar_memoria_y_finalizar();
 void destruir_elemento_lista(void *elemento);
 void destruir_mapeos();
 
+int indice;
 #endif

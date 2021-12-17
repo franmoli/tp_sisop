@@ -11,7 +11,7 @@ int main(int argc, char **argv) {
     tabla_marcos = list_create();
     sem_init(&mutex_operacion, 0, 1);
     log_info(logger_swap, "Programa inicializado correctamente");
-
+    indice = 0;
     //Se carga la configuración
     log_info(logger_swap, "Iniciando carga del archivo de configuración");
     config_file = leer_config_file("./cfg/swap.cfg");
@@ -60,12 +60,18 @@ int ejecutar_operacion(int client) {
     if(paquete->codigo_operacion == SWAPSAVE) {
         //Deserializo la página enviada por Memoria
         t_pagina_enviada_swap *pagina = deserializar_pagina(paquete->buffer->stream);
+        t_heap_contenido_enviado *p2 = list_get(pagina->heap_contenidos,0); 
         if(pagina->numero_pagina==4){
             int o = 0;
             o++;
         }
-
+        indice ++;
         //Inserto la página en los archivos de swap
+        if(indice == 44){
+            //CASO QUE ROMPE
+            int p4 = 0;
+            p4++;
+        }
         int op_code = insertar_pagina_en_archivo(pagina);
         //Envío respuesta de la operación a memoria
         t_buffer *buffer = malloc(sizeof(t_buffer));
