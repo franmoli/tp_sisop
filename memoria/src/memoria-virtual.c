@@ -78,7 +78,7 @@ int recibirPaginaSwap(t_pagina* pagina){
 
     t_pagina_enviada_swap *pagina_swap = deserializar_pagina(paquete->buffer->stream);
 
-    uint32_t inicio = tamanio_memoria;
+    //uint32_t inicio = tamanio_memoria;
     //Escribir pagina en memoria
     escribirPaginaEnMemoria(pagina, pagina_swap);
     free(paquete);
@@ -123,6 +123,13 @@ int enviarPaginaSwap(t_pagina* pagina){
             heap_swap->prevAlloc = heap->prevAlloc;
             heap_swap->nextAlloc = heap->nextAlloc;
             heap_swap->isFree = heap->isFree;
+            if(heap->nextAlloc == 0){
+                heap_swap->contenido = malloc(sizeof(7));
+                heap_swap->contenido= "basura";
+                heap_swap->size_contenido= strlen(heap_swap->contenido)+1;
+                int a = 0;
+                a++;
+            }
             list_add(pagina_swap->heap_contenidos,heap_swap);
         }
     }
@@ -149,7 +156,9 @@ int enviarPaginaSwap(t_pagina* pagina){
     while(list_iterator_has_next(list_iterator))
     {
          t_heap_contenido_enviado* heap_swap  = list_iterator_next(list_iterator);
-         free(heap_swap->contenido);
+         if(heap_swap->nextAlloc != 0)
+            free(heap_swap->contenido);
+            
          free(heap_swap);
     }
     list_iterator_destroy(list_iterator);

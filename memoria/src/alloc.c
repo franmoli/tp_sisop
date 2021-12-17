@@ -247,6 +247,11 @@ int memAlloc(t_paquete *paquete)
     int carpincho_id = socket_client;
     free(mallocDeserializado);
 
+    if(size == 10){
+        int a = 0;
+        a++;
+    }
+
     uint32_t inicio = tamanio_memoria;
     uint32_t direccion_logica;
     if (list_is_empty(tabla_paginas->paginas))
@@ -356,6 +361,15 @@ int memAlloc(t_paquete *paquete)
             uint32_t direccion_fisica_anterior = inicio + offset + pagina_alloc_actual->marco_asignado * config_memoria->TAMANIO_PAGINA;
             
             int numero_contenido = getContenidoByDireccionFisica(pagina_alloc_actual,direccion_fisica_anterior);
+            if(numero_contenido < 0){
+                int b = 0;
+                t_pagina* last = list_get(tabla_paginas->paginas,list_size(tabla_paginas->paginas)-1);
+                t_contenidos_pagina *a = list_get(last->listado_de_contenido,0);
+                t_contenidos_pagina *a2 = list_get(last->listado_de_contenido,1);
+                t_contenidos_pagina *a3 = list_get(last->listado_de_contenido,2);
+                b++;
+            }
+            numero_contenido = getContenidoByDireccionFisica(pagina_alloc_actual,direccion_fisica_anterior);
             if(numero_contenido < 0)
                 return -1;
 
