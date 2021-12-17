@@ -60,7 +60,6 @@ int ejecutar_operacion(int client) {
     if(paquete->codigo_operacion == SWAPSAVE) {
         //Deserializo la página enviada por Memoria
         t_pagina_enviada_swap *pagina = deserializar_pagina(paquete->buffer->stream);
-        
         //Inserto la página en los archivos de swap
         int op_code = insertar_pagina_en_archivo(pagina);
         //Envío respuesta de la operación a memoria
@@ -83,7 +82,6 @@ int ejecutar_operacion(int client) {
 	    
         //Busco la página y la envío en caso correcto
         t_pagina_enviada_swap pagina = leer_pagina_de_archivo(id_carpincho, pagina_solicitada);
-
         if(pagina.numero_pagina >= 0) {
             void *pagina_serializada = serializar_pagina(&pagina);
 
