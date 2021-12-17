@@ -18,7 +18,7 @@ sem_t semCarpincho3;
 
 void* carpincho1_func(void* config){
 
-	//sem_wait(&semCarpincho1);
+	sem_wait(&semCarpincho1);
 	mate_instance instanceC1;
 
 	printf("C1 - Llamo a mate_init\n");
