@@ -98,6 +98,10 @@ int enviarPaginaSwap(t_pagina* pagina){
     pagina_swap->pid = pagina->carpincho_id;
     pagina_swap->numero_pagina = pagina->numero_pagina;
 
+    if(pagina->numero_pagina == 4){
+        int q = 0;
+        q++;
+    }
     t_list_iterator *list_iterator = list_iterator_create(pagina->listado_de_contenido);
     while(list_iterator_has_next(list_iterator)){
 
@@ -149,8 +153,8 @@ int enviarPaginaSwap(t_pagina* pagina){
         
     enviar_paquete(paquete, socket_cliente_swap);
     //free(cont);
-    free(pagina_serial);
-    free(buffer);
+    //free(pagina_serial);
+    //free(buffer);
 
     list_iterator = list_iterator_create(pagina_swap->heap_contenidos);
     while(list_iterator_has_next(list_iterator))

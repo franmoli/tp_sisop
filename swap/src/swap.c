@@ -60,6 +60,11 @@ int ejecutar_operacion(int client) {
     if(paquete->codigo_operacion == SWAPSAVE) {
         //Deserializo la página enviada por Memoria
         t_pagina_enviada_swap *pagina = deserializar_pagina(paquete->buffer->stream);
+        if(pagina->numero_pagina==4){
+            int o = 0;
+            o++;
+        }
+
         //Inserto la página en los archivos de swap
         int op_code = insertar_pagina_en_archivo(pagina);
         //Envío respuesta de la operación a memoria
@@ -71,7 +76,7 @@ int ejecutar_operacion(int client) {
         paquete_respuesta->buffer = buffer;
 
         enviar_paquete(paquete_respuesta, socket_client);
-        free(buffer);
+        //free(buffer);
 
     } else if(paquete->codigo_operacion == SWAPFREE) {
         //Deserializo el pedido enviado por Memoria
@@ -80,8 +85,13 @@ int ejecutar_operacion(int client) {
         int pagina_solicitada;
         memcpy(&pagina_solicitada, paquete->buffer->stream + sizeof(int), sizeof(int));
 	    
+        if(pagina_solicitada == 4){
+            int k = 0;
+            k++;
+        }
         //Busco la página y la envío en caso correcto
         t_pagina_enviada_swap pagina = leer_pagina_de_archivo(id_carpincho, pagina_solicitada);
+        t_heap_contenido_enviado *p = list_get(pagina.heap_contenidos,0); 
         if(pagina.numero_pagina >= 0) {
             void *pagina_serializada = serializar_pagina(&pagina);
 
@@ -105,8 +115,8 @@ int ejecutar_operacion(int client) {
             list_iterator_destroy(list_iterator);
             list_destroy(pagina.heap_contenidos);
 
-            free(buffer->stream);
-            free(buffer);
+            /*free(buffer->stream);
+            free(buffer);*/
         }
     } else {
         log_info(logger_swap, "Memoria se esta preparando para finalizar, apagando memoria virtual");
