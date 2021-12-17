@@ -105,7 +105,8 @@ int main(int argc, char **argv)
     free(paquete);*/
 
     while (1)
-    {
+    {   
+        printf("Esperando cliente\n");
         socket_client = esperar_cliente(socket_server, logger_memoria);
         if (socket_client != -1)
         {
@@ -123,9 +124,11 @@ static void *ejecutar_operacion()
 {
     bool cerrar = true;
     while (cerrar)
-    {
+    {   
+        log_info(logger_memoria, "Esperando recibir paquete por parte de kernel %d", socket_client);        
         t_paquete *paquete = recibir_paquete(socket_client);
-        
+        log_info(logger_memoria, "Paquete recibido codigo de op %d", paquete->codigo_operacion);
+
         //Analizo el código de operación recibido y ejecuto acciones según corresponda
         switch (paquete->codigo_operacion)
         {
@@ -274,6 +277,7 @@ void inicializarCarpincho(int socket_cliente)
 {
 
     //t_mateinit_serializado *mateInit_deserializado = deserializar_mate_init(paquete);
+    printf("Inicializo carpincho\n");
     uint32_t id = socket_cliente;
 
     t_tabla_paginas *nuevaTabla = malloc(sizeof(t_tabla_paginas));

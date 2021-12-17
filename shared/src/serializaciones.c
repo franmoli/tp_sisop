@@ -124,8 +124,11 @@ int bytes_pagina(t_pagina_enviada_swap* pagina) {
 
     //Contenidos heap
     size += sizeof(uint32_t);
+    printf("La lista tiene %d heaps \n", list_size(pagina->heap_contenidos));
     for(int i=0; i<list_size(pagina->heap_contenidos); i++) {
 		t_heap_contenido_enviado *contenido = list_get(pagina->heap_contenidos, i);
+        printf("Heap %d con size %d next alloc %d prev alloc %d\n", i,contenido->size_contenido, contenido->prevAlloc, contenido->nextAlloc);
+
 		size += bytes_info_heap(*contenido);
 	}
 
@@ -141,13 +144,14 @@ int bytes_info_heap(t_heap_contenido_enviado info) {
     size += sizeof(uint8_t);
     size += sizeof(uint32_t); //Longitud del contenido
     size += sizeof(char) * (info.size_contenido + 1);
-
+    printf("El heap este tiene %d nytes de tamanio\n", size);
     return size;
 }
 //--------------------------------------------------------------------------------------------
 
 void* serializar_pagina(t_pagina_enviada_swap* pagina) {
     int bytes = bytes_pagina(pagina);
+    printf("Quiero serializar %d bytes\n", bytes);
     void *stream = malloc(bytes);
     int offset = 0;
 

@@ -182,6 +182,7 @@ char *memRead(t_paquete *paquete)
 
 char* traerDeMemoria(int marco, int desplazamiento, int size) {
     char *contenido = malloc(size);
+    printf("Traigo de memoria marco %d desp %d size %d\n", marco, desplazamiento, size);
     uint32_t dir_fisica = tamanio_memoria + marco * config_memoria->TAMANIO_PAGINA + desplazamiento;
     memcpy(contenido, dir_fisica, size);
   
