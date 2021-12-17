@@ -446,6 +446,12 @@ int agregarPagina(t_pagina *pagina, t_heap_metadata *data, uint32_t nextAnterior
     uint32_t direccion_fisica_anterior = inicio + offset + pagina->marco_asignado * config_memoria->TAMANIO_PAGINA;
     
     int numero_contenido = getContenidoByDireccionFisica(pagina,direccion_fisica_anterior);
+    if(numero_contenido < 0){
+        int c = 0;
+        c++;
+    }
+
+    numero_contenido = getContenidoByDireccionFisica(pagina,direccion_fisica_anterior);
     if(numero_contenido < 0)
         return -1;
 
