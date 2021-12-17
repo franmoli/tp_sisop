@@ -91,6 +91,10 @@ void enviar_paquete(t_paquete *paquete, int socket_cliente) {
 	int error = send(socket_cliente, a_enviar, bytes, 0);
 
 	free(a_enviar);
+	if(paquete->buffer->size){
+		free(paquete->buffer->stream);
+	}
+	free(paquete->buffer);
 	free(paquete);
 	if(error == -1){
 		printf("Hubo un error en el envio\n");

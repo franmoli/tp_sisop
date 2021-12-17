@@ -22,9 +22,9 @@ void iniciar_planificador_corto(){
     }
      
     pthread_create(&hilo_planificador, NULL, planificador, (void *)NULL);
-    //pthread_detach(hilo_planificador);
+    pthread_detach(hilo_planificador);
     pthread_create(&hilo_esperar_bloqueo, NULL, esperar_bloqueo, (void *)NULL);
-    //pthread_detach(&hilo_esperar_bloqueo);
+    pthread_detach(hilo_esperar_bloqueo);
 }
 
 void *planificador_corto_plazo_sjf (void *_){
@@ -32,41 +32,44 @@ void *planificador_corto_plazo_sjf (void *_){
     
     t_proceso *aux;
 
-    while(1){
+    while(!terminar_kernel){
         sem_wait(&cambio_de_listas_corto);
-        sem_wait(&mutex_listas);
-        //calcular estimaciones
-        for(int i = 0; i < list_size(lista_ready); i++){
-
-            aux = list_get(lista_ready, i);
-            if(aux->estimar)
-                estimar(aux);
-
-        }
-        if(multiprocesamiento && list_size(lista_ready)){
-            int index = -1;
-            float estimacion_aux = 0;
-            printf("Elijo de entre %d\n", list_size(lista_ready));
-            sleep(1);
-            //se busca la estimacion menor
+        if(!terminar_kernel){
+            
+            sem_wait(&mutex_listas);
+            //calcular estimaciones
             for(int i = 0; i < list_size(lista_ready); i++){
+
                 aux = list_get(lista_ready, i);
-                printf("Probando una estimacion %f\n", aux->estimacion);
-                if(aux->estimacion < estimacion_aux || i == 0){
-                    estimacion_aux = aux->estimacion;
-                    index = i;
-                }
+                if(aux->estimar)
+                    estimar(aux);
+
             }
-            
-            //Se saca de ready y se pasa a exec
-            int *carpincho = list_get(lista_ready,index);
-            mover_proceso_de_lista(lista_ready, lista_exec, index, EXEC);
+            if(multiprocesamiento && list_size(lista_ready)){
+                int index = -1;
+                float estimacion_aux = 0;
+                printf("Elijo de entre %d\n", list_size(lista_ready));
+                sleep(1);
+                //se busca la estimacion menor
+                for(int i = 0; i < list_size(lista_ready); i++){
+                    aux = list_get(lista_ready, i);
+                    printf("Probando una estimacion %f\n", aux->estimacion);
+                    if(aux->estimacion < estimacion_aux || i == 0){
+                        estimacion_aux = aux->estimacion;
+                        index = i;
+                    }
+                }
+                
+                //Se saca de ready y se pasa a exec
+                int *carpincho = list_get(lista_ready,index);
+                mover_proceso_de_lista(lista_ready, lista_exec, index, EXEC);
 
-            
-        }
+                
+            }
 
-        sem_post(&mutex_listas);
+            sem_post(&mutex_listas);
         }
+    }
 
 
     return NULL;
@@ -76,41 +79,44 @@ void *planificador_corto_plazo_hrrn (void *_){
     t_proceso *aux;
 
 
-    while(1){
+    while(!terminar_kernel){
         
         sem_wait(&cambio_de_listas_corto);
-        sem_wait(&mutex_listas);
-        //calcular estimaciones
-        for(int i = 0; i < list_size(lista_ready); i++){
+        if(!terminar_kernel){
 
-            aux = list_get(lista_ready, i);
-            if(aux->estimar)
-                estimar(aux);
-
-        }
-
-        if(multiprocesamiento > 0 && list_size(lista_ready)){
-            int index = -1;
-            int response_ratio = 0;
-
-            printf("Elijo de entre %d multiprocesamiento %d\n", list_size(lista_ready), multiprocesamiento);
-            //se busca el response ratio mas alto
+            sem_wait(&mutex_listas);
+            //calcular estimaciones
             for(int i = 0; i < list_size(lista_ready); i++){
 
                 aux = list_get(lista_ready, i);
-                
-                if(calcular_response_ratio(aux) > response_ratio || i == 0){
-                    response_ratio = calcular_response_ratio(aux);
-                    index = i;
-                }
+                if(aux->estimar)
+                    estimar(aux);
+
             }
 
-            //Se saca de ready y se pasa a exec
-            mover_proceso_de_lista(lista_ready, lista_exec, index, EXEC);
-            
+            if(multiprocesamiento > 0 && list_size(lista_ready)){
+                int index = -1;
+                int response_ratio = 0;
 
+                printf("Elijo de entre %d multiprocesamiento %d\n", list_size(lista_ready), multiprocesamiento);
+                //se busca el response ratio mas alto
+                for(int i = 0; i < list_size(lista_ready); i++){
+
+                    aux = list_get(lista_ready, i);
+                    
+                    if(calcular_response_ratio(aux) > response_ratio || i == 0){
+                        response_ratio = calcular_response_ratio(aux);
+                        index = i;
+                    }
+                }
+
+                //Se saca de ready y se pasa a exec
+                mover_proceso_de_lista(lista_ready, lista_exec, index, EXEC);
+                
+
+            }
+            sem_post(&mutex_listas);
         }
-        sem_post(&mutex_listas);
     }
 
 
@@ -136,25 +142,30 @@ float calcular_response_ratio(t_proceso *proceso){
 
 void *esperar_bloqueo(void *_){
 
-    while(1){
+    while(!terminar_kernel){
 
         sem_wait(&solicitar_block);
-        sem_wait(&mutex_listas);
-        procesos_esperando_bloqueo--;
-        bool encontrado = false;
-        int tamanio_lista_exec = list_size(lista_exec);
-        int index = 0;
+        if(!terminar_kernel){
 
-        while(!encontrado && (index < tamanio_lista_exec)){
-            t_proceso *aux = list_get(lista_exec, index);
-            
-                if(aux->block){
-                    aux->block = false;
-                    mover_proceso_de_lista(lista_exec, lista_blocked, index, BLOCKED);
-                    encontrado = true;
-                }
-            index ++;
+            sem_wait(&mutex_listas);
+            procesos_esperando_bloqueo--;
+            bool encontrado = false;
+            int tamanio_lista_exec = list_size(lista_exec);
+            int index = 0;
+
+            while(!encontrado && (index < tamanio_lista_exec)){
+                t_proceso *aux = list_get(lista_exec, index);
+                
+                    if(aux->block){
+                        aux->block = false;
+                        mover_proceso_de_lista(lista_exec, lista_blocked, index, BLOCKED);
+                        encontrado = true;
+                    }
+                index ++;
+            }
+            sem_post(&mutex_listas);
+
         }
-        sem_post(&mutex_listas);
     }
+    return NULL;
 }

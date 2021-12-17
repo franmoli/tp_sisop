@@ -46,6 +46,8 @@ int main(int argc, char **argv) {
     //bloquear con algo
     while(!terminar_kernel);
 
+    sleep(config_kernel->TIEMPO_DEADLOCK/1000);
+
     pthread_join(hilo_deteccion_deadlock,NULL);
 
     //Fin del programa
@@ -59,17 +61,22 @@ void liberar_memoria_y_finalizar(t_config_kernel *config_kernel, t_log *logger_k
     config_destroy(config_file);
     destruir_semaforos();
     destruir_listas();
-    list_destroy_and_destroy_elements(config_kernel->DISPOSITIVOS_IO, element_destroyer);
-    list_destroy_and_destroy_elements(config_kernel->DURACIONES_IO, element_destroyer);
+    list_destroy_and_destroy_elements(config_kernel->DISPOSITIVOS_IO, destruir_cosas);
+    list_destroy_and_destroy_elements(config_kernel->DURACIONES_IO, destruir_cosas);
     free(config_kernel);
     log_info(logger_kernel, "Programa finalizado con éxito");
     log_destroy(logger_kernel);
 }
 
 void element_destroyer(void* elemento){
+    t_proceso *procesou = elemento;
+    printf("Proceso %d size %d\n", procesou->id, list_size(procesou->task_list));
+    list_destroy_and_destroy_elements(procesou->task_list, destruir_cosas);
     free(elemento);
 }
-
+void destruir_cosas(void *elemento){
+    free(elemento);
+}
 void iniciar_listas(){
     
     lista_new = list_create();
@@ -127,13 +134,17 @@ void mover_proceso_de_lista(t_list *origen, t_list *destino, int index, int stat
 
     aux = list_remove(origen, index);
     printf("Moviendo proceso - %d | to: %d\n", aux->id , status);
+    
+    aux->status =  status;
+    aux->termino_rafaga = false;
 
     if(status == READY)
         aux->entrada_a_ready = clock();
     
-    if(status == EXIT)
+    if(status == EXIT){
+        avisar_cambio();
         cantidad_de_procesos--;
-
+    }
     if(status == NEW)
         cantidad_de_procesos++;
 
@@ -142,9 +153,6 @@ void mover_proceso_de_lista(t_list *origen, t_list *destino, int index, int stat
 
     if(status == EXEC)
         multiprocesamiento--;
-
-    aux->status =  status;
-    aux->termino_rafaga = false;
 
     list_add(destino, aux);
 
@@ -155,6 +163,7 @@ void mover_proceso_de_lista(t_list *origen, t_list *destino, int index, int stat
 void avisar_cambio(){
     sem_wait(&mutex_cant_procesos);
     //Aviso que hubo un cambio de listas
+    //printf("CANTIDAD DE PROCESOS: %d\n", cantidad_de_procesos);
     for(int i = 0; i < cantidad_de_procesos; i++){
         //printf("Un post\n");
         sem_post(&actualizacion_de_listas_1);
@@ -181,16 +190,16 @@ void avisar_cambio(){
 void iniciar_debug_console(){
     pthread_t hilo_console;
     pthread_create(&hilo_console, NULL, debug_console, (void *)NULL);
+    pthread_detach(hilo_console);
     return;
 }
 
 //funciones de debug
 void *debug_console(void *_ ){
-    pthread_detach(pthread_self());
     log_info(logger_kernel, "Debug console active");
     char input[100] = {0};
 
-    while(1){
+    while(!terminar_kernel){
         fgets(input, 100, stdin);
 
         if(string_contains(input, "Texto")){
@@ -217,10 +226,14 @@ void *debug_console(void *_ ){
             list_iterate(lista_new, cerrar_conexion);
             list_iterate(lista_s_ready, cerrar_conexion);
             list_iterate(lista_s_blocked, cerrar_conexion);
-            avisar_cambio();
+            shutdown(socket_servidor_kernel, SHUT_RDWR);
             sleep(2);
             terminar_kernel = true;
-            return NULL;
+            avisar_cambio();
+            sem_post(&salida_a_exit);
+            sem_post(&solicitar_block);
+            sem_post(&salida_block);
+            sleep(1);
         }
         if(string_contains(input, "list")){
             print_lists();
@@ -243,7 +256,7 @@ void *debug_console(void *_ ){
 
     }
 
-
+    printf("Termino el debug console\n");
     return NULL;
 }
 
@@ -507,7 +520,7 @@ void destruir_listas(){
     list_destroy_and_destroy_elements(lista_s_ready,element_destroyer);
     list_destroy_and_destroy_elements(lista_semaforos,element_destroyer);
     list_destroy_and_destroy_elements(lista_exit,element_destroyer);
-    list_destroy_and_destroy_elements(lista_recursos_asignados,element_destroyer);
+    list_destroy_and_destroy_elements(lista_recursos_asignados,destruir_cosas);
     return;
 }
 

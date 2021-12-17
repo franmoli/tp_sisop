@@ -181,11 +181,11 @@ char *memRead(t_paquete *paquete)
 }
 
 char* traerDeMemoria(int marco, int desplazamiento, int size) {
-    char* contenido = malloc(size);
+    char *contenido = malloc(size);
     uint32_t dir_fisica = tamanio_memoria + marco * config_memoria->TAMANIO_PAGINA + desplazamiento;
     memcpy(contenido, dir_fisica, size);
   
-    return string_substring(contenido, 0,size);
+    return string_substring(contenido, 0, size);
 }
 
 int memWrite(t_paquete *paquete)

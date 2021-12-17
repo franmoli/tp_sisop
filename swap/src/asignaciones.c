@@ -237,6 +237,8 @@ bool asignacion_fija_de_pagina(int posicion_archivo, char *path_archivo, int arc
     t_entrada_tabla_marcos *marco_seleccionado = seleccionar_marco_libre_fija(id_carpincho, posicion_archivo);
     if(marco_seleccionado != NULL) {
         offset = marco_seleccionado->base;
+        marco_seleccionado->esta_libre = 0;
+        marco_seleccionado->id_proceso = pagina->pid;
 
         //Mapeo los datos de la pagina
         log_info(logger_swap, "Escribiendo la pagina %d en el archivo %s en el marco %d", pagina->numero_pagina, path_archivo, marco_seleccionado->numero_marco);

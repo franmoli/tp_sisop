@@ -1,14 +1,14 @@
 #include "proceso.h"
 
 void *proceso(void *self){
-    //pthread_detach(pthread_self());
+    
     t_proceso *proceso_struct = self;
     int prev_status = -1;
     
     pthread_t hilo_ejecucion;
 
 
-    while(1){
+    while(!terminar_kernel){
         sem_wait(&actualizacion_de_listas_1);
         if(prev_status != proceso_struct->status){
             switch (proceso_struct->status){
@@ -35,8 +35,8 @@ void *proceso(void *self){
         sem_wait(&actualizacion_de_listas_2);
         
     }
-
-
+    sem_post(&actualizacion_de_listas_1_recibido);
+    sem_wait(&actualizacion_de_listas_2);
     return NULL;
 }
 
@@ -45,7 +45,7 @@ void new(){
 }
 
 void exec(t_proceso *self){
-    //pthread_detach(pthread_self());
+    pthread_detach(pthread_self());
     log_info(logger_kernel,"Ejecutando el proceso %d",self->id);
     t_task *next_task = NULL;
     bool bloquear_f = false;
@@ -71,8 +71,10 @@ void exec(t_proceso *self){
                     log_info(logger_kernel, "Iniciando semaforo: %s", semaforo_aux->nombre_semaforo);
                     iniciar_semaforo(next_task->datos_tarea);
                     enviar_confirmacion(self->socket_carpincho);
+                    //free(semaforo_aux->nombre_semaforo);
                     break;
                 case CLIENTE_DESCONECTADO:
+                    free(next_task);
                     return;
                 case CLIENTE_TEST:
                 case NUEVO_CARPINCHO:
@@ -89,7 +91,8 @@ void exec(t_proceso *self){
                     sem_wait(&mutex_recursos_asignados);
 
                     bloquear_f = solicitar_semaforo(semaforo_aux->nombre_semaforo, self->socket_carpincho);
-
+                    free(semaforo_aux->nombre_semaforo);
+                    free(semaforo_aux);
                     sem_post(&mutex_recursos_asignados);
                     sem_post(&mutex_semaforos);
                     break;
@@ -102,7 +105,8 @@ void exec(t_proceso *self){
 
                     printf("Carpincho %d posteando semaforo %s\n", self->socket_carpincho, semaforo_aux->nombre_semaforo);
                     postear_semaforo(semaforo_aux->nombre_semaforo, self->id);
-
+                    free(semaforo_aux->nombre_semaforo);
+                    free(semaforo_aux);
                     sem_post(&mutex_recursos_asignados);
                     sem_post(&mutex_semaforos);
 
@@ -118,6 +122,8 @@ void exec(t_proceso *self){
                     printf("Carpincho %d eliminando semaforo %s\n", self->socket_carpincho, semaforo_aux->nombre_semaforo);
                     destruir_semaforo(semaforo_aux->nombre_semaforo);
                     enviar_confirmacion(self->socket_carpincho);
+                    free(semaforo_aux->nombre_semaforo);
+                    free(semaforo_aux);
                     sem_post(&mutex_recursos_asignados);
                     sem_post(&mutex_semaforos);
 
@@ -184,7 +190,7 @@ bool solicitar_semaforo(char *nombre_semaforo, int id){
 
         // sumar a lista de recursos asignados 
         t_recurso_asignado *recurso_asignado = malloc(sizeof(t_recurso_asignado));
-        recurso_asignado->nombre_recurso = nombre_semaforo;
+        recurso_asignado->nombre_recurso = semaforo_solicitado->nombre_semaforo;
         recurso_asignado->id_asignado = id;
         list_add(lista_recursos_asignados, recurso_asignado);
 
@@ -337,7 +343,7 @@ void desbloquear(t_proceso *self){
 }
 
 void *desbloquear_en(void *param){
-    //pthread_detach(pthread_self());
+    pthread_detach(pthread_self());
     t_io *io_recibida = param;
     sem_wait(&io_libre[io_recibida->id]);
 
@@ -356,6 +362,7 @@ void *desbloquear_en(void *param){
 }
 
 void devolver_recurso(int id, char *sem_devuelto){
+    t_recurso_asignado *aux = NULL;
     bool lo_encontre(void *elemento){
         t_recurso_asignado *recurso = elemento;
         if(recurso->id_asignado == id && !strcmp(sem_devuelto, recurso->nombre_recurso))
@@ -363,8 +370,10 @@ void devolver_recurso(int id, char *sem_devuelto){
         
         return false;
     }
-    list_remove_by_condition(lista_recursos_asignados, lo_encontre);
-
+    aux =list_remove_by_condition(lista_recursos_asignados, lo_encontre);
+    if(aux != NULL){
+        free(aux);
+    }
     return;
 }
 
@@ -404,6 +413,9 @@ void destruir_semaforo(char *nombre_semaforo){
     };
 
     list_remove_by_condition(lista_semaforos, semaforo_encontrado);
+    list_destroy(semaforo->solicitantes);
+    free(semaforo->nombre_semaforo);
+    free(semaforo);
 
     print_semaforos();
     return;

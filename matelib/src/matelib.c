@@ -62,14 +62,17 @@ int mate_init(mate_instance_pointer *instance_pointer, char *config){
 
     //Compruebo que la operacion fue exitosa
     t_paquete *paquete_recibido = recibir_paquete(lib_ref->socket);
-
+    int ret;
     if(paquete_recibido->codigo_operacion == OP_CONFIRMADA){
         log_info(lib_ref->logger,"Carpincho %d: Acabo de instanciarme correctamente",lib_ref->socket);
-        return 0;
+        ret = 0;
     }else{
         log_error(lib_ref->logger,"Carpincho %d: No me instancie correctamente",lib_ref->socket);
-        return -1;
+        ret = -1;
     }
+    free(paquete_recibido->buffer);
+    free(paquete_recibido);
+    return ret;
 }
 
 int mate_close(mate_instance_pointer *instance_pointer){
@@ -103,6 +106,7 @@ int mate_sem_init(mate_instance_pointer *instance_pointer, mate_sem_name sem, un
     
     
     mate_instance *lib_ref = instance_pointer->group_info;
+    int ret;
     if(!lib_ref->desconectado){
         t_paquete *paquete = serializar(INIT_SEM, 4, U_INT, value, CHAR_PTR, sem);
         enviar_paquete(paquete, lib_ref->socket);
@@ -113,22 +117,25 @@ int mate_sem_init(mate_instance_pointer *instance_pointer, mate_sem_name sem, un
         
         if(paquete_recibido->codigo_operacion == OP_CONFIRMADA){
             log_info(lib_ref->logger,"Carpincho %d: La funcion SEM_INIT se ejecuto exitosamente",lib_ref->socket);
-            return 0;
+            ret = 0;
         }else{
             log_error(lib_ref->logger,"Carpincho %d: La funcion SEM_INIT no se ejecuto correctamente",lib_ref->socket);
             lib_ref->desconectado = true;
-            return -1;
+            ret = -1;
         }
+        free(paquete_recibido->buffer);
+        free(paquete_recibido);
     }else{
         log_error(lib_ref->logger, "No se pudo ejecutar la operacion sem init (Servidor desconectado)");     
-        return -1;   
+        ret = -1;   
     }
-
+    return ret;
 }
 
 int mate_sem_wait(mate_instance_pointer *instance_pointer, mate_sem_name sem){
 
     mate_instance *lib_ref = instance_pointer->group_info;
+    int ret;
     if(!lib_ref->desconectado){
 
         t_paquete *paquete = serializar(SEM_WAIT,2,CHAR_PTR,sem);
@@ -139,22 +146,25 @@ int mate_sem_wait(mate_instance_pointer *instance_pointer, mate_sem_name sem){
         
         if(paquete_recibido->codigo_operacion == OP_CONFIRMADA){
             log_info(lib_ref->logger,"Carpincho %d: La funcion SEM_WAIT se ejecuto exitosamente",lib_ref->socket);
-            return 0;
+            ret = 0;
         }else{
             log_error(lib_ref->logger,"Carpincho %d: La funcion SEM_WAIT no se ejecuto correctamente",lib_ref->socket);
             lib_ref->desconectado = true;
-            return -1;
+            ret = -1;
         }
+        free(paquete_recibido->buffer);
+        free(paquete_recibido);
     }else{
         log_error(lib_ref->logger, "No se pudo ejecutar la operacion sem wait (Servidor desconectado)");     
-        return -1;   
+        ret = -1;   
     }
-    
+    return ret;
 }
 
 int mate_sem_post(mate_instance_pointer *instance_pointer, mate_sem_name sem){
 
     mate_instance *lib_ref = instance_pointer->group_info;  
+    int ret;
     if(!lib_ref->desconectado){
 
         t_paquete *paquete = serializar(SEM_POST,2,CHAR_PTR,sem);    
@@ -165,22 +175,26 @@ int mate_sem_post(mate_instance_pointer *instance_pointer, mate_sem_name sem){
         
         if(paquete_recibido->codigo_operacion == OP_CONFIRMADA){
             log_info(lib_ref->logger,"Carpincho %d: La funcion SEM_POST se ejecuto exitosamente",lib_ref->socket);
-            return 0;
+            ret = 0;
         }else{
             log_error(lib_ref->logger,"Carpincho %d: La funcion SEM_POST no se ejecuto correctamente",lib_ref->socket);
             lib_ref->desconectado = true;
-            return -1;
+            ret = -1;
         }
+        free(paquete_recibido->buffer);
+        free(paquete_recibido);
     }else{
         log_error(lib_ref->logger, "No se pudo ejecutar la operacion sem post (Servidor desconectado)");  
-        return -1;      
+        ret = -1;      
     }
+    return ret;
 
 }
 
 int mate_sem_destroy(mate_instance_pointer *instance_pointer, mate_sem_name sem){
 
     mate_instance *lib_ref = instance_pointer->group_info;
+    int ret;
     if(!lib_ref->desconectado){
         t_paquete *paquete = serializar(SEM_DESTROY,2,CHAR_PTR,sem); 
         enviar_paquete(paquete,lib_ref->socket);
@@ -188,16 +202,19 @@ int mate_sem_destroy(mate_instance_pointer *instance_pointer, mate_sem_name sem)
         t_paquete *paquete_recibido = recibir_paquete(lib_ref->socket);
         if(paquete_recibido->codigo_operacion == OP_CONFIRMADA){
             log_info(lib_ref->logger,"Carpincho %d: La funcion SEM_DESTROY se ejecuto exitosamente", lib_ref->socket);
-            return 0;
+            ret = 0;
         }else{
             log_error(lib_ref->logger,"Carpincho %d: La funcion SEM_DESTROY no se ejecuto correctamente",lib_ref->socket);
             lib_ref->desconectado = true;
-            return -1;
+            ret = -1;
         }
+        free(paquete_recibido->buffer);
+        free(paquete_recibido);
     }else{
         log_error(lib_ref->logger, "No se pudo ejecutar la operacion mate close (Servidor desconectado)");
-        return -1;        
+        ret = -1;        
     }
+    return ret;
 }
 
 //-----------------------------------Funcion Entrada/Salida-----------------------------------
@@ -205,7 +222,7 @@ int mate_sem_destroy(mate_instance_pointer *instance_pointer, mate_sem_name sem)
 int mate_call_io(mate_instance_pointer *instance_pointer, mate_io_resource io, void *msg){
 
     mate_instance *lib_ref = instance_pointer->group_info;
-
+    int ret;
     if(!lib_ref->desconectado){
 
         t_paquete *paquete = serializar(CALLIO,4,CHAR_PTR,io,CHAR_PTR,msg);
@@ -218,17 +235,19 @@ int mate_call_io(mate_instance_pointer *instance_pointer, mate_io_resource io, v
 
         if(paquete_recibido->codigo_operacion == OP_CONFIRMADA){
             log_info(lib_ref->logger,"Carpincho %d: La funcion CALL_IO se ejecuto exitosamente",lib_ref->socket);
-            return 0;
+            ret = 0;
         }else{
             log_error(lib_ref->logger,"Carpincho %d: La funcion CALL_IO no se ejecuto correctamente",lib_ref->socket);
             lib_ref->desconectado = true;
-            return -1;
+            ret = -1;
         }
+        free(paquete_recibido->buffer);
+        free(paquete_recibido);
     }else{
         log_error(lib_ref->logger, "No se pudo ejecutar la operacion mate close (Servidor desconectado)");
-        return -1;        
+        ret = -1;
     }
-
+    return ret;
 }
 
 //-----------------------------------Funciones Modulo Memoria -----------------------------------
@@ -246,11 +265,13 @@ mate_pointer mate_memalloc(mate_instance_pointer *instance_pointer, int size){
         if(paquete_recibido->codigo_operacion == MEMALLOC){
             deserializar(paquete_recibido,2,INT,&p);
             log_info(lib_ref->logger,"Carpincho %d: La funcion MEM_ALLOC se ejecuto correctamente",lib_ref->socket);
-        
+            free(paquete_recibido->buffer->stream);        
         }else{
             log_error(lib_ref->logger,"Carpincho %d: La funcion MEM_ALLOC no se ejecuto correctamente",lib_ref->socket);
             lib_ref->desconectado = true;
         }
+        free(paquete_recibido->buffer);
+        free(paquete_recibido);
     }else{
         log_error(lib_ref->logger, "No se pudo ejecutar la operacion mate close (Servidor desconectado)");       
     }
@@ -260,6 +281,7 @@ mate_pointer mate_memalloc(mate_instance_pointer *instance_pointer, int size){
 int mate_memfree(mate_instance_pointer *instance_pointer, mate_pointer addr){
 
     mate_instance *lib_ref = instance_pointer->group_info;
+    int ret;
     if(!lib_ref->desconectado){
 
         t_paquete *paquete = serializar(MEMFREE,2,INT,addr);
@@ -268,21 +290,25 @@ int mate_memfree(mate_instance_pointer *instance_pointer, mate_pointer addr){
         t_paquete *paquete_recibido = recibir_paquete(lib_ref->socket);    
         if(paquete_recibido->codigo_operacion == MEMFREE){
             log_info(lib_ref->logger,"Carpincho %d: La funcion MEM_FREE se ejecuto correctamente",lib_ref->socket);
-            return 0;    
+            ret = 0;    
         }else{
             log_error(lib_ref->logger,"Carpincho %d: La funcion MEM_FREE no se ejecuto correctamente",lib_ref->socket);
             lib_ref->desconectado = true;
-            return MATE_FREE_FAULT;
+            ret = MATE_FREE_FAULT;
         }
+        free(paquete_recibido->buffer);
+        free(paquete_recibido);
     }else{
         log_error(lib_ref->logger, "No se pudo ejecutar la operacion mate close (Servidor desconectado)");
-        return MATE_FREE_FAULT;        
+        ret = MATE_FREE_FAULT;        
     }
+    return ret;
 }   
 
 int mate_memread(mate_instance_pointer *instance_pointer, mate_pointer origin, void *dest, int size){
 
     mate_instance *lib_ref = instance_pointer->group_info;
+    int ret;
     if(!lib_ref->desconectado){
 
         t_paquete *paquete = serializar(MEMREAD,6,INT,origin,CHAR_PTR,dest,INT,size);
@@ -291,21 +317,25 @@ int mate_memread(mate_instance_pointer *instance_pointer, mate_pointer origin, v
         t_paquete *paquete_recibido = recibir_paquete(lib_ref->socket);    
         if(paquete_recibido->codigo_operacion == MEMREAD){
             log_info(lib_ref->logger,"Carpincho %d: La funcion MEM_READ se ejecuto correctamente",lib_ref->socket);
-            return 0;    
+            ret = 0;    
         }else{
             log_error(lib_ref->logger,"Carpincho %d: La funcion MEM_READ no se ejecuto correctamente",lib_ref->socket);
             lib_ref->desconectado = true;
-            return MATE_READ_FAULT;
+            ret = MATE_READ_FAULT;
         }
+        free(paquete_recibido->buffer);
+        free(paquete_recibido);
     }else{
         log_error(lib_ref->logger, "No se pudo ejecutar la operacion mate close (Servidor desconectado)");
-        return MATE_READ_FAULT;        
+        ret = MATE_READ_FAULT;        
     }
+    return ret;
 }
 
 int mate_memwrite(mate_instance_pointer *instance_pointer, void *origin, mate_pointer dest, int size){
 
     mate_instance *lib_ref = instance_pointer->group_info;
+    int ret;
     if(!lib_ref->desconectado){
 
         t_paquete *paquete = serializar(MEMWRITE,6,CHAR_PTR,origin,INT,dest,INT,size);
@@ -314,14 +344,17 @@ int mate_memwrite(mate_instance_pointer *instance_pointer, void *origin, mate_po
         t_paquete *paquete_recibido = recibir_paquete(lib_ref->socket);    
         if(paquete_recibido->codigo_operacion == MEMWRITE){
             log_info(lib_ref->logger,"Carpincho %d: La funcion MEM_WRITE se ejecuto correctamente",lib_ref->socket);
-            return 0;    
+            ret = 0;    
         }else{
             log_error(lib_ref->logger,"Carpincho %d: La funcion MEM_WRITE no se ejecuto correctamente",lib_ref->socket);
             lib_ref->desconectado = true;
-            return MATE_WRITE_FAULT;
+            ret = MATE_WRITE_FAULT;
         }
+        free(paquete_recibido->buffer);
+        free(paquete_recibido);
     }else{
         log_error(lib_ref->logger, "No se pudo ejecutar la operacion mate close (Servidor desconectado)");
-        return MATE_WRITE_FAULT;        
+        ret = MATE_WRITE_FAULT;        
     }
+    return ret;
 }

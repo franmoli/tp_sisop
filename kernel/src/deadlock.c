@@ -48,9 +48,9 @@ void* algoritmo_deteccion(void *_) {
                 index2 = 0;
             }
             index++;
+            list_destroy(lista_recursos_en_deadlock);
+            list_destroy(lista_de_procesos_en_deadlock);
         }
-        lista_recursos_en_deadlock = NULL;
-        lista_de_procesos_en_deadlock = NULL;
         deadlock = false;
         sem_post(&mutex_recursos_asignados);
     }
