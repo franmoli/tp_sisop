@@ -467,6 +467,7 @@ void escribirPaginaEnMemoria(t_pagina* pagina,t_pagina_enviada_swap* pagina_swap
             header_pagina_actual->dir_fin = header_pagina_actual->dir_comienzo + header_pagina_actual->tamanio;
             
             guardarAlloc(data,header_pagina_actual->dir_comienzo);
+            free(data);
         }
         else{
             if(info->prevAlloc == 1){
@@ -485,6 +486,16 @@ void escribirPaginaEnMemoria(t_pagina* pagina,t_pagina_enviada_swap* pagina_swap
                 data->isFree = info->isFree;
 
                 guardarAlloc(data,contenido_alloc_actual->dir_comienzo);
+                free(data);
+                if(indice + 1 < list_size(pagina->listado_de_contenido)){
+                    contenido_alloc_actual = list_get(pagina->listado_de_contenido, indice + 1);
+                    offset = (contenido_alloc_actual->dir_comienzo - inicio) % config_memoria->TAMANIO_PAGINA;
+                    contenido_alloc_actual->dir_comienzo = inicio + pagina->marco_asignado * config_memoria->TAMANIO_PAGINA + offset;
+                    contenido_alloc_actual->dir_fin = contenido_alloc_actual->dir_comienzo + contenido_alloc_actual->tamanio;
+                    indice++;
+                }
+                
+
             }
         }
         indice ++;
@@ -899,12 +910,13 @@ int traerPaginaAMemoria(t_pagina* pagina_alloc_actual){
         trajeDeMemoria = true;
     }
     if(marco == -1){
-        log_info(logger_memoria, "Tengo que ir a swap");
+        log_info(logger_memoria, "Enviando pagina a swap");
         marco = reemplazarPagina();
         if(marco < 0)
             return -1;
 
         pagina_alloc_actual->marco_asignado = marco;
+        log_info(logger_memoria, "Recibiendo pagina de swap");
         int resultado = recibirPaginaSwap(pagina_alloc_actual);
         if(resultado == -1){
             //Swap no trajo nada
@@ -921,7 +933,7 @@ int traerPaginaAMemoria(t_pagina* pagina_alloc_actual){
     {
         replaceClock(pagina_alloc_actual);
     }
-    log_info(logger_memoria, "PAGINA %d TRAIDA A MEMORIA CORRECTAMENTE", pagina_alloc_actual->numero_pagina);
+    //log_info(logger_memoria, "PAGINA %d TRAIDA A MEMORIA CORRECTAMENTE", pagina_alloc_actual->numero_pagina);
     return pagina_alloc_actual->marco_asignado;
 }
 
