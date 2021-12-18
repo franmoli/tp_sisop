@@ -107,7 +107,7 @@ int enviarPaginaSwap(t_pagina* pagina){
     pagina_swap->pid = pagina->carpincho_id;
     pagina_swap->numero_pagina = pagina->numero_pagina;
 
-    if(pagina->numero_pagina == 4){
+    if(pagina->numero_pagina == 10){
         int q = 0;
         q++;
     }
@@ -135,18 +135,48 @@ int enviarPaginaSwap(t_pagina* pagina){
             }
         }else
         {
-            t_heap_metadata* heap = traerAllocIncompleto(pagina->marco_asignado,contenido->dir_comienzo,contenido->dir_fin);
             t_heap_contenido_enviado* heap_swap = malloc(sizeof(t_heap_contenido_enviado));
-            heap_swap->prevAlloc = heap->prevAlloc;
-            heap_swap->nextAlloc = heap->nextAlloc;
-            heap_swap->isFree = heap->isFree;
-            if(heap->nextAlloc == 0){
-                heap_swap->contenido = malloc(sizeof(7));
-                heap_swap->contenido= "basura";
-                heap_swap->size_contenido= strlen(heap_swap->contenido)+1;
-                int a = 0;
-                a++;
+            if(contenido->contenido_pagina == RESTO_ALLOC){
+                if(contenido->subcontenido->contenido_pagina == PREV){
+                    heap_swap->prevAlloc = 2;
+                    memcpy(&heap_swap->nextAlloc, contenido->dir_comienzo, sizeof(uint32_t));
+                    heap_swap->isFree = false;
+                    heap_swap->contenido = malloc(sizeof(7));
+                    heap_swap->contenido= "basura";
+                    heap_swap->size_contenido= strlen(heap_swap->contenido)+1;
+                }
+                 if(contenido->subcontenido->contenido_pagina == NEXT){
+                    heap_swap->prevAlloc = 3;
+                    memcpy(&heap_swap->nextAlloc, contenido->dir_comienzo, sizeof(uint32_t));
+                    heap_swap->isFree = false;
+                    heap_swap->contenido = malloc(sizeof(7));
+                    heap_swap->contenido= "basura";
+                    heap_swap->size_contenido= strlen(heap_swap->contenido)+1;
+                }
+                  if(contenido->subcontenido->contenido_pagina == FREE){
+                    heap_swap->prevAlloc = 4;
+                    memcpy(&heap_swap->isFree, contenido->dir_comienzo, sizeof(uint32_t));
+                    //heap_swap->isFree = false;
+                    heap_swap->contenido = malloc(sizeof(7));
+                    heap_swap->contenido= "basura";
+                    heap_swap->size_contenido= strlen(heap_swap->contenido)+1;
+                }
+
             }
+            else{
+                t_heap_metadata* heap = traerAllocIncompleto(pagina->marco_asignado,contenido->dir_comienzo,contenido->dir_fin);
+                heap_swap->prevAlloc = heap->prevAlloc;
+                heap_swap->nextAlloc = heap->nextAlloc;
+                heap_swap->isFree = heap->isFree;
+                if(heap->nextAlloc == 0 || contenido->contenido_pagina==FRAGMENTACION){
+                    heap_swap->contenido = malloc(sizeof(7));
+                    heap_swap->contenido= "basura";
+                    heap_swap->size_contenido= strlen(heap_swap->contenido)+1;
+                    int a = 0;
+                    a++;
+                }
+            }
+           
             list_add(pagina_swap->heap_contenidos,heap_swap);
         }
     }
