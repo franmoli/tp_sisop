@@ -49,7 +49,6 @@ void *planificador_corto_plazo_sjf (void *_){
                 int index = -1;
                 float estimacion_aux = 0;
                 printf("Elijo de entre %d\n", list_size(lista_ready));
-                sleep(1);
                 //se busca la estimacion menor
                 for(int i = 0; i < list_size(lista_ready); i++){
                     aux = list_get(lista_ready, i);
@@ -67,6 +66,7 @@ void *planificador_corto_plazo_sjf (void *_){
                 
             }
 
+                sleep(1);
             sem_post(&mutex_listas);
         }
     }

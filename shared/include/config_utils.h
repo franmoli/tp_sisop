@@ -7,6 +7,7 @@
 #include <commons/config.h>
 #include <commons/string.h>
 #include <commons/collections/list.h>
+#include <commons/log.h>
 
 typedef struct {
     char *IP_MEMORIA;
@@ -26,6 +27,7 @@ typedef struct {
 
 typedef struct {
     char *IP;
+    char *IP_SWAP;
     int TAMANIO;
     char *PUERTO;
     char *ALGORITMO_REEMPLAZO_MMU;
@@ -55,7 +57,7 @@ typedef struct {
     char *PUERTO_KERNEL;
     char *IP_MEMORIA;
     char *PUERTO_MEMORIA;
-    char *LOG_LEVEL;
+    t_log_level LOG_LEVEL;
 } t_config_matelib;
 
 t_config *leer_config_file(char *);

@@ -79,6 +79,7 @@ t_config_memoria *generarConfigMemoria(t_config *config){
     config_memoria->MARCOS_POR_CARPINCHO = config_get_int_value(config, "MARCOS_POR_CARPINCHO");
     config_memoria->TAMANIO_PAGINA = config_get_int_value(config, "TAMANIO_PAGINA");
     config_memoria->PATH_DUMP_TLB = config_get_string_value(config, "PATH_DUMP_TLB");
+    config_memoria->IP_SWAP = config_get_string_value(config, "IP_SWAP");
     return config_memoria;
 }
 
@@ -123,7 +124,19 @@ t_config_matelib *generar_config_matelib(t_config *config){
     config_matelib->PUERTO_KERNEL = config_get_string_value(config,"PUERTO_KERNEL");
     config_matelib->IP_MEMORIA = config_get_string_value(config,"IP_MEMORIA");
     config_matelib->PUERTO_MEMORIA = config_get_string_value(config,"PUERTO_MEMORIA");
-    config_matelib->LOG_LEVEL = config_get_string_value(config,"LOG_LEVEL");
+    char *log = config_get_string_value(config,"LOG_LEVEL");
+    printf("EL LOG ES %s\n",log);
+
+    if(!strcmp(log,"LOG_LEVEL_TRACE"))
+        config_matelib->LOG_LEVEL = LOG_LEVEL_TRACE;
+    if(!strcmp(log,"LOG_LEVEL_DEBUG"))
+        config_matelib->LOG_LEVEL = LOG_LEVEL_DEBUG;
+    if(!strcmp(log,"LOG_LEVEL_INFO"))
+        config_matelib->LOG_LEVEL = LOG_LEVEL_INFO;
+    if(!strcmp(log,"LOG_LEVEL_WARNING"))
+        config_matelib->LOG_LEVEL = LOG_LEVEL_WARNING;
+    if(!strcmp(log,"LOG_LEVEL_ERROR"))
+        config_matelib->LOG_LEVEL = LOG_LEVEL_ERROR;
 
     return config_matelib;
 }
