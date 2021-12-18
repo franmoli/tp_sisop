@@ -123,10 +123,10 @@ int enviarPaginaSwap(t_pagina* pagina){
                 heap_swap->prevAlloc = 1;
                 heap_swap->nextAlloc = 1;
                 heap_swap->isFree = false;
-                if(list_size(pagina->listado_de_contenido) == 1){
-                    heap_swap->size_contenido = contenido->tamanio;
-                    heap_swap->contenido = traerDeMemoria(pagina->marco_asignado, offset, contenido->tamanio);
-                }
+                
+                heap_swap->size_contenido = contenido->tamanio;
+                heap_swap->contenido = traerDeMemoria(pagina->marco_asignado, offset, contenido->tamanio);
+                
                 list_add(pagina_swap->heap_contenidos,heap_swap);
             }else{
                 t_heap_contenido_enviado *contenido_heap_enviado = list_get(pagina_swap->heap_contenidos,list_size(pagina_swap->heap_contenidos)-1);
@@ -152,14 +152,14 @@ int enviarPaginaSwap(t_pagina* pagina){
     }
     list_iterator_destroy(list_iterator);
 
-    if(pagina_swap->numero_pagina == 4){
+    if(pagina_swap->numero_pagina == 10){
         printf("Memoria envia la pagina 4\n");
         int index_aux = 0;
-        while(index_aux < list_size(pagina_swap->heap_contenidos)){
+       /* while(index_aux < list_size(pagina_swap->heap_contenidos)){
             t_heap_contenido_enviado *heap_aux = list_get(pagina_swap->heap_contenidos, index_aux);
             printf("Un heap con next_alloc %d  |  prev_alloc %d \n", heap_aux->nextAlloc, heap_aux->prevAlloc);
             index_aux++;
-        }
+        }*/
 
     }
 
@@ -217,7 +217,7 @@ int reemplazarLRU(){
     int marco = -1;
     if(strcmp(config_memoria->TIPO_ASIGNACION, "FIJA") == 0){
         t_pagina* old = list_get(tabla_paginas->Lru,0);
-        printf("Quiero reemplazar la pagina %d\n", old->numero_pagina);
+        log_error(logger_memoria,"Quiero reemplazar la pagina %d\n", old->numero_pagina );
         if(old->numero_pagina == 10){
             printf("pto interrup\n");
         }

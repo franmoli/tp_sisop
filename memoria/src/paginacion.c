@@ -452,7 +452,7 @@ void escribirPaginaEnMemoria(t_pagina* pagina,t_pagina_enviada_swap* pagina_swap
     t_list_iterator *list_iterator = list_iterator_create(pagina_swap->heap_contenidos);
     t_heap_contenido_enviado *info;
     int indice = 0;
-    if(pagina->numero_pagina == 4){
+    if(pagina->numero_pagina == 10){
         int z = 0;
         z++;
     }
@@ -476,8 +476,12 @@ void escribirPaginaEnMemoria(t_pagina* pagina,t_pagina_enviada_swap* pagina_swap
         }
         else{
             if(info->prevAlloc == 1){//ES UN RESTO DE UN ALLOC ANTERIOR
-                int a = 0;
-                a++;
+                t_contenidos_pagina *contenido_alloc_actual = list_get(pagina->listado_de_contenido, indice);
+                offset = (contenido_alloc_actual->dir_comienzo - inicio) % config_memoria->TAMANIO_PAGINA;
+                contenido_alloc_actual->dir_comienzo = inicio + pagina->marco_asignado * config_memoria->TAMANIO_PAGINA + offset;
+                contenido_alloc_actual->dir_fin = contenido_alloc_actual->dir_comienzo + contenido_alloc_actual->tamanio;
+                
+
             }else{
                 //ES UN ALLOC PERO NO ES EL PRIMERO
                 t_contenidos_pagina *contenido_alloc_actual = list_get(pagina->listado_de_contenido, indice);
