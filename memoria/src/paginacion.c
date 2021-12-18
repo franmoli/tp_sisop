@@ -323,7 +323,6 @@ void escribirEnMemoria(int marco, int desplazamiento, int size, char* contenido)
     uint32_t inicio = tamanio_memoria;
     uint32_t dir_fisica = inicio + marco * config_memoria->TAMANIO_PAGINA + desplazamiento;
     uint32_t offset = 0;
-    log_info(logger_memoria,"Escribiendo en memoria para el carpincho: %d\n",socket_client);
     memcpy(dir_fisica,contenido, size);
     log_info(logger_memoria,"Se termino de escribir en memoria.");
 }
