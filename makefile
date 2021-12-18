@@ -2,6 +2,7 @@ KERNEL_DIR = kernel/
 MEMORY_DIR = memoria/
 MATELIB_DIR = matelib/
 SWAP_DIR = swap/
+SHARED_DIR = shared/
 
 matelib_c :
 	$(MAKE) -C $(MATELIB_DIR)
@@ -83,6 +84,8 @@ deploy_obj:
 	cd $(KERNEL_DIR) && \
 	mkdir obj
 	cd $(MATELIB_DIR) && \
+	mkdir obj
+	cd $(SHARED_DIR) && \
 	mkdir obj
 
 deploy: deploy_obj compile
