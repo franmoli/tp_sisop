@@ -18,6 +18,9 @@ void *debug_console(void *_ );
 void print_task_lists();
 void print_sem_asignados();
 void print_lists();
+void destruir_semaforos();
+void destruir_listas();
+void destruir_cosas(void *elemento);
 
 t_config *config_file;
 

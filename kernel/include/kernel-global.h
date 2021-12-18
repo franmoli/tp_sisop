@@ -7,6 +7,7 @@
 #include <commons/log.h>
 #include <time.h>
 #include <stdlib.h>
+#include <signal.h>
 //#include "matelib.h"
 #include "server.h"
 #include "config_utils.h"
@@ -55,6 +56,7 @@ typedef struct {
     char *mensaje;
     int duracion;
     t_proceso *proceso_solicitante;
+    int id;
 }t_io;
 
 typedef struct {
@@ -78,6 +80,10 @@ t_list *lista_s_ready;
 t_list *lista_semaforos;
 t_list *lista_exit;
 t_list *lista_recursos_asignados;
+
+//Hilos
+pthread_t hilo_planificador;
+pthread_t hilo_esperar_bloqueo;
 
 //Semaforos
 sem_t mutex_listas;
@@ -104,6 +110,7 @@ sem_t pedir_salida_de_block;
 sem_t solicitar_block;
 sem_t mutex_semaforos;
 sem_t mutex_recursos_asignados;
+sem_t *io_libre;
 
 
 //Auxiliares
@@ -111,7 +118,13 @@ int cantidad_de_procesos;
 bool salida_de_exec;
 int multiprogramacion_disponible;
 int socket_cliente_memoria;
+int socket_servidor_kernel;
 int multiprocesamiento;
+int procesos_esperando_bloqueo;
+bool terminar_kernel;
+
+//Hilos
+pthread_t hilo_deteccion_deadlock;
 
 //funciones
 void mover_proceso_de_lista(t_list *origen, t_list *destino, int index, int status);

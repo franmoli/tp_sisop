@@ -22,6 +22,7 @@ typedef struct mate_instance
     t_config_matelib *config;
     void *group_info;
     t_log *logger;
+    bool desconectado;
 } mate_instance;
 
 typedef struct mate_instance_pointer{

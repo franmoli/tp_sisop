@@ -33,20 +33,20 @@ typedef struct {
     int MARCOS_POR_CARPINCHO;
     int CANTIDAD_ENTRADAS_TLB;
     char *ALGORITMO_REEMPLAZO_TLB;
-    int RETARDO_ACIERTO_TLB;
-    int RETARDO_FALLO_TLB;
+    float RETARDO_ACIERTO_TLB;
+    float RETARDO_FALLO_TLB;
     int TAMANIO_PAGINA;
     char *PATH_DUMP_TLB;
 } t_config_memoria;
 
 typedef struct {
     char *IP;
-    int PUERTO;
+    char *PUERTO;
     int TAMANIO_SWAP;
     int TAMANIO_PAGINA;
     t_list *ARCHIVOS_SWAP;
     int MARCOS_MAXIMOS;
-    int RETARDO_SWAP;
+    float RETARDO_SWAP;
     char *TIPO_ASIGNACION;
 } t_config_swap;
 

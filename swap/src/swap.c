@@ -11,7 +11,7 @@ int main(int argc, char **argv) {
     tabla_marcos = list_create();
     sem_init(&mutex_operacion, 0, 1);
     log_info(logger_swap, "Programa inicializado correctamente");
-
+    indice = 0;
     //Se carga la configuración
     log_info(logger_swap, "Iniciando carga del archivo de configuración");
     config_file = leer_config_file("./cfg/swap.cfg");
@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
     }
 
     //Se inicializan el servidor y la conexión con memoria
-    socket_server = iniciar_servidor(config_swap->IP, string_itoa(config_swap->PUERTO), logger_swap);
+    socket_server = iniciar_servidor(config_swap->IP, (config_swap->PUERTO), logger_swap);
 
     //Se inicializan los archivos
     log_info(logger_swap, "Aguarde un momento... Generando archivos...");
@@ -43,7 +43,7 @@ int main(int argc, char **argv) {
             sem_post(&mutex_operacion);
 
             //Espero el tiempo de retardo
-            sleep(config_swap->RETARDO_SWAP);
+            sleep(config_swap->RETARDO_SWAP/1000);
         }
     }
 
@@ -56,15 +56,23 @@ int main(int argc, char **argv) {
 
 int ejecutar_operacion(int client) {
     t_paquete *paquete = recibir_paquete(client);
-
     //Analizo el código de operación recibido y ejecuto acciones según corresponda
     if(paquete->codigo_operacion == SWAPSAVE) {
         //Deserializo la página enviada por Memoria
-        t_pagina_swap *pagina = deserializar_pagina(paquete->buffer->stream);
-        
+        t_pagina_enviada_swap *pagina = deserializar_pagina(paquete->buffer->stream);
+        t_heap_contenido_enviado *p2 = list_get(pagina->heap_contenidos,0); 
+        if(pagina->numero_pagina==4){
+            int o = 0;
+            o++;
+        }
+        indice ++;
         //Inserto la página en los archivos de swap
+        if(indice == 44){
+            //CASO QUE ROMPE
+            int p4 = 0;
+            p4++;
+        }
         int op_code = insertar_pagina_en_archivo(pagina);
-
         //Envío respuesta de la operación a memoria
         t_buffer *buffer = malloc(sizeof(t_buffer));
         buffer->size = 0;
@@ -74,14 +82,22 @@ int ejecutar_operacion(int client) {
         paquete_respuesta->buffer = buffer;
 
         enviar_paquete(paquete_respuesta, socket_client);
+        //free(buffer);
+
     } else if(paquete->codigo_operacion == SWAPFREE) {
         //Deserializo el pedido enviado por Memoria
+        int id_carpincho;
+        memcpy(&id_carpincho, paquete->buffer->stream + 0, sizeof(int));
         int pagina_solicitada;
-        memcpy(&pagina_solicitada, paquete->buffer->stream + 0, sizeof(int));
+        memcpy(&pagina_solicitada, paquete->buffer->stream + sizeof(int), sizeof(int));
 	    
+        if(pagina_solicitada == 4){
+            int k = 0;
+            k++;
+        }
         //Busco la página y la envío en caso correcto
-        t_pagina_swap pagina = leer_pagina_de_archivo(pagina_solicitada);
-
+        t_pagina_enviada_swap pagina = leer_pagina_de_archivo(id_carpincho, pagina_solicitada);
+        t_heap_contenido_enviado *p = list_get(pagina.heap_contenidos,0); 
         if(pagina.numero_pagina >= 0) {
             void *pagina_serializada = serializar_pagina(&pagina);
 
@@ -94,6 +110,19 @@ int ejecutar_operacion(int client) {
             paquete_respuesta->buffer = buffer;
 
             enviar_paquete(paquete_respuesta, socket_client);
+
+            t_list_iterator *list_iterator = list_iterator_create(pagina.heap_contenidos);
+            while(list_iterator_has_next(list_iterator))
+            {
+                t_heap_contenido_enviado* heap_swap  = list_iterator_next(list_iterator);
+                free(heap_swap->contenido);
+                free(heap_swap);
+            }
+            list_iterator_destroy(list_iterator);
+            list_destroy(pagina.heap_contenidos);
+
+            /*free(buffer->stream);
+            free(buffer);*/
         }
     } else {
         log_info(logger_swap, "Memoria se esta preparando para finalizar, apagando memoria virtual");
@@ -127,7 +156,6 @@ void liberar_memoria_y_finalizar(){
     list_destroy_and_destroy_elements(archivos_abiertos, (void *) destruir_elemento_lista);
     list_destroy_and_destroy_elements(lista_paginas_almacenadas, (void *) destruir_elemento_lista);
     list_destroy_and_destroy_elements(tabla_marcos, (void *) destruir_elemento_lista);
-    
     free(config_swap);
 }
 

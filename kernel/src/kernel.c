@@ -5,6 +5,7 @@ int main(int argc, char **argv) {
     system("clear");
     logger_kernel = log_create("./cfg/kernel.log", "KERNEL", true, LOG_LEVEL_INFO);
     log_info(logger_kernel, "Programa inicializado correctamente ");
+    terminar_kernel = false;
 
     //Se carga la configuración
     log_info(logger_kernel, "Iniciando carga del archivo de configuración");
@@ -14,8 +15,10 @@ int main(int argc, char **argv) {
 
     //Iniciar semaforos de uso general
     iniciar_semaforos_generales();
-    multiprogramacion_disponible = config_kernel->GRADO_MULTIPROGRAMACION;
-    multiprocesamiento = config_kernel->GRADO_MULTIPROCESAMIENTO;
+
+    //Inicio variables globales generales
+    iniciar_variables_generales();
+    
 
     //Iniciar listas de procesos
     iniciar_listas();
@@ -41,7 +44,11 @@ int main(int argc, char **argv) {
     }
 
     //bloquear con algo
-    while(1);
+    while(!terminar_kernel);
+
+    sleep(config_kernel->TIEMPO_DEADLOCK/1000);
+
+    pthread_join(hilo_deteccion_deadlock,NULL);
 
     //Fin del programa
     liberar_memoria_y_finalizar(config_kernel, logger_kernel, config_file);
@@ -52,17 +59,24 @@ int main(int argc, char **argv) {
 
 void liberar_memoria_y_finalizar(t_config_kernel *config_kernel, t_log *logger_kernel, t_config *config_file){
     config_destroy(config_file);
-    list_destroy_and_destroy_elements(config_kernel->DISPOSITIVOS_IO, element_destroyer);
-    list_destroy_and_destroy_elements(config_kernel->DURACIONES_IO, element_destroyer);
+    destruir_semaforos();
+    destruir_listas();
+    list_destroy_and_destroy_elements(config_kernel->DISPOSITIVOS_IO, destruir_cosas);
+    list_destroy_and_destroy_elements(config_kernel->DURACIONES_IO, destruir_cosas);
     free(config_kernel);
     log_info(logger_kernel, "Programa finalizado con éxito");
     log_destroy(logger_kernel);
 }
 
 void element_destroyer(void* elemento){
+    t_proceso *procesou = elemento;
+    printf("Proceso %d size %d\n", procesou->id, list_size(procesou->task_list));
+    list_destroy_and_destroy_elements(procesou->task_list, destruir_cosas);
     free(elemento);
 }
-
+void destruir_cosas(void *elemento){
+    free(elemento);
+}
 void iniciar_listas(){
     
     lista_new = list_create();
@@ -107,6 +121,10 @@ void iniciar_semaforos_generales(){
     sem_init(&solicitar_block, 0, 0);
     sem_init(&mutex_semaforos, 0, 1);
     sem_init(&mutex_recursos_asignados, 0, 1);
+    io_libre = calloc(&io_libre,list_size(config_kernel->DISPOSITIVOS_IO));
+    for(int i = 0; i<list_size(config_kernel->DISPOSITIVOS_IO); i++){
+        sem_init(&io_libre[i], 0, 1);
+    }
     return;
 }
 
@@ -116,13 +134,17 @@ void mover_proceso_de_lista(t_list *origen, t_list *destino, int index, int stat
 
     aux = list_remove(origen, index);
     printf("Moviendo proceso - %d | to: %d\n", aux->id , status);
+    
+    aux->status =  status;
+    aux->termino_rafaga = false;
 
     if(status == READY)
         aux->entrada_a_ready = clock();
     
-    if(status == EXIT)
+    if(status == EXIT){
+        avisar_cambio();
         cantidad_de_procesos--;
-
+    }
     if(status == NEW)
         cantidad_de_procesos++;
 
@@ -132,29 +154,24 @@ void mover_proceso_de_lista(t_list *origen, t_list *destino, int index, int stat
     if(status == EXEC)
         multiprocesamiento--;
 
-    aux->status =  status;
-    aux->termino_rafaga = false;
-
     list_add(destino, aux);
 
-    printf("Avisando del cambio\n");
     avisar_cambio();
-    printf("Cambio avisado\n");
     return;
 }
 
 void avisar_cambio(){
     sem_wait(&mutex_cant_procesos);
     //Aviso que hubo un cambio de listas
-    printf("Cantidad de procesos %d\n", cantidad_de_procesos);
+    //printf("CANTIDAD DE PROCESOS: %d\n", cantidad_de_procesos);
     for(int i = 0; i < cantidad_de_procesos; i++){
-        printf("Un post\n");
+        //printf("Un post\n");
         sem_post(&actualizacion_de_listas_1);
     }
 
     //Espero que todos los procesos hayan recibido el aviso y ejecutado
     for(int i = 0; i < cantidad_de_procesos; i++){
-        printf("Un wait\n");        
+        //printf("Un wait\n");        
         sem_wait(&actualizacion_de_listas_1_recibido);
     }
     //Habilito que vuelvan a esperar una vez ya resuelto todo lo que tengan que hacer con su nuevo estado
@@ -168,12 +185,12 @@ void avisar_cambio(){
     sem_post(&cambio_de_listas_mediano);
 
     sem_post(&mutex_cant_procesos);
-    printf("Pasó todos los wait\n");
 }
 
 void iniciar_debug_console(){
     pthread_t hilo_console;
     pthread_create(&hilo_console, NULL, debug_console, (void *)NULL);
+    pthread_detach(hilo_console);
     return;
 }
 
@@ -182,7 +199,7 @@ void *debug_console(void *_ ){
     log_info(logger_kernel, "Debug console active");
     char input[100] = {0};
 
-    while(1){
+    while(!terminar_kernel){
         fgets(input, 100, stdin);
 
         if(string_contains(input, "Texto")){
@@ -200,15 +217,23 @@ void *debug_console(void *_ ){
         if(string_contains(input, "exit")){
             void cerrar_conexion(void *elemento){
                 t_proceso *carpincho = elemento;
+                carpincho->status = EXIT;
                 close(carpincho->id);
-            }
+            };
             list_iterate(lista_blocked, cerrar_conexion);
             list_iterate(lista_ready, cerrar_conexion);
             list_iterate(lista_exec, cerrar_conexion);
             list_iterate(lista_new, cerrar_conexion);
             list_iterate(lista_s_ready, cerrar_conexion);
             list_iterate(lista_s_blocked, cerrar_conexion);
-            exit(EXIT_SUCCESS);
+            shutdown(socket_servidor_kernel, SHUT_RDWR);
+            sleep(2);
+            terminar_kernel = true;
+            avisar_cambio();
+            sem_post(&salida_a_exit);
+            sem_post(&solicitar_block);
+            sem_post(&salida_block);
+            sleep(1);
         }
         if(string_contains(input, "list")){
             print_lists();
@@ -225,10 +250,13 @@ void *debug_console(void *_ ){
         if(string_contains(input, "sem_t")){
             print_sem_tipe();
         }
+        if(string_contains(input, "blocking")){
+            printf("Procesos esperando bloqueo %d\n", procesos_esperando_bloqueo);
+        }
 
     }
 
-
+    printf("Termino el debug console\n");
     return NULL;
 }
 
@@ -449,4 +477,56 @@ void print_sem_tipe(){
     sem_getvalue(&solicitar_block, &aux);
     printf("Sem solicitar_block : %d\n", aux);
     
+}
+
+void destruir_semaforos(){
+    sem_destroy(&proceso_finalizo_o_suspended);
+    sem_destroy(&salida_exec);
+    sem_destroy(&salida_block);
+    sem_destroy(&actualizacion_de_listas_1);
+    sem_destroy(&actualizacion_de_listas_2);
+    sem_destroy(&actualizacion_de_listas_1_recibido);
+    sem_destroy(&proceso_inicializado);
+    sem_destroy(&libre_para_inicializar_proceso);
+    sem_destroy(&mutex_multiprocesamiento);
+    sem_destroy(&mutex_cant_procesos);
+    sem_destroy(&mutex_multiprogramacion);
+    sem_destroy(&salida_a_exit);
+    sem_destroy(&liberar_multiprocesamiento);
+    sem_destroy(&salida_de_exec_recibida);
+    sem_destroy(&salida_a_exit_recibida);
+    sem_destroy(&cambio_de_listas);
+    sem_destroy(&cambio_de_listas_largo);
+    sem_destroy(&cambio_de_listas_mediano);
+    sem_destroy(&cambio_de_listas_corto);
+    sem_destroy(&pedir_salida_de_block);
+    sem_destroy(&solicitar_block);
+    sem_destroy(&mutex_semaforos);
+    sem_destroy(&mutex_recursos_asignados);
+    sem_destroy(&mutex_listas);
+    for(int i = 0; i<list_size(config_kernel->DISPOSITIVOS_IO); i++){
+        sem_destroy(&io_libre[i]);
+    }
+    free(io_libre);
+    return;
+}
+
+void destruir_listas(){
+    list_destroy_and_destroy_elements(lista_new,element_destroyer);
+    list_destroy_and_destroy_elements(lista_ready,element_destroyer);
+    list_destroy_and_destroy_elements(lista_exec,element_destroyer);
+    list_destroy_and_destroy_elements(lista_blocked,element_destroyer);
+    list_destroy_and_destroy_elements(lista_s_blocked,element_destroyer);
+    list_destroy_and_destroy_elements(lista_s_ready,element_destroyer);
+    list_destroy_and_destroy_elements(lista_semaforos,element_destroyer);
+    list_destroy_and_destroy_elements(lista_exit,element_destroyer);
+    list_destroy_and_destroy_elements(lista_recursos_asignados,destruir_cosas);
+    return;
+}
+
+void iniciar_variables_generales(){
+    multiprogramacion_disponible = config_kernel->GRADO_MULTIPROGRAMACION;
+    multiprocesamiento = config_kernel->GRADO_MULTIPROCESAMIENTO;
+    procesos_esperando_bloqueo = 0;
+    return;
 }

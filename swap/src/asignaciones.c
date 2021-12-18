@@ -138,7 +138,7 @@ void instanciar_marcos_fija(int file) {
 /*
     Almacenamiento de una página según el esquema de asignación global
 */
-bool asignacion_global_de_pagina(int posicion_archivo, char *path_archivo, int archivo, t_pagina_swap *pagina) {
+bool asignacion_global_de_pagina(int posicion_archivo, char *path_archivo, int archivo, t_pagina_enviada_swap *pagina) {
     bool operacion_concretada = 1;
 
     //Almaceno el tamaño disponible del archivo
@@ -163,6 +163,8 @@ bool asignacion_global_de_pagina(int posicion_archivo, char *path_archivo, int a
     t_entrada_tabla_marcos *marco_seleccionado = seleccionar_marco_libre(posicion_archivo);
     if(marco_seleccionado != NULL) {
         offset = marco_seleccionado->base;
+        marco_seleccionado->esta_libre = 0;
+        marco_seleccionado->proceso_asignado = pagina->pid;
     } else {
         marco_seleccionado = instanciar_marco_global(posicion_archivo);
         offset = marco_seleccionado->base;
@@ -171,52 +173,21 @@ bool asignacion_global_de_pagina(int posicion_archivo, char *path_archivo, int a
     //Mapeo los datos de la pagina
     log_info(logger_swap, "Escribiendo la pagina %d en el archivo %s en el marco %d", pagina->numero_pagina, path_archivo, marco_seleccionado->numero_marco);
     
-    memcpy(mapping + offset, &(pagina->tipo_contenido), sizeof(int));
-    offset += sizeof(int);
-    memcpy(mapping + offset, &(pagina->pid), sizeof(uint32_t));
-    offset += sizeof(uint32_t);
-    memcpy(mapping + offset, &(pagina->numero_pagina), sizeof(uint32_t));
-    offset += sizeof(uint32_t);
+    t_list *sizes_contenidos = list_create();
+    for(int i=0; i<list_size(pagina->heap_contenidos); i++) {
+        t_heap_contenido_enviado *contenido_heap = list_get(pagina->heap_contenidos, i);
 
-    /*t_list: contenido heap*/
-    memcpy(mapping + offset, &(pagina->contenido_heap_info->elements_count), sizeof(uint32_t));
-    offset += sizeof(uint32_t);
-
-    for(int i=0; i<list_size(pagina->contenido_heap_info); i++) {
-        t_info_heap_swap *contenido_heap = list_get(pagina->contenido_heap_info, i);
-        /*t_info_heap_swap*/
-        memcpy(mapping + offset, &(contenido_heap->inicio), sizeof(uint32_t));
+        memcpy(mapping + offset, &(contenido_heap->prevAlloc), sizeof(uint32_t));
         offset += sizeof(uint32_t);
-        memcpy(mapping + offset, &(contenido_heap->fin), sizeof(uint32_t));
+        memcpy(mapping + offset, &(contenido_heap->nextAlloc), sizeof(uint32_t));
         offset += sizeof(uint32_t);
-        //t_heap_swap
-        memcpy(mapping + offset, &(contenido_heap->contenido->prevAlloc), sizeof(uint32_t));
-        offset += sizeof(uint32_t);
-        memcpy(mapping + offset, &(contenido_heap->contenido->nextAlloc), sizeof(uint32_t));
-        offset += sizeof(uint32_t);
-        memcpy(mapping + offset, &(contenido_heap->contenido->isFree), sizeof(uint8_t));
+        memcpy(mapping + offset, &(contenido_heap->isFree), sizeof(uint8_t));
         offset += sizeof(uint8_t);
-    }
 
-    /*t_list: contenido_carpincho*/
-    memcpy(mapping + offset, &(pagina->contenido_carpincho_info->elements_count), sizeof(uint32_t));
-    offset += sizeof(uint32_t);
-
-    for(int i=0; i<list_size(pagina->contenido_carpincho_info); i++) {
-        t_info_carpincho_swap *contenido_carpincho = list_get(pagina->contenido_carpincho_info, i);
-        /*t_info_carpincho_swap*/
-        memcpy(mapping + offset, &(contenido_carpincho->size), sizeof(int));
-        offset += sizeof(int);
-        memcpy(mapping + offset, &(contenido_carpincho->inicio), sizeof(uint32_t));
-        offset += sizeof(uint32_t);
-        memcpy(mapping + offset, &(contenido_carpincho->fin), sizeof(uint32_t));
-        offset += sizeof(uint32_t);
-        
-        int strlen_contenido = strlen(contenido_carpincho->contenido);
-        memcpy(mapping + offset, &(strlen_contenido), sizeof(int));
-        offset += sizeof(int);
-        memcpy(mapping + offset, contenido_carpincho->contenido, strlen_contenido + 1);
-        offset += strlen_contenido + 1;
+        int strlen_contenido = strlen(contenido_heap->contenido);
+        list_add(sizes_contenidos, strlen_contenido);
+        memcpy(mapping + offset, contenido_heap->contenido, strlen_contenido);
+        offset += strlen_contenido;
     }
 
     //Añado los datos de la página a la estructura administrativa
@@ -224,6 +195,8 @@ bool asignacion_global_de_pagina(int posicion_archivo, char *path_archivo, int a
     pagina_almacenada->numero_pagina = pagina->numero_pagina;
     pagina_almacenada->id_proceso = pagina->pid;
     pagina_almacenada->marco = marco_seleccionado;
+    pagina_almacenada->cantidad_contenidos = list_size(pagina->heap_contenidos);
+    pagina_almacenada->sizes_contenidos = sizes_contenidos;
     list_add(lista_paginas_almacenadas, pagina_almacenada);
 
     //Escribo el archivo
@@ -238,7 +211,7 @@ bool asignacion_global_de_pagina(int posicion_archivo, char *path_archivo, int a
 /*
     Almacenamiento de una página según el esquema de asignación fija
 */
-bool asignacion_fija_de_pagina(int posicion_archivo, char *path_archivo, int archivo, t_pagina_swap *pagina) {
+bool asignacion_fija_de_pagina(int posicion_archivo, char *path_archivo, int archivo, t_pagina_enviada_swap *pagina) {
     bool operacion_concretada = 1;
 
     //Almaceno el tamaño disponible del archivo
@@ -264,63 +237,36 @@ bool asignacion_fija_de_pagina(int posicion_archivo, char *path_archivo, int arc
     t_entrada_tabla_marcos *marco_seleccionado = seleccionar_marco_libre_fija(id_carpincho, posicion_archivo);
     if(marco_seleccionado != NULL) {
         offset = marco_seleccionado->base;
+        marco_seleccionado->esta_libre = 0;
+        marco_seleccionado->proceso_asignado = pagina->pid;
 
         //Mapeo los datos de la pagina
         log_info(logger_swap, "Escribiendo la pagina %d en el archivo %s en el marco %d", pagina->numero_pagina, path_archivo, marco_seleccionado->numero_marco);
     
-        memcpy(mapping + offset, &(pagina->tipo_contenido), sizeof(int));
-        offset += sizeof(int);
-        memcpy(mapping + offset, &(pagina->pid), sizeof(uint32_t));
-        offset += sizeof(uint32_t);
-        memcpy(mapping + offset, &(pagina->numero_pagina), sizeof(uint32_t));
-        offset += sizeof(uint32_t);
+        t_list *sizes_contenidos = list_create();
+        for(int i=0; i<list_size(pagina->heap_contenidos); i++) {
+            t_heap_contenido_enviado *contenido_heap = list_get(pagina->heap_contenidos, i);
 
-        /*t_list: contenido heap*/
-        memcpy(mapping + offset, &(pagina->contenido_heap_info->elements_count), sizeof(uint32_t));
-        offset += sizeof(uint32_t);
-
-        for(int i=0; i<list_size(pagina->contenido_heap_info); i++) {
-            t_info_heap_swap *contenido_heap = list_get(pagina->contenido_heap_info, i);
-            /*t_info_heap_swap*/
-            memcpy(mapping + offset, &(contenido_heap->inicio), sizeof(uint32_t));
+            memcpy(mapping + offset, &(contenido_heap->prevAlloc), sizeof(uint32_t));
             offset += sizeof(uint32_t);
-            memcpy(mapping + offset, &(contenido_heap->fin), sizeof(uint32_t));
+            memcpy(mapping + offset, &(contenido_heap->nextAlloc), sizeof(uint32_t));
             offset += sizeof(uint32_t);
-            //t_heap_swap
-            memcpy(mapping + offset, &(contenido_heap->contenido->prevAlloc), sizeof(uint32_t));
-            offset += sizeof(uint32_t);
-            memcpy(mapping + offset, &(contenido_heap->contenido->nextAlloc), sizeof(uint32_t));
-            offset += sizeof(uint32_t);
-            memcpy(mapping + offset, &(contenido_heap->contenido->isFree), sizeof(uint8_t));
+            memcpy(mapping + offset, &(contenido_heap->isFree), sizeof(uint8_t));
             offset += sizeof(uint8_t);
-        }
 
-        /*t_list: contenido_carpincho*/
-        memcpy(mapping + offset, &(pagina->contenido_carpincho_info->elements_count), sizeof(uint32_t));
-        offset += sizeof(uint32_t);
-
-        for(int i=0; i<list_size(pagina->contenido_carpincho_info); i++) {
-            t_info_carpincho_swap *contenido_carpincho = list_get(pagina->contenido_carpincho_info, i);
-            /*t_info_carpincho_swap*/
-            memcpy(mapping + offset, &(contenido_carpincho->size), sizeof(int));
-            offset += sizeof(int);
-            memcpy(mapping + offset, &(contenido_carpincho->inicio), sizeof(uint32_t));
-            offset += sizeof(uint32_t);
-            memcpy(mapping + offset, &(contenido_carpincho->fin), sizeof(uint32_t));
-            offset += sizeof(uint32_t);
-
-            int strlen_contenido = strlen(contenido_carpincho->contenido);
-            memcpy(mapping + offset, &(strlen_contenido), sizeof(int));
-            offset += sizeof(int);
-            memcpy(mapping + offset, &(contenido_carpincho->contenido), strlen_contenido + 1);
-            offset += strlen_contenido + 1;
+            int strlen_contenido = strlen(contenido_heap->contenido);
+            list_add(sizes_contenidos, strlen_contenido);
+            memcpy(mapping + offset, &(contenido_heap->contenido), strlen_contenido);
+            offset += strlen_contenido;
         }
 
         //Añado los datos de la página a la estructura administrativa
         t_pagina_almacenada *pagina_almacenada = malloc(sizeof(t_pagina_almacenada));
         pagina_almacenada->numero_pagina = pagina->numero_pagina;
-        pagina_almacenada->id_proceso = id_carpincho;
+        pagina_almacenada->id_proceso = pagina->pid;
         pagina_almacenada->marco = marco_seleccionado;
+        pagina_almacenada->cantidad_contenidos = list_size(pagina->heap_contenidos);
+        pagina_almacenada->sizes_contenidos = sizes_contenidos;
         list_add(lista_paginas_almacenadas, pagina_almacenada);
 
         //Escribo el archivo

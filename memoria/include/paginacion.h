@@ -36,6 +36,9 @@ char* traerDeMemoria(int marco, int desplazamiento, int size);
 int memWrite(t_paquete *paquete);
 void escribirEnMemoria(int marco, int desplazamiento, int size, char* contenido);
 
+
+void escribirPaginaEnMemoria(t_pagina* pagina,t_pagina_enviada_swap* pagina_swap);
+
 void* traerMarcoDeMemoria(t_pagina* pagina);
 t_heap_metadata* traerAllocIncompleto(int marco,uint32_t dir_comienzo, uint32_t dir_final);
 void escribirMarcoEnMemoria(t_pagina* pagina, void* stream);
@@ -48,4 +51,6 @@ int getPaginaByDireccionLogica(uint32_t direccion);
 int getPaginaByDireccionFisica(uint32_t direccion);
 int getPrimeraPaginaDisponible(int size, t_tabla_paginas *tabla_paginas);
 int getPosicionEnTablaDeProcesos(t_tabla_paginas* tabla);
+
+int getContenidoByDireccionFisica(t_pagina* pagina,uint32_t direccion_fisica_anterior);
 #endif

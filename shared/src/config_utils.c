@@ -14,6 +14,9 @@ t_config_kernel *generar_config_kernel(t_config *config) {
     char *io_durations_substring = string_substring(io_durations_unformatted, 1, strlen(io_durations_unformatted)-2);
     char **io_durations_formatted = string_split(io_durations_substring, ",");
 
+    free(io_durations_substring);
+    free(io_devices_substring);
+
     //Agrego los elementos de los array a una lista
     t_list *io_devices = list_create();
     int contador_devices = 0;
@@ -50,13 +53,14 @@ t_config_kernel *generar_config_kernel(t_config *config) {
     config_kernel->TIEMPO_DEADLOCK = config_get_int_value(config, "TIEMPO_DEADLOCK");
 
     // libero memoria utilizada en el formateo
-    free(io_devices_unformatted);
-    free(io_devices_substring);
+    //free(io_devices_unformatted);
+    //free(io_devices_substring);
     free(io_devices_formatted);
 
-    free(io_durations_unformatted);
+    //free(io_durations_unformatted);
     free(io_durations_formatted);
-    free(io_durations_substring);
+    //free(io_durations_substring);
+
 
     return config_kernel;
 }
@@ -95,12 +99,13 @@ t_config_swap *generar_config_swap(t_config *config) {
         }
 
         free(file_paths_substring);
+        free(file_paths_formatted);
     }
 
     //Cargo la configuración
     t_config_swap *config_swap = malloc(sizeof(t_config_swap));
     config_swap->IP = config_get_string_value(config, "IP");
-    config_swap->PUERTO = config_get_int_value(config, "PUERTO");
+    config_swap->PUERTO = config_get_string_value(config, "PUERTO");
     config_swap->TAMANIO_SWAP = config_get_int_value(config, "TAMANIO_SWAP");
     config_swap->TAMANIO_PAGINA = config_get_int_value(config, "TAMANIO_PAGINA");
     config_swap->MARCOS_MAXIMOS = config_get_int_value(config, "MARCOS_MAXIMOS");

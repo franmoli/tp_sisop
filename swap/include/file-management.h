@@ -23,6 +23,8 @@ typedef struct {
     int numero_pagina;
     int id_proceso;
     t_entrada_tabla_marcos *marco;
+    int cantidad_contenidos;
+    t_list *sizes_contenidos;
 } t_pagina_almacenada;
 
 typedef struct {
@@ -49,12 +51,12 @@ t_entrada_tabla_marcos* instanciar_marco_global(int file);
 void instanciar_marcos_fija(int file);
 
 //Funciones de páginas
-bool insertar_pagina_en_archivo(t_pagina_swap *pagina);
-t_pagina_swap leer_pagina_de_archivo(int numero_pagina);
+bool insertar_pagina_en_archivo(t_pagina_enviada_swap *pagina);
+t_pagina_enviada_swap leer_pagina_de_archivo(int id_proceso, int numero_pagina);
 void eliminar_pagina(int numero_pagina);
 
 //Esquemas de asignación
-bool asignacion_global_de_pagina(int posicion_archivo, char *path_archivo, int archivo, t_pagina_swap *pagina);
-bool asignacion_fija_de_pagina(int posicion_archivo, char *path_archivo, int archivo, t_pagina_swap *pagina);
+bool asignacion_global_de_pagina(int posicion_archivo, char *path_archivo, int archivo, t_pagina_enviada_swap *pagina);
+bool asignacion_fija_de_pagina(int posicion_archivo, char *path_archivo, int archivo, t_pagina_enviada_swap *pagina);
 
 #endif
