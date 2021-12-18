@@ -18,9 +18,7 @@ void inicializarCarpincho(int socket_cliente);
 void metricas();
 char* cargarTextoTLb(t_list *paginas, int carpincho_id);
 
-
 sem_t mutex_memoria;
 sem_t mutex_memoria_read;
 sem_t mutex_memoria_write;
-
 #endif

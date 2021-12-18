@@ -59,8 +59,6 @@ int main(int argc, char **argv)
 
     indice = 0;
     sem_init(&mutex_memoria,0,1);
-    sem_init(&mutex_memoria,0,1);
-
     while (1)
     {   
         printf("Esperando cliente\n");
@@ -119,9 +117,9 @@ static void *ejecutar_operacion(int *socket_client_p)
         case MEMFREE:
             sem_wait(&mutex_memoria);
             log_info(logger_memoria, "recibi orden de memfree del cliente %d", socket_client);
-            
+   
             int resultado_free = freeAlloc(paquete);
-           
+
             if(resultado_free < 0){
                 //NO SE PUDO LIBERAR
                 t_paquete* paquete_enviar = serializar(DIRECCION_LOGICA_INVALIDA,2,INT,0);
@@ -143,7 +141,7 @@ static void *ejecutar_operacion(int *socket_client_p)
             log_warning(logger_memoria, "MEMWRITE %d", socket_client);
             
             int resultado_write = memWrite(paquete);
-            
+
             if(resultado_write< 0){
                 //NO SE PUDO ESCRIBIR
                 t_paquete* paquete_enviar = serializar(DIRECCION_LOGICA_INVALIDA,2,INT,0);
@@ -163,7 +161,7 @@ static void *ejecutar_operacion(int *socket_client_p)
             sem_wait(&mutex_memoria);
             log_warning(logger_memoria, "MEMREAD %d", socket_client);
             char *data = memRead(paquete);
-           
+
             if(string_equals_ignore_case(data,"FAIL")){
                 //NO SE PUDO LEER
                 t_paquete* paquete_enviar = serializar(DIRECCION_LOGICA_INVALIDA,2,INT,0);
