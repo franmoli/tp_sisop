@@ -89,3 +89,13 @@ deploy_obj:
 	mkdir obj
 
 deploy: deploy_obj compile
+
+config_humedal:
+        cp configs/humedal_k.cfg kernel/cfg/kernel.cfg
+        cp configs/humedal_m.cfg memoria/cfg/memoria.cfg
+        cp configs/humedal_s.cfg swap/cfg/swap.cfg
+
+config_reemplazo_mmu:
+        cp configs/reemplazo_mmu_k.cfg kernel/cfg/kernel.cfg
+        cp configs/reemplazo_mmu_m.cfg memoria/cfg/memoria.cfg
+        cp configs/reemplazo_mmu_s.cfg swap/cfg/swap.cfg
