@@ -59,51 +59,6 @@ int main(int argc, char **argv)
 
     indice = 0;
 
-    /*inicializarCarpincho(0);
-    socket_client = 0;
-    
-    t_paquete* paquete = serializar_alloc(23);
-    memAlloc(paquete);
-
-    free(paquete->buffer->stream);
-    free(paquete->buffer);
-    free(paquete);
-    
-    paquete = serializar_alloc(20);
-    memAlloc(paquete); 
-
-    free(paquete->buffer->stream);
-    free(paquete->buffer);
-    free(paquete);
-
-    paquete = serializar_alloc(23);
-    memAlloc(paquete); 
-
-    free(paquete->buffer->stream);
-    free(paquete->buffer);
-    free(paquete);
-
-    paquete = serializar_alloc(23);
-    memAlloc(paquete); 
-
-    free(paquete->buffer->stream);
-    free(paquete->buffer);
-    free(paquete);*/
-
-    /*paquete = serializar_alloc(23);
-    memAlloc(paquete); 
-
-    free(paquete->buffer->stream);
-    free(paquete->buffer);
-    free(paquete);
-
-    paquete = serializar_alloc(23);
-    memAlloc(paquete); 
-
-    free(paquete->buffer->stream);
-    free(paquete->buffer);
-    free(paquete);*/
-
     while (1)
     {   
         printf("Esperando cliente\n");

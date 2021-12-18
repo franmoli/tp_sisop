@@ -199,6 +199,7 @@ int memWrite(t_paquete *paquete)
    int carpincho_id = 0;
 
    deserializar(paquete,8,INT,&carpincho_id,CHAR_PTR,&contenido_escribir,INT,&direccion_logica,INT,&size);
+   tabla_paginas = buscarTablaPorPID(carpincho_id);
    int numero_pagina_original = (direccion_logica - inicio) / config_memoria->TAMANIO_PAGINA;
    int desplazamiento = ((direccion_logica-inicio) % config_memoria->TAMANIO_PAGINA) + sizeof(t_heap_metadata);
    
@@ -212,7 +213,8 @@ int memWrite(t_paquete *paquete)
    }*/
      
 
-   if(numero_pagina > list_size(tabla_paginas)){
+   if(numero_pagina > list_size(tabla_paginas->paginas)){
+       int a = list_size(tabla_paginas->paginas);
        return -1;
    }
    
