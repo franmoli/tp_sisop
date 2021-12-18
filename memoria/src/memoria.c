@@ -59,10 +59,11 @@ int main(int argc, char **argv)
 
     indice = 0;
     sem_init(&mutex_memoria,0,1);
+
     while (1)
     {   
         printf("Esperando cliente\n");
-        socket_client = esperar_cliente(socket_server, logger_memoria);
+        int socket_client = esperar_cliente(socket_server, logger_memoria);
         if (socket_client != -1)
         {
             //inicializarCarpincho(socket_client);
@@ -75,10 +76,9 @@ int main(int argc, char **argv)
     free(config_memoria);
 }
 
-static void *ejecutar_operacion()
+static void *ejecutar_operacion(int socket_client)
 {
-    bool cerrar = true;
-    while (cerrar)
+    while (1)
     {   
         log_info(logger_memoria, "Esperando recibir paquete por parte de kernel %d", socket_client);        
         t_paquete *paquete = recibir_paquete(socket_client);
@@ -108,6 +108,7 @@ static void *ejecutar_operacion()
                 enviar_paquete(paquete_enviar,socket_client);
                 log_info(logger_memoria,"Paquete enviado");
             }
+            
             break;
         case MEMFREE:
             log_info(logger_memoria, "recibi orden de memfree del cliente %d", socket_client);
@@ -133,7 +134,7 @@ static void *ejecutar_operacion()
             log_info(logger_memoria, "recibi orden de memwrite del cliente %d", socket_client);
             sem_wait(&mutex_memoria);
             int resultado_write = memWrite(paquete);
-            sem_post(&mutex_memoria);
+             sem_post(&mutex_memoria);
             if(resultado_write< 0){
                 //NO SE PUDO ESCRIBIR
                 t_paquete* paquete_enviar = serializar(DIRECCION_LOGICA_INVALIDA,2,INT,0);
@@ -152,7 +153,8 @@ static void *ejecutar_operacion()
             log_info(logger_memoria, "recibi orden de leer memoria del cliente %d", socket_client);
             sem_wait(&mutex_memoria);
             char *data = memRead(paquete);
-            sem_post(&mutex_memoria);
+              sem_post(&mutex_memoria);
+           
             if(string_equals_ignore_case(data,"FAIL")){
                 //NO SE PUDO LEER
                 t_paquete* paquete_enviar = serializar(DIRECCION_LOGICA_INVALIDA,2,INT,0);
@@ -167,7 +169,7 @@ static void *ejecutar_operacion()
                 log_info(logger_memoria,"Paquete enviado");
             }
             break;
-        case MATEINIT:
+        /*case MATEINIT:
             log_info(logger_memoria, "recibi un nuevo carpincho para inicializar del cliente %d", socket_client);
             t_paquete *paquete_init = malloc(sizeof(t_paquete));
             paquete_init->buffer = malloc(sizeof(t_buffer));
@@ -176,10 +178,10 @@ static void *ejecutar_operacion()
             paquete_init->codigo_operacion = OP_CONFIRMADA;
 
             enviar_paquete(paquete_init, socket_client);
-            break;
+            break;*/
         
         case NUEVO_CARPINCHO:
-            log_info(logger_memoria,"MATELIB ENVIO A MEMORIA UN AVISO");
+            log_info(logger_memoria,"MATELIB ENVIO A MEMORIA UN AVISO %d", socket_client);
             t_paquete *paquete = malloc(sizeof(t_paquete));
             paquete->buffer = malloc(sizeof(t_buffer));
             paquete->buffer->size = 0;

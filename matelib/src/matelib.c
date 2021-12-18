@@ -273,12 +273,16 @@ mate_pointer mate_memalloc(mate_instance_pointer *instance_pointer, int size){
             log_info(lib_ref->logger,"Carpincho %d: La funcion MEM_ALLOC se ejecuto correctamente",lib_ref->socket);
             free(paquete_recibido->buffer->stream);        
         }else{
+            printf("codigo: %d", paquete_recibido->codigo_operacion);
             log_error(lib_ref->logger,"Carpincho %d: La funcion MEM_ALLOC no se ejecuto correctamente",lib_ref->socket);
             lib_ref->desconectado = true;
         }
         free(paquete_recibido->buffer);
         free(paquete_recibido);
     }else{
+        while(1){
+
+        }
         log_error(lib_ref->logger, "No se pudo ejecutar la operacion mate close (Servidor desconectado)");       
     }
     return p;
@@ -306,6 +310,7 @@ int mate_memfree(mate_instance_pointer *instance_pointer, mate_pointer addr){
         free(paquete_recibido->buffer);
         free(paquete_recibido);
     }else{
+
         log_error(lib_ref->logger, "No se pudo ejecutar la operacion mate close (Servidor desconectado)");
         ret = MATE_FREE_FAULT;        
     }
@@ -327,6 +332,7 @@ int mate_memread(mate_instance_pointer *instance_pointer, mate_pointer origin, v
             log_info(lib_ref->logger,"Carpincho %d: La funcion MEM_READ se ejecuto correctamente",lib_ref->socket);
             ret = 0;    
         }else{
+            printf("codigo: %d", paquete_recibido->codigo_operacion);
             log_error(lib_ref->logger,"Carpincho %d: La funcion MEM_READ no se ejecuto correctamente",lib_ref->socket);
             lib_ref->desconectado = true;
             ret = MATE_READ_FAULT;
@@ -334,6 +340,9 @@ int mate_memread(mate_instance_pointer *instance_pointer, mate_pointer origin, v
         free(paquete_recibido->buffer);
         free(paquete_recibido);
     }else{
+        while(1){
+            
+        }
         log_error(lib_ref->logger, "No se pudo ejecutar la operacion mate close (Servidor desconectado)");
         ret = MATE_READ_FAULT;        
     }
@@ -355,6 +364,7 @@ int mate_memwrite(mate_instance_pointer *instance_pointer, void *origin, mate_po
             log_info(lib_ref->logger,"Carpincho %d: La funcion MEM_WRITE se ejecuto correctamente",lib_ref->socket);
             ret = 0;    
         }else{
+            printf("codigo: %d", paquete_recibido->codigo_operacion);
             log_error(lib_ref->logger,"Carpincho %d: La funcion MEM_WRITE no se ejecuto correctamente",lib_ref->socket);
             lib_ref->desconectado = true;
             ret = MATE_WRITE_FAULT;

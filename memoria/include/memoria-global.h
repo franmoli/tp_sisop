@@ -135,7 +135,7 @@ t_list *reemplazo_LRU;
 t_lista_clock *reemplazo_CLOCK;
 
 void* tamanio_memoria;
-int socket_server, socket_cliente_swap, socket_client;
+int socket_server, socket_cliente_swap;
 
 
 t_tabla_paginas *tabla_paginas;

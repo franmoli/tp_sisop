@@ -86,6 +86,7 @@ void *serializar_paquete(t_paquete *paquete, int *bytes) {
 /* Utilizar esta función para enviar un paquete */
 void enviar_paquete(t_paquete *paquete, int socket_cliente) {
 	int bytes = paquete->buffer->size + 2 * sizeof(int);
+	printf("SOCKET: %d", socket_cliente);
 	//printf("Paquete a enviar: opcode %d | buffer size %d | dest %d\n", paquete->codigo_operacion, paquete->buffer->size, socket_cliente);
 	void *a_enviar = serializar_paquete(paquete, &bytes);
 	int error = send(socket_cliente, a_enviar, bytes, 0);

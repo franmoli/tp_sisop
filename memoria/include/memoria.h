@@ -8,6 +8,7 @@
 #include "recepcion-mensaje.h"
 #include "mem-dump.h"
 #include "enviar-datos.h"
+#include <semaphore.h>
 
 static void *ejecutar_operacion();
 void imprimirMetricas();
