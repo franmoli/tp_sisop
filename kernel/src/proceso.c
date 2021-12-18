@@ -156,6 +156,7 @@ void exec(t_proceso *self){
                     enviar_paquete(next_task->datos_tarea,socket_cliente_memoria);
                     paquete_recibido = recibir_paquete(socket_cliente_memoria);
                     enviar_paquete(paquete_recibido,self->socket_carpincho);
+                    printf("CODIGO DE OPERACION RECIBIDO: %d",paquete_recibido->codigo_operacion);
                     break;
             }
             free(next_task);

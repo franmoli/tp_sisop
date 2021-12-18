@@ -35,22 +35,25 @@ int buscarEnTLB(int numero_pagina_buscada, int id){
 
 void agregarTLB(int pagina, int marco, int id){
 
-    t_tlb* newElem = malloc(sizeof(t_tlb));
-    newElem->pid = id;
-    newElem->numero_marco = marco;
-    newElem->numero_pagina = pagina;
+    if(config_memoria->CANTIDAD_ENTRADAS_TLB > 0){
+        t_tlb* newElem = malloc(sizeof(t_tlb));
+            newElem->pid = id;
+            newElem->numero_marco = marco;
+            newElem->numero_pagina = pagina;
 
-    if(list_size(tabla_tlb->tlb) < config_memoria->CANTIDAD_ENTRADAS_TLB){
-        list_add(tabla_tlb->tlb,newElem);
-    }else
-    {
-        t_tlb* old = list_get(tabla_tlb->tlb,0);
-        log_info(logger_memoria,"Reemplazo TLB - VICTIMA - PID: %d PAGINA: %d MARCO: %d NUEVO - PID: %d PAGINA: %d MARCO: %d ",old->pid,old->numero_pagina,old->numero_marco,newElem->pid,newElem->numero_pagina,newElem->numero_marco);
-        list_remove(tabla_tlb->tlb,0);
-        list_add(tabla_tlb->tlb,newElem);
+            if(list_size(tabla_tlb->tlb) < config_memoria->CANTIDAD_ENTRADAS_TLB){
+                list_add(tabla_tlb->tlb,newElem);
+            }else
+            {
+                t_tlb* old = list_get(tabla_tlb->tlb,0);
+                log_info(logger_memoria,"Reemplazo TLB - VICTIMA - PID: %d PAGINA: %d MARCO: %d NUEVO - PID: %d PAGINA: %d MARCO: %d ",old->pid,old->numero_pagina,old->numero_marco,newElem->pid,newElem->numero_pagina,newElem->numero_marco);
+                list_remove(tabla_tlb->tlb,0);
+                list_add(tabla_tlb->tlb,newElem);
+            }
     }
+        
 
-    return;
+            return;
 
 }
 
