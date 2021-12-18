@@ -107,6 +107,7 @@ int mate_sem_init(mate_instance_pointer *instance_pointer, mate_sem_name sem, un
     
     mate_instance *lib_ref = instance_pointer->group_info;
     int ret;
+    log_info(lib_ref->logger,"Carpincho %d: Quiero ejecutar SEMINIT",lib_ref->socket);
     if(!lib_ref->desconectado){
         t_paquete *paquete = serializar(INIT_SEM, 4, U_INT, value, CHAR_PTR, sem);
         enviar_paquete(paquete, lib_ref->socket);
@@ -136,6 +137,7 @@ int mate_sem_wait(mate_instance_pointer *instance_pointer, mate_sem_name sem){
 
     mate_instance *lib_ref = instance_pointer->group_info;
     int ret;
+    log_info(lib_ref->logger,"Carpincho %d: Quiero ejecutar SEMWAIT",lib_ref->socket);
     if(!lib_ref->desconectado){
 
         t_paquete *paquete = serializar(SEM_WAIT,2,CHAR_PTR,sem);
@@ -165,6 +167,7 @@ int mate_sem_post(mate_instance_pointer *instance_pointer, mate_sem_name sem){
 
     mate_instance *lib_ref = instance_pointer->group_info;  
     int ret;
+    log_info(lib_ref->logger,"Carpincho %d: Quiero ejecutar SEMPOST",lib_ref->socket);
     if(!lib_ref->desconectado){
 
         t_paquete *paquete = serializar(SEM_POST,2,CHAR_PTR,sem);    
@@ -195,6 +198,7 @@ int mate_sem_destroy(mate_instance_pointer *instance_pointer, mate_sem_name sem)
 
     mate_instance *lib_ref = instance_pointer->group_info;
     int ret;
+    log_info(lib_ref->logger,"Carpincho %d: Quiero ejecutar SEMDESTROY",lib_ref->socket);
     if(!lib_ref->desconectado){
         t_paquete *paquete = serializar(SEM_DESTROY,2,CHAR_PTR,sem); 
         enviar_paquete(paquete,lib_ref->socket);
@@ -223,6 +227,7 @@ int mate_call_io(mate_instance_pointer *instance_pointer, mate_io_resource io, v
 
     mate_instance *lib_ref = instance_pointer->group_info;
     int ret;
+    log_info(lib_ref->logger,"Carpincho %d: Quiero ejecutar CALLIO",lib_ref->socket);
     if(!lib_ref->desconectado){
 
         t_paquete *paquete = serializar(CALLIO,4,CHAR_PTR,io,CHAR_PTR,msg);
@@ -256,9 +261,10 @@ mate_pointer mate_memalloc(mate_instance_pointer *instance_pointer, int size){
 
     mate_pointer p = 0;
     mate_instance *lib_ref = instance_pointer->group_info;
+    log_info(lib_ref->logger,"Carpincho %d: Quiero ejecutar MEMALLOC",lib_ref->socket);
     if(!lib_ref->desconectado){
 
-        t_paquete *paquete = serializar(MEMALLOC,2,INT,size);
+        t_paquete *paquete = serializar(MEMALLOC,4,INT,lib_ref->socket,INT,size);
         enviar_paquete(paquete,lib_ref->socket);
 
         t_paquete *paquete_recibido = recibir_paquete(lib_ref->socket);
@@ -282,9 +288,10 @@ int mate_memfree(mate_instance_pointer *instance_pointer, mate_pointer addr){
 
     mate_instance *lib_ref = instance_pointer->group_info;
     int ret;
+    log_info(lib_ref->logger,"Carpincho %d: Quiero ejecutar MEMFREE",lib_ref->socket);
     if(!lib_ref->desconectado){
 
-        t_paquete *paquete = serializar(MEMFREE,2,INT,addr);
+        t_paquete *paquete = serializar(MEMFREE,4,INT,lib_ref->socket,INT,addr);
         enviar_paquete(paquete,lib_ref->socket);
 
         t_paquete *paquete_recibido = recibir_paquete(lib_ref->socket);    
@@ -309,9 +316,10 @@ int mate_memread(mate_instance_pointer *instance_pointer, mate_pointer origin, v
 
     mate_instance *lib_ref = instance_pointer->group_info;
     int ret;
+    log_info(lib_ref->logger,"Carpincho %d: Quiero ejecutar MEMREAD",lib_ref->socket);
     if(!lib_ref->desconectado){
 
-        t_paquete *paquete = serializar(MEMREAD,6,INT,origin,CHAR_PTR,dest,INT,size);
+        t_paquete *paquete = serializar(MEMREAD,8,INT,lib_ref->socket,INT,origin,CHAR_PTR,dest,INT,size);
         enviar_paquete(paquete,lib_ref->socket);
 
         t_paquete *paquete_recibido = recibir_paquete(lib_ref->socket);    
@@ -336,9 +344,10 @@ int mate_memwrite(mate_instance_pointer *instance_pointer, void *origin, mate_po
 
     mate_instance *lib_ref = instance_pointer->group_info;
     int ret;
+    log_info(lib_ref->logger,"Carpincho %d: Quiero ejecutar MEMWRITE",lib_ref->socket);
     if(!lib_ref->desconectado){
 
-        t_paquete *paquete = serializar(MEMWRITE,6,CHAR_PTR,origin,INT,dest,INT,size);
+        t_paquete *paquete = serializar(MEMWRITE,8,INT,lib_ref->socket,CHAR_PTR,origin,INT,dest,INT,size);
         enviar_paquete(paquete,lib_ref->socket);
 
         t_paquete *paquete_recibido = recibir_paquete(lib_ref->socket);    

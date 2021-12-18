@@ -241,12 +241,17 @@ void guardarAlloc(t_heap_metadata *data, uint32_t direccion)
 int memAlloc(t_paquete *paquete)
 {
 
-    t_malloc_serializado *mallocDeserializado = deserializar_alloc(paquete);
+    /*t_malloc_serializado *mallocDeserializado = deserializar_alloc(paquete);
 
     int size = mallocDeserializado->size_reservar;
-    int carpincho_id = socket_client;
+    
     free(mallocDeserializado);
+*/
+    int carpincho_id = 0;
+    int size = 0;
 
+    deserializar(paquete,4,INT,&carpincho_id,INT,&size);
+    
     if(size == 10){
         int a = 0;
         a++;
