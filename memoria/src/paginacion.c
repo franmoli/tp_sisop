@@ -69,11 +69,12 @@ char *memRead(t_paquete *paquete)
    
    int inicio = tamanio_memoria;
    int numero_pagina = (direccion_logica - inicio) / config_memoria->TAMANIO_PAGINA;
-   t_tabla_paginas* tabla_paginas = buscarTablaPorPID(socket_client);
+   t_tabla_paginas* tabla_paginas = buscarTablaPorPID(carpincho_id);
+
    t_pagina* pagina = pagina = list_get(tabla_paginas->paginas,numero_pagina);
    int desplazamiento = ((direccion_logica-inicio) % config_memoria->TAMANIO_PAGINA)  + sizeof(t_heap_metadata);
 
-   if(numero_pagina > list_size(tabla_paginas)){
+   if(numero_pagina > list_size(tabla_paginas->paginas)){
        return "FAIL";
    }
 
