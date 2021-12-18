@@ -58,7 +58,7 @@ int main(int argc, char **argv)
         signal(SIGUSR2, limpiarTlb);
 
     indice = 0;
-
+    sem_init(&mutex_memoria,0,1);
     while (1)
     {   
         printf("Esperando cliente\n");
@@ -92,7 +92,9 @@ static void *ejecutar_operacion()
             break;
         case MEMALLOC:
             log_info(logger_memoria, "recibi orden de memalloc del cliente %d", socket_client);
+            sem_wait(&mutex_memoria);
             int dire_logica =memAlloc(paquete);
+            sem_post(&mutex_memoria);
             if(dire_logica <0){
                 //NO HAY MEMORIA Y SWAP NO PUDO GUARDAR
                 t_paquete* paquete_enviar = serializar(DIRECCION_LOGICA_INVALIDA,2,INT,dire_logica);
@@ -109,11 +111,13 @@ static void *ejecutar_operacion()
             break;
         case MEMFREE:
             log_info(logger_memoria, "recibi orden de memfree del cliente %d", socket_client);
+            sem_wait(&mutex_memoria);
             int resultado_free = freeAlloc(paquete);
+            sem_post(&mutex_memoria);
             if(resultado_free < 0){
                 //NO SE PUDO LIBERAR
                 t_paquete* paquete_enviar = serializar(DIRECCION_LOGICA_INVALIDA,2,INT,0);
-                log_info(logger_memoria,"No se pudo liberar la direccion logica de memoria solicitada.");
+                log_error(logger_memoria,"No se pudo liberar la direccion logica de memoria solicitada.");
                 enviar_paquete(paquete_enviar,socket_client);
             }
             else{
@@ -127,11 +131,13 @@ static void *ejecutar_operacion()
 
         case MEMWRITE:
             log_info(logger_memoria, "recibi orden de memwrite del cliente %d", socket_client);
+            sem_wait(&mutex_memoria);
             int resultado_write = memWrite(paquete);
+            sem_post(&mutex_memoria);
             if(resultado_write< 0){
                 //NO SE PUDO ESCRIBIR
                 t_paquete* paquete_enviar = serializar(DIRECCION_LOGICA_INVALIDA,2,INT,0);
-                log_info(logger_memoria,"No se pudo escribir en la direccion logica solicitada.");
+                log_error(logger_memoria,"No se pudo escribir en la direccion logica solicitada.");
                 enviar_paquete(paquete_enviar,socket_client);
             }
             else{
@@ -144,7 +150,9 @@ static void *ejecutar_operacion()
             break;
         case MEMREAD:
             log_info(logger_memoria, "recibi orden de leer memoria del cliente %d", socket_client);
+            sem_wait(&mutex_memoria);
             char *data = memRead(paquete);
+            sem_post(&mutex_memoria);
             if(string_equals_ignore_case(data,"FAIL")){
                 //NO SE PUDO LEER
                 t_paquete* paquete_enviar = serializar(DIRECCION_LOGICA_INVALIDA,2,INT,0);
@@ -161,7 +169,13 @@ static void *ejecutar_operacion()
             break;
         case MATEINIT:
             log_info(logger_memoria, "recibi un nuevo carpincho para inicializar del cliente %d", socket_client);
-            //inicializarCarpincho(paquete);
+            t_paquete *paquete_init = malloc(sizeof(t_paquete));
+            paquete_init->buffer = malloc(sizeof(t_buffer));
+            paquete_init->buffer->size = 0;
+            paquete_init->buffer->stream = NULL;
+            paquete_init->codigo_operacion = OP_CONFIRMADA;
+
+            enviar_paquete(paquete_init, socket_client);
             break;
         
         case NUEVO_CARPINCHO:
@@ -174,14 +188,7 @@ static void *ejecutar_operacion()
 
             enviar_paquete(paquete, socket_client);
             break;
-
-          /*case INIT_SEM:
-            log_info(logger_memoria,"MATELIB ENVIO A MEMORIA UN AVISO");
-            t_paquete *paquete_enviado = serializar(DIRECCION_LOGICA_INVALIDA,2,INT,0);
-            enviar_paquete(paquete_enviado, socket_client);
-
-            break;*/
-
+            
         default:
             log_error(logger_memoria, "Codigo de operacion desconocido. Codigo operacion recibida: %d",paquete->codigo_operacion);
             t_paquete *paquete_enviado_error = serializar(DIRECCION_LOGICA_INVALIDA,2,INT,0);
