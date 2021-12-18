@@ -163,7 +163,7 @@ void exec(t_proceso *self){
     }
 
     //Solo por debug, borrar despues
-    
+    //sleep(1);
     self->ejecucion_anterior = ((clock() - reloj_i) / CLOCKS_PER_SEC) * 1000;
     self->estimar = true;
 
