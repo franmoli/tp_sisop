@@ -215,7 +215,7 @@ int enviarPaginaSwap(t_pagina* pagina){
     while(list_iterator_has_next(list_iterator))
     {
          t_heap_contenido_enviado* heap_swap  = list_iterator_next(list_iterator);
-         if(heap_swap->nextAlloc != 0)
+         if(heap_swap->nextAlloc != 0 && !string_equals_ignore_case(heap_swap->contenido,"basura"))
             free(heap_swap->contenido);
             
          free(heap_swap);

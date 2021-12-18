@@ -57,7 +57,7 @@ int main(int argc, char **argv)
         signal(SIGUSR1, generarDump);
         signal(SIGUSR2, limpiarTlb);
 
-
+    indice = 0;
 
     /*inicializarCarpincho(0);
     socket_client = 0;

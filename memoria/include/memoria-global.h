@@ -140,4 +140,5 @@ int socket_server, socket_cliente_swap, socket_client;
 
 t_tabla_paginas *tabla_paginas;
 pthread_mutex_t mutex_envio_pagina;
+int indice;
 #endif

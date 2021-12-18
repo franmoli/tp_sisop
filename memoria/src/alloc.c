@@ -291,6 +291,10 @@ int memAlloc(t_paquete *paquete)
         int index = 0;
         while (data->nextAlloc != 0)
         {
+            indice++;
+            if(indice ==71){
+                printf("llegue");
+            }
             log_warning(logger_memoria,"estoy en el while pev: %d, next: %d", data->prevAlloc, data->nextAlloc);
             if (data->isFree)
             {
@@ -378,7 +382,13 @@ int memAlloc(t_paquete *paquete)
                 direccion_fisica_anterior = contenido_pagina_actual->dir_fin;
                 nextAnterior = inicio +config_memoria->TAMANIO_PAGINA + pagina_alloc_actual->numero_pagina * config_memoria->TAMANIO_PAGINA;
             }
-
+            if(contenido_pagina_actual->contenido_pagina == RESTO_ALLOC){
+                if(contenido_pagina_actual->subcontenido->contenido_pagina == PREV){
+                    //memcpy();
+                    int t = 0;
+                    t++;
+                }
+            }
             data = traerAllocDeMemoria(direccion_fisica_anterior);
             index++;
         }
