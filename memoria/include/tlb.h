@@ -4,6 +4,7 @@
 #include "memoria-global.h"
 #include <commons/collections/list.h>
 #include <commons/collections/queue.h>
+#include <commons/string.h>
 
 int buscarEnTLB(int numero_pagina, int id);
 

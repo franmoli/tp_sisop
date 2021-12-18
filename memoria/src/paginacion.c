@@ -613,7 +613,7 @@ void escribirAllocIncompleto(int marco,uint32_t dir_comienzo,uint32_t dir_fin,vo
 
 int getMarco(t_tabla_paginas* tabla_paginas){
     int numeroMarco = -1;
-    if(strcmp(config_memoria->ALGORITMO_REEMPLAZO_MMU, "DINAMICA") == 0){
+    if(strcmp(config_memoria->TIPO_ASIGNACION, "DINAMICA") == 0){
         t_list_iterator *list_iterator = list_iterator_create(tabla_marcos_memoria->marcos);
         bool marcoDisponible = false;
         while (list_iterator_has_next(list_iterator) && !marcoDisponible)
@@ -624,6 +624,10 @@ int getMarco(t_tabla_paginas* tabla_paginas){
                 marcoDisponible = true;
                 numeroMarco = marco->numero_marco;
                 list_iterator_destroy(list_iterator);
+
+                if(numeroMarco > 4){
+                    printf("asd");
+                }
                 return numeroMarco;
             }
         }
@@ -634,11 +638,17 @@ int getMarco(t_tabla_paginas* tabla_paginas){
             //Asigno una nueva pagina al marco correspondiente
             int numero = getIndexByPid(tabla_paginas->pid);
             numeroMarco =  numero * config_memoria->MARCOS_POR_CARPINCHO + tabla_paginas->paginas_en_memoria;
+            if(numeroMarco > 4){
+                    printf("asd");
+                }
             return numeroMarco;
         }
 
     }
-
+    if(numeroMarco >4){
+        printf("llego");
+    }
+    log_error(logger_memoria,"MARCO: %d", numeroMarco);
     return numeroMarco;
 
 }
@@ -757,6 +767,9 @@ int solicitarPaginaNueva(uint32_t carpincho_id)
         marco = reemplazarPagina();
         if(marco < 0)
             return -1;
+    }
+    if(marco > 4){
+        printf("asd");
     }
     int numero_pagina = 0;
     if (list_size(tabla_paginas->paginas) > 0)
