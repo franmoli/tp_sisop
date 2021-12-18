@@ -20,7 +20,7 @@ t_config_matelib* obtenerConfig(char* config){
 int mate_init(mate_instance_pointer *instance_pointer, char *config){
 
     char *string = malloc(sizeof(char)*50);
-    socket_cliente   = -1;
+    int socket_cliente   = -1;
 
     instance_pointer->group_info = malloc(sizeof(mate_instance));
     mate_instance *lib_ref = instance_pointer->group_info;
@@ -51,6 +51,7 @@ int mate_init(mate_instance_pointer *instance_pointer, char *config){
         exit(EXIT_FAILURE);
     }
     lib_ref->socket = socket_cliente;
+    printf("CONECTADO SOCKET %d", socket_cliente);
     //Creo el paquete para enviar la señal a kernel o memoria.
     t_paquete *paquete = malloc(sizeof(t_paquete));
     t_buffer *buffer = malloc(sizeof(t_buffer));

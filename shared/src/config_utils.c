@@ -79,6 +79,7 @@ t_config_memoria *generarConfigMemoria(t_config *config){
     config_memoria->MARCOS_POR_CARPINCHO = config_get_int_value(config, "MARCOS_POR_CARPINCHO");
     config_memoria->TAMANIO_PAGINA = config_get_int_value(config, "TAMANIO_PAGINA");
     config_memoria->PATH_DUMP_TLB = config_get_string_value(config, "PATH_DUMP_TLB");
+    config_memoria->IP_SWAP = config_get_string_value(config, "IP_SWAP");
     return config_memoria;
 }
 

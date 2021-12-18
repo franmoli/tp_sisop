@@ -26,6 +26,7 @@ typedef struct {
 
 typedef struct {
     char *IP;
+    char *IP_SWAP;
     int TAMANIO;
     char *PUERTO;
     char *ALGORITMO_REEMPLAZO_MMU;

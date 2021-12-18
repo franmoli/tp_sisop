@@ -5,14 +5,14 @@ int main(int argc, char **argv)
     system("clear");
     logger_memoria = log_create("./cfg/memoria.log", "MEMORIA", true, LOG_LEVEL_INFO);
     log_info(logger_memoria, "Programa inicializado correctamente");
-    pthread_t hilo_client;
+   
     t_config *config = leer_config_file("./cfg/memoria.cfg");
     config_memoria = generarConfigMemoria(config);
     log_info(logger_memoria, "Configuración cargada correctamente");
     tamanio_memoria = malloc(config_memoria->TAMANIO);
     socket_server = iniciar_servidor(config_memoria->IP, (config_memoria->PUERTO), logger_memoria);
     
-    socket_cliente_swap = crear_conexion(config_memoria->IP, "5002");
+    socket_cliente_swap = crear_conexion(config_memoria->IP_SWAP, "5002");
     if (socket_cliente_swap == -1) {
         log_info(logger_memoria, "Fallo en la conexion a swap");
     }
@@ -59,15 +59,19 @@ int main(int argc, char **argv)
 
     indice = 0;
     sem_init(&mutex_memoria,0,1);
+    sem_init(&mutex_memoria,0,1);
 
     while (1)
     {   
         printf("Esperando cliente\n");
         int socket_client = esperar_cliente(socket_server, logger_memoria);
+        int *socekt = malloc(sizeof(int));
+        *socekt = socket_client;
         if (socket_client != -1)
         {
             //inicializarCarpincho(socket_client);
-            pthread_create(&hilo_client, NULL, (void *)ejecutar_operacion, (void *)socket_client);
+            pthread_t hilo_client;
+            pthread_create(&hilo_client, NULL, (void *)ejecutar_operacion, (void *)socekt);
         }
     }
     log_info(logger_memoria, "Programa finalizado con éxito");
@@ -76,8 +80,9 @@ int main(int argc, char **argv)
     free(config_memoria);
 }
 
-static void *ejecutar_operacion(int socket_client)
+static void *ejecutar_operacion(int *socket_client_p)
 {
+    int socket_client = *socket_client_p;
     while (1)
     {   
         log_info(logger_memoria, "Esperando recibir paquete por parte de kernel %d", socket_client);        
@@ -91,10 +96,11 @@ static void *ejecutar_operacion(int socket_client)
             log_info(logger_memoria, "Mensaje de prueba recibido correctamente por el cliente %d", socket_client);
             break;
         case MEMALLOC:
-            log_info(logger_memoria, "recibi orden de memalloc del cliente %d", socket_client);
-            sem_wait(&mutex_memoria);
+        sem_wait(&mutex_memoria);
+            log_info(logger_memoria, "MEMALLOC %d", socket_client);
+            
             int dire_logica =memAlloc(paquete);
-            sem_post(&mutex_memoria);
+            
             if(dire_logica <0){
                 //NO HAY MEMORIA Y SWAP NO PUDO GUARDAR
                 t_paquete* paquete_enviar = serializar(DIRECCION_LOGICA_INVALIDA,2,INT,dire_logica);
@@ -108,13 +114,14 @@ static void *ejecutar_operacion(int socket_client)
                 enviar_paquete(paquete_enviar,socket_client);
                 log_info(logger_memoria,"Paquete enviado");
             }
-            
+            sem_post(&mutex_memoria);
             break;
         case MEMFREE:
-            log_info(logger_memoria, "recibi orden de memfree del cliente %d", socket_client);
             sem_wait(&mutex_memoria);
+            log_info(logger_memoria, "recibi orden de memfree del cliente %d", socket_client);
+            
             int resultado_free = freeAlloc(paquete);
-            sem_post(&mutex_memoria);
+           
             if(resultado_free < 0){
                 //NO SE PUDO LIBERAR
                 t_paquete* paquete_enviar = serializar(DIRECCION_LOGICA_INVALIDA,2,INT,0);
@@ -128,13 +135,15 @@ static void *ejecutar_operacion(int socket_client)
                 enviar_paquete(paquete_enviar,socket_client);
                 log_info(logger_memoria,"Paquete enviado");
             }
+             sem_post(&mutex_memoria);
             break;
 
         case MEMWRITE:
-            log_info(logger_memoria, "recibi orden de memwrite del cliente %d", socket_client);
             sem_wait(&mutex_memoria);
+            log_warning(logger_memoria, "MEMWRITE %d", socket_client);
+            
             int resultado_write = memWrite(paquete);
-             sem_post(&mutex_memoria);
+            
             if(resultado_write< 0){
                 //NO SE PUDO ESCRIBIR
                 t_paquete* paquete_enviar = serializar(DIRECCION_LOGICA_INVALIDA,2,INT,0);
@@ -148,12 +157,12 @@ static void *ejecutar_operacion(int socket_client)
                 enviar_paquete(paquete_enviar,socket_client);
                 log_info(logger_memoria,"Paquete enviado");
             }
+             sem_post(&mutex_memoria);
             break;
         case MEMREAD:
-            log_info(logger_memoria, "recibi orden de leer memoria del cliente %d", socket_client);
             sem_wait(&mutex_memoria);
+            log_warning(logger_memoria, "MEMREAD %d", socket_client);
             char *data = memRead(paquete);
-              sem_post(&mutex_memoria);
            
             if(string_equals_ignore_case(data,"FAIL")){
                 //NO SE PUDO LEER
@@ -168,26 +177,17 @@ static void *ejecutar_operacion(int socket_client)
                 enviar_paquete(paquete_enviar,socket_client);
                 log_info(logger_memoria,"Paquete enviado");
             }
+            sem_post(&mutex_memoria);
             break;
-        /*case MATEINIT:
-            log_info(logger_memoria, "recibi un nuevo carpincho para inicializar del cliente %d", socket_client);
-            t_paquete *paquete_init = malloc(sizeof(t_paquete));
-            paquete_init->buffer = malloc(sizeof(t_buffer));
-            paquete_init->buffer->size = 0;
-            paquete_init->buffer->stream = NULL;
-            paquete_init->codigo_operacion = OP_CONFIRMADA;
 
-            enviar_paquete(paquete_init, socket_client);
-            break;*/
-        
         case NUEVO_CARPINCHO:
-            log_info(logger_memoria,"MATELIB ENVIO A MEMORIA UN AVISO %d", socket_client);
+            log_warning(logger_memoria,"NUEVO CARPINCHO %d", socket_client);
             t_paquete *paquete = malloc(sizeof(t_paquete));
             paquete->buffer = malloc(sizeof(t_buffer));
             paquete->buffer->size = 0;
             paquete->buffer->stream = NULL;
             paquete->codigo_operacion = OP_CONFIRMADA;
-
+           
             enviar_paquete(paquete, socket_client);
             break;
             
