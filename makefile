@@ -82,5 +82,7 @@ deploy_obj:
 	mkdir obj
 	cd $(KERNEL_DIR) && \
 	mkdir obj
+	cd $(MATELIB_DIR) && \
+	mkdir obj
 
 deploy: deploy_obj compile
