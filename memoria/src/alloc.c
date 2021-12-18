@@ -4,10 +4,12 @@ int freeAlloc(t_paquete *paquete)
 {
    uint32_t inicio = tamanio_memoria;
 
-    t_malloc_serializado *mallocDeserializado = deserializar_alloc(paquete);
+    //t_malloc_serializado *mallocDeserializado = deserializar_alloc(paquete);
 
-    uint32_t direccion = mallocDeserializado->size_reservar;
-    free(mallocDeserializado);
+    uint32_t direccion = 0;
+    int carpincho_id = 0;
+
+    deserializar(paquete,4,INT,&carpincho_id,U_INT,&direccion);
     
 
     int nropaginaAllocActual = getPaginaByDireccionLogica(direccion-inicio);

@@ -63,8 +63,9 @@ char *memRead(t_paquete *paquete)
 {
 
    int32_t direccion_logica ; 
+   int carpincho_id = 0;
 
-   deserializar(paquete,2,INT,&direccion_logica);
+   deserializar(paquete,4,INT,carpincho_id,INT,&direccion_logica);
    
    int inicio = tamanio_memoria;
    int numero_pagina = (direccion_logica - inicio) / config_memoria->TAMANIO_PAGINA;
@@ -195,8 +196,9 @@ int memWrite(t_paquete *paquete)
    int size = 0;
    uint32_t direccion_logica = 0 ; 
    uint32_t inicio = tamanio_memoria;
+   int carpincho_id = 0;
 
-   deserializar(paquete,6,CHAR_PTR,&contenido_escribir,INT,&direccion_logica,INT,&size);
+   deserializar(paquete,8,INT,&carpincho_id,CHAR_PTR,&contenido_escribir,INT,&direccion_logica,INT,&size);
    int numero_pagina_original = (direccion_logica - inicio) / config_memoria->TAMANIO_PAGINA;
    int desplazamiento = ((direccion_logica-inicio) % config_memoria->TAMANIO_PAGINA) + sizeof(t_heap_metadata);
    
