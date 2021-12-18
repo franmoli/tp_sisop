@@ -35,7 +35,7 @@ int mate_init(mate_instance_pointer *instance_pointer, char *config){
     strcat(string,".log");
     
     //TODO Fijarse como usar el log_level_debug para instanciarlo desde config (string to enum)
-    lib_ref->logger = log_create(string,"MATELIB",true,LOG_LEVEL_DEBUG);
+    lib_ref->logger = log_create(string,"MATELIB",true,lib_ref->config->LOG_LEVEL);
     
     free(string);
 
