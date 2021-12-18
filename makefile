@@ -74,3 +74,13 @@ compile : matelib_c kernel_c mem_c swap_c
 mem: compile mem_r
 
 swap: compile swap_r
+
+deploy_obj: 
+	cd $(SWAP_DIR) && \
+	mkdir obj
+	cd $(MEMORY_DIR) && \
+	mkdir obj
+	cd $(KERNEL_DIR) && \
+	mkdir obj
+
+deploy: deploy_obj compile
