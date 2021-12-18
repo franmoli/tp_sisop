@@ -51,6 +51,9 @@ run5: clean build $(CARPINCHOS)
 run6: clean build $(CARPINCHOS)
 	./build/PruebaDeadlock cfg/matelib.cfg
 
+run7: clean build $(CARPINCHOS)
+	./build/prueba_tlb_fifo cfg/matelib.cfg
+
 runDL: run6
 
 rundl: runDL

@@ -257,6 +257,7 @@ int memAlloc(t_paquete *paquete)
         int a = 0;
         a++;
     }
+    log_warning(logger_memoria,"SOLICITO MEMALLOC DE %d", size);
 
     tabla_paginas = buscarTablaPorPID(carpincho_id);
    
@@ -273,6 +274,7 @@ int memAlloc(t_paquete *paquete)
         t_contenidos_pagina *contenido = list_get(pagina->listado_de_contenido, 0);
         t_heap_metadata *header = traerAllocDeMemoria(contenido->dir_comienzo);
         uint32_t offset = (contenido->dir_comienzo - inicio) % config_memoria->TAMANIO_PAGINA;
+        pagina = list_get(tabla_paginas->paginas,list_size(tabla_paginas->paginas)-1);
         //uint32_t dire = inicio + pagina->numero_pagina * config_memoria->TAMANIO_PAGINA + offset;
         direccion_logica = agregarPagina(pagina, header, inicio, sizeof(t_heap_metadata), true,0);
         free(header);
@@ -417,44 +419,102 @@ int memAlloc(t_paquete *paquete)
 void crearPrimerHeader(t_pagina *pagina, uint32_t size)
 {
     uint32_t inicio = tamanio_memoria;
-    t_heap_metadata *data = malloc(sizeof(t_heap_metadata));
-    data->nextAlloc = inicio + (pagina->numero_pagina * config_memoria->TAMANIO_PAGINA) + sizeof(t_heap_metadata) + size;
-    data->prevAlloc = NULL;
-    data->isFree = false;
+    if(pagina->tamanio_ocupado + size + sizeof(t_heap_metadata) <= config_memoria->TAMANIO_PAGINA){
+        t_heap_metadata *data = malloc(sizeof(t_heap_metadata));
+        data->nextAlloc = inicio + (pagina->numero_pagina * config_memoria->TAMANIO_PAGINA) + sizeof(t_heap_metadata) + size;
+        data->prevAlloc = NULL;
+        data->isFree = false;
 
-    guardarAlloc(data, (inicio + (pagina->marco_asignado * config_memoria->TAMANIO_PAGINA)));
-    free(data);
+        guardarAlloc(data, (inicio + (pagina->marco_asignado * config_memoria->TAMANIO_PAGINA)));
+        free(data);
 
-    pagina->cantidad_contenidos += 1;
-    pagina->tamanio_ocupado += sizeof(t_heap_metadata) + size;
+        pagina->cantidad_contenidos += 1;
+        pagina->tamanio_ocupado += sizeof(t_heap_metadata) + size;
 
-    t_contenidos_pagina *contenido = malloc(sizeof(t_contenidos_pagina));
-    contenido->carpincho_id = pagina->carpincho_id;
-    contenido->dir_comienzo = inicio + (pagina->marco_asignado * config_memoria->TAMANIO_PAGINA);
-    contenido->dir_fin = contenido->dir_comienzo + sizeof(t_heap_metadata);
-    contenido->contenido_pagina = HEADER;
-    contenido->tamanio = sizeof(t_heap_metadata);
-    list_add(pagina->listado_de_contenido, contenido);
+        t_contenidos_pagina *contenido = malloc(sizeof(t_contenidos_pagina));
+        contenido->carpincho_id = pagina->carpincho_id;
+        contenido->dir_comienzo = inicio + (pagina->marco_asignado * config_memoria->TAMANIO_PAGINA);
+        contenido->dir_fin = contenido->dir_comienzo + sizeof(t_heap_metadata);
+        contenido->contenido_pagina = HEADER;
+        contenido->tamanio = sizeof(t_heap_metadata);
+        list_add(pagina->listado_de_contenido, contenido);
 
-    t_contenidos_pagina *contenido_contenido = malloc(sizeof(t_contenidos_pagina));
-    contenido_contenido->carpincho_id = pagina->carpincho_id;
-    contenido_contenido->dir_comienzo = contenido->dir_fin;
-    contenido_contenido->dir_fin = contenido_contenido->dir_comienzo + size;
-    contenido_contenido->contenido_pagina = CONTENIDO;
-    contenido_contenido->tamanio = size;
-    list_add(pagina->listado_de_contenido, contenido_contenido);
+        t_contenidos_pagina *contenido_contenido = malloc(sizeof(t_contenidos_pagina));
+        contenido_contenido->carpincho_id = pagina->carpincho_id;
+        contenido_contenido->dir_comienzo = contenido->dir_fin;
+        contenido_contenido->dir_fin = contenido_contenido->dir_comienzo + size;
+        contenido_contenido->contenido_pagina = CONTENIDO;
+        contenido_contenido->tamanio = size;
+        list_add(pagina->listado_de_contenido, contenido_contenido);
 
-    if((config_memoria->TAMANIO_PAGINA - pagina->tamanio_ocupado) < sizeof(uint32_t)
-     && (config_memoria->TAMANIO_PAGINA - pagina->tamanio_ocupado) > 0){
-        uint32_t fragmentacion_numero = (config_memoria->TAMANIO_PAGINA - pagina->tamanio_ocupado);
-        t_contenidos_pagina *fragmentacion = malloc(sizeof(t_contenidos_pagina));
-        fragmentacion->carpincho_id = pagina->carpincho_id;
-        fragmentacion->dir_comienzo = contenido_contenido->dir_fin;
-        fragmentacion->dir_fin = fragmentacion->dir_comienzo + fragmentacion_numero;
-        fragmentacion->contenido_pagina = FRAGMENTACION;
-        fragmentacion->tamanio = fragmentacion_numero;
-        pagina->tamanio_fragmentacion +=fragmentacion_numero;
-        list_add(pagina->listado_de_contenido, fragmentacion);
+        if((config_memoria->TAMANIO_PAGINA - pagina->tamanio_ocupado) < sizeof(uint32_t)
+        && (config_memoria->TAMANIO_PAGINA - pagina->tamanio_ocupado) > 0){
+            uint32_t fragmentacion_numero = (config_memoria->TAMANIO_PAGINA - pagina->tamanio_ocupado);
+            t_contenidos_pagina *fragmentacion = malloc(sizeof(t_contenidos_pagina));
+            fragmentacion->carpincho_id = pagina->carpincho_id;
+            fragmentacion->dir_comienzo = contenido_contenido->dir_fin;
+            fragmentacion->dir_fin = fragmentacion->dir_comienzo + fragmentacion_numero;
+            fragmentacion->contenido_pagina = FRAGMENTACION;
+            fragmentacion->tamanio = fragmentacion_numero;
+            pagina->tamanio_fragmentacion +=fragmentacion_numero;
+            list_add(pagina->listado_de_contenido, fragmentacion);
+        }
+    }else{
+       if(pagina->tamanio_ocupado + sizeof(t_heap_metadata) <= config_memoria->TAMANIO_PAGINA){
+           t_heap_metadata *data = malloc(sizeof(t_heap_metadata));
+            data->nextAlloc = inicio + (pagina->numero_pagina * config_memoria->TAMANIO_PAGINA) + sizeof(t_heap_metadata)+size;
+            data->prevAlloc = NULL;
+            data->isFree = false;
+
+            guardarAlloc(data, (inicio + (pagina->marco_asignado * config_memoria->TAMANIO_PAGINA)));
+            
+
+            pagina->cantidad_contenidos += 1;
+            pagina->tamanio_ocupado += sizeof(t_heap_metadata);
+
+            t_contenidos_pagina *contenido = malloc(sizeof(t_contenidos_pagina));
+            contenido->carpincho_id = pagina->carpincho_id;
+            contenido->dir_comienzo = inicio + (pagina->marco_asignado * config_memoria->TAMANIO_PAGINA);
+            contenido->dir_fin = contenido->dir_comienzo + sizeof(t_heap_metadata);
+            contenido->contenido_pagina = HEADER;
+            contenido->tamanio = sizeof(t_heap_metadata);
+            list_add(pagina->listado_de_contenido, contenido);
+
+            int restante = size - (config_memoria->TAMANIO_PAGINA - pagina->tamanio_ocupado);
+            
+             t_contenidos_pagina *contenido_resto = malloc(sizeof(t_contenidos_pagina));
+                contenido_resto->carpincho_id = pagina->carpincho_id;
+                contenido_resto->contenido_pagina = RESTO_CONTENIDO;
+                contenido_resto->tamanio = (size - restante);
+
+                contenido_resto->dir_comienzo = inicio + pagina->marco_asignado * config_memoria->TAMANIO_PAGINA +  sizeof(t_heap_metadata);
+                contenido_resto->dir_fin = contenido_resto->dir_comienzo + (size - restante);
+                list_add(pagina->listado_de_contenido,contenido_resto);
+
+                pagina->cantidad_contenidos += 1;
+                pagina->tamanio_ocupado += (size - restante);
+
+                int numero_pagina = solicitarPaginaNueva(pagina->carpincho_id);
+                if(numero_pagina < 0){
+                    return -1;
+                }
+
+                pagina = list_get(tabla_paginas->paginas, numero_pagina);
+                t_contenidos_pagina *contenido_nuevo = malloc(sizeof(t_contenidos_pagina));
+                contenido_nuevo->carpincho_id = pagina->carpincho_id;
+                contenido_nuevo->tamanio = restante;
+                contenido_nuevo->contenido_pagina= RESTO_CONTENIDO;
+                contenido_nuevo->dir_comienzo = inicio + pagina->marco_asignado * config_memoria->TAMANIO_PAGINA;
+                contenido_nuevo->dir_fin = contenido_nuevo->dir_comienzo + restante;
+
+                list_add(pagina->listado_de_contenido,contenido_nuevo);
+                pagina->cantidad_contenidos += 1;
+                pagina->tamanio_ocupado+= restante;
+
+                free(data);
+        }else{
+            return -1;
+        }
     }
 }
 
