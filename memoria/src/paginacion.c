@@ -65,11 +65,11 @@ char *memRead(t_paquete *paquete)
    int32_t direccion_logica ; 
    int carpincho_id = 0;
 
-   deserializar(paquete,4,INT,carpincho_id,INT,&direccion_logica);
+   deserializar(paquete,4,INT,&carpincho_id,INT,&direccion_logica);
    
    int inicio = tamanio_memoria;
    int numero_pagina = (direccion_logica - inicio) / config_memoria->TAMANIO_PAGINA;
-   t_tabla_paginas* tabla_paginas = buscarTablaPorPID(carpincho_id);
+   tabla_paginas = buscarTablaPorPID(carpincho_id);
 
    t_pagina* pagina = pagina = list_get(tabla_paginas->paginas,numero_pagina);
    int desplazamiento = ((direccion_logica-inicio) % config_memoria->TAMANIO_PAGINA)  + sizeof(t_heap_metadata);
