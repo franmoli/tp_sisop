@@ -291,7 +291,7 @@ int mate_memfree(mate_instance_pointer *instance_pointer, mate_pointer addr){
     log_info(lib_ref->logger,"Carpincho %d: Quiero ejecutar MEMFREE",lib_ref->socket);
     if(!lib_ref->desconectado){
 
-        t_paquete *paquete = serializar(MEMFREE,4,INT,lib_ref->socket,INT,addr);
+        t_paquete *paquete = serializar(MEMFREE,4,INT,lib_ref->socket,U_INT,addr);
         enviar_paquete(paquete,lib_ref->socket);
 
         t_paquete *paquete_recibido = recibir_paquete(lib_ref->socket);    
