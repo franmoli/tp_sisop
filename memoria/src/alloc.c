@@ -251,12 +251,13 @@ int memAlloc(t_paquete *paquete)
     int size = 0;
 
     deserializar(paquete,4,INT,&carpincho_id,INT,&size);
-    
-    if(size == 10){
+     if(size == 10 || carpincho_id == 7){
         int a = 0;
         a++;
     }
 
+    tabla_paginas = buscarTablaPorPID(carpincho_id);
+   
     uint32_t inicio = tamanio_memoria;
     uint32_t direccion_logica;
     if (list_is_empty(tabla_paginas->paginas))
@@ -269,7 +270,9 @@ int memAlloc(t_paquete *paquete)
         crearPrimerHeader(pagina, size);
         t_contenidos_pagina *contenido = list_get(pagina->listado_de_contenido, 0);
         t_heap_metadata *header = traerAllocDeMemoria(contenido->dir_comienzo);
-        direccion_logica = agregarPagina(pagina, header, contenido->dir_comienzo, sizeof(t_heap_metadata), true,0);
+        uint32_t offset = (contenido->dir_comienzo - inicio) % config_memoria->TAMANIO_PAGINA;
+        //uint32_t dire = inicio + pagina->numero_pagina * config_memoria->TAMANIO_PAGINA + offset;
+        direccion_logica = agregarPagina(pagina, header, inicio, sizeof(t_heap_metadata), true,0);
         free(header);
         return direccion_logica;
     }

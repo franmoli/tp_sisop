@@ -689,8 +689,7 @@ t_tabla_paginas *buscarTablaPorPID(int id)
 
     if (list_size(tabla_procesos) == 0)
     {
-        //No existen procesos
-        return 1000;
+        inicializarCarpincho(id);
     }
 
     int numeroTabla = -1;
@@ -706,11 +705,11 @@ t_tabla_paginas *buscarTablaPorPID(int id)
             return tabla;
         }
     }
-
-    //No se encontro la tabla --> me pego un tiro
-    log_info(logger_memoria, "No se encontro la tabla perteneciente al proceso");
-    list_iterator_destroy(list_iterator);
-    return 1000;
+    if(numeroTabla == -1){
+        inicializarCarpincho(id);
+        list_iterator_destroy(list_iterator);
+        return buscarTablaPorPID(id);
+    }
 }
 
 int buscarMarcoEnMemoria(int numero_pagina_buscada, int id)

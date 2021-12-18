@@ -110,7 +110,7 @@ int main(int argc, char **argv)
         socket_client = esperar_cliente(socket_server, logger_memoria);
         if (socket_client != -1)
         {
-            inicializarCarpincho(socket_client);
+            //inicializarCarpincho(socket_client);
             pthread_create(&hilo_client, NULL, (void *)ejecutar_operacion, (void *)socket_client);
         }
     }
