@@ -51,4 +51,6 @@ int getPaginaByDireccionLogica(uint32_t direccion);
 int getPaginaByDireccionFisica(uint32_t direccion);
 int getPrimeraPaginaDisponible(int size, t_tabla_paginas *tabla_paginas);
 int getPosicionEnTablaDeProcesos(t_tabla_paginas* tabla);
+
+int getContenidoByDireccionFisica(t_pagina* pagina,uint32_t direccion_fisica_anterior);
 #endif

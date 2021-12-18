@@ -33,7 +33,9 @@ int main(int argc, char **argv)
                 reemplazo_LRU = list_create();
             }else 
             {
-                reemplazo_CLOCK = list_create();
+                t_lista_clock *reemplazo_CLOCK = malloc(sizeof(t_lista_clock));
+                reemplazo_CLOCK->Clock = list_create();
+                reemplazo_CLOCK->ultimo = 0;
             }
         }
 
@@ -55,90 +57,15 @@ int main(int argc, char **argv)
         signal(SIGUSR1, generarDump);
         signal(SIGUSR2, limpiarTlb);
 
-
-
-    /*t_pagina_enviada_swap* p = maloc(sizeof(t_pagina_enviada_swap));
-    p->numero_pagina = 0;
-    p->pid = 0;
-    p->heap_contenidos = list_create();
-    t_heap_contenido_enviado * h = malloc(sizeof(t_heap_contenido_enviado));
-    h->contenido = "No, ¡hola humedal!\n";
-    h->prevAlloc = 0;
-    h->nextAlloc = h->prevAlloc + strlen(h->contenido);
-    list_add(p->heap_contenidos,h);
-
-    t_pagina_enviada_swap* p2= maloc(sizeof(t_pagina_enviada_swap));
-    p2->numero_pagina = 1;
-    p2->pid = 0;
-    p2->heap_contenidos = list_create();
-    t_heap_contenido_enviado * h2 = malloc(sizeof(t_heap_contenido_enviado));
-    h2->contenido = "Hello world!\n";
-    h2->prevAlloc = 0;
-    h2->nextAlloc = h2->prevAlloc + strlen(h2->contenido);
-    list_add(p2->heap_contenidos,h2);*/
-    /*
-    free(paquete->buffer->stream);
-    free(paquete->buffer);
-    free(paquete);
-
-    
-    t_paquete *paquete2 = serializar(MEMWRITE,6,CHAR_PTR,"holaholaholaholahol",INT,dire_logica,INT,23);
-    memWrite(paquete2);
-
-    free(paquete2->buffer);
-    free(paquete2);*/
-  
-    /*inicializarCarpincho(0);
-    socket_client = 0;
-    
-    t_paquete* paquete = serializar_alloc(23);
-    int dire_logica =memAlloc(paquete);
-
-    free(paquete->buffer->stream);
-    free(paquete->buffer);
-    free(paquete);
-    
-    paquete = serializar_alloc(23);
-    memAlloc(paquete); 
-
-    free(paquete->buffer->stream);
-    free(paquete->buffer);
-    free(paquete);
-
-    paquete = serializar_alloc(23);
-    memAlloc(paquete); 
-
-    free(paquete->buffer->stream);
-    free(paquete->buffer);
-    free(paquete);
-
-    paquete = serializar_alloc(23);
-    memAlloc(paquete); 
-
-    free(paquete->buffer->stream);
-    free(paquete->buffer);
-    free(paquete);
-
-    paquete = serializar_alloc(23);
-    memAlloc(paquete); 
-
-    free(paquete->buffer->stream);
-    free(paquete->buffer);
-    free(paquete);
-
-    paquete = serializar_alloc(23);
-    memAlloc(paquete); 
-
-    free(paquete->buffer->stream);
-    free(paquete->buffer);
-    free(paquete);*/
+    indice = 0;
 
     while (1)
-    {
+    {   
+        printf("Esperando cliente\n");
         socket_client = esperar_cliente(socket_server, logger_memoria);
         if (socket_client != -1)
         {
-            inicializarCarpincho(socket_client);
+            //inicializarCarpincho(socket_client);
             pthread_create(&hilo_client, NULL, (void *)ejecutar_operacion, (void *)socket_client);
         }
     }
@@ -152,9 +79,11 @@ static void *ejecutar_operacion()
 {
     bool cerrar = true;
     while (cerrar)
-    {
+    {   
+        log_info(logger_memoria, "Esperando recibir paquete por parte de kernel %d", socket_client);        
         t_paquete *paquete = recibir_paquete(socket_client);
-        
+        log_info(logger_memoria, "Paquete recibido codigo de op %d", paquete->codigo_operacion);
+
         //Analizo el código de operación recibido y ejecuto acciones según corresponda
         switch (paquete->codigo_operacion)
         {
@@ -190,7 +119,7 @@ static void *ejecutar_operacion()
             else{
                 //SI SE PUDO LIBERAR
                 t_paquete* paquete_enviar = serializar(MEMFREE,2,INT,0);
-                log_info(logger_memoria,"Enviando paquete");
+                log_info(logger_memoria,"Se pudo liberar el espacio de memoria en la direccion logica solicitada.");
                 enviar_paquete(paquete_enviar,socket_client);
                 log_info(logger_memoria,"Paquete enviado");
             }
@@ -208,7 +137,7 @@ static void *ejecutar_operacion()
             else{
                 //SI SE PUDO ESCRIBIR
                 t_paquete* paquete_enviar = serializar(MEMWRITE,2,INT,0);
-                log_info(logger_memoria,"Enviando paquete");
+                log_info(logger_memoria,"Enviando la direccion logica solicitada.");
                 enviar_paquete(paquete_enviar,socket_client);
                 log_info(logger_memoria,"Paquete enviado");
             }
@@ -216,7 +145,7 @@ static void *ejecutar_operacion()
         case MEMREAD:
             log_info(logger_memoria, "recibi orden de leer memoria del cliente %d", socket_client);
             char *data = memRead(paquete);
-            if(data == "FAIL"){
+            if(string_equals_ignore_case(data,"FAIL")){
                 //NO SE PUDO LEER
                 t_paquete* paquete_enviar = serializar(DIRECCION_LOGICA_INVALIDA,2,INT,0);
                 log_info(logger_memoria,"No se pudo leer de la direccion logica solicitada.");
@@ -225,14 +154,14 @@ static void *ejecutar_operacion()
             else{
                 //SI SE PUDO LEER
                 t_paquete* paquete_enviar = serializar(MEMREAD,6,CHAR_PTR,data,INT,strlen(data),INT,0);
-                log_info(logger_memoria,"Enviando paquete");
+                log_info(logger_memoria,"Se pudo leer en la direccion logica solicitada.");
                 enviar_paquete(paquete_enviar,socket_client);
                 log_info(logger_memoria,"Paquete enviado");
             }
             break;
         case MATEINIT:
             log_info(logger_memoria, "recibi un nuevo carpincho para inicializar del cliente %d", socket_client);
-            inicializarCarpincho(paquete);
+            //inicializarCarpincho(paquete);
             break;
         
         case NUEVO_CARPINCHO:
@@ -246,12 +175,12 @@ static void *ejecutar_operacion()
             enviar_paquete(paquete, socket_client);
             break;
 
-          case INIT_SEM:
+          /*case INIT_SEM:
             log_info(logger_memoria,"MATELIB ENVIO A MEMORIA UN AVISO");
             t_paquete *paquete_enviado = serializar(DIRECCION_LOGICA_INVALIDA,2,INT,0);
             enviar_paquete(paquete_enviado, socket_client);
 
-            break;
+            break;*/
 
         default:
             log_error(logger_memoria, "Codigo de operacion desconocido. Codigo operacion recibida: %d",paquete->codigo_operacion);
@@ -288,7 +217,6 @@ void imprimirMetricas()
 }
 
 void metricas(){
-    char *texto = string_new();
     t_list_iterator *list_iterator = list_iterator_create(tabla_procesos);
     t_tabla_paginas *tablas;
 
@@ -304,6 +232,7 @@ void inicializarCarpincho(int socket_cliente)
 {
 
     //t_mateinit_serializado *mateInit_deserializado = deserializar_mate_init(paquete);
+    printf("Inicializo carpincho\n");
     uint32_t id = socket_cliente;
 
     t_tabla_paginas *nuevaTabla = malloc(sizeof(t_tabla_paginas));
